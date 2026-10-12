@@ -948,9 +948,6 @@ function placementSection(p) {
   }).join('\n');
   return `<section class="placement">
   <h2 id="where-it-appears">Where it appears</h2>
-  <p class="hint-line">Read off the registry hosts in the component, so this is
-  where the tool puts itself in a default install; every one of these can be
-  reordered or hidden from <a href="/docs/fns-hub/">Hub</a>.</p>
   <ul class="place-list">
 ${rows}
   </ul>
@@ -1076,8 +1073,8 @@ for (const p of pages) {
   if (pricing) {
     badges.push(`<a class="badge badge-cat" href="${esc(pricing.url || p.homepage || '#')}" target="_blank" rel="noopener" title="${esc(pricing.detail || '')}">${esc(pricing.summary)}</a>`);
   }
-  // Where it shows up, before anything else about it: this is the question
-  // a reader scanning the docs actually has.
+  // Where it shows up, as badges under the title; the full list is a
+  // reference section below the tool's own page.
   for (const sid of surfacesOf(p.name)) {
     const reg = surfaceRegistry(sid);
     // The glyph the bar button actually draws, beside the words for it --
@@ -1140,9 +1137,11 @@ for (const p of pages) {
   // entitlement Worker, and a preview is not released to everyone. A tool
   // dropped in alone brings its own registries (tested in a bare project).
   const dl = !isPlus(p.name) && freeDownload.get(p.name);
-  const downloadNote = dl ? `<p class="dl-line">
-    <a class="btn btn-secondary" href="${esc(dl.url)}" download>Download ${esc(decodeURIComponent(dl.url.split('/').pop()))}</a>
-    <span class="hint">Version ${esc(dl.version)}. Drop it into any project and it works on its own. This copy does not update itself: to get fixes as they ship, install it through <a href="/get/">the picker</a>.</span>
+  const downloadNote = dl ? `<p>Tick it on <a href="/get/">the install page</a> and it installs with the
+    rest of your setup and stays up to date.</p>
+  <p class="dl-line">
+    <a class="btn btn-quiet" href="${esc(dl.url)}" download>Download ${esc(decodeURIComponent(dl.url.split('/').pop()))}</a>
+    <span class="hint">Version ${esc(dl.version)}, the tool on its own. It works in any project, and this copy never updates itself.</span>
   </p>` : '';
   const trialNote = !isPlus(p.name) && pricing ? `<div class="plus-note">
     <p><strong>${esc(p.title)} is a family product with its own licence.</strong> ${esc(pricing.detail || pricing.summary)}</p>
@@ -1160,10 +1159,12 @@ for (const p of pages) {
     ? ((anchorsOf.get(p.slug) || new Set()).has('parameters')
         ? 'parameter-reference' : 'parameters')
     : '';
-  const tocItems = (entriesOf(p.name).length
+  const hasGetIt = Boolean(plusNote || variantNote || trialNote || downloadNote);
+  const tocItems = features
+      .map((f) => `<li><a href="#${esc(f.anchor)}">${featIcon(f)}${esc(f.name)}</a></li>`)
+    .concat(hasGetIt ? [`<li><a href="#get-it">Get it</a></li>`] : [])
+    .concat(entriesOf(p.name).length
       ? [`<li><a href="#where-it-appears">Where it appears</a></li>`] : [])
-    .concat(features
-      .map((f) => `<li><a href="#${esc(f.anchor)}">${featIcon(f)}${esc(f.name)}</a></li>`))
     .concat(parAnchor ? [`<li><a href="#${parAnchor}">Parameters</a></li>`] : []);
   const onThisPage = tocItems.length > 1
     ? `<nav class="toc"><span>On this page</span><ul>${tocItems.join('')}</ul></nav>`
@@ -1203,7 +1204,6 @@ for (const p of pages) {
   const parSection = parametersSection(p);
   const shortcuts = bound.length ? `<section class="shortcuts">
     <h2 id="shortcuts">Shortcuts</h2>
-    <p class="hint-line">Global: they fire anywhere in TouchDesigner. Shortcuts scoped to a single panel are a local control scheme and stay off this list.</p>
     <ul class="feat-keys">${bound.map((h) => {
       const what = said.get(keyId(h.keys)) || '';
       return `<li><kbd>${esc(prettyKeys(h.keys))}</kbd>${
@@ -1231,15 +1231,18 @@ ${sidebar(p.slug)}
   <h1>${esc(p.title)}</h1>
   ${p.description ? `<p class="lede">${esc(p.description)}</p>` : ''}
   <p class="badges">${badges.join(' ')}</p>
-  ${plusNote}${variantNote}${trialNote}${downloadNote}
   ${undocumented}
   ${video}
   ${onThisPage}
-  ${placementSection(p)}
-  ${shortcuts}
   <div class="docs-body">
 ${body}
   </div>
+  ${hasGetIt ? `<section class="get-it">
+  <h2 id="get-it">Get it</h2>
+  ${plusNote}${variantNote}${trialNote}${downloadNote}
+  </section>` : ''}
+  ${placementSection(p)}
+  ${shortcuts}
   ${parSection}
   ${registrySection(p.name)}
   <p class="edit-page"><a href="${EDIT_BASE}/${p.file}" target="_blank" rel="noopener">Edit this page on GitHub →</a></p>
@@ -2337,8 +2340,8 @@ if (fs.existsSync(cfgSrc)) {
     const said = new Map();
     // Keys a page declares as its own panel's control scheme -- the
     // in-window keys of a palette or an editor -- are no more bindings
-    // than a mouse combo is, and the Shortcuts hint-line already says
-    // panel-scoped keys are not listed. `local_keys:` in the frontmatter
+    // than a mouse combo is, and the Shortcuts section lists global
+    // bindings only. `local_keys:` in the frontmatter
     // is that declaration, so the exemption is explicit, not guessed.
     const local = new Set((p.meta.local_keys || []).map((k) => keyId(String(k))));
     // Keys a tool binds OUTSIDE FNS_HotkeyManager's reach -- BorderlessTD's

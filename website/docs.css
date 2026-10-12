@@ -410,10 +410,6 @@ details.fold > summary:focus-visible { outline: 2px solid var(--accent); outline
 /* Feature metadata authored in the CMS: the icon rides its heading and the
    table of contents; hotkeys list under the feature they belong to. */
 .feat-icon { vertical-align: -3px; margin-right: 7px; border-radius: 3px; }
-.shortcuts .hint-line {
-  margin: -4px 0 10px; font-size: 12.5px; color: var(--text-faint);
-  max-width: 62ch;
-}
 .feat-keys { list-style: none; margin: 6px 0 14px; padding: 0; display: flex;
   flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--text-dim); }
 .feat-keys kbd {
@@ -630,14 +626,15 @@ a.badge-surface:hover { color: var(--text); border-color: var(--accent); }
    Derived from the registry hosts (build_manifest.SurfaceEntries): the icon
    is the glyph rendered from the same font the live bar button draws, so
    this block is the button's own picture rather than a description of it. */
-.placement { margin: 0 0 30px; }
-.placement h2 {
-  margin: 0 0 6px; font-size: 20px; font-weight: 700; letter-spacing: -0.02em;
+.placement { margin: 44px 0 30px; }
+.placement h2, .get-it h2 {
+  margin: 0 0 12px; font-size: 20px; font-weight: 700; letter-spacing: -0.02em;
   scroll-margin-top: 84px;
 }
-.placement .hint-line {
-  margin: 0 0 12px; font-size: 13px; color: var(--text-faint); max-width: 66ch;
-}
+/* How to get the tool, after what it is: the Patreon note, a licence
+   note, or the install line with the single download under it. */
+.get-it { margin: 44px 0 0; }
+.get-it > p { margin: 0 0 10px; color: var(--text-dim); max-width: 66ch; }
 .place-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .place-list li {
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
