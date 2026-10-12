@@ -76,6 +76,11 @@ REGISTRY_OWNER = {
     # The eleventh: contributed controls in each pane's find bar
     # (docs/PaneSearchRegistry.md).
     'FNS_PaneSearchRegistry': 'FNS_PaneSearchRegistry',
+    # The twelfth: one composited overlay over the network editor
+    # (docs/NetworkOverlayRegistry.md). Not in CORE (owner, 2026-10-11): a
+    # package the tools that draw overlays require, pulled in through
+    # `requires` like the rest.
+    'FNS_OverlayRegistry': 'FNS_OverlayRegistry',
 }
 # WHAT A PACKAGE GIVES YOU, keyed by the registry it hosts to give it.
 #
@@ -95,6 +100,7 @@ SURFACE_OF = {
     'FNS_Console': 'console',
     'FNS_TimelineRegistry': 'timeline',
     'FNS_PaneSearchRegistry': 'findbar',
+    'FNS_OverlayRegistry': 'overlay',
     # FNS_ConfigRegistry is deliberately absent. 37 of the 49 packages host
     # it, so a chip for it would mark almost everything and separate
     # nothing -- and what it grants (settings that follow you between
@@ -116,6 +122,7 @@ SURFACE_LABEL = {
     'console': 'Console tab',
     'timeline': 'Timeline panel',
     'findbar': 'Find bar control',
+    'overlay': 'Network editor overlay',
 }
 # Packages that ARE the infrastructure; always installed, never optional.
 # Core = the raw registries plus two non-registry exceptions: FNS_Updater,
@@ -516,6 +523,16 @@ def CatalogProblems(catalog, live_names, opmenu_hosted=None, family_hosted=None)
                                                and all(isinstance(x, str) for x in wh)):
                         problems.append('%s: variant %s withhold must be a list of file '
                                         'names' % (name, vid))
+        if 'third_party' in meta:
+            # docs/LicenseNotices.md: the notices it names are stamped into
+            # our artifacts; a foreign package is never exported here
+            if foreign:
+                problems.append('%s: third_party belongs on our own packages; '
+                                'a foreign package ships its upstream\'s '
+                                'notices' % name)
+            for p in _licenseNotices().thirdPartyProblems(meta.get('third_party'),
+                                                          _repo()):
+                problems.append('%s: %s' % (name, p))
         if foreign and name in live:
             problems.append('%s: declares a `source` but is also a live '
                             'package in this project -- a package is ours '
@@ -1824,13 +1841,16 @@ def StripReleaseMarkers(comp):
     return changed
 
 
-def ScrubArtifact(path):
+def ScrubArtifact(path, notices=None, identity=None):
     """Load a saved artifact into a cooking-disabled holder in /sys/quiet
     (the staging class Embody's own export uses), strip PI's markers from
-    that copy, save it back over `path`, destroy the holder. Returns the
-    number of operators changed; raises when the artifact cannot be loaded
-    or saved, so the export reports it instead of hashing marked bytes.
-    An artifact with nothing to strip is left byte-identical."""
+    that copy, stamp `notices` (license_notices.Notices) and `identity`
+    ((name, is_global) for package_identity.Stamp) onto it, save it back
+    over `path`, destroy the holder. Returns the number of operators
+    whose markers changed; raises when the artifact cannot be loaded,
+    stamped or saved, so the export reports it instead of hashing marked
+    or unlicensed bytes. With no notices, an artifact with nothing to strip
+    is left byte-identical."""
     quiet = op('/sys/quiet') or op('/sys')
     holder = quiet.create(baseCOMP, 'fns_release_scrub')
     # cooking off on the HOLDER only: a flag set on the loaded copy would
@@ -1839,14 +1859,18 @@ def ScrubArtifact(path):
     try:
         loaded = holder.loadTox(path)
         changed = StripReleaseMarkers(loaded)
-        if changed:
+        if notices:
+            _licenseNotices().Stamp(loaded, notices, annotateCOMP)
+        if identity:
+            _packageIdentity().Stamp(loaded, identity[0], identity[1], executeDAT)
+        if changed or notices or identity:
             loaded.save(path)
         return len(changed)
     finally:
         holder.destroy()
 
 
-def ExportPackage(comp, suffix=''):
+def ExportPackage(comp, suffix='', notices=None, identity=None):
     """Export one self-contained .tox (Embody metadata stripped) and hash it.
 
     `suffix` names a variant build ('.pro'): the file is <name><suffix>.tox
@@ -1858,6 +1882,9 @@ def ExportPackage(comp, suffix=''):
     touched. PI's markers (PI_RELEASE_TAGS, Vcoriginal) are then scrubbed
     from the written artifact (ScrubArtifact), so it ships without them
     while the master keeps them; a scrub that fails fails the export.
+    `notices` (license_notices.Notices) are stamped onto the same copy
+    (docs/LicenseNotices.md), never the master, and so is `identity`
+    ((name, is_global): Pkgname and <FNS:GLOBAL>, docs/StandaloneTakeover.md).
     """
     os.makedirs(_repo(DIST_DIR), exist_ok=True)
     dest = _repo(DIST_DIR, comp.name + suffix + '.tox')
@@ -1865,7 +1892,7 @@ def ExportPackage(comp, suffix=''):
     ok = op.Embody.ExportPortableTox(target=comp, save_path=dest)
     if ok and os.path.exists(dest) and (before is None or os.path.getmtime(dest) != before):
         try:
-            ScrubArtifact(dest)
+            ScrubArtifact(dest, notices=notices, identity=identity)
         except Exception as e:
             debug('packaging: %s artifact kept PI markers, scrub failed (%s)' % (comp.name, e))
             return None
@@ -2163,6 +2190,26 @@ def _quiz(catalog, packages):
     return out, problems
 
 
+def _packageIdentity():
+    """packaging/package_identity.py, loaded by path like _searchIndex."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        'fns_package_identity', _repo(PKG_DIR, 'package_identity.py'))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _licenseNotices():
+    """packaging/license_notices.py, loaded by path like _searchIndex."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        'fns_license_notices', _repo(PKG_DIR, 'license_notices.py'))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
 def _searchIndex():
     """packaging/search_index.py, loaded by path: this file is exec'd into
     TD's namespace, so there is no package to import it from."""
@@ -2419,7 +2466,16 @@ def Build(export=False, out_path=None, base_url=BASE_URL, release=None):
 
         do_export = export is True or (want is not None and name in want)
         if do_export:
-            art = ExportPackage(comp)
+            art = None
+            try:
+                notices = _licenseNotices().Notices(entry['access'],
+                                                    meta.get('third_party'), _repo())
+            except Exception as e:
+                debug('packaging: %s has no licence notice (%s)' % (name, e))
+            else:
+                identity = (name, _packageIdentity().IsGlobal(
+                    entry.get('placement'), entry.get('family'), entry.get('kind')))
+                art = ExportPackage(comp, notices=notices, identity=identity)
             if art:
                 entry['artifact'] = art
             else:
@@ -2456,7 +2512,19 @@ def Build(export=False, out_path=None, base_url=BASE_URL, release=None):
                 if src_comp is None:
                     export_failed.append('%s.%s (source %s missing)' % (name, vid, src_name))
                 elif do_export:
-                    vart = ExportPackage(src_comp, suffix='.' + vid)
+                    vart = None
+                    try:
+                        vnotices = _licenseNotices().Notices(
+                            vrow['access'], meta.get('third_party'), _repo())
+                    except Exception as e:
+                        debug('packaging: %s.%s has no licence notice (%s)'
+                              % (name, vid, e))
+                    else:
+                        vart = ExportPackage(src_comp, suffix='.' + vid,
+                                             notices=vnotices,
+                                             identity=(name, _packageIdentity().IsGlobal(
+                                                 entry.get('placement'), entry.get('family'),
+                                                 entry.get('kind'))))
                     if vart:
                         vrow['artifact'] = vart
                     else:

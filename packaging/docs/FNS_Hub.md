@@ -43,6 +43,14 @@ Hub* and *Open main-menu configurator*.
 - **OpMenu**: what the tools contribute to TD's OP Create dialog (search
   words, row decorations, right-click items, filters): reorder them, switch
   a contribution off without uninstalling its tool.
+- **Overlay**: everything tools draw on the network editor
+  ([OverlayRegistry](/docs/fns-overlayregistry/)). Layers, such as Cook Bar's
+  bars and QuickMarks' outlines, come first, bottom layer first; then the
+  corner lists, corner by corner. Drag rows to reorder, click **Show** to hide
+  or show one (hiding never switches its tool off), click **Corner** to move
+  a list to the next corner and **Margin** to set its distance from the edges.
+  A tool that is off reads *(off)* and draws nothing whatever Show says. Every
+  change lands on the tool's own parameters.
 - **Console**: the toolkit's web front (settings, install & remove, tabs
   tools contribute) rendered inside the hub; its browser only runs while
   this tab is shown.

@@ -244,7 +244,11 @@ def UnseenTools(manifest, installed=(), firstrun=False, root=None):
     - An install with no record yet (everyone on the release that brings
       this) starts from what it knows: everything is shown except the
       tools this release line introduced that it has not installed.
-    - After that, whatever the record lacks is new.
+    - After that, whatever the record lacks is new, unless it is already
+      installed: whatever installed it (this picker, the paste rail, a
+      selection made on the site) was its introduction. Those are recorded
+      as shown here, so the picker never opens on a tool that can only show
+      as "already picked", and the console's count agrees.
     """
     tools = _pickableTools(manifest)
     seen = SeenPackages(root)
@@ -258,7 +262,11 @@ def UnseenTools(manifest, installed=(), firstrun=False, root=None):
         MarkSeen([n for n in tools if n not in fresh], root)
         return sorted(fresh)
     known = set(seen)
-    return sorted(n for n in tools if n not in known)
+    have = set(installed or ())
+    shown_by_install = [n for n in tools if n not in known and n in have]
+    if shown_by_install:
+        MarkSeen(shown_by_install, root)
+    return sorted(n for n in tools if n not in known and n not in have)
 
 
 def RecordFirstInstall(manifest, root=None):
@@ -782,6 +790,34 @@ def ResolvePlan(selection_path, manifest_path=DEFAULT_MANIFEST, target=None,
             'missing_artifact': missing, 'unknown_packages': unknown}
 
 
+def _standaloneCopies(parent_comp, target):
+    """{package: path} of standalone copies of global tools in this project
+    (docs/StandaloneTakeover.md), from the updater beside this installer:
+    FNS_Updater.FindStandalone owns the matching rules, so they live in one
+    place. An updater too old to have it, or none at all, answers {} and
+    the install goes ahead as it always did."""
+    upd = parent_comp.op('FNS_Updater') if parent_comp is not None else None
+    find = getattr(upd, 'FindStandalone', None) if upd is not None else None
+    if find is None:
+        return {}
+    try:
+        rows = find(target)
+    except Exception as e:
+        debug('INSTALLER: could not look for standalone copies (%s)' % e)
+        return {}
+    out = {}
+    for r in rows or []:
+        out.setdefault(r.get('package'), r.get('path'))
+    return out
+
+
+def StandaloneSentence(name, path):
+    """What a refused install says, everywhere it is reported."""
+    return ('%s is already in this project as a standalone copy at %s -- '
+            'take it over from the FNSTools console (Updates) instead of '
+            'installing a second copy' % (name, path))
+
+
 def _verify(comp):
     """Installed means the COMP exists, its extensions are up and it
     reports no errors -- not merely that loadTox returned.
@@ -1206,6 +1242,7 @@ def InstallPlan(plan, replace=False, only=None, bind=None):
         pane_path, pane_note = PanePlacement(tgt)
 
     results = []
+    standalone = None      # looked up once, and only if a step needs it
     for step in plan['steps']:
         name = step['name']
         if only and name not in only:
@@ -1270,6 +1307,21 @@ def InstallPlan(plan, replace=False, only=None, bind=None):
             results.append({'name': name, 'action': 'skipped (present)',
                             **state})
             continue
+        if (existing is None and not pane and not rooted
+                and str(step.get('kind') or 'tool') != 'core'):
+            # A global tool exists once per project. A standalone copy
+            # dropped in elsewhere (a single .tox from the website) would
+            # sit beside this one with a doubled shortcut, hotkeys and
+            # buttons, and TD hands the shortcut to the FIRST holder. So
+            # say where it is and leave it to Take over, which moves it in.
+            if standalone is None:
+                standalone = _standaloneCopies(parent_comp, tgt)
+            if standalone.get(name):
+                results.append({'name': name, 'ok': True,
+                                'action': 'skipped (standalone copy)',
+                                'standalone': standalone[name],
+                                'why': StandaloneSentence(name, standalone[name])})
+                continue
         if not os.path.exists(step['path']):
             results.append({'name': name, 'action': 'FAILED', 'ok': False,
                             'why': 'artifact not downloaded (%s)' % step['path']})
@@ -1347,6 +1399,9 @@ def InstallPlan(plan, replace=False, only=None, bind=None):
             'installed': [r['name'] for r in results if r.get('action') == 'installed'],
             'failed': [r['name'] for r in results if not r.get('ok', True)],
             'results': results,
+            # global tools not installed because a standalone copy is here
+            'standalone': [{'name': r['name'], 'path': r['standalone']}
+                           for r in results if r.get('standalone')],
             # non-empty = pane placement fell back to the target, and why
             'pane_note': pane_note,
             'registries': PromotedRegistries()}
@@ -1491,10 +1546,13 @@ class InstallerExt:
             rm = RemoveTools(plan)
             res['removed'] = rm['removed']
             res['remove_notes'] = rm['notes']
-        self._status('installed %d, removed %d, failed %d%s'
+        self._status('installed %d, removed %d, failed %d%s%s'
                      % (len(res['installed']), len(res['removed']),
                         len(res['failed']),
-                        ': ' + ', '.join(res['failed']) if res['failed'] else ''))
+                        ': ' + ', '.join(res['failed']) if res['failed'] else '',
+                        '; %d already here as standalone copies (take them '
+                        'over from the console, Updates)' % len(res['standalone'])
+                        if res.get('standalone') else ''))
         self.rebuildInstallCommands()
         self._afterPasteInstall(res)
         self._keepStore()
@@ -2164,6 +2222,11 @@ class InstallerExt:
         self.rebuildInstallCommands()
         summary.update({'ok': not res['failed'], 'dry_run': False,
                         'installed': res['installed'], 'failed': res['failed']})
+        held = [r for r in res.get('standalone', []) if r['name'] == name]
+        if held:
+            # a refusal with its sentence: the palette footer marks it failed
+            summary.update({'ok': False, 'standalone': held[0]['path'],
+                            'error': StandaloneSentence(name, held[0]['path'])})
         return summary
 
     def installWhenFetched(self, name, tries=0):
@@ -3253,8 +3316,22 @@ class InstallerExt:
                         owned = self._ownedProducts()
                         access = {str(p.get('name')): str(p.get('access', 'free') or 'free')
                                   for p in man.get('packages', [])}
+                        # and an installed tool is not news either (the
+                        # UnseenTools rule): whatever installed it was its
+                        # introduction. Read only; the picker records it.
+                        installed = set()
+                        try:
+                            tgt = op(self._par('Target') or DefaultTarget(self.ownerComp))
+                            if tgt is not None:
+                                installed = {c.name for c in tgt.children if c.family == 'COMP'}
+                                rec_t = tgt.op(INSTALLED_DAT)
+                                if rec_t is not None:
+                                    installed |= {rec_t[i, 0].val for i in range(1, rec_t.numRows)}
+                        except Exception:
+                            installed = set()
                         out['unseen'] = sorted(
                             n for n in _pickableTools(man) if n not in known
+                            and n not in installed
                             and (access.get(n, 'free') == 'free' or n in owned))
                 except Exception as e:
                     out = {'ok': False, 'why': str(e)[:200], 'unseen': []}
@@ -3406,6 +3483,8 @@ class InstallerExt:
                     if res.get('pane_note'):
                         lines.append('  (%s -- spawned into the toolkit '
                                      'container instead)' % res['pane_note'])
+                    lines += ['  ' + StandaloneSentence(r['name'], r['path'])
+                              for r in res.get('standalone', [])]
                     lines += ['  removed %s' % n for n in res.get('removed', [])]
                     lines += ['  %s' % n for n in res.get('remove_notes', [])]
                     lines += ['  FAILED %s' % n for n in res['failed']]

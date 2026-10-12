@@ -9,7 +9,10 @@ comp = me.parent()
 
 # StorageManager keeps its items inside one container key
 # ('MainMenuRegistryExtStored'); legacy top-level keys scrubbed too.
-for key in ('MainMenuRegistryExtStored', 'PaneRegistry', 'HostCanonical'):
+# ToolbarRegistryExtStored: the master was copied from FNS_ToolbarRegistry
+# and still carries that registry's (empty) storage key; it shipped until
+# 2026-10-12.
+for key in ('MainMenuRegistryExtStored', 'ToolbarRegistryExtStored', 'PaneRegistry', 'HostCanonical'):
 	if key in comp.storage:
 		comp.unstore(key)
 

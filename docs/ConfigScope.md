@@ -103,8 +103,18 @@ The development project therefore points its FNS_ConfigRegistry master's
 `Configfile` at `FNStools_config.dev.json`, beside the normal file in
 `<palette>/FNSTools/config/`. It is set as an expression on
 `app.userPaletteFolder`, so the same value resolves on any machine instead
-of baking one computer's path into a tracked tox. Promotion carries it to the
-`/sys` global, which is the copy that reads it.
+of baking one computer's path into a tracked tox. The `/sys` global is the
+copy that reads it, and it reads the **master's** when its own is empty.
+
+Promotion does not carry it (found 2026-10-09). Every non-global copy calls
+`_installGlobalRegistry` from `postInit`, hosts included, so whichever copy
+initializes first at project open becomes the global, and a tie at the same
+version keeps it. 45 of the 51 copies were hosts with an empty `Configfile`,
+so the global usually came from one of them and read the shared file: from
+some session after 2026-10-06 the dev project wrote its settings into the
+file every user project reads. `ConfigPath` now falls back to
+`_masterComp()`'s `Configfile` on the global. In an install every shipped
+copy is scrubbed empty, the master included, so nothing changes there.
 
 Two things this is careful about:
 

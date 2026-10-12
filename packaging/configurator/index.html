@@ -3203,7 +3203,7 @@ function fnsBoot() {
     var counts = document.getElementById('welcomecounts');
     var authEl = document.getElementById('welcomeauth');
     if (!counts || !authEl) return;
-    refreshAccountOnce();
+    refreshAccount();
     var plus = tools.filter(isPlus);
     var priced = tools.filter(function (p) { return !isPlus(p) && pricingOf(p); });
     var free = tools.length - plus.length - priced.length;
@@ -3271,22 +3271,40 @@ function fnsBoot() {
       authEl.appendChild(docsLink(FNS_DOCS + '/patreon/', 'How unlocking works ↗', ''));
     }
   }
-  // The account the page loaded with can be stale: a recheck elsewhere can
-  // change it after this page was served (field report 2026-09-16, a Mac
-  // planned a Patreon tool from an old sign-in record). Ask once per
-  // session when the welcome opens, and reload if it moved, which is the
-  // same honest refresh a sign-in ends in.
-  function refreshAccountOnce() {
-    if (!served || !hasAuthRail || sessionFlag('fns.acctsync')) return;
-    sessionFlag('fns.acctsync', true);
+  // The account the page loaded with can be stale: a recheck, a sign-in or
+  // a lost session elsewhere can change it after this page was served
+  // (field report 2026-09-16, a Mac planned a Patreon tool from an old
+  // sign-in record). Ask whenever the welcome opens or the page comes
+  // back into view, at most every few seconds, and reload if the account
+  // moved, which is the same honest refresh a sign-in ends in. The whole
+  // account counts, not only its products: a lost session signed in again
+  // on the same tier changes no products, and comparing products alone
+  // left the page showing "signed out" until it was reloaded by hand
+  // (owner, 2026-10-12). Once per session missed any sign-in made outside
+  // the page after the first look.
+  var acctAskedAt = 0;
+  // Products and the connection only: the served account fills a default
+  // label ('supporter') that /auth/status leaves empty, so comparing labels
+  // reloaded the page on every look.
+  function acctKey(a) {
+    return JSON.stringify((a && a.products) || null)
+      + '|' + String(!(a && a.connected === false));
+  }
+  function refreshAccount() {
+    if (!served || !hasAuthRail) return;
+    var nowMs = Date.now();
+    if (nowMs - acctAskedAt < 5000) return;
+    acctAskedAt = nowMs;
     fetch('/auth/status').then(function (r) { return r.json(); })
       .then(function (st) {
-        var now = JSON.stringify(st.products || null);
-        var was = JSON.stringify((account && account.products) || null);
-        if (now !== was) location.reload();
+        if (acctKey(st) !== acctKey(account)) location.reload();
       })
       .catch(function () { /* no server answer: keep what the page has */ });
   }
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) refreshAccount();
+  });
+  window.addEventListener('focus', refreshAccount);
 
   function selection() {
     var chosen = Array.from(picked).sort();

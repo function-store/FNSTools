@@ -80,10 +80,20 @@ check('expression text first, then the value in CONSTANT mode',
       and 'p.val = p.default' in sever.group(0))
 
 print('2. the override is the mechanism the dev project uses')
+cp = re.search(r"def ConfigPath\(self\):.*?return _fnsPaletteRoot\(\)", reg, re.S)
+cp = cp.group(0) if cp else ''
 check('ConfigPath honours a non-empty Configfile over the palette default',
-      re.search(r"def ConfigPath\(self\):.*?getattr\(self\.ownerComp\.par, "
-                r"'Configfile', None\).*?if override:\s*\n\s*return override",
-                reg, re.S) is not None)
+      'override = self._configFileOverride(self.ownerComp)' in cp
+      and re.search(r"if override:\s*\n\s*return override", cp) is not None
+      and "getattr(comp.par, 'Configfile', None)" in reg)
+# Any copy can become the /sys global (postInit -> _installGlobalRegistry on
+# hosts too; first one wins, a tie keeps it), and hosts carry an empty
+# Configfile, so the global falls back to the MASTER's. Without this the dev
+# checkout wrote the shared file on every save (measured 2026-10-09).
+check('the /sys global falls back to the master\'s Configfile when its own is empty',
+      'if not override and self._is_sys_global():' in cp
+      and 'self._configFileOverride(master)' in cp
+      and cp.index('self._configFileOverride(master)') < cp.index('if override:'))
 check('the default is still <palette>/FNSTools/config/FNStools_config.json',
       "return _fnsPaletteRoot() + '/' + self.SUBFOLDER + '/' + self.FILE_NAME" in reg
       and "FILE_NAME = 'FNStools_config.json'" in reg)

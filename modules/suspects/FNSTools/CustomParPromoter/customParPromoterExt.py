@@ -875,8 +875,9 @@ class customParPromoterExt:
 				qpc.par.Active.bindExpr = want
 				qpc.par.Active.mode = ParMode.BIND
 
-		# the four stock-TD hotkeys: an expression tracks the toggle forever,
-		# where a pushed value goes stale the next time anything sets it.
+		# the stock-TD hotkeys (one Keyboard In DAT holds all four): an
+		# expression tracks the toggle forever, where a pushed value goes stale
+		# the next time anything sets it.
 		want = 'parent.PAR_PROMOTER.par.Activetdshortcuts'
 		for k in c.children:
 			if k.OPType != 'keyboardinDAT':

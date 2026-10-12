@@ -65,7 +65,7 @@ for path in ('FNSTools/FNS_TimelineTools/TimelineToolsExt.py',
 
 print('4. mentioning a gated tool is not being one -- these still publish')
 for path in ('packaging/catalog.json',
-             'packaging/docs/FNS_TimelineTools.md',
+             'packaging/docs/FNS_SwitchTools.md',
              'docs/GatedDeliveryResearch.md',
              'FNSTools/FNS_TimelineRegistry/TimelineRegistryExt.py'):
     check('published: %s' % path, pp.Rule(path, real) is None)
@@ -236,7 +236,7 @@ print('15. the fix changed no published byte -- root scaffolding still ships')
 # Without these, the root arm would newly withhold 66 files the mirror
 # already carries. A safety fix that silently removes files from the
 # public repo is a product change wearing a safety fix's clothes.
-for name in ('FNSTools', 'FNS_CMS', 'FunctionStore_tools_2023',
+for name in ('FNSTools', 'FNS_CMS',
              'project1', 'private_investigator1_withmyhacks'):
     check('grandfathered root suspect still publishes: %s' % name,
           pp.Rule('modules/suspects/%s.tox' % name, real) is None,
@@ -250,7 +250,7 @@ splan = pp.Plan('HEAD', scope)
 spub = set(splan['published'])
 check('the landing page is in', 'website/index.html' in spub)
 check('a gated tool doc page is in (a doc is not the tool)',
-      'packaging/docs/FNS_TimelineTools.md' in spub)
+      'packaging/docs/FNS_SwitchTools.md' in spub)
 check('catalog and manifest are in',
       {'packaging/catalog.json', 'packaging/manifest.json'} <= spub)
 check('nothing under modules/ or FNSTools/ is in',
@@ -298,6 +298,23 @@ check('a retired package path publishes instead of reading undeclared',
 check('an unknown package name still fails closed',
       pp.Rule('modules/suspects/FNSTools/FNS_NotAThing.tox', real)
       == 'undeclared:FNS_NotAThing')
+
+print('14. previews show nowhere: doc page and icons withheld too')
+_prev = pp.PreviewPackages()
+check('previews come from the catalog flag', 'FNS_POPOverlay' in _prev or not _prev, _prev)
+if _prev:
+    _p = _prev[0]
+    check("a preview's doc page is withheld by the preview rule",
+          pp.Rule('packaging/docs/%s.md' % _p, real) == 'preview:%s' % _p)
+    check("a preview's surface icon is withheld by the preview rule",
+          pp.Rule('packaging/docs/surface-icons/%s-toolbar.png' % _p, real) == 'preview:%s' % _p)
+_released = [n for n in real if n not in _prev]
+if _released:
+    check("a released gated package's doc page still publishes (the site shows it)",
+          pp.Rule('packaging/docs/%s.md' % _released[0], real) is None)
+check('the Patreon delivery design and the preview test files are declared private',
+      all(pp.Rule(x, real) == 'declared' for x in (
+          'docs/PatreonWebDownloads.md', 'docs/OpSeqDevTestBench.md', 'tests/test_pop_overlay.py')))
 
 shutil.rmtree(tmp, ignore_errors=True)
 print()

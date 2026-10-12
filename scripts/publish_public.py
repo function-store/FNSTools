@@ -61,8 +61,22 @@ DEFAULT_TARGET = os.path.normpath(
     os.path.join(REPO, '..', 'FNSTools_PUB'))
 BRANCH = 'dev25'
 # The mirror's identity. A target whose origin does not match this is
-# refused: publishing into the wrong checkout is unrecoverable.
-PUBLIC_SLUG = 'function-store/FunctionStore_tools'
+# refused: publishing into the wrong checkout is unrecoverable. The repo was
+# renamed from FunctionStore_tools (GitHub redirects the old URL), so a
+# checkout still pointing at the old name is the same mirror. Compared as an
+# exact owner/repo, never a substring: 'function-store/FNSTools' is a
+# substring of the private repo's 'function-store/FNSTools_PRIV'.
+PUBLIC_SLUG = 'function-store/FNSTools'
+PUBLIC_SLUGS = (PUBLIC_SLUG, 'function-store/FunctionStore_tools')
+
+
+def _slugOf(url):
+    """'owner/repo' of a git remote URL (https or scp-style), lowercased."""
+    u = (url or '').strip().rstrip('/')
+    if u.endswith('.git'):
+        u = u[:-4]
+    parts = [x for x in u.replace(':', '/').split('/') if x]
+    return '/'.join(parts[-2:]).lower() if len(parts) >= 2 else ''
 
 # --only presets: a NAMED subset of the mirror, for a publish that must not
 # carry everything else that changed since the last one (the site after a
@@ -108,6 +122,9 @@ DECLARED_PRIVATE = (
     # modulators are built. Naming the tool publicly is fine, handing over
     # its construction is not.
     'docs/BeatModDesign.md',
+    # FNS_POPOverlay (Base): how it reads POPs, lays out labels and monitors,
+    # the same call as BeatModDesign above.
+    'docs/POPOverlay.md',
     # Phone-remote followups. Mixed subject (some navbar), but the parts
     # that matter are FNS_Remote's internals and its open build decisions,
     # and a doc is withheld whole or not at all.
@@ -123,6 +140,20 @@ DECLARED_PRIVATE = (
     'tests/fixtures/markers/premiere_markers_tabbed.csv',
     'tests/fixtures/markers/resolve_dropframe.edl',
     'tests/fixtures/markers/resolve_markers.edl',
+    # 1406 component names dumped from the author's own palette for the
+    # fuzzy-match tests: what is installed on a private machine, not part
+    # of the toolkit (owner, 2026-10-12). The tests that read it skip
+    # without it.
+    'tests/fixtures/palette_names.txt',
+    # How Patreon members download gated tools on the web: the delivery
+    # design behind the paywall (owner, 2026-10-12).
+    'docs/PatreonWebDownloads.md',
+    # About preview packages, which nobody else sees until released: the
+    # sequencers' test bench and POPOverlay's test. Their doc pages and
+    # icons are withheld by rule (_previewOwnFile); these do not carry a
+    # package name the rule can match.
+    'docs/OpSeqDevTestBench.md',
+    'tests/test_pop_overlay.py',
 )
 
 # Whole private subtrees. DECLARED_PRIVATE is exact paths on purpose (a
@@ -162,17 +193,13 @@ DECLARED_PRIVATE_PREFIXES = (
 # different package entirely, and must keep publishing.
 #
 # `_tokens()` strips the FNS_ prefix, so gating FNS_Remote made every
-# path containing "remote" suspicious -- including FNS_Updater's
-# `github_remote` helper, which fetches release info from GitHub, is not
-# gated, and has nothing to do with phone control (verified: zero
-# references to phone, touch or FNS_Remote). The sweep is deliberately
-# name-based and fail-closed, so a common English word in a gated
-# package's name WILL produce false positives. Each entry here is a
+# path containing "remote" suspicious (the first case was FNS_Updater's
+# `github_remote` helper, deleted with the dead suspects on 2026-10-08).
+# The sweep is deliberately name-based and fail-closed, so a common English
+# word in a gated package's name WILL produce false positives. Each entry here is a
 # decision that a human made once; do not add one without checking the
 # file actually belongs elsewhere.
 NAME_COLLISIONS = (
-    'modules/suspects/FNSTools/FNS_Updater/github_remote.tox',
-    'modules/suspects/FNSTools/FNS_Updater/github_remote/githubRemote.py',
     # "Markers" is one of FNS_TimelineTools' sub-toxes, and this test is
     # about Private Investigator's markers (pi_suspect, FNS_externalized,
     # Vcoriginal) in released artifacts. Checked: no reference to
@@ -231,13 +258,12 @@ GRANDFATHERED = (
     #   FNSTools                          the root toolkit tox itself --
     #     publishes by design, and EmbeddedGated() is what keeps a gated
     #     package from riding inside it
-    #   FunctionStore_tools_2023          the previous-generation project
     #   project1 / private_investigator1_withmyhacks   dev shells
     #   FNS_CMS                           the release console. Publishes
     #     today and is left publishing here; whether it SHOULD is a
     #     separate call, since it is internal release machinery rather
     #     than a tool anyone installs.
-    'FNSTools', 'FNS_CMS', 'FunctionStore_tools_2023',
+    'FNSTools', 'FNS_CMS',
     'private_investigator1_withmyhacks', 'project1',
 )
 
@@ -351,6 +377,34 @@ def GatedPackages():
     return out
 
 
+_PREVIEWS = None
+
+
+def PreviewPackages():
+    """Catalog packages flagged `preview` (docs/PreviewPackages.md). Their
+    trees are withheld like any gated package (GatedPackages); on top of
+    that, what publishes for a gated package so the site can show it -- its
+    doc page and surface icons -- is withheld too, because a preview is
+    shown to no one until the flag is cleared (owner, 2026-10-12). Read once
+    per run."""
+    global _PREVIEWS
+    if _PREVIEWS is None:
+        cat = json.load(io.open(CATALOG, encoding='utf-8'))
+        pk = cat.get('packages', cat)
+        _PREVIEWS = sorted(n for n, meta in pk.items()
+                           if isinstance(meta, dict) and meta.get('preview') is True)
+    return _PREVIEWS
+
+
+def _previewOwnFile(path):
+    """The preview package whose doc page or surface icon `path` is, or None."""
+    for name in PreviewPackages():
+        if path == 'packaging/docs/%s.md' % name \
+                or path.startswith('packaging/docs/surface-icons/%s-' % name):
+            return name
+    return None
+
+
 def GatedFiles():
     """Source files a variant build alone may hold (`variants.<vid>.withhold`):
     when a FREE Base and a paid variant share one master, the variant's own
@@ -445,6 +499,9 @@ def Rule(path, gated):
     if any(path == p.rstrip('/') or path.startswith(p)
            for p in DECLARED_PRIVATE_PREFIXES):
         return 'declared'
+    preview = _previewOwnFile(path)
+    if preview:
+        return 'preview:%s' % preview
     for name in gated:
         prefixes, exacts = _gatedPrefixes(name)
         if path in exacts or any(path.startswith(p) for p in prefixes):
@@ -564,7 +621,7 @@ def _targetOk(target):
         url = _git('remote', 'get-url', 'origin', cwd=target).strip()
     except subprocess.CalledProcessError:
         return 'no origin remote in %s' % target
-    if PUBLIC_SLUG.lower() not in url.lower():
+    if _slugOf(url) not in {x.lower() for x in PUBLIC_SLUGS}:
         return 'origin is %s -- expected the public mirror (%s)' % (
             url, PUBLIC_SLUG)
     branch = _git('rev-parse', '--abbrev-ref', 'HEAD', cwd=target).strip()

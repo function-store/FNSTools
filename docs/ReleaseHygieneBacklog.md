@@ -352,6 +352,28 @@ serves both by branching on the save path. Adding the common-scrub exec to
 that file therefore fixes BOTH, and ProSceneChanger's tox should be committed
 with the rest rather than held back.
 
+**2026-10-08: the Pro master is a real Pro now.** Until then the hook was the
+only thing that ever built Pro, on the staged copy of an export, so the dev
+master ran Base and Pro could not be worked on without exporting (owner:
+"that's no way to work with it"). The Pro builders moved out of the hook into
+`FNS_SimpleSceneChanger/ProBuild.py`, shared like the rest of the folder and
+bound to a `ProBuild` DAT in both masters, and were run once on the live Pro
+master: it runs `ExtSimpleSceneChangerPro` and carries the Cues, CHOP and
+Fleet pages and the per-scene Inputs settings. Every builder is
+get-or-create, so the export still calls them (with `reset=True`, so a
+release ships the Pro settings at their defaults) and a master that is Pro
+already only has its schema re-asserted. Run it again only after copying
+Base's network over Pro, from the textport (`buildProMaster`, the line is in
+`ProBuild.py`'s docstring; it refuses on Base). A Build Pro pulse on a Dev page
+did this for a day and was removed: it could only work if Base carried it too,
+and its handler shipped in both editions. Both exports drop `ProBuild`. Verified:
+fresh exports of both editions differ from the v3.2.67 artifacts in nothing
+(extension, every page and parameter with mode, value, expression, enable and
+help, children, variant, the Pro manual and callbacks once each). Two traps
+found on the way: the hook's "block parameters landed last" check raised when
+nothing was added, and a DAT's `.module` cannot compile inside the staged
+copy (cooking is off there), so the hook runs `ProBuild`'s text instead.
+
 ### The sweep found no borrowed bindings
 
 Every file-synced DAT in the toolkit was checked against its owning package
@@ -435,6 +457,8 @@ verified active and correctly pointed, never fired while the count went 26 ->
 `Presets_RepoMaker` / `Campresets` repo sync (CamSeqExt line 43 maps the par
 to the table) and `AnySeqExt.RestorePresets`, which assigns `table.text`
 wholesale from a stored backup that may itself contain the column.
+(Since 2026-10-09 that backup lives in memory for the session only; the
+stored `_presetsBackup` / `_wrong_order_backup` copies are dropped on init.)
 
 ## 8. FNS_ProSceneChanger cook loop -- DIAGNOSED 2026-09-18
 

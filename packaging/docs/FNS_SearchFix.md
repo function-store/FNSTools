@@ -55,3 +55,7 @@ bar from there too.
 
 Switching SearchFix off leaves every find bar exactly as TouchDesigner made
 it.
+
+From quick-launch: **Toggle SearchFix**, **Toggle fuzzy find** and **Toggle
+legacy find** switch the same parameters and show whether each is on, and
+**Repatch find bars** applies the search to every find bar again.

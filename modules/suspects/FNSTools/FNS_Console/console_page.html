@@ -1616,12 +1616,18 @@ const UPD_STATES = {
   update: ['update available', 'up'],
   current: ['up to date', 'ok'],
   locked: ['locked', 'warn'],
+  // newer, but a Patreon build this account does not hold: the reason
+  // shows, and it is not counted as an update
+  gated: ['needs your account', 'warn'],
   incompatible: ['needs a newer TD', 'warn'],
   unversioned: ['unversioned', 'warn'],
   missing: ['missing', 'err'],
   // a foreign package with its own updater (manifest updates: 'self'):
   // never offered here, never touched -- the tool checks for itself
   'self-managed': ['updates itself', 'ok'],
+  // a global tool dropped in as a single .tox, outside the toolkit: it
+  // doubles shortcuts, hotkeys and buttons until it is taken over
+  standalone: ['standalone copy', 'warn'],
 };
 
 function paintUpdatesBadge() {
@@ -1696,6 +1702,11 @@ function updRow(r) {
     b.onclick = () => confirmUpdate([r.package]);
     row.append(b);
   }
+  if (r.state === 'standalone' && r.path) {
+    const b = $('button', {className: 'btn btn-secondary', textContent: 'Take over'});
+    b.onclick = () => confirmTakeOver(r);
+    row.append(b);
+  }
   return row;
 }
 
@@ -1724,7 +1735,7 @@ function renderUpdates() {
   const rows = (UPD.rows || []).slice().sort((a, b) =>
     publicName(a.package).localeCompare(publicName(b.package), 'en', {sensitivity: 'base'}));
   const upd = rows.filter(r => r.state === 'update');
-  const attn = rows.filter(r => ['locked', 'incompatible', 'unversioned', 'missing'].includes(r.state));
+  const attn = rows.filter(r => ['standalone', 'locked', 'incompatible', 'unversioned', 'missing'].includes(r.state));
   const cur = rows.filter(r => r.state === 'current' || r.state === 'self-managed');
   if (!rows.length) {
     list.append($('div', {className: 'empty'},
@@ -1782,9 +1793,49 @@ function confirmUpdate(names) {
   const rows = (UPD && UPD.rows || []).filter(r => names.includes(r.package));
   document.getElementById('upd-dlg-out').textContent = rows.map(r =>
     publicName(r.package) + '  ' + r.installed + ' → ' + r.available).join('\n');
+  document.getElementById('upd-dlg-hint').textContent = UPD_HINT;
   const go = document.getElementById('upd-dlg-go');
+  go.textContent = 'Update';
   go.hidden = false;
   go.onclick = () => { dlg.close(); applyUpdates(names); };
+  dlg.showModal();
+}
+
+// the update dialog's own hint, kept so the take-over dialog can borrow the
+// element and an update opened afterwards still says the right thing
+const UPD_HINT = document.getElementById('upd-dlg-hint').textContent;
+
+async function confirmTakeOver(r) {
+  const post = (confirm) => fetch('/api/updates/takeover', {method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({path: r.path, confirm})}).then(x => x.json());
+  let plan;
+  try { plan = await post(false); } catch (e) { toast(String(e), false); return; }
+  if (!plan.ok) { toast(plan.why || 'take over refused', false); return; }
+  const name = publicName(plan.package);
+  const dlg = document.getElementById('upddlg');
+  document.getElementById('upd-dlg-title').textContent = 'Take over ' + name + '?';
+  document.getElementById('upd-dlg-hint').textContent = plan.action === 'move'
+    ? 'This copy moves into FNSTools under its package name, with its settings, '
+      + 'and is updated like every other installed tool from then on.'
+    : 'FNSTools already has its own ' + name + '; it keeps its own settings, '
+      + 'and this copy is deleted.';
+  const lines = [(plan.action === 'move' ? 'Moves ' : 'Deletes ') + plan.path];
+  if ((plan.references || []).length)
+    lines.push('', 'These refer to it by path and will break:', ...plan.references);
+  document.getElementById('upd-dlg-out').textContent = lines.join('\n');
+  const go = document.getElementById('upd-dlg-go');
+  go.textContent = 'Take over';
+  go.hidden = false;
+  go.onclick = async () => {
+    dlg.close();
+    try {
+      const res = await post(true);
+      if (!res.ok) { updStatus(res.why || 'take over refused', true); return; }
+      updStatus('Taking over ' + name + '…');
+      setTimeout(loadUpdates, 1500);
+    } catch (e) { updStatus(String(e), true); }
+  };
   dlg.showModal();
 }
 

@@ -39,6 +39,29 @@ class ToolbarRegistryExt(RegistryBase):
 		"and op.FNS_TOOLBARREGISTRY.WidgetTarget({canonical!r}) is not None else 30)"
 	)
 
+	# One Panel Execute for every toolbar button: Alt (Option) + right-click
+	# opens that tool's docs page. TouchDesigner delivers Alt + right-click as
+	# a MIDDLE click, so it watches mselect -- the convention the tools
+	# already keep: CustomParTools' middle-click handler does nothing while
+	# Alt is held, leaving the gesture to the docs. It watches the TOOLS'
+	# buttons, which receive the click through their mirrors (a mirror's own
+	# panel values never move), and only watches: the click still reaches the
+	# tool. Alt is asked of the OS through FNSModifiers, because a button
+	# clicked through a mirror latches its own alt value a click late (see
+	# CookBar's rclick DAT); the panel value is the fallback.
+	DOCS_CLICK_DAT = 'docs_altrclick'
+	DOCS_CLICK_TEXT = (
+		"# Built by FNS_ToolbarRegistry (_ensureDocsClick): Alt/Option +\n"
+		"# right-click on any toolbar button opens that tool's docs page. TD\n"
+		"# delivers Alt + right-click as a MIDDLE click, so this watches mselect\n"
+		"# on the tools' own buttons. It only watches; the click still reaches\n"
+		"# the tool.\n"
+		"\n"
+		"def onOffToOn(panelValue):\n"
+		"\tparent().ext.ToolbarRegistryExt.onButtonMiddleClick(panelValue.owner)\n"
+		"\treturn\n"
+	)
+
 	# --- surface hooks (RegistryBase contract) ---
 
 	def _ensureSelectionExecuteRole(self):
@@ -58,6 +81,8 @@ class ToolbarRegistryExt(RegistryBase):
 			ancestors, _ = self._scanGroups(names)
 			for i, canonical in enumerate(names):
 				self._injectWidget(canonical, i, ancestors.get(canonical, ()))
+			if self._is_sys_global():
+				self._ensureDocsClick()
 			return
 		if attempts <= 0:
 			debug(f'{self.REGISTRY_NAME}: bar never became available, skipping sync ({self.ownerComp.path})')
@@ -65,6 +90,64 @@ class ToolbarRegistryExt(RegistryBase):
 		self._pane_sync_queued = True
 		run(f"args[0].valid and args[0].ext.{self.EXT_NAME}._syncSurface(args[1])",
 			self.ownerComp, attempts - 1, delayFrames=30, delayRef=op.TDResources)
+
+	def _ensureDocsClick(self):
+		"""Get-or-create the one docs watcher and point it at every mirror,
+		writing only what differs (this runs on every sync)."""
+		bar = self._bar()
+		d = self.ownerComp.op(self.DOCS_CLICK_DAT)
+		if d is None:
+			d = self.ownerComp.create(panelexecuteDAT, self.DOCS_CLICK_DAT)
+			d.nodeX, d.nodeY = 0, -600
+		if d.text != self.DOCS_CLICK_TEXT:
+			d.text = self.DOCS_CLICK_TEXT
+		for name, val in (('panelvalue', 'mselect'), ('offtoon', True), ('ontooff', False),
+						  ('whileon', False), ('whileoff', False), ('valuechange', False),
+						  ('active', True)):
+			p = getattr(d.par, name, None)
+			if p is not None and p.eval() != val:
+				p.val = val
+		buttons = []
+		for canonical, info in self.stored['PaneRegistry'].items():
+			if info.get('adopted') == '1' or info.get('virtual') == '1':
+				continue
+			w = self.WidgetTarget(canonical)
+			if w is not None and w.isPanel:
+				buttons.append(w.path)
+		want = ' '.join(sorted(buttons))
+		if str(d.par.panels.val) != want:
+			d.par.panels = want
+
+	def onButtonMiddleClick(self, button):
+		"""The docs watcher's handler: with Alt held, open the docs of the
+		tool whose toolbar button `button` is. A plain middle click is the
+		tool's own business and does nothing here."""
+		if not self._altHeld(button):
+			return False
+		for canonical in list(self.stored['PaneRegistry'].keys()):
+			if self.WidgetTarget(canonical) == button:
+				return self.OpenDocs(canonical)
+		return False
+
+	def _altHeld(self, button):
+		"""Is Alt (Option) down? The OS answers through any FNSModifiers in
+		the toolkit; the button's own latched panel value is the fallback."""
+		raw = False
+		try:
+			raw = bool(button.panel.alt.val)
+		except Exception:
+			pass
+		root = getattr(op, 'FNS', None)
+		mods = None
+		if root is not None:
+			found = root.findChildren(name='FNSModifiers', maxDepth=3)
+			mods = found[0] if found else None
+		if mods is None:
+			return raw
+		try:
+			return bool(mods.module.heldOr('alt', raw))
+		except Exception:
+			return raw
 
 	# --- bar helpers ---
 
@@ -423,8 +506,30 @@ class ToolbarRegistryExt(RegistryBase):
 		self.fnsLog(f'{self.REGISTRY_NAME}: registered widget "{canonical_name}" ({widget_op.path})')
 		if self._barReady():
 			self._injectWidget(canonical_name)
+			self._queueOrderSync()
 		elif not self._pane_sync_queued:
 			self._syncSurface()
+
+	def _queueOrderSync(self):
+		"""One full sync on the next frame, however many entries register
+		before it runs.
+
+		A single registration places only its own mirror, and by its stored
+		menu_order; a full sync places every entry by its index in the
+		resolved sequence. The two numberings disagree as soon as the orders
+		have gaps or ties, and nothing re-sorts the bar afterwards while the
+		watch tick is off. A fresh install registers its tools one at a time
+		after the Hub's first sync and ended with TD's Layouts button among
+		the FNS tools (user report, 2026-10-09)."""
+		if getattr(self, '_order_sync_queued', False):
+			return
+		self._order_sync_queued = True
+		run(f"args[0].valid and args[0].ext.{self.EXT_NAME}._runOrderSync()",
+			self.ownerComp, delayFrames=1, delayRef=op.TDResources)
+
+	def _runOrderSync(self):
+		self._order_sync_queued = False
+		self._syncSurface()
 
 	def UnregisterWidget(self, canonical_name):
 		if not self._is_sys_global():
@@ -584,6 +689,7 @@ class ToolbarRegistryExt(RegistryBase):
 		self.stored['PaneRegistry'][canonical_name] = entry
 		if self._barReady():
 			self._injectWidget(canonical_name)
+			self._queueOrderSync()
 		elif not self._pane_sync_queued:
 			self._syncSurface()
 		return canonical_name
@@ -694,14 +800,20 @@ class ToolbarRegistryExt(RegistryBase):
 		self._ensureToolRegistryPage()
 
 	def _hostHelpUrl(self, widget):
-		"""The tool's self-reported wiki page: the host's Helpurl par when
-		set, else auto-discovered from the registered panel or its parent --
-		either a docsHelper COMP (its Url par) or a Url/Wikipage custom par
-		on the panel itself (both pre-registry self-reporting conventions)."""
+		"""The tool's docs page: the host's Helpurl par when set (the one
+		override), else its package's page on the docs site (_packageHelpUrl,
+		the manifest's rule and the hub's). Only a widget outside any toolkit
+		package falls back to auto-discovery from the panel or its parent --
+		a docsHelper COMP (its Url par) or a Url/Wikipage custom par, the
+		pre-registry conventions. Those still named the old GitHub wiki on 17
+		of 19 toolbar tools when discovery came first (2026-10-09)."""
 		if hasattr(self.ownerComp.par, 'Helpurl'):
 			u = str(self.ownerComp.par.Helpurl.eval()).strip()
 			if u:
 				return u
+		u = self._packageHelpUrl(widget)
+		if u:
+			return u
 		for holder in (widget, widget.parent()):
 			if holder is None:
 				continue

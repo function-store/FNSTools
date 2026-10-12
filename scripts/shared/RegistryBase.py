@@ -1834,17 +1834,20 @@ class _RegistryGroupWidgetMixin:
 	GROUP_TOGGLE_WIDTH = 8
 
 	# A default buttonCOMP drives its label's colours from button STATE, so the
-	# switch flickered between looks as it was pressed and toggled. The chevron
-	# already carries the state, so the look is pinned to one flat set of
-	# constants instead.
+	# switch flickered between looks as it was pressed and toggled. The look is
+	# pinned to flat constants instead, written on every sync; only the
+	# background follows the group: lighter while it is open, darker while it
+	# is collapsed (owner, 2026-10-10).
 	GROUP_TOGGLE_LOOK = (
-		('bgcolor', (0.2, 0.2, 0.2)),
 		('bordera', (0.43, 0.43, 0.43)),
 		('fontcolor', (0.6, 0.6, 0.6)),
 	)
+	GROUP_TOGGLE_BG_OPEN = (0.28, 0.28, 0.28)
+	GROUP_TOGGLE_BG_CLOSED = (0.13, 0.13, 0.13)
 
-	def _applyGroupToggleLook(self, icon):
-		for pg_name, values in self.GROUP_TOGGLE_LOOK:
+	def _applyGroupToggleLook(self, icon, visible=True):
+		bg = self.GROUP_TOGGLE_BG_OPEN if visible else self.GROUP_TOGGLE_BG_CLOSED
+		for pg_name, values in self.GROUP_TOGGLE_LOOK + (('bgcolor', bg),):
 			pg = getattr(icon.parGroup, pg_name, None)
 			if pg is None:
 				continue
@@ -1903,7 +1906,7 @@ class _RegistryGroupWidgetMixin:
 			icon.par.alignx = 'center'
 			icon.par.aligny = 'center'
 			self._setConst(icon.par.text, self._groupToggleIcon(visible))
-			self._applyGroupToggleLook(icon)
+			self._applyGroupToggleLook(icon, visible)
 		tip = inst.op('tip')
 		if tip is not None:
 			label = info.get('label') or gid

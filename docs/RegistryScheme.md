@@ -38,7 +38,10 @@ globals live in `/sys/FNS_Registries`; see
 > dialog panels, [TimelineRegistryContract.md](TimelineRegistryContract.md)),
 > so "nine registries" below reads ten. **2026-10-01:** eleven, with
 > `FNS_PaneSearchRegistry` (controls in each pane's find bar,
-> [PaneSearchRegistry.md](PaneSearchRegistry.md)). The periodic healing watch described
+> [PaneSearchRegistry.md](PaneSearchRegistry.md)). **2026-10-11:** twelve, with
+> `FNS_OverlayRegistry` (every tool's layer TOP composited and shown above the
+> nodes of the network editor you work in, [NetworkOverlayRegistry.md](NetworkOverlayRegistry.md));
+> the first registry shipped as a package rather than core. The periodic healing watch described
 > in §3 and in the OpMenu notes is switched off in code
 > (`RegistryBase.REGISTRY_WATCH_ENABLED = False`): healing runs once per
 > project save through `registry_presave_exec.healAllRegistries()`, and the

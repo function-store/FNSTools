@@ -11,7 +11,8 @@ active tab (Hub page pars, roamed by the config registry).
 Interaction model of the FNS button:
   left-click   Open()      the hub, on the last active tab
   right-click  OpenMenu()  a popMenu: every tab, then Settings / Install &
-                           remove (the console's pages)
+                           remove (the console's pages), then
+                           Documentation / Website
   drop         RouteDrop() a panel COMP dropped on the button (its main-menu
                            mirror forwards the drop) or on the hub window is
                            offered to every tab whose component implements
@@ -28,7 +29,27 @@ Address pars) has its Active switched directly.
 FNSCommand = next(d for d in me.docked if 'ExtUtils' in d.tags).mod('FNSCommand')  # import
 
 TAB_PREFIX = 'hubtab_'
+# The hub's own tabs are no package of their own (they all document as
+# FNS_Hub), so their rollover help is written here. Every other tab says
+# what its package's manifest description says.
+BUILTIN_HELP = {
+    'console': "The FNSTools console: every tool's settings, Install & remove, and Updates.",
+    'toolbar': 'Arrange the FNS toolbar: which tool buttons it shows, their order and their groups.',
+    'navbar': 'Arrange the buttons FNS tools add to the bar above each network pane.',
+    'mainmenu': "Arrange what FNS tools add to TouchDesigner's main-menu bar.",
+    'opmenu': 'Arrange what FNS tools add to the OP Create dialog.',
+}
+TAB_HELP_DAT = 'help'
+TAB_HELP_WIDTH = 64
 CONSOLE_ITEMS = (('Settings', 'settings'), ('Install & remove', 'tools'))
+# The FNS button's right-click menu ends on the website. Same host as
+# RegistryBase.HELP_SITE and build_manifest.DOCS_SITE: change all three or none.
+WEB_ITEMS = (('Documentation', 'https://functionstore.tools/docs/'),
+			 ('Website', 'https://functionstore.tools/'))
+# Opens a second menu: every toolbar tool with a docs page, in bar order. A
+# click on the toolbar itself cannot carry this: the buttons forward every
+# click to their tools, and several tools already use Alt and right-click.
+TOOLBAR_DOCS_ITEM = 'Toolbar tool docs…'
 
 
 class HubExt:
@@ -157,6 +178,7 @@ class HubExt:
 		for i, t in enumerate(tabs):
 			nm = 'tab_' + tdu.legalName(t['name'])
 			want[nm] = (i, t)
+		descriptions = self._packageDescriptions()
 		for c in list(bar.children):
 			if c.OPType == 'textCOMP' and c.name.startswith('tab_') and c.name != 'tab_template' and c.name not in want:
 				c.destroy()
@@ -176,6 +198,82 @@ class HubExt:
 				c.store('canonical', t['name'])
 			if not c.par.display.eval():
 				c.par.display = True
+			self._ensureTabHelp(c, self._tabHelp(t, descriptions))
+
+	# --- rollover help and the tab's right-click menu ---------------------
+	# A panel's Help DAT is TD's own rollover pop-up help (Panel page, "Help
+	# DAT"), so each tab carries a small text DAT: what the tool does, from
+	# its package's manifest description, and how to reach its docs.
+
+	def _packageDescriptions(self):
+		"""{package: description} from the store manifest the updater keeps
+		on disk; {} without one (the tooltip then names the tab only)."""
+		upd = getattr(op, 'FNS_UPDATER', None)
+		try:
+			man = upd.StoreManifest() if upd is not None else None
+		except Exception:
+			man = None
+		out = {}
+		for p in (man or {}).get('packages', []):
+			if p.get('description'):
+				out[p['name']] = str(p['description'])
+		return out
+
+	def _packageOf(self, path):
+		"""The toolkit package a tab's tool lives in: the root child on its
+		path, or ''."""
+		root = self.ownerComp.parent()
+		o = op(path) if path else None
+		while o is not None and o.parent() is not None and o.parent().id != root.id:
+			o = o.parent()
+		return o.name if o is not None and o.parent() is not None else ''
+
+	def _tabHelp(self, t, descriptions):
+		import textwrap
+		text = BUILTIN_HELP.get(t['name']) or descriptions.get(self._packageOf(t.get('tool', '')), '')
+		lines = [str(t['label'])]
+		if text:
+			lines.append(textwrap.fill(text, TAB_HELP_WIDTH))
+		lines.append('')
+		lines.append('Right-click for its documentation and parameters.'
+					 if t.get('help_url') else 'Right-click for its parameters.')
+		return '\n'.join(lines)
+
+	def _ensureTabHelp(self, tab_comp, text):
+		"""Get-or-create the tab's help DAT and point the Help DAT par at it,
+		writing only what differs (RefreshTabs runs after every sync)."""
+		d = tab_comp.op(TAB_HELP_DAT)
+		if d is None:
+			d = tab_comp.create(textDAT, TAB_HELP_DAT)
+			d.nodeX, d.nodeY = 0, 0
+		if d.text != text:
+			d.text = text
+		# compare the stored text: eval() resolves the path to the DAT's
+		# absolute one, which never equals './help' and would rewrite every refresh
+		if tab_comp.par.helpdat.mode != ParMode.CONSTANT or tab_comp.par.helpdat.val != './' + TAB_HELP_DAT:
+			tab_comp.par.helpdat = './' + TAB_HELP_DAT
+
+	def openTabMenu(self, index):
+		"""Right-click on a tab (tabbar/tabs_exec): its documentation, or the
+		owning tool's parameter window."""
+		tabs = self._orderedTabs()
+		try:
+			t = tabs[int(index)]
+		except (IndexError, ValueError, TypeError):
+			return
+		items = (['Documentation'] if t.get('help_url') else []) + ['Parameters']
+		op.TDResources.op('popMenu').Open(
+			items=items, callback=self._onTabMenu,
+			callbackDetails={'index': int(index), 'url': t.get('help_url', '')},
+			autoClose=True)
+
+	def _onTabMenu(self, info):
+		item = info.get('item')
+		details = info.get('details') or {}
+		if item == 'Documentation' and details.get('url'):
+			ui.viewFile(details['url'])
+		elif item == 'Parameters':
+			self.OpenTabParameters(details.get('index', -1))
 
 	def _styleTabs(self, active_name):
 		bar = self._tabBar()
@@ -385,8 +483,8 @@ class HubExt:
 			self._showTab(name)
 
 	def OpenTabParameters(self, index):
-		"""Right-click on a tab: the owning tool's parameter window (the
-		mappers are configured there). `index` = position on the bar."""
+		"""The owning tool's parameter window (the mappers are configured
+		there), from a tab's right-click menu. `index` = position on the bar."""
 		tabs = self._orderedTabs()
 		try:
 			tool = op(tabs[int(index)]['tool'])
@@ -488,21 +586,23 @@ class HubExt:
 		self._unexposeAll()
 
 	def OpenMenu(self):
-		"""Right-click on the FNS button: jump straight to a tab, or to one
-		of the console's pages."""
+		"""Right-click on the FNS button: jump straight to a tab, to one of
+		the console's pages, or to the documentation and the website."""
 		tabs = self._orderedTabs()
 		labels = [t['label'] for t in tabs]
 		console = [lbl for lbl, _ in CONSOLE_ITEMS]
 		hidden = self.HiddenTabs()
 		show_items = ['Show ' + t['label'] for t in hidden]
-		items = labels + console + show_items
-		if not items:
-			return
+		web = [TOOLBAR_DOCS_ITEM] + [lbl for lbl, _ in WEB_ITEMS]
+		items = labels + console + show_items + web
 		dividers = []
 		if labels and (console or show_items):
 			dividers.append(labels[-1])
 		if console and show_items:
 			dividers.append(console[-1])
+		before_web = (show_items or console or labels)
+		if before_web:
+			dividers.append(before_web[-1])
 		details = {'tabs': {t['label']: t['name'] for t in tabs},
 				   'show': {'Show ' + t['label']: t['name'] for t in hidden}}
 		op.TDResources.op('popMenu').Open(
@@ -520,10 +620,41 @@ class HubExt:
 		if name:
 			self.Open(tab=name)       # a hidden tab is shown again, then opened
 			return
+		if item == TOOLBAR_DOCS_ITEM:
+			# a frame later: this menu is still closing
+			run('args[0]._openToolbarDocsMenu()', self, delayFrames=1, delayRef=op.TDResources)
+			return
+		url = dict(WEB_ITEMS).get(item)
+		if url:
+			ui.viewFile(url)
+			return
 		page = dict(CONSOLE_ITEMS).get(item)
 		con = getattr(op, 'FNS_CONSOLE', None)
 		if page and con is not None:
 			con.Open(tab=page, panel=True)
+
+	def _openToolbarDocsMenu(self):
+		"""The toolbar's tools that have a docs page, in bar order; picking
+		one opens it (FNS_ToolbarRegistry.OpenDocs)."""
+		reg = getattr(op, 'FNS_TOOLBARREGISTRY', None)
+		if reg is None:
+			return
+		try:
+			widgets, order = reg.Widgets, list(reg.WidgetSequence)
+		except Exception:
+			return
+		items = [n for n in order if (widgets.get(n) or {}).get('help_url')]
+		if not items:
+			return
+		op.TDResources.op('popMenu').Open(
+			items=items, callback=self._onToolbarDocsMenu, autoClose=True,
+			title='Toolbar tool docs')
+
+	def _onToolbarDocsMenu(self, info):
+		reg = getattr(op, 'FNS_TOOLBARREGISTRY', None)
+		item = info.get('item')
+		if reg is not None and item:
+			reg.OpenDocs(item)
 
 	# --- drop-to-register -------------------------------------------------
 

@@ -43,7 +43,7 @@ UPDATER_TOX = 'packaging/dist/FNS_Updater.tox'
 # installer is a copy of the live dev comp, re-stamped so the two rails
 # can never ship different answers), which also makes the live dev comp's
 # own Pkgversion a mirror of this value, not a second source.
-INSTALLER_VERSION = '3.2.45'
+INSTALLER_VERSION = '3.2.48'
 # publish.Stage() runs on the shell with no TD, so the version each rail
 # was built at rides this sidecar from the build to the staged manifest's
 # `rails` block. Without it a rail is recallable only by hash, which no
@@ -66,11 +66,42 @@ the configurator by hand, pulse "Plan", then "Install".
 
 Later updates: FNS_Updater -> Refresh Store, Check for Updates,
 Update This Project.
+
+For people, AI agents and scripts working in this project
+----------------------------------------------------------
+Every tool in this container is replaced whole when it updates: its
+network, extensions, scripts and name. Do not rename, move or edit
+anything inside it -- the change will not last, and a renamed tool comes
+back under its own name. Change a tool through its parameters; settings
+survive updates.
+
+To keep a modified version of a tool, copy it out of this container,
+rename it, remove the <FNS:GLOBAL> tag from the copy, and give it a
+different Global OP Shortcut if it has one. The copy is then yours and
+is never updated.
+
+A COMP tagged <FNS:GLOBAL> outside this container is a standalone copy
+of one of these tools. Take it over from the FNSTools console (Updates),
+which moves it in with its settings; do not delete or move it by hand.
+
+https://functionstore.tools/docs/guides/working-in-your-project/
+https://functionstore.tools/llms.txt
 """
 
 
 def _repo(*parts):
     return os.path.join(project.folder, *parts).replace('\\', '/')
+
+
+def _licenseNotices():
+    """packaging/license_notices.py, loaded by path (this file is exec'd
+    into TD's namespace, so there is no package to import it from)."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        'fns_license_notices', _repo('packaging', 'license_notices.py'))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def _stampInstallerVersion(comp):
@@ -1095,6 +1126,16 @@ def BuildBootstrap(out_path=OUT_BOOTSTRAP):
         web.par.clone = ''
 
     EnsureRootEntryPoints(root)
+
+    # docs/LicenseNotices.md: the bootstrap is MIT like every free package,
+    # and it never passes through build_manifest's artifact scrub, so it is
+    # stamped here, on the staged copy. A failed stamp fails the build.
+    try:
+        ln = _licenseNotices()
+        ln.Stamp(root, ln.Notices(ln.FREE, None, _repo()), annotateCOMP)
+    except Exception as e:
+        stage.destroy()
+        return {'exported': False, 'error': 'licence notice: %s' % e}
 
     info = _export(root, out_path, stage)
     if info.get('exported'):

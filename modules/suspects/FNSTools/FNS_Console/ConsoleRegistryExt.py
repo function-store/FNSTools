@@ -571,6 +571,34 @@ class ConsoleRegistryExt(RegistryBase):
 				'text': 'updating %s...' % (', '.join(clean) if clean
 											else 'everything that differs')}
 
+	def UiUpdatesTakeOver(self, path=None, confirm=False):
+		"""Bring a standalone copy of a global tool under the toolkit
+		(FNS_Updater.TakeOver, docs/StandaloneTakeover.md). Unconfirmed it
+		answers the plan -- move in or delete, and what breaks -- read-only
+		and at once. Confirmed it defers the move or delete out of the web
+		server callback, like UiUpdatesApply, and the page re-reads the
+		Compare rows after it."""
+		comp = self._updaterComp()
+		if comp is None:
+			return dict(self.NO_UPDATER)
+		path = str(path or '').strip()
+		if not path:
+			return {'ok': False, 'why': 'no path given'}
+		try:
+			plan = comp.ext.ExtUpdater.TakeOver(path)
+		except Exception as e:
+			return {'ok': False, 'path': path, 'why': str(e)}
+		if not confirm or not plan.get('ok'):
+			return plan
+		job = self._updaterJob()
+		if job and job.get('stage') not in ('done', 'failed'):
+			return {'ok': False,
+					'why': 'an update job is already running (%s)' % job.get('kind')}
+		run('op(%r).TakeOver(%r, confirm=True)' % (comp.path, path),
+			delayFrames=1, delayRef=op.TDResources)
+		plan['dry_run'] = False
+		return plan
+
 	def UiUpdatesStatus(self):
 		"""The live pass, for the page's poll: stage, the updater's own
 		narration, and -- once settled -- the per-package results."""

@@ -32,6 +32,13 @@ CustomParHelper = next(d for d in me.docked if 'ExtUtils' in d.tags).mod('Custom
 
 CommandPaletteExt_ROWCAP = 12          # the launcher caps at 12; so do we
 
+# fns.collect (FNS_Collect.FnsCommands): its entry command is a DRY RUN for a
+# generic consumer, a plan with nowhere to show it here. The capability lets a
+# consumer that knows it render its own plan and confirm; the toolkit's is the
+# hub's Collect tab, so the palette opens that on a fresh scan. The command and
+# its id stay as they are for every other consumer (the launcher drives them).
+_COLLECT_CAPABILITY = 'fns.collect'
+
 
 class CommandPaletteExt:
 
@@ -1235,6 +1242,11 @@ class CommandPaletteExt:
 		return {'ok': False, 'error': 'unknown row kind %r' % row.get('kind')}
 
 	def _runCommand(self, row, args) -> dict:
+		if row.get('capability') == _COLLECT_CAPABILITY:
+			opened = self._openCollectPlan(row)
+			if opened is not None:
+				self._recordUsage(row.get('ident') or self._identity(row))
+				return opened
 		reg = getattr(op, 'FNS_COMMANDREGISTRY', None)
 		if reg is None or not hasattr(reg, 'Run'):
 			return {'ok': False, 'error': 'no command registry'}
@@ -1246,6 +1258,32 @@ class CommandPaletteExt:
 			# a command row carries its ident; a preset hands over the raw command
 			self._recordUsage(row.get('ident') or self._identity(row))
 		return result
+
+	def _openCollectPlan(self, row):
+		"""fns.collect's entry command, shown where the plan can be acted on:
+		FNS Hub on the Collect tab, with a fresh scan. None when there is no
+		hub or no Collect tab, and the command then runs as it always did."""
+		key = str(row.get('key') or '')
+		if not key.endswith('#collect'):
+			return None
+		tool = op(key.split('#', 1)[0])
+		root = getattr(op, 'FNS', None)
+		hub = root.op('FNS_Hub') if root is not None else None
+		if tool is None or hub is None or not hub.extensionsReady:
+			return None
+		tab = None
+		for t in hub.Tabs():
+			p = str(t.get('tool') or '')
+			if p == tool.path or p.startswith(tool.path + '/'):
+				tab = t['name']
+				break
+		if tab is None:
+			return None
+		hub.Open(tab=tab)
+		# a frame later, so the tab's panel is up when its list fills
+		run('args[0].valid and args[0].UIScan()', tool,
+			delayFrames=2, delayRef=op.TDResources)
+		return {'ok': True, 'text': 'Collect is open in FNS Hub, with the plan scanned'}
 
 	def _placeComponent(self, row) -> dict:
 		"""Load a palette .tox into the network the palette was summoned over.

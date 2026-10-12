@@ -6,23 +6,27 @@ features:
     anchor: turning-it-on
   - name: Reading the bars
     anchor: reading-the-bars
+  - name: Top List
+    anchor: top-list
   - name: Global Hog CHOP
     anchor: global-hog-chop
     icon: HogCHOP.png
-  - name: What it changes in your network
-    anchor: what-it-changes-in-your-network
+  - name: Your network stays as it is
+    anchor: your-network-stays-as-it-is
 ---
+
+It is based on [Anton Heestand's Cook Bar](https://github.com/heestand-xyz/cook_bar).
 
 ## Turning it on
 
 Click its toolbar button, run **Toggle cook bar** from quick-launch, or switch
-**Active** on. Cook Bar draws behind the network in the network editor you are
-working in, and follows you as you move between networks and between panes.
-The button lights up while the bars are on, whichever way you switched them.
-Right-click it to open Cook Bar's parameters, like the other toolbar tools.
+**Active** on. Cook Bar draws over the network in the network editor you are
+working in, above the nodes, and follows you as you move between networks and
+between panes. The button lights up while the bars are on, whichever way you
+switched them. Right-click it to open Cook Bar's parameters, like the other
+toolbar tools.
 
-With two panes showing the same network, the bars fit the one you are working
-in: the two share one background.
+The bars show in one pane at a time: the network editor you are working in.
 
 It needs the timeline playing. While the timeline is paused, **Active** is
 greyed out and the bars stop; they come back when you press play.
@@ -41,20 +45,62 @@ A bigger pane costs more in proportion to its size.
 
 ## Reading the bars
 
+Each operator can get two bars: cook time above it and GPU memory below it.
+
 **The top bar is cook time**, CPU and GPU together.
 
-- It fills across the operator as cook time rises to 1 ms, going from green
-  through yellow to red.
-- Past 1 ms it grows taller, up to ten times its height, fading as it goes.
-- Moving stripes mean the operator cooked this frame or the last one. A dim,
-  still bar means it is not cooking right now.
+| What you see | What it means |
+|---|---|
+| The bar fills across the operator | Cook time from 0 to 1 ms: full width at 1 ms |
+| The fill goes from green through yellow to red | Green up to 0.5 ms, red at 1 ms |
+| A faint strip after the fill | The rest of the bar, up to 1 ms |
+| The bar grows taller and fades toward its top | Past 1 ms, up to ten times its height at 10 ms |
+| Diagonal stripes moving along it | The operator cooked this frame or the last one |
+| A dim bar that stands still | It is not cooking now; the bar shows its last cook |
 
-**The bottom bar is GPU memory.** It fills across the operator up to 100
-million pixel channels (about three 4K RGBA textures) and grows taller past
-that. Operators that hold no GPU memory have no bottom bar.
+**The bottom bar is GPU memory.** Operators that hold none have no bottom bar.
+
+| What you see | What it means |
+|---|---|
+| The bar fills across the operator | GPU memory from 0 to 100 MB: full width at 100 MB, about three 4K RGBA textures |
+| The fill goes from cyan to blue | Blue past 50 MB |
+| The bar grows taller and fades downward | Past 100 MB, up to ten times its height at 1 GB |
+
+The memory bar has no stripes.
 
 **On a COMP**, the top bar adds the COMP's own cook time to everything inside
-it, and the bottom bar counts the GPU memory of everything inside it.
+it and its stripes move while anything inside is cooking; the bottom bar counts
+the GPU memory of everything inside it.
+
+The bars of the current operator and of selected operators sit a little wider,
+around their outline.
+
+**Values** writes each bar's number next to it: the cook time above the
+operator and the GPU memory below it, dimmer while the operator is not
+cooking. Operators too small on screen to fit a number get none, so zoom in to
+read more of them. The numbers change ten times a second so they stay
+readable. Values is off unless you switch it on.
+
+## Top List
+
+While the bars are on, a small list in a corner of the network editor names
+the heaviest operators in the network you are viewing.
+
+- The **Cook Time** and **GPU Memory** tabs along its top choose what it
+  ranks by. Cook time counts only operators that cooked in the last second,
+  so something that cooked once at startup does not stay on top.
+- Click a row to select that operator and zoom the view to it.
+- The arrow at the right of the tabs folds the list to its tab row (**Top List
+  Collapsed** does the same).
+- **Top List** switches it on or off, **Rank By** is the same choice as the
+  tabs, **List Corner** picks the corner, **List Margin** sets how far it sits
+  from the edges of the network editor (12 screen points unless you change
+  it), **List Order** sets its place among other tools' lists in the same
+  corner (lower sits nearer the corner), and **List Rows** sets how many
+  operators it shows, 1 to 12 (8 unless you change it).
+- The **Overlay** tab of [FNS_Hub](/docs/fns-hub/) sets the same things for
+  every tool that draws on the network editor, and hides the bars or the
+  list without switching Cook Bar off.
 
 ## Global Hog CHOP
 
@@ -68,19 +114,15 @@ goes. It ships switched off.
 While the Hog is on, the toolbar button turns red, so a stress test is never
 left running by accident.
 
-## What it changes in your network
+## Your network stays as it is
 
-The bars are a background image. While Cook Bar is on, it changes three things
-in the network you are viewing, so nothing covers the bars:
+The bars are drawn through the network overlay (FNS_OverlayRegistry, which
+installs with Cook Bar), shared with any other tool that draws over the network
+editor. Your network keeps its display flags, its annotations and its
+operators: the overlay is not one of them, and it leaves before every project
+save, so a saved project never holds it.
 
-- it places a hidden Select TOP there to show them;
-- it switches off the display flags of that network's TOPs;
-- it lowers the back colour of every annotation to **Annotation Alpha** (0.2
-  unless you change it on the CookBar page). An annotation that is already
-  fainter stays as it is.
-
-When you leave the network or turn Cook Bar off, it removes the hidden
-operators and puts the display flags and annotation colours back the way they
-were. It does the same just before you save the project, and draws again right
-after, so a saved project never keeps them. Removing Cook Bar while it is on
-puts the network back too.
+Earlier versions drew the bars as the network's background, which meant
+switching off its TOPs' display flags and fading its annotations while the
+bars were on. If a project still holds anything from that, Cook Bar removes it
+the next time it starts.

@@ -24,7 +24,12 @@ spec = importlib.util.spec_from_file_location(
 fm = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(fm)
 
-NAMES = io.open(os.path.join(_FIX, 'palette_names.txt'), encoding='utf-8').read().split()
+_NAMES_FILE = os.path.join(_FIX, 'palette_names.txt')
+if not os.path.exists(_NAMES_FILE):
+    # private: a dump of the author's palette, withheld from the public mirror
+    print('SKIP: tests/fixtures/palette_names.txt is not in this checkout (private fixture)')
+    sys.exit(0)
+NAMES = io.open(_NAMES_FILE, encoding='utf-8').read().split()
 ROWS = json.load(io.open(os.path.join(_FIX, 'command_rows.json'), encoding='utf-8'))
 
 # The CommandPalette's field weighting, mirrored from CommandPaletteExt._rowScore.

@@ -16,6 +16,8 @@ Routes:
   /api/updates/check        Compare rows + release notes (GET), kick a cheap
   /api/updates/apply        manifest check, apply updates, and the live
   /api/updates/status       pass's stage/results for the page's poll
+  /api/updates/takeover     bring a standalone copy of a global tool under
+                            the toolkit (plan first, then confirmed)
   /tools + /manifest.js /selection /status /install /auth/*
                             FNS_Installer.ServeRequest, forwarded verbatim
   /t/<tab>/                 a contributed tab's page (served as-is)
@@ -152,6 +154,9 @@ def onHTTPRequest(webServerDAT, request, response):
 			_json(response, ext.UiUpdatesApply(b.get('names')))
 		elif uri == '/api/updates/status':
 			_json(response, ext.UiUpdatesStatus())
+		elif uri == '/api/updates/takeover' and method == 'POST':
+			b = _body(request)
+			_json(response, ext.UiUpdatesTakeOver(b.get('path'), b.get('confirm')))
 		elif uri in CONFIG_URIS:
 			_serveConfig(ext, uri, method, request, response)
 		elif uri == '/tools' or uri in PICKER_URIS:

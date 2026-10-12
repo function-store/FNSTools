@@ -311,6 +311,59 @@ def _variantOf(comp):
     return 'base'
 
 
+# Standalone takeover (docs/StandaloneTakeover.md). The release stamps every
+# artifact with FNS_About.Pkgname and every global tool with this tag; both
+# must match packaging/package_identity.py (tests/test_standalone_takeover.py).
+GLOBAL_TAG = '<FNS:GLOBAL>'
+# Never searched for standalone copies: TD's own trees, and /local.
+_SCAN_SKIP = ('/sys', '/ui', '/local')
+
+
+def _pkgName(comp):
+    """The package a component ships as: FNS_About's `Pkgname`, else the
+    comp's own, else ''. Stamped at release; empty on copies that predate
+    it, where callers fall back to the COMP name."""
+    if comp is None:
+        return ''
+    for host in (comp.op('FNS_About'), comp):
+        if host is None:
+            continue
+        p = getattr(host.par, 'Pkgname', None)
+        if p is not None and str(p.eval()).strip():
+            return str(p.eval()).strip()
+    return ''
+
+
+def _isGlobal(pkg):
+    """A manifest row for a global tool: it lands in the toolkit, is no FNS
+    family member and is not core (package_identity.IsGlobal)."""
+    return ((pkg.get('placement') or 'toolkit') == 'toolkit'
+            and not pkg.get('family')
+            and str(pkg.get('kind') or 'tool') != 'core')
+
+
+def _reregisterHosts(comp):
+    """Pulse Register on every registry host inside `comp`. A standalone
+    copy's hosts register under the SAME canonical names as the toolkit
+    copy's, so the registry entry ends up pointing at the copy (measured:
+    the toolbar's QuickTime entry did), and deleting the copy leaves it
+    dangling. Re-registering the toolkit copy's hosts points it home."""
+    hosts = comp.findChildren(type=COMP, key=lambda c: hasattr(c.par, 'Register')
+                              and hasattr(c.par, 'Regstatus'))
+    for h in hosts:
+        try:
+            h.par.Register.pulse()
+        except Exception as e:
+            debug('UPDATER: could not re-register %s (%s)' % (h.path, e))
+    return [h.path for h in hosts]
+
+
+def _isPackageRoot(comp):
+    """Does `comp` look like the root of an FNS package? It declares a
+    version, through FNS_About or its own Pkgversion."""
+    return bool(_version(comp))
+
+
 def _artifactFor(pkg, vid='base'):
     """The artifact of one build of a manifest row: the Base build is the
     row's own `artifact`, a variant's sits under `variants.<vid>`."""
@@ -772,14 +825,15 @@ class ExtUpdater:
 		stem = name if not vid or vid == 'base' else '%s.%s' % (name, vid)
 		return '%s/%s.tox' % (self.StoreFolder(), stem)
 
-	def _familyStoreStale(self, pkg):
-		"""Is this family member's store copy missing, or not the manifest's
-		bytes? Size first, so a current store costs one stat per member."""
-		art = _artifactFor(pkg) or {}
+	def _storeCopyStale(self, pkg, vid='base'):
+		"""Is this package's store copy missing, or not the bytes the
+		manifest describes? Size first, so a current store costs one stat
+		per package."""
+		art = _artifactFor(pkg, vid) or {}
 		want = art.get('sha256', '')
 		if not pkg or not want:
 			return False
-		path = self._storePath(str(pkg.get('name', '')))
+		path = self._storePath(str(pkg.get('name', '')), vid)
 		if not os.path.exists(path):
 			return True
 		try:
@@ -963,6 +1017,15 @@ class ExtUpdater:
 		               doorstep -- in the root, or beside it at the network
 		               root -- is NOT this: it compares and updates like
 		               any root child.
+		  standalone   a global tool outside the toolkit -- a single .tox
+					   dropped into the project (FindStandalone). Reported
+					   with its path, never updated in place; TakeOver
+					   brings it under the toolkit.
+		  gated        newer, but a Patreon build this account does not hold
+		               (signed out, or the tier lapsed): reported with the
+		               reason, never counted as an update. The pass would
+		               skip it, so counting it made an update that never
+		               cleared.
 		  self-managed a foreign package that keeps ITSELF current
 		               (manifest `updates: 'self'`, docs/ForeignPackages.md):
 		               the store installed it once; its own updater owns it
@@ -997,23 +1060,30 @@ class ExtUpdater:
 					candidates.append(c)
 
 		for child in sorted(candidates, key=lambda c: c.name.lower()):
-			pkg = index.get(child.name) if child.family == 'COMP' else None
+			if child.family != 'COMP':
+				continue
+			# Pkgname first (stamped at release), so a renamed copy is still
+			# recognised; the COMP name for copies that predate the stamp.
+			name = _pkgName(child) or child.name
+			pkg = index.get(name)
 			if pkg is None:
 				continue          # not something the store publishes: say nothing
-			seen.add(child.name)
+			if name in seen:
+				continue          # a second copy of one package: the first answers
+			seen.add(name)
 			have = _version(child)
 			avail = str(pkg.get('version', '')).strip()
 			if str(pkg.get('updates', '') or '') == 'self':
 				# Its own updater owns it after install. No Pkgversion
 				# is required inside the artifact, so `installed` may be
 				# blank; the store's version is shown for orientation only.
-				rows.append({'package': child.name, 'state': 'self-managed',
+				rows.append({'package': name, 'state': 'self-managed',
 							 'installed': have, 'available': avail,
 							 'note': 'keeps itself current -- check for '
 									 'updates from inside the tool'})
 				continue
 			if not have:
-				rows.append({'package': child.name, 'state': 'unversioned', 'installed': '',
+				rows.append({'package': name, 'state': 'unversioned', 'installed': '',
 							 'available': avail,
 							 'note': 'component declares no version -- reinstall to adopt'})
 				continue
@@ -1023,46 +1093,49 @@ class ExtUpdater:
 			have_vid = _variantOf(child)
 			target_vid = have_vid if have_vid in vs else 'base'
 			if vs:
-				if target_vid != 'base' and not self._entitled('%s.%s' % (child.name, target_vid)):
+				if target_vid != 'base' and not self._entitled('%s.%s' % (name, target_vid)):
 					# Hold on Pro (owner, 2026-09-17): the installed build stays and
 					# the updater says nothing until the account holds it again.
-					rows.append({'package': child.name, 'state': 'held',
+					rows.append({'package': name, 'state': 'held',
 							 'installed': have, 'available': avail, 'variant': target_vid,
 							 'note': 'installed %s build; your account no longer includes it '
 							'-- kept as it is' % target_vid})
 					continue
-				best = self.BestVariant(child.name, man)
+				best = self.BestVariant(name, man)
 				if (self._variantRank(man, (vs.get(best) or {}).get('access'))
 						> self._variantRank(man, (vs.get(target_vid) or {}).get('access'))):
 					# the account grew: a swap upward at whatever version ships
 					refuse = self._refuseReason(child)
-					rows.append({'package': child.name, 'state': 'locked' if refuse else 'upgrade',
+					rows.append({'package': name, 'state': 'locked' if refuse else 'upgrade',
 							 'installed': have, 'available': str((vs.get(best) or {}).get('version') or avail),
 							 'variant': best,
 							 'note': refuse or 'your account now holds the %s build' % best})
 					if not refuse:
-						updates.append(child.name)
+						updates.append(name)
 					continue
 				avail = str((vs.get(target_vid) or {}).get('version') or avail)
 			if _isNewer(avail, have):
+				if target_vid == 'base' and self._isGated(pkg) and not self._entitled(name):
+					rows.append(self._gatedRow(name, have, avail))
+					continue
 				floor = pkg.get('min_td_build', '')
 				if _tdBuildTooOld(floor, app.build):
 					# Refused BEFORE the download, and before the embedded
 					# rail would destroy the installed copy: an older TD
 					# loading a newer-build tox returns nothing silently.
-					rows.append({'package': child.name, 'state': 'incompatible',
+					rows.append({'package': name, 'state': 'incompatible',
 								 'installed': have, 'available': avail,
 								 'note': 'needs TouchDesigner %s or newer '
 										 '(this is %s)' % (floor, app.build)})
 					continue
 				refuse = self._refuseReason(child)
-				rows.append({'package': child.name, 'state': 'locked' if refuse else 'update',
+				rows.append({'package': name, 'state': 'locked' if refuse else 'update',
 							 'installed': have, 'available': avail, 'variant': target_vid,
 							 'note': refuse or man.get('release', '')})
 				if not refuse:
-					updates.append(child.name)
+					updates.append(name)
 			else:
-				rows.append({'package': child.name, 'state': 'current',
+				rows.append({'package': name, 'state': 'current',
 							 'installed': have, 'available': avail, 'variant': target_vid, 'note': ''})
 
 		# Recorded as installed but no longer here -- the one thing the
@@ -1071,7 +1144,11 @@ class ExtUpdater:
 			if name in seen or root.op(name) is not None:
 				continue
 			placement = (index.get(name) or {}).get('placement')
-			if placement == 'none' and self._familyStoreStale(index.get(name)):
+			if placement == 'none' and self._storeCopyStale(index.get(name)):
+				if self._isGated(index.get(name)) and not self._entitled(name):
+					rows.append(self._gatedRow(name, rec.get('release', ''),
+							str((index.get(name) or {}).get('version', ''))))
+					continue
 				# A family member's only home is the store file, which the
 				# family folder mirrors: a missing or older copy is an update
 				# like any other, applied by fetching and recording it
@@ -1107,8 +1184,211 @@ class ExtUpdater:
 						 'available': str((index.get(name) or {}).get('version', '')),
 						 'note': 'recorded as installed but not in this project'})
 
+		# Store-served tools (owner, 2026-10-12: "just the store"). An FNS
+		# family member, or a store alternative the op menu places from disk,
+		# is nothing in the project, so it has no Pkgversion to read: its
+		# update is the STORE copy. When the store holds a build older than
+		# this release, Update downloads the new .tox into the store and the
+		# family folder follows. Operators already placed in a network keep
+		# the version they were placed at; never fetched here at all is an
+		# install, not an update.
+		reported = {r['package'] for r in rows}
+		family_here = self._familyOwner() is not None
+		for pkg in man.get('packages', []):
+			name = str(pkg.get('name', ''))
+			if not name or name in reported or name in seen or root.op(name) is not None:
+				continue
+			fam = pkg.get('family')
+			is_member = family_here and isinstance(fam, dict) and bool(fam.get('op_type'))
+			if not (is_member or pkg.get('alternatives_for')):
+				continue
+			vid = self.BestVariant(name, man) if pkg.get('variants') else 'base'
+			if not os.path.exists(self._storePath(name, vid)) or not self._storeCopyStale(pkg, vid):
+				continue
+			avail = str(((pkg.get('variants') or {}).get(vid) or {}).get('version')
+						or pkg.get('version', ''))
+			if vid == 'base' and self._isGated(pkg) and not self._entitled(name):
+				rows.append(self._gatedRow(name, '', avail))
+				continue
+			rows.append({'package': name, 'state': 'update', 'installed': '',
+						 'available': avail, 'variant': vid, 'store_only': True,
+						 'note': ('FNS family operator' if is_member else 'op menu alternative')
+								 + ': Update downloads the new .tox into the store; '
+								   'operators already placed keep their version'})
+			updates.append(name)
+
+		# Standalone copies of global tools elsewhere in the project: never
+		# updated in place (the update rail only reaches the toolkit),
+		# offered to TakeOver instead.
+		for st in self.FindStandalone(target, _index=index):
+			rows.append({'package': st['package'], 'state': 'standalone',
+						 'installed': st['version'],
+						 'available': str((index.get(st['package']) or {}).get('version', '')),
+						 'path': st['path'], 'managed': st['managed'],
+						 'note': st['path'] + (' -- the toolkit has its own copy'
+											   if st['managed'] else '')})
+
 		return {'ok': True, 'release': man.get('release', ''), 'rows': rows,
 				'updates': updates, 'why': ''}
+
+	def _gatedRow(self, name, installed, available):
+		"""A newer build this account cannot download, with the sentence
+		the pass would give (MissingFor names the tier and the key)."""
+		a = self._auth()
+		why = ''
+		try:
+			why = a.MissingFor(name) if a else ''
+		except Exception:
+			why = ''
+		return {'package': name, 'state': 'gated', 'installed': installed,
+				'available': available,
+				'note': why or '%s needs a supporter account.' % name}
+
+	def FindStandalone(self, target=None, _index=None):
+		"""Standalone copies of global tools anywhere in this project.
+
+		A global tool exists once per project (docs/StandaloneTakeover.md):
+		it lands in the toolkit, is no family member and is not core. A copy
+		outside the toolkit -- one .tox someone downloaded and dropped in --
+		doubles its Global OP Shortcut (TD keeps the FIRST holder, so the
+		toolkit's own op.<Shortcut> calls can reach the stray), its hotkeys
+		and its registrations.
+
+		Found by the release-stamped GLOBAL_TAG, and for copies that predate
+		the stamp by COMP name or Global OP Shortcut. A copy that carries
+		Pkgname but not the tag had the tag taken off on purpose (a kept fork,
+		docs/StandaloneTakeover.md) and is left alone. Name and shortcut matches
+		count only on a COMP that declares a version, so a user's own COMP that happens
+		to share a name is never taken for ours. The walk never enters the
+		toolkit root, /sys, /ui or /local, and never descends into a package:
+		a copy nested inside another tool belongs to that tool. Read-only, no
+		network. Rows: {path, package, version, managed, via}.
+		"""
+		index = _index
+		if index is None:
+			man = self.StoreManifest() or {}
+			index = {p['name']: p for p in man.get('packages', [])}
+		glob = {n: p for n, p in index.items() if _isGlobal(p)}
+		root = self._root(target)
+		if not glob or root is None:
+			return []
+		by_shortcut = {str(p.get('shortcut') or ''): n for n, p in glob.items()
+					   if str(p.get('shortcut') or '')}
+		managed = set()
+		for c in root.children:
+			if c.family == 'COMP':
+				managed.add(_pkgName(c) or c.name)
+		out = []
+		stack = [c for c in op('/').children if c.family == 'COMP']
+		while stack:
+			c = stack.pop()
+			if (c.id == root.id or c.path.startswith(_SCAN_SKIP)
+					or c.path.startswith(root.path + '/')):
+				continue
+			pkg, via = '', ''
+			stamped = _pkgName(c)
+			if GLOBAL_TAG in c.tags:
+				pkg, via = (stamped or c.name), 'tag'
+			elif stamped:
+				# Stamped but untagged: the release stamps both together, so
+				# someone took the tag off -- a fork kept on purpose (the site
+				# guide's opt-out). Never ours to take over.
+				pass
+			elif _isPackageRoot(c):
+				if c.name in glob:
+					pkg, via = c.name, 'name'
+				else:
+					sc = str(c.par.opshortcut.eval() or '')
+					if sc in by_shortcut:
+						pkg, via = by_shortcut[sc], 'shortcut'
+			if pkg in glob:
+				out.append({'path': c.path, 'package': pkg, 'version': _version(c),
+							'managed': pkg in managed, 'via': via})
+				continue
+			if _isPackageRoot(c):
+				continue          # another package's insides are its own
+			stack.extend(k for k in c.children if k.family == 'COMP')
+		return sorted(out, key=lambda r: r['path'])
+
+	def TakeOver(self, path, confirm=False, target=None):
+		"""Bring one standalone copy of a global tool under the toolkit.
+
+		`confirm=False` answers what WOULD happen and changes nothing (the
+		installer's two-call shape); `confirm=True` does it:
+
+		  the toolkit has no copy   this copy MOVES in: saved, loaded into
+									the toolkit root under its package name,
+									recorded as installed, the original
+									deleted. The update rail's own mechanics
+									(backup, destroy, loadTox, restore on
+									failure), so its parameters, storage and
+									tables come along -- it is the same
+									component -- and the next update brings
+									it current.
+		  the toolkit has its own   this copy is deleted; the managed copy
+									keeps its own, newer settings.
+
+		Only a path FindStandalone reports is accepted, so this can never
+		delete an arbitrary COMP. `references` lists the expressions beside
+		it (its own network) that named its path; they break with it.
+		"""
+		root = self._root(target)
+		hit = next((r for r in self.FindStandalone(target) if r['path'] == path), None)
+		if root is None or hit is None:
+			return {'ok': False, 'path': path,
+					'why': 'not a standalone copy of a global tool in this project'}
+		stray = op(path)
+		name = hit['package']
+		action = 'delete' if hit['managed'] else 'move'
+		# The stray's own network only. A project-wide findChildren(parExpr=)
+		# matches every parameter of every operator, /sys and /ui included,
+		# and held the main thread for minutes in this project (2026-10-09):
+		# never run that from an action a user clicks.
+		refs = [o.path for o in stray.parent().findChildren(
+					maxDepth=1, parExpr='*%s*' % path) if o.path != path]
+		plan = {'ok': True, 'path': path, 'package': name, 'action': action,
+				'version': hit['version'], 'references': refs[:20],
+				'dry_run': not confirm}
+		if not confirm:
+			return plan
+		if action == 'delete':
+			stray.destroy()
+			mine = next((c for c in root.children if c.family == 'COMP'
+						 and (_pkgName(c) or c.name) == name), None)
+			if mine is not None:
+				plan['reregistered'] = _reregisterHosts(mine)
+			debug('UPDATER: took over %s -- deleted the standalone copy at %s; '
+				  'the toolkit keeps its own' % (name, path))
+			return plan
+		# its own file name: the plain one holds the managed copy's last
+		# update backup, which this must never overwrite
+		backup = self._backupPackage(stray, name + '.standalone')
+		if not backup:
+			return {'ok': False, 'path': path, 'package': name,
+					'why': 'could not back up the standalone copy -- refusing '
+						   '(check the store folder is writable)'}
+		home, nx, ny, color = stray.parent(), stray.nodeX, stray.nodeY, stray.color
+		stray.destroy()
+		before = {c.id for c in root.children}
+		err = 'loaded nothing'
+		try:
+			root.loadTox(backup)
+			fresh = [c for c in root.children if c.id not in before]
+		except Exception as e:
+			fresh, err = [], str(e)[:110]
+		if not fresh:
+			back = self._restorePackage(home, backup, name, nx, ny, color)
+			return {'ok': False, 'path': path, 'package': name,
+					'why': 'could not move it into the toolkit (%s)%s' % (
+						err, ' -- left where it was' if back
+						else ' AND IT COULD NOT BE PUT BACK: ' + backup)}
+		new = fresh[0]
+		if new.name != name:
+			new.name = name   # the package name wins, as on every update
+		self.RecordInstalled(name, '', '', target)
+		debug('UPDATER: took over %s -- moved %s into %s' % (name, path, new.path))
+		plan['installed_as'] = new.path
+		return plan
 
 	# ------------------------------------------------------------------
 	# job plumbing (a manifest fetch, then whatever asked for it)
@@ -1730,7 +2010,9 @@ class ExtUpdater:
 			# which BUILD each update lands (docs/TierVariants.md): the one
 			# Compare chose -- the installed variant, or the upgrade
 			job['plan_variants'] = {r['package']: r.get('variant', 'base')
-					for r in cmp_['rows'] if r.get('package')}
+					for r in cmp_['rows'] if r.get('package')
+					and r.get('state') != 'standalone'}
+			job['store_only'] = [r['package'] for r in cmp_['rows'] if r.get('store_only')]
 		else:
 			# a scoped refresh fetches just these; [] is manifest-only
 			names = job.get('names')
@@ -2315,6 +2597,7 @@ class ExtUpdater:
 			steps.append({'name': name, 'path': self._storePath(name, vid),
 						  'sha256': art.get('sha256', ''),
 						  'placement': (pkg or {}).get('placement', ''),
+						  'store_only': name in (job.get('store_only') or ()),
 						  'release': man.get('release', '')})
 		if not steps:
 			return self._report()
@@ -2750,18 +3033,21 @@ class ExtUpdater:
 
 	def _replacePackage(self, step, target=None):
 		name = step['name']
-		if step.get('placement') == 'none':
-			# An FNS family member: nothing is placed, so there is nothing to
-			# replace. The update IS the verified store copy; record it, and
-			# the family sync at the end of the pass mirrors it into the
-			# folder the FNS tab reads.
+		if step.get('placement') == 'none' or step.get('store_only'):
+			# An FNS family member or a store alternative: nothing in the
+			# project to replace. The update IS the verified store copy; the
+			# family sync at the end of the pass mirrors it into the folder
+			# the FNS tab reads, and the op menu places from the store. A
+			# package this project recorded keeps its record current; one it
+			# never recorded is not made into an install by an update.
 			path = step['path']
 			if not os.path.exists(path):
 				return {'package': name, 'ok': False, 'why': 'no artifact in the store'}
 			digest = _sha256(path)
 			if not step.get('sha256') or digest != step['sha256']:
 				return {'package': name, 'ok': False, 'why': 'store copy fails its hash'}
-			self.RecordInstalled(name, digest, step.get('release', ''), target)
+			if name in self.Installed(target):
+				self.RecordInstalled(name, digest, step.get('release', ''), target)
 			return {'package': name, 'ok': True, 'action': 'refreshed in the store'}
 		root = self._root(target)
 		dest = root.op(name)
@@ -2772,6 +3058,11 @@ class ExtUpdater:
 			cand = home.op(name) if home is not None else None
 			if cand is not None and cand.family == 'COMP':
 				dest = cand
+		if dest is None:
+			# a renamed copy (Compare matched it by Pkgname); the replace
+			# below restores the package name
+			dest = next((c for c in root.children
+						 if c.family == 'COMP' and _pkgName(c) == name), None)
 		if dest is None:
 			return {'package': name, 'ok': False, 'why': 'not present in this project'}
 		refuse = self._refuseReason(dest)
@@ -3085,6 +3376,16 @@ class ExtUpdater:
 			side = '%s/%s.json' % (folder, stem)
 			keep.add(dest.lower())
 			keep.add(side.lower())
+			if self._storeCopyStale(pkg):
+				# The store holds an older build than this manifest row
+				# describes: a check or the picker refreshed the manifest and
+				# no update has fetched the bytes yet. The row's version and
+				# metadata are not this file's, so the folder keeps the pair
+				# the last sync wrote from bytes and a row that matched (or
+				# shows nothing yet). Before 2026-10-12 the sidecar took the
+				# new row over the old tox and claimed a version it was not.
+				skipped.append(name)
+				continue
 			try:
 				if (not os.path.exists(dest)
 						or os.path.getsize(dest) != os.path.getsize(src)

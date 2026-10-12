@@ -99,6 +99,19 @@ r = pal()
 check('without it, a bare-root install still announces introduced tools (unchanged)',
       Unseen(MAN3, installed=['A'], firstrun=False, root=r) == ['B', 'C'])
 
+# Field report 2026-10-07: CookBar was picked on /get and installed by the
+# paste, and the picker inside TouchDesigner still opened on it ("already
+# picked") -- the page and the installer keep separate records. An
+# installed tool has been shown: nothing to ask, and it is recorded.
+r = pal()
+Mark(['A', 'B', 'C'], root=r)
+MAN4 = {'packages': MAN['packages'] + [{'name': 'E', 'kind': 'tool', 'whatsnew': 'new package'},
+                                       {'name': 'G', 'kind': 'tool', 'whatsnew': 'new package'}]}
+got = Unseen(MAN4, installed=['A', 'E'], firstrun=False, root=r)
+check('an installed new tool is not news', got == ['G'], got)
+check('and it is recorded as shown', 'E' in Seen(r) and 'G' not in Seen(r), Seen(r))
+check('so the next look asks only about the other', Unseen(MAN4, installed=['A'], root=r) == ['G'])
+
 print('2. the installer')
 check('manifest.js carries FNS_UNSEEN',
       "'window.FNS_UNSEEN = %s;\\n'" in ins and 'unseen = UnseenTools(json.loads(man_text), known_here, firstrun)' in ins)
@@ -120,14 +133,35 @@ check('A: a recorded family member with no file is fetched',
 print('3. the updater keeps family members current (B)')
 upd = read(UPD)
 check('Compare reports a stale family member as an update',
-      "if placement == 'none' and self._familyStoreStale(index.get(name)):" in upd
-      and re.search(r"_familyStoreStale\(index\.get\(name\)\):.*?updates\.append\(name\)", upd, re.S) is not None)
-check('stale = missing, or not the manifest bytes', 'def _familyStoreStale(self, pkg):' in upd
+      "if placement == 'none' and self._storeCopyStale(index.get(name)):" in upd
+      and re.search(r"_storeCopyStale\(index\.get\(name\)\):.*?updates\.append\(name\)", upd, re.S) is not None)
+check('stale = missing, or not the manifest bytes', "def _storeCopyStale(self, pkg, vid='base'):" in upd
       and 'return _sha256(path) != want' in upd)
-check('the apply records it, never replaces anything',
-      re.search(r"def _replacePackage.*?if step\.get\('placement'\) == 'none':.*?"
+check('the apply refreshes the store copy, never replaces anything',
+      re.search(r"def _replacePackage.*?if step\.get\('placement'\) == 'none' or step\.get\('store_only'\):.*?"
                 r"self\.RecordInstalled\(name, digest", upd, re.S) is not None)
 check('the pass still ends with the family sync', upd.count('self.SyncFamilyFolder()') >= 3)
+
+# 2026-10-12 (owner: "just the store, not the placed operators")
+_cmp = upd[upd.index('	def Compare(self'):upd.index('	def _gatedRow(self')]
+check('a store-served tool (family member, op menu alternative) whose store copy is older is an update',
+      "is_member or pkg.get('alternatives_for')" in _cmp and "'store_only': True" in _cmp
+      and 'not os.path.exists(self._storePath(name, vid)) or not self._storeCopyStale(pkg, vid)' in _cmp)
+check('it is skipped when the project holds the package itself',
+      'if not name or name in reported or name in seen or root.op(name) is not None:' in _cmp)
+check('the plan carries the store-only names to the apply step',
+      "job['store_only'] = [r['package'] for r in cmp_['rows'] if r.get('store_only')]" in upd
+      and "'store_only': name in (job.get('store_only') or ())," in upd)
+check('an update records only what the project already recorded',
+      re.search(r'if name in self\.Installed\(target\):\s+self\.RecordInstalled\(name, digest', upd) is not None)
+check('a newer Patreon build the account lacks is gated, never counted',
+      _cmp.count('self._gatedRow(') == 3 and _cmp.count('updates.append(name)') >= 3
+      and "'state': 'gated'" in upd)
+_sync = upd[upd.index('	def SyncFamilyFolder(self'):upd.index('	def _dropLegacyFamilyTree(self')]
+check('the family folder takes a member only from bytes that match its row',
+      _sync.index('if self._storeCopyStale(pkg):') < _sync.index('shutil.copyfile(src, dest)')
+      and _sync.index('keep.add(side.lower())') < _sync.index('if self._storeCopyStale(pkg):'))
+check('the console names the gated state', "gated: ['needs your account', 'warn']," in read(CONSOLE))
 
 print('4. the picker and the console')
 page = read(PAGE)
@@ -146,6 +180,13 @@ check('the window lists only what the viewer can get (no Patreon pestering)',
 check('and the console count follows the same rule',
       "and (access.get(n, 'free') == 'free' or n in owned))" in ins and 'def _ownedProducts(self):' in ins)
 check('the dialog exists', 'id="newtools"' in page and 'id="newadd"' in page and 'id="newlater"' in page)
+check('a new tool already in the selection is recorded and left out (no "already picked" dialog)',
+      'if (had.length) markSeen(had);' in page
+      and 'list = list.filter(function (p) { return !picked.has(p.name); });' in page
+      and page.index('list = list.filter(function (p) { return !picked.has(p.name); });')
+      < page.index("if (!d || !list.length) return;"))
+check('the console count leaves installed tools out too',
+      'and n not in installed' in ins and 'installed |= {rec_t[i, 0].val' in ins)
 check('a preference: the window opens by itself only while it is on',
       'if (!firstrun && !firstVisit && announceOn && unseenAtLoad.size' in page
       and 'id="newauto"' in page and "window.FNS_ANNOUNCE !== false" in page

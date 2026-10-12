@@ -272,7 +272,10 @@ with its doc or nothing ships. This is deliberate.
 - **Dependencies.** Tools depend only on CORE, never on each other.
   Registry masters live in core; your tool ships stamped registry
   *hosts*, and its `requires` is derived from exactly the registries it
-  hosts. (Stamping a host: load `/fns-registry` first.)
+  hosts. (Stamping a host: load `/fns-registry` first.) One exception:
+  `FNS_OverlayRegistry` is a package, not core (owner, 2026-10-11), so a
+  tool hosting it requires that package, and the installer pulls it in
+  through `requires` like any other (docs/NetworkOverlayRegistry.md).
 - **Surfaces** (toolbar, hub, op menu…), **integrations**
   (`integrates_with` degrades gracefully by design — never a hard
   dependency), **op counts**, **artifact hashes and URLs**.

@@ -334,6 +334,10 @@ for (const file of files) {
 }
 
 for (const name of Object.keys(curated)) {
+  // A preview's doc is withheld from the public mirror (publish_public's
+  // preview rule), and this site drops previews anyway: the mirror build
+  // must not fail for its absence. Where the doc exists it is still checked.
+  if (curated[name].preview === true) continue;
   if (!pages.some((p) => p.name === name)) {
     fail(`catalog.json has package "${name}" with no packaging/docs/${name}.md`);
   }
@@ -348,7 +352,9 @@ if (problems.length) {
 // keeps its doc and its catalog entry, so the checks above still hold it
 // to the same standard, but the site says nothing about it: no page, no
 // card, no count, no search entry, until the flag is cleared.
-const previewNames = pages.filter((p) => curated[p.name].preview === true).map((p) => p.name);
+// From the catalog, not from the pages found: on the public mirror a
+// preview has no doc, and links to it must still be unlinked below.
+const previewNames = Object.keys(curated).filter((n) => curated[n].preview === true);
 for (let i = pages.length - 1; i >= 0; i--) {
   if (curated[pages[i].name].preview === true) pages.splice(i, 1);
 }
@@ -549,7 +555,57 @@ const navLinks = [
 
 const docsStyleVersion = createHash('sha256').update(fs.readFileSync(path.join(WEB, 'docs.css'))).digest('hex').slice(0, 12);
 
-function head(title, description, canonical) {
+// ------------------------------------------------------- search and sharing
+//
+// Why each piece is here, and what was left out: docs/SiteSearchVisibility.md.
+
+// Every page the site publishes passes through head() or is added by hand
+// (the landing page, /get/), so this set IS the sitemap. Written at the end.
+const sitemapUrls = new Set();
+
+// The image is versioned by its content: link previews (Discord, Slack,
+// LinkedIn) cache by URL, and the old one said tools.functionstore.xyz for
+// a month after the domain moved. Size read off the PNG header, so a
+// regenerated image cannot leave the declared size behind.
+const OG_PNG = fs.readFileSync(path.join(WEB, 'og-image.png'));
+const OG_IMAGE = `${SITE}/og-image.png?v=${createHash('sha256').update(OG_PNG).digest('hex').slice(0, 12)}`;
+const OG_SIZE = [OG_PNG.readUInt32BE(16), OG_PNG.readUInt32BE(20)];
+const OG_ALT = 'FNSTools by Function Store: TouchDesigner, minus the busywork.';
+
+/** Open Graph and Twitter tags every page shares; title and description stay per page. */
+function shareTags(canonical) {
+  return `<meta property="og:type" content="website" />
+<meta property="og:url" content="${canonical}" />
+<meta property="og:site_name" content="FNSTools" />
+<meta property="og:image" content="${OG_IMAGE}" />
+<meta property="og:image:width" content="${OG_SIZE[0]}" />
+<meta property="og:image:height" content="${OG_SIZE[1]}" />
+<meta property="og:image:alt" content="${esc(OG_ALT)}" />
+<meta name="twitter:card" content="summary_large_image" />`;
+}
+
+/** One JSON-LD block. `<` is escaped so prose holding "</script>" cannot end it early. */
+function jsonLd(data) {
+  return `<script type="application/ld+json">${
+    JSON.stringify({ '@context': 'https://schema.org', ...data }).replace(/</g, '\\u003c')}</script>`;
+}
+
+/** The trail Google shows in place of the URL: FNSTools, then each [name, url]. */
+function breadcrumbLd(crumbs) {
+  return jsonLd({
+    '@type': 'BreadcrumbList',
+    itemListElement: [['FNSTools', `${SITE}/`], ...crumbs].map(([name, item], i) => ({
+      '@type': 'ListItem', position: i + 1, name, item,
+    })),
+  });
+}
+
+/** "ColorGen for TouchDesigner": the word people search with, said once. */
+const forTD = (title) => (/touchdesigner/i.test(title) ? title : `${title} for TouchDesigner`);
+
+/** head() options: `crumbs` adds breadcrumb data; `noindex` keeps a page out of search and the sitemap. */
+function head(title, description, canonical, { crumbs = null, noindex = false } = {}) {
+  if (!noindex) sitemapUrls.add(canonical);
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -561,10 +617,9 @@ function head(title, description, canonical) {
 <meta name="description" content="${esc(description)}" />
 <meta property="og:title" content="${esc(title)}" />
 <meta property="og:description" content="${esc(description)}" />
-<meta property="og:type" content="website" />
-<meta property="og:image" content="${SITE}/og-image.png" />
+${shareTags(canonical)}
 <link rel="canonical" href="${canonical}" />
-<meta name="robots" content="index, follow" />
+<meta name="robots" content="${noindex ? 'noindex, follow' : 'index, follow'}" />${crumbs ? `\n${breadcrumbLd(crumbs)}` : ''}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
@@ -1166,7 +1221,8 @@ for (const p of pages) {
     the prose. <a href="${EDIT_BASE}/${p.file}" target="_blank"
     rel="noopener">Write it →</a></p>`;
 
-  const html = `${head(`${p.title} | FNSTools docs`, p.description || `${p.title} documentation.`, `${SITE}/docs/${p.slug}/`)}
+  const html = `${head(`${forTD(p.title)} | FNSTools docs`, p.description || `${p.title} documentation.`, `${SITE}/docs/${p.slug}/`,
+    { crumbs: [['Docs', `${SITE}/docs/`], [p.title, `${SITE}/docs/${p.slug}/`]] })}
 ${header('/docs/')}
 <div class="docs-layout wrap">
 ${sidebar(p.slug)}
@@ -1210,7 +1266,10 @@ for (const g of guides) {
   const onThisPage = h2s.length > 1
     ? `<nav class="toc"><span>On this page</span><ul>${h2s.join('')}</ul></nav>`
     : '';
-  fs.writeFileSync(path.join(dir, 'index.html'), `${head(`${g.title} | FNSTools docs`, g.summary, `${SITE}/docs/guides/${g.slug}/`)}
+  fs.writeFileSync(path.join(dir, 'index.html'), `${head(
+    /touchdesigner/i.test(g.title) ? `${g.title} | FNSTools docs` : `${g.title} | FNSTools for TouchDesigner`,
+    g.summary, `${SITE}/docs/guides/${g.slug}/`,
+    { crumbs: [['Docs', `${SITE}/docs/`], [g.title, `${SITE}/docs/guides/${g.slug}/`]] })}
 <!-- GENERATED by tools/build-site.mjs from website/content/guides/${g.file}: do not edit here -->
 ${header('/docs/')}
 <div class="docs-layout wrap">
@@ -1328,9 +1387,9 @@ ${items}
 }).filter(Boolean).join('\n');
 
 fs.writeFileSync(path.join(OUT, 'index.html'), `${head(
-  'FNSTools docs: every tool in the toolkit',
+  'FNSTools docs: every TouchDesigner tool in the toolkit',
   `Documentation for all ${pages.length} FNSTools packages: templates, parameter tools, network shortcuts, MIDI/OSC mapping and extension helpers for TouchDesigner.`,
-  `${SITE}/docs/`)}
+  `${SITE}/docs/`, { crumbs: [['Docs', `${SITE}/docs/`]] })}
 ${header('/docs/')}
 <div class="docs-layout wrap">
 ${sidebar(null)}
@@ -1363,9 +1422,10 @@ ${FOOT}`);
   const dir = path.join(OUT, PARAMS_SLUG);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, 'index.html'), `${head(
-    'Common parameters | FNSTools docs',
+    'Common parameters | FNSTools for TouchDesigner',
     'The controls every FNSTools package carries: the read-only About block that identifies a version, and the registry sections that decide where a tool appears.',
-    `${SITE}/docs/${PARAMS_SLUG}/`)}
+    `${SITE}/docs/${PARAMS_SLUG}/`,
+    { crumbs: [['Docs', `${SITE}/docs/`], ['Common parameters', `${SITE}/docs/${PARAMS_SLUG}/`]] })}
 ${header('/docs/')}
 <div class="docs-layout wrap">
 ${sidebar(PARAMS_SLUG)}
@@ -1535,6 +1595,30 @@ if (fs.existsSync(landing)) {
   }
   out = out.replace(familyRe, (_m, a, b) =>
     `${a}\n    <div class="prod-grid">\n${familyBlock}\n    </div>\n    ${b}`);
+
+  // The home page's search and sharing tags come from the same generator as
+  // every other page. Two blocks belong here only: WebSite, which is where
+  // Google reads the site name it shows above a result, and Organization,
+  // which says who publishes it. Title and description stay hand-written.
+  const seoRe = /(<!-- SEO:START -->)[\s\S]*?(<!-- SEO:END -->)/;
+  if (!seoRe.test(out)) {
+    console.error('index.html is missing the <!-- SEO:START --> / <!-- SEO:END --> markers');
+    process.exit(1);
+  }
+  const orgId = `${SITE}/#organization`;
+  const landingSeo = `${shareTags(`${SITE}/`)}
+<link rel="canonical" href="${SITE}/" />
+${jsonLd({ '@graph': [
+    { '@type': 'WebSite', '@id': `${SITE}/#website`, name: 'FNSTools',
+      alternateName: ['FNSTools by Function Store'], url: `${SITE}/`, inLanguage: 'en',
+      publisher: { '@id': orgId } },
+    { '@type': 'Organization', '@id': orgId, name: 'Function Store',
+      url: 'https://functionstore.xyz', logo: `${SITE}/favicon.png`,
+      sameAs: ['https://github.com/function-store', PATREON,
+        'https://youtube.com/@functionstore', 'https://instagram.com/function.str'] },
+  ] })}`;
+  out = out.replace(seoRe, (_m, a, b) => `${a}\n${landingSeo}\n${b}`);
+  sitemapUrls.add(`${SITE}/`);
 
   // "N tools" always matches the catalogue this build actually rendered.
   out = out.replace(/(<span class="js-fns-count">)[^<]*(<\/span>)/g,
@@ -1876,7 +1960,8 @@ ${families.map(familyCard).join('\n')}
 const COMMUNITY_TITLE = 'Community tools for TouchDesigner | FNSTools';
 const COMMUNITY_DESC = 'TouchDesigner tools by other creators that we think are worth your time. Each is made and maintained by its author.';
 const communityIntro = String(recommends.intro || '').trim();
-fs.writeFileSync(path.join(COMMUNITY_OUT, 'index.html'), `${head(COMMUNITY_TITLE, COMMUNITY_DESC, `${SITE}/community/`)}
+fs.writeFileSync(path.join(COMMUNITY_OUT, 'index.html'), `${head(COMMUNITY_TITLE, COMMUNITY_DESC, `${SITE}/community/`,
+  { crumbs: [['Community', `${SITE}/community/`]] })}
 <!-- GENERATED by tools/build-site.mjs from packaging/recommendations.json and website/content/community/ — do not edit here -->
 ${header('/community/')}
 <main class="plus-page cm-page">
@@ -1895,7 +1980,13 @@ for (const p of posts) {
   fs.mkdirSync(dir, { recursive: true });
   const byline = [`by ${t.author_url ? `<a href="${esc(t.author_url)}" target="_blank" rel="noopener">${esc(t.author)}</a>` : esc(t.author)}`,
     t.date ? `<time datetime="${esc(t.date)}">${esc(fmtDate(t.date))}</time>` : ''].filter(Boolean).join(' · ');
-  fs.writeFileSync(path.join(dir, 'index.html'), `${head(`${p.title} by ${t.author} | FNSTools community`, p.summary || `${p.title}, a TouchDesigner tool by ${t.author}.`, `${SITE}/community/${t.slug}/`)}
+  // a post titled "Pathtracer by Josef Pelz" already names its author
+  const titled = p.title.toLowerCase().includes(`by ${String(t.author).toLowerCase()}`)
+    ? p.title : `${p.title} by ${t.author}`;
+  // A draft only exists in a FNS_SHOW_DRAFTS preview build; noindex keeps
+  // it out of the sitemap too, so a preview can never list one.
+  fs.writeFileSync(path.join(dir, 'index.html'), `${head(`${titled} | FNSTools community`, p.summary || `${p.title}, a TouchDesigner tool by ${t.author}.`, `${SITE}/community/${t.slug}/`,
+    { crumbs: [['Community', `${SITE}/community/`], [p.title, `${SITE}/community/${t.slug}/`]], noindex: t.draft === true })}
 <!-- GENERATED by tools/build-site.mjs from website/content/community/${p.w.file} — do not edit here -->
 ${header('/community/')}
 <main class="plus-page cm-page cm-post">
@@ -2027,8 +2118,7 @@ if (fs.existsSync(cfgSrc)) {
     + `<meta name="description" content="Browse the FNSTools toolkit for TouchDesigner, see what each tool does, and keep only the ones you want. Free and open source, macOS and Windows." />\n`
     + `<meta property="og:title" content="Build your FNSTools install" />\n`
     + `<meta property="og:description" content="Browse every FNSTools tool for TouchDesigner and pick the ones that fit your workflow." />\n`
-    + `<meta property="og:type" content="website" />\n`
-    + `<meta property="og:image" content="${SITE}/og-image.png" />\n`
+    + `${shareTags(`${SITE}/get/`)}\n`
     + `<link rel="preconnect" href="https://fonts.googleapis.com">\n`
     + `<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n`
     + `<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">\n`
@@ -2051,6 +2141,7 @@ if (fs.existsSync(cfgSrc)) {
   fs.mkdirSync(path.join(WEB, 'get'), { recursive: true });
   fs.writeFileSync(path.join(WEB, 'get', 'index.html'),
     '<!-- GENERATED by tools/build-site.mjs from packaging/configurator/index.html — do not edit here -->\n' + page);
+  sitemapUrls.add(`${SITE}/get/`);
   console.log(`built /get/ (release ${manifest.release}, ${live ? 'published' : 'repo'} manifest`
     + `${manifest.rails ? '' : ', no rails hashes yet — paste script needs the next publish'}`
     + `${manifest.category_meta ? '' : ', category_meta baked from catalog.json'})`);
@@ -2165,6 +2256,32 @@ if (fs.existsSync(cfgSrc)) {
   fs.writeFileSync(FEED, JSON.stringify(feed, null, 1) + '\n');
   console.log(`built /catalog.json (${tools.length} tools, ${categoriesOut.length} categories, `
     + `${feed.family.length} family, ${feed.guides.length} guides)`);
+}
+
+// ------------------------------------------- /sitemap.xml and /robots.txt
+//
+// Generated, so neither can drift from the pages: the sitemap is every
+// canonical URL head() was given, plus the two pages built without it. A
+// URL with no built page behind it refuses the build, because a sitemap
+// that lists a 404 is worse than none. No <lastmod>: Vercel builds from a
+// fresh clone, so every file time would be the build time.
+{
+  const urls = [...sitemapUrls].sort();
+  const missing = urls.filter((u) => !u.startsWith(`${SITE}/`)
+    || !fs.existsSync(path.join(WEB, ...u.slice(SITE.length).split('/').filter(Boolean), 'index.html')));
+  if (missing.length) {
+    console.error('build refused -- sitemap URLs with no built page:\n'
+      + missing.map((u) => `  - ${u}`).join('\n'));
+    process.exit(1);
+  }
+  fs.writeFileSync(path.join(WEB, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?>\n'
+    + '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    + urls.map((u) => `  <url><loc>${esc(u)}</loc></url>`).join('\n')
+    + '\n</urlset>\n');
+  fs.writeFileSync(path.join(WEB, 'robots.txt'), '# Generated by website/tools/build-site.mjs\n'
+    + 'User-agent: *\nAllow: /\n\n'
+    + `Sitemap: ${SITE}/sitemap.xml\n`);
+  console.log(`built /sitemap.xml (${urls.length} pages) and /robots.txt`);
 }
 
 // ------------------------------------------------- doc evidence audit

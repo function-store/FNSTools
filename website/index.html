@@ -9,9 +9,19 @@
 <meta name="description" content="FNSTools is a free, open-source toolkit of TouchDesigner workflow tools: operator templates, parameter promotion, MIDI/OSC mapping, network shortcuts and extension helpers. Pick only the tools you want; the installer downloads just those." />
 <meta property="og:title" content="FNSTools - Tools for TouchDesigner" />
 <meta property="og:description" content="Operator templates, parameter promotion, MIDI/OSC mapping, network shortcuts and extension helpers for TouchDesigner. Free and open source. Pick only the tools you want." />
+<!-- Sharing tags, canonical, WebSite + Organization data: filled by tools/build-site.mjs -->
+<!-- SEO:START -->
 <meta property="og:type" content="website" />
-<meta property="og:image" content="https://functionstore.tools/og-image.png" />
+<meta property="og:url" content="https://functionstore.tools/" />
+<meta property="og:site_name" content="FNSTools" />
+<meta property="og:image" content="https://functionstore.tools/og-image.png?v=09cf83ae6edb" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="FNSTools by Function Store: TouchDesigner, minus the busywork." />
+<meta name="twitter:card" content="summary_large_image" />
 <link rel="canonical" href="https://functionstore.tools/" />
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://functionstore.tools/#website","name":"FNSTools","alternateName":["FNSTools by Function Store"],"url":"https://functionstore.tools/","inLanguage":"en","publisher":{"@id":"https://functionstore.tools/#organization"}},{"@type":"Organization","@id":"https://functionstore.tools/#organization","name":"Function Store","url":"https://functionstore.xyz","logo":"https://functionstore.tools/favicon.png","sameAs":["https://github.com/function-store","https://patreon.com/function_store","https://youtube.com/@functionstore","https://instagram.com/function.str"]}]}</script>
+<!-- SEO:END -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
@@ -664,7 +674,7 @@
     <ul class="hero-meta">
       <li><span class="dot" aria-hidden="true"></span> TouchDesigner 2025.33070+</li>
       <li>Windows &amp; macOS</li>
-      <li><span class="js-fns-count">85</span> tools, pick what you want</li>
+      <li><span class="js-fns-count">86</span> tools, pick what you want</li>
       <li>MIT licensed</li>
     </ul>
 
@@ -697,7 +707,7 @@
     <div class="section-head">
       <h2>What's in the toolkit</h2>
       <p>
-        <span class="js-fns-count">85</span> packages, each installing on its own. Core goes in as
+        <span class="js-fns-count">86</span> packages, each installing on its own. Core goes in as
         a unit; everything else is optional. Open a category to see what is inside.
       </p>
     </div>
@@ -749,7 +759,7 @@
             <span class="cat-name">Network</span>
             <span class="cat-pitch">Place, find, swap and move between operators.</span>
           </span>
-          <span class="cat-count">15 tools · 1 Patreon</span>
+          <span class="cat-count">16 tools · 1 Patreon</span>
         </summary>
         <div class="cat-list">
           <div class="feat">
@@ -766,7 +776,7 @@
           </div>
           <div class="feat">
             <div class="feat-icon" aria-hidden="true">⇄</div>
-            <div class="feat-text"><strong><a href="/docs/cookbar/">CookBar</a></strong><span>Draws a bar above every operator in the network you are viewing: its cook time on top, its GPU memory below, so the expensive parts of a network stand out at a glance. Its toolbar button switches it on; right-click the button for a global Hog CHOP to stress-test against.</span></div>
+            <div class="feat-text"><strong><a href="/docs/cookbar/">CookBar</a></strong><span>Draws a bar above every operator in the network you are viewing: its cook time on top, its GPU memory below, so the expensive parts of a network stand out at a glance, with the numbers beside them if you like. A Top List in a corner names the heaviest operators and takes you to one with a click. Its toolbar button switches it on; Ctrl+right-click the button for a global Hog CHOP to stress-test against. Based on Anton Heestand's Cook Bar.</span></div>
           </div>
           <div class="feat">
             <div class="feat-icon" aria-hidden="true">⇄</div>
@@ -786,6 +796,10 @@
           </div>
           <div class="feat">
             <div class="feat-icon" aria-hidden="true">⇄</div>
+            <div class="feat-text"><strong><a href="/docs/fns-overlayregistry/">OverlayRegistry</a></strong><span>One overlay over the network editor you are working in, composited from every tool that draws there: each tool hands over its own image, and this registry fits it over your view, stacks it with the rest and shows it above the nodes, without touching your network's display flags or annotations.</span></div>
+          </div>
+          <div class="feat">
+            <div class="feat-icon" aria-hidden="true">⇄</div>
             <div class="feat-text"><strong><a href="/docs/fns-parenthierarchy/">ParentHierarchy</a></strong><span>Hover a parent in the pane-bar path with Alt to see its parent shortcut, global shortcut and internal operators, and Ctrl to see its custom parameters and values. Click any item to copy a reference to it. It works on the path you already have and adds no button of its own.</span></div>
           </div>
           <div class="feat">
@@ -798,7 +812,7 @@
           </div>
           <div class="feat">
             <div class="feat-icon" aria-hidden="true">⇄</div>
-            <div class="feat-text"><strong><a href="/docs/quickmarks/">QuickMarks</a></strong><span>Bookmark network locations and jump back to them. Bookmarks stay project-local by design.</span></div>
+            <div class="feat-text"><strong><a href="/docs/quickmarks/">QuickMarks</a></strong><span>Bookmark network locations and jump back to them with Ctrl+number. Your marks show on the network editor: a list in a corner you can click, and a pin at each marked spot. Bookmarks stay project-local by design. Based on Alex Guevara's QuickMarks.</span></div>
           </div>
           <div class="feat">
             <div class="feat-icon" aria-hidden="true">⇄</div>
@@ -1090,7 +1104,7 @@
           </div>
           <div class="feat">
             <div class="feat-icon" aria-hidden="true">⁂</div>
-            <div class="feat-text"><strong><a href="/docs/particlesgpuultimate/">ParticlesGpuUltimate</a><span class="plus-mark" title="Unlocks with the Patreon Pro tier or higher">Patreon:Pro</span></strong><span>A GPU particle system driven by images: a thresholded source emits particles, look, life, turbulence, wind and force fields shape them, a fluid simulation can carry them, with raw colour, position and optical-flow inputs and one rendered output.</span></div>
+            <div class="feat-text"><strong><a href="/docs/particlesgpuultimate/">ParticlesGpuUltimate</a><span class="plus-mark" title="Unlocks with the Patreon Pro tier or higher">Patreon:Pro</span></strong><span>A GPU particle system driven by images: a thresholded source emits particles, and look, life, turbulence, wind and force fields shape them, each optionally read from its own image, with a feedback pass for trails and one rendered output.</span></div>
           </div>
         </div>
       </details>
@@ -1319,7 +1333,7 @@
       <div class="cfg-band__body">
         <h2>Choose tools online</h2>
         <p>
-          Browse all <span class="js-fns-count">85</span> packages by category, read what each one
+          Browse all <span class="js-fns-count">86</span> packages by category, read what each one
           does, and tick the ones you want. You get a single line to paste into the Textport. It
           installs that selection and nothing else.
         </p>
@@ -1361,7 +1375,7 @@
           <span class="picker__cat">
             <span class="picker__cat-glyph" aria-hidden="true">⇄</span>
             Network
-            <span class="picker__cat-count">1 of 15 selected</span>
+            <span class="picker__cat-count">1 of 16 selected</span>
           </span>
           <span class="picker__card is-on">
             <span class="picker__box" aria-hidden="true">✓</span>
