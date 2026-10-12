@@ -1,0 +1,976 @@
+{
+ "packages": {
+  "CookBar": {
+   ".": {
+    "Ovmenuorder": 100,
+    "Tbmenuorder": 31,
+    "Tbdisplayed": true,
+    "Tbbarwidth": 0
+   }
+  },
+  "FNS_BackupCleaner": {
+   ".": {
+    "Hbdisplayed": true,
+    "Hbtaborder": 70,
+    "Hbtablabel": "BackupCleaner"
+   }
+  },
+  "FNS_BeatMod": {
+   ".": {
+    "Hbdisplayed": true,
+    "Hbtaborder": 60,
+    "Hbtablabel": "BeatMod"
+   }
+  },
+  "FNS_BorderlessTD": {
+   "BorderlessWindow": {
+    "Mmmenuorder": 4,
+    "Mmdisplayed": true,
+    "Mmbarwidth": 0,
+    "Mmalign": "left",
+    "Mmanchor": ""
+   },
+   ".": {
+    "Tbmenuorder": 33,
+    "Tbbarwidth": 0
+   }
+  },
+  "FNS_Collect": {
+   ".": {
+    "Hbdisplayed": true,
+    "Hbtaborder": 72,
+    "Hbtablabel": "Collect"
+   }
+  },
+  "FNS_ColorUI": {
+   ".": {
+    "Hbdisplayed": true,
+    "Hbtaborder": 150,
+    "Hbtablabel": "OpColor"
+   }
+  },
+  "FNS_CommandPalette": {
+   ".": {
+    "Hbdisplayed": true,
+    "Hbtaborder": 40,
+    "Hbtablabel": "Commands"
+   }
+  },
+  "FNS_CustomParTools": {
+   ".": {
+    "Tbmenuorder": 41,
+    "Tbdisplayed": true,
+    "Tbbarwidth": 0,
+    "Nbmenuorder": 1,
+    "Nbdisplayed": true,
+    "Nbalign": "right"
+   },
+   "hijack_dragdrop": {
+    "Nbmenuorder": -1,
+    "Nbdisplayed": true,
+    "Nbalign": "right"
+   },
+   "PathCellClickInject": {
+    "Nbmenuorder": -1,
+    "Nbdisplayed": true,
+    "Nbalign": "right"
+   }
+  },
+  "FNS_ExprHotStrings": {
+   ".": {
+    "Hbdisplayed": true,
+    "Hbtaborder": 110,
+    "Hbtablabel": "ExprHotStrings"
+   }
+  },
+  "FNS_GlobalOutSelect": {
+   ".": {
+    "Hbdisplayed": true,
+    "Hbtaborder": 120,
+    "Hbtablabel": "GlobalOutSelect"
+   }
+  },
+  "FNS_GlobalVolControl": {
+   "button_mute": {
+    "Tbmenuorder": 17,
+    "Tbdisplayed": true,
+    "Tbbarwidth": 0
+   },
+   "slider_volume": {
+    "Tbmenuorder": 18,
+    "Tbdisplayed": true,
+    "Tbbarwidth": 100
+   }
+  },
+  "FNS_HotkeyManager": {
+   ".": {
+    "Hbdisplayed": true,
+    "Hbtaborder": 115,
+    "Hbtablabel": "HotkeyManager"
+   }
+  },
+  "FNS_HydroHomie": {
+   ".": {
+    "Tbmenuorder": 43,
+    "Tbdisplayed": false,
+    "Tbbarwidth": 0
+   }
+  },
+  "FNS_MediaBrowser": {
+   ".": {
+    "Hbdisplayed": true,
+    "Hbtaborder": 71,
+    "Hbtablabel": "Media"
+   }
+  },
+  "FNS_Misc": {
+   "background1": {
+    "Tbmenuorder": 34,
+    "Tbdisplayed": true,
+    "Tbbarwidth": 0
+   },
+   "input_mouse": {
+    "Tbmenuorder": 28,
+    "Tbdisplayed": true,
+    "Tbbarwidth": 0
+   }
+  },
+  "FNS_OpMenuMods": {
+   ".": {
+    "Hbdisplayed": true,
+    "Hbtaborder": 130,
+    "Hbtablabel": "SearchWords",
+    "Ommenuorder": 0,
+    "Omdisplayed": true
+   },
+   "IOFilter": {
+    "Ommenuorder": 2,
+    "Omdisplayed": true
+   }
+  },
+  "FNS_OpTemplates": {
+   ".": {
+    "Tbmenuorder": 21,
+    "Tbdisplayed": true,
+    "Tbbarwidth": 30,
+    "Ommenuorder": 1,
+    "Omdisplayed": true
+   }
+  },
+  "FNS_Output": {
+   ".": {
+    "Tbmenuorder": 20,
+    "Tbdisplayed": true,
+    "Tbbarwidth": 0
+   }
+  },
+  "FNS_ParOPDrop": {
+   ".": {
+    "Tbmenuorder": 38,
+    "Tbdisplayed": true,
+    "Tbbarwidth": 0
+   }
+  },
+  "FNS_ParRandomizer": {
+   ".": {
+    "Tbmenuorder": 40,
+    "Tbdisplayed": true,
+    "Tbbarwidth": 0
+   }
+  },
+  "FNS_ParentHierarchy": {
+   "nbwidget": {
+    "Nbmenuorder": 8,
+    "Nbdisplayed": false,
+    "Nbalign": "left"
+   }
+  },
+  "FNS_PreviewPanel": {
+   "UI/POPtoDAT_panel": {
+    "Ptmenuorder": -1
+   },
+   ".": {
+    "Ptmenuorder": -1
+   }
+  },
+  "FNS_QuickTime": {
+   ".": {
+    "Tbmenuorder": 23,
+    "Tbdisplayed": true,
+    "Tbbarwidth": 0
+   }
+  },
+  "FNS_Remote": {
+   ".": {
+    "Tbmenuorder": 26,
+    "Tbdisplayed": true,
+    "Tbbarwidth": 0
+   }
+  },
+  "FNS_ResetPLS": {
+   ".": {
+    "Tbmenuorder": 39,
+    "Tbdisplayed": true,
+    "Tbbarwidth": 0
+   }
+  },
+  "FNS_SetSmoothness": {
+   ".": {
+    "Tbmenuorder": 35,
+    "Tbdisplayed": true,
+    "Tbbarwidth": 0
+   }
+  },
+  "FNS_SwapOps": {
+   ".": {
+    "Tbmenuorder": 36,
+    "Tbdisplayed": true,
+    "Tbbarwidth": 0
+   }
+  },
+  "FNS_VSCodeTools": {
+   ".": {
+    "Tbmenuorder": 22,
+    "Tbdisplayed": true,
+    "Tbbarwidth": 0
+   }
+  },
+  "FNS_iopBrowser": {
+   "nbwidget": {
+    "Nbmenuorder": 7,
+    "Nbdisplayed": true,
+    "Nbalign": "left"
+   }
+  },
+  "midiMapper": {
+   "button_midi_learn": {
+    "Tbmenuorder": 27,
+    "Tbdisplayed": true,
+    "Tbbarwidth": 0
+   },
+   ".": {
+    "Hbdisplayed": true,
+    "Hbtaborder": 140,
+    "Hbtablabel": "midiMapper"
+   }
+  },
+  "oscMapper": {
+   ".": {
+    "Hbdisplayed": true,
+    "Hbtaborder": 100,
+    "Hbtablabel": "oscMapper"
+   }
+  },
+  "QuickMarks": {
+   ".": {
+    "Ovmenuorder": 200
+   }
+  },
+  "FNS_POPOverlay": {
+   ".": {
+    "Tbmenuorder": 32,
+    "Tbdisplayed": true,
+    "Tbbarwidth": 0,
+    "Ovmenuorder": 210
+   }
+  }
+ },
+ "configurators": {
+  "ToolbarConfigurator": [
+   [
+    "kind",
+    "name",
+    "order",
+    "width",
+    "display",
+    "target_group",
+    "label",
+    "group_id",
+    "anchor",
+    "td_order",
+    "side"
+   ],
+   [
+    "builtin",
+    "layout1",
+    "6",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "3.0",
+    ""
+   ],
+   [
+    "groupstart",
+    "GroupStart_G1",
+    "16",
+    "",
+    "1",
+    "",
+    "FNSTools",
+    "G1",
+    "Mute|Volume|Perform|OpTemplates|VSCode|QuickTime|Remote|MIDILearn|MouseCHOP|CookBar|POPOverlay|GridShow|BackgroundTOPs|InputSmoothness|SwapOPs|ParOPPlace|ResetPLS|Randomizer|CustomParTools|HydroHomie",
+    "",
+    ""
+   ],
+   [
+    "groupend",
+    "GroupEnd_G1",
+    "44",
+    "",
+    "1",
+    "",
+    "",
+    "G1",
+    "HydroHomie",
+    "",
+    ""
+   ],
+   [
+    "builtin",
+    "perform",
+    "1",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "0.0",
+    ""
+   ],
+   [
+    "builtin",
+    "palette",
+    "2",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "0.5",
+    ""
+   ],
+   [
+    "builtin",
+    "divider",
+    "3",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "1.0",
+    ""
+   ],
+   [
+    "builtin",
+    "pi_notifiy",
+    "4",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "1.0",
+    ""
+   ],
+   [
+    "builtin",
+    "label",
+    "5",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "2.0",
+    ""
+   ],
+   [
+    "builtin",
+    "layout2",
+    "7",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "4.0",
+    ""
+   ],
+   [
+    "builtin",
+    "layout3",
+    "8",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "5.0",
+    ""
+   ],
+   [
+    "builtin",
+    "layout4",
+    "9",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "6.0",
+    ""
+   ],
+   [
+    "builtin",
+    "layout5",
+    "10",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "7.0",
+    ""
+   ],
+   [
+    "builtin",
+    "divider1",
+    "11",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "8.0",
+    ""
+   ],
+   [
+    "builtin",
+    "layouts",
+    "12",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "9.0",
+    ""
+   ],
+   [
+    "builtin",
+    "divider2",
+    "13",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "10.0",
+    ""
+   ],
+   [
+    "builtin",
+    "buttonsymbol",
+    "14",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "11.0",
+    ""
+   ],
+   [
+    "group",
+    "G1",
+    "",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "divider",
+    "DividerX1",
+    "15",
+    "3",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "groupstart",
+    "GroupStart_G2",
+    "37",
+    "",
+    "1",
+    "",
+    "Pars",
+    "G2",
+    "ParOPPlace|ResetPLS|Randomizer|CustomParTools",
+    "",
+    ""
+   ],
+   [
+    "groupend",
+    "GroupEnd_G2",
+    "42",
+    "",
+    "1",
+    "",
+    "",
+    "G2",
+    "CustomParTools",
+    "",
+    ""
+   ],
+   [
+    "groupstart",
+    "GroupStart_G3",
+    "19",
+    "",
+    "1",
+    "",
+    "Project",
+    "G3",
+    "Perform|OpTemplates|VSCode|QuickTime",
+    "",
+    ""
+   ],
+   [
+    "groupend",
+    "GroupEnd_G3",
+    "24",
+    "",
+    "1",
+    "",
+    "",
+    "G3",
+    "QuickTime",
+    "",
+    ""
+   ],
+   [
+    "groupstart",
+    "GroupStart_G4",
+    "25",
+    "",
+    "1",
+    "",
+    "Control",
+    "G4",
+    "Remote|MIDILearn|MouseCHOP",
+    "",
+    ""
+   ],
+   [
+    "groupend",
+    "GroupEnd_G4",
+    "29",
+    "",
+    "1",
+    "",
+    "",
+    "G4",
+    "MouseCHOP",
+    "",
+    ""
+   ],
+   [
+    "groupstart",
+    "GroupStart_G5",
+    "30",
+    "",
+    "1",
+    "",
+    "Network",
+    "G5",
+    "CookBar|POPOverlay|GridShow|BackgroundTOPs|InputSmoothness|SwapOPs",
+    "",
+    ""
+   ],
+   [
+    "groupend",
+    "GroupEnd_G5",
+    "37",
+    "",
+    "1",
+    "",
+    "",
+    "G5",
+    "SwapOPs",
+    "",
+    ""
+   ],
+   [
+    "group",
+    "G3",
+    "",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "group",
+    "G4",
+    "",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "group",
+    "G5",
+    "",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "group",
+    "G2",
+    "",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ]
+  ],
+  "NavbarConfigurator": [
+   [
+    "kind",
+    "name",
+    "order",
+    "width",
+    "display",
+    "target_group",
+    "label",
+    "side",
+    "group_id",
+    "anchor",
+    "td_order"
+   ],
+   [
+    "builtin",
+    "done",
+    "",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "builtin",
+    "viewer",
+    "",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "builtin",
+    "back",
+    "1",
+    "",
+    "1",
+    "",
+    "",
+    "left",
+    "",
+    "",
+    "2.0"
+   ],
+   [
+    "builtin",
+    "forward",
+    "2",
+    "",
+    "1",
+    "",
+    "",
+    "left",
+    "",
+    "",
+    "3.0"
+   ],
+   [
+    "builtin",
+    "opmenu",
+    "3",
+    "",
+    "1",
+    "",
+    "",
+    "left",
+    "",
+    "",
+    "4.0"
+   ],
+   [
+    "builtin",
+    "bookmarks",
+    "4",
+    "",
+    "1",
+    "",
+    "",
+    "left",
+    "",
+    "",
+    "5.0"
+   ],
+   [
+    "builtin",
+    "homeAll",
+    "5",
+    "",
+    "1",
+    "",
+    "",
+    "left",
+    "",
+    "",
+    "5.4"
+   ],
+   [
+    "builtin",
+    "root",
+    "6",
+    "",
+    "1",
+    "",
+    "",
+    "left",
+    "",
+    "",
+    "5.5"
+   ],
+   [
+    "builtin",
+    "parent_hierarchy",
+    "",
+    "",
+    "1",
+    "",
+    "",
+    "left",
+    "",
+    "",
+    "5.6"
+   ]
+  ],
+  "MainMenuConfigurator": [
+   [
+    "kind",
+    "name",
+    "order",
+    "width",
+    "display",
+    "target_group",
+    "group_id",
+    "label",
+    "anchor",
+    "side",
+    "td_order"
+   ],
+   [
+    "builtin",
+    "wiki",
+    "1",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "left",
+    "1.0"
+   ],
+   [
+    "builtin",
+    "forum",
+    "2",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "left",
+    "2.0"
+   ],
+   [
+    "builtin",
+    "tutorials",
+    "3",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "left",
+    "3.0"
+   ],
+   [
+    "builtin",
+    "startstop",
+    "5",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "left",
+    "3.1"
+   ],
+   [
+    "builtin",
+    "fps",
+    "6",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "left",
+    "3.2"
+   ],
+   [
+    "builtin",
+    "fps1",
+    "7",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "left",
+    "3.3"
+   ],
+   [
+    "builtin",
+    "gpuUsage",
+    "8",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "left",
+    "3.4"
+   ],
+   [
+    "builtin",
+    "realtime",
+    "9",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "left",
+    "3.4"
+   ],
+   [
+    "builtin",
+    "projname",
+    "4",
+    "",
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "left",
+    "3.09"
+   ]
+  ],
+  "OpMenuConfigurator": [
+   [
+    "kind",
+    "name",
+    "order",
+    "width",
+    "display",
+    "target_group",
+    "group_id",
+    "label",
+    "anchor",
+    "side",
+    "td_order"
+   ]
+  ]
+ },
+ "shipped_values": {
+  "FNS_TimelineTools": {
+   ".": {
+    "Exportfile": ""
+   }
+  },
+  "FNS_VSCodeTools": {
+   ".": {
+    "Workspace": ""
+   }
+  }
+ }
+}

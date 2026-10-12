@@ -163,7 +163,9 @@ TIERS = """
     "FNS_RandomCHOP",
     "InfinityCHOP",
     "FNS_SimpleSceneChanger",
-    "FNS_ProSceneChanger"
+    "FNS_ProSceneChanger",
+    "FNS_GeoPilot",
+    "FNS_POPOverlay"
   ]
 }
 """

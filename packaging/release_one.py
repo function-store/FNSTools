@@ -270,13 +270,22 @@ the auto-generated package list.
 """
 
 
+def _previewNames():
+    """Catalog packages held back as previews: they ship for the owner's
+    testing and stay hidden from everyone else (1470088d), so the public
+    changelog never names them (owner, 2026-10-12)."""
+    return {n for n, e in (_catalogDoc().get('packages') or {}).items()
+            if isinstance(e, dict) and e.get('preview')}
+
+
 def _writeChangelog(release, versions, per_tool, general):
     """Prepend this release's entry to packaging/CHANGELOG.md: the label
     and package list are derived; per-tool prose (the "Tool: ..." lines
     from release_notes.md) rides each tool's bullet, general prose
-    follows. Written after a successful Stage (before upload -- a failed
-    upload is retryable with upload.py and the entry still describes the
-    staged bytes)."""
+    follows. Preview packages are left out (_previewNames). Written after
+    a successful Stage (before upload -- a failed upload is retryable with
+    upload.py and the entry still describes the staged bytes)."""
+    previews = _previewNames()
     path = _repo(PKG_DIR, 'CHANGELOG.md')
     header = '# FNS tools changelog\n\n'
     body = ''
@@ -285,7 +294,7 @@ def _writeChangelog(release, versions, per_tool, general):
         body = old[len(header):] if old.startswith(header) else old
     pkgs = '\n'.join(
         '- %s %s%s' % (n, v, (' -- ' + per_tool[n]) if per_tool.get(n) else '')
-        for n, v in sorted(versions.items()))
+        for n, v in sorted(versions.items()) if n not in previews)
     entry = '## %s -- %s\n\n%s\n' % (release, date.today().isoformat(), pkgs)
     if general:
         entry += '\n%s\n' % general

@@ -1,0 +1,25 @@
+TDFam
+
+Copyright 2025-2026 Lyell Hintz, Dan Molnar, and TDFam contributors.
+
+TDFam was created by Lyell Hintz / dotsimulate and Dan Molnar / Function Store.
+
+Project links:
+- dotsimulate: https://dotsimulate.com
+- Function Store: https://www.functionstore.xyz/link-in-bio
+
+TDFam is an open-source TouchDesigner framework for creating, registering,
+distributing, and updating custom operator families. It includes the TDFam
+core, TD Registry, menu integration, manifest system, stubbing and update
+tools, callbacks, configuration import/export, examples, documentation, and
+related support files distributed with this project.
+
+This product is licensed under the Apache License, Version 2.0.
+See the LICENSE file for the full license text.
+
+If you distribute TDFam, a modified version of TDFam, or a TouchDesigner
+component or operator family that includes TDFam, preserve the Apache-2.0
+license notices and this NOTICE file as required by the license.
+
+TouchDesigner is a product of Derivative Inc. TDFam is not affiliated with,
+endorsed by, sponsored by, or officially supported by Derivative Inc.

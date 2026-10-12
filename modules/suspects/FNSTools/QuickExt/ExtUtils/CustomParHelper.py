@@ -1151,6 +1151,12 @@ class CustomParHelper:
             # own commented-out line above. Route by it rather than by whichever
             # extension called Init last.
             _comp = cls._extForComp(_par.owner)
+            # A tool that never called Init still carries this watcher (every
+            # ExtUtils clone does): there is no extension to call, and a
+            # tuplet such as an XY par reached `_comp.ownerComp` below as
+            # None (CookBar's List Margin, 2026-10-11).
+            if _comp is None:
+                continue
             # handle sequence exceptions
             # check if we are a sequence parameter first
             match = None

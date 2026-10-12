@@ -272,3 +272,46 @@ for _o in [_c0] + _c0.findChildren():
                 _p.val = _DEV_TWIN.sub(r'FNSTools/\1', str(_p.val))
         except Exception:
             pass
+
+# --- Embody's recovery breadcrumbs never ship -------------------------------
+# Embody stamps `_tdn_rel_path` (and the pending-restore markers) into the
+# storage of every COMP it externalizes as TDN, and storage rides inside the
+# tox. Tools ported from a project that externalized them that way arrive
+# carrying one on most of their COMPs (128 under /FNSTools on 2026-10-09,
+# cleared then). In an install they point at files that do not exist. Literal
+# keys: unstore() globs.
+for _o in [_c0] + _c0.findChildren(includeUtility=True):
+    try:
+        for _k in ('_tdn_rel_path', '_pending_tox_restore', '_pending_tdn_restore'):
+            if _k in _o.storage:
+                _o.unstore(_k)
+    except Exception:
+        pass
+
+# --- no artifact ships the network overlay ----------------------------------
+# FNS_OverlayRegistry shows its composite through one utility annotation in
+# the network you are viewing (docs/NetworkOverlayRegistry.md). A package
+# exported while you viewed its own network would carry it; it is tagged, so
+# it goes here wherever it sits.
+for _ov in _c0.findChildren(tags=['fns_network_overlay', 'fns_network_overlay_widget'], includeUtility=True):
+    try:
+        _ov.destroy()
+    except Exception:
+        pass
+
+# --- shipped surface layout is the authored default, not the live one ------
+# A tool's place on the toolbar, navbar, main menu, op menu, pane-type menu
+# and hub tabs lives in its own surface pars (Tbmenuorder, Hbtaborder, ...),
+# and the Hub configurators keep TD's built-ins, dividers and groups in
+# their `state` tables. The author arranges those like any user, and every
+# drag wrote straight into the tox: v3.2.67 shipped the author's personal
+# group, anchored on two tools outside the starter set, and two tools tied
+# at one toolbar slot. What ships is packaging/surface_defaults.json, which
+# changes only when the author takes a snapshot (packaging/surface_defaults.py,
+# docs/ShippedSurfaceDefaults.md). Deliberately NOT wrapped in a try: a file
+# naming a par the package no longer has must fail this export, not ship the
+# author's arrangement silently.
+_sd = {}
+exec(open('packaging/surface_defaults.py').read(), _sd)
+_sd['Apply'](_c0, _sd['Load']())
+

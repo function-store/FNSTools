@@ -1,0 +1,24 @@
+# FNSTools
+
+> A toolkit of free and Patreon tools for TouchDesigner 2025 and newer, installed and kept current as one package from functionstore.tools. Free tools are MIT licensed; Patreon tools are licensed per person and are not MIT.
+
+## Rules for agents working in a project that uses FNSTools
+
+- The toolkit lives in one container at the project root, normally `/FNSTools`, reachable as `op.FNS`. Every tool in it is replaced whole on update: its network, extensions, scripts and name. Do not rename, move or edit anything inside it; the change will not last, and a renamed tool comes back under its own name.
+- Change a tool through its custom parameters. Settings are saved and survive updates.
+- To keep a modified version of a tool, copy it out of `/FNSTools`, rename it, remove the `<FNS:GLOBAL>` tag from the copy, and give it a different Global OP Shortcut if it has one. The copy is then the user's and is never updated.
+- A COMP tagged `<FNS:GLOBAL>` outside `/FNSTools` is a standalone copy of a toolkit tool. Do not delete or move it yourself: the FNSTools console (Updates, Take over) does that and carries its settings over.
+- Reach the toolkit and its tools through their shortcuts (`op.FNS`, `op.FNS_<NAME>`), guarded with `getattr(op, 'FNS', None)`: a tool used on its own has no toolkit root.
+- Each tool's licence is an annotation in its network. Patreon tools may not be redistributed, resold, or built into a tool, template or pack that is distributed.
+
+## Docs
+
+- [Working with FNSTools in your project](https://functionstore.tools/docs/guides/working-in-your-project/): what an update replaces, what is safe to change, and how to keep your own version of a tool
+- [Getting started](https://functionstore.tools/docs/guides/getting-started/): install, choose packages, update, settings
+- [Architecture](https://functionstore.tools/docs/guides/architecture/): packages, registries and how they fit together
+- [All tools](https://functionstore.tools/docs/): one page per tool, with its parameters
+
+## Optional
+
+- [Terms](https://functionstore.tools/terms/): licences for free and Patreon tools
+- [Patreon](https://functionstore.tools/patreon/): which tools unlock with a membership

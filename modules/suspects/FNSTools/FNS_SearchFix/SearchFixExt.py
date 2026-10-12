@@ -20,6 +20,8 @@ from __future__ import annotations
 import fnmatch
 from typing import Optional
 
+FNSCommand = (next((d for d in me.docked if 'ExtUtils' in d.tags), None) or next((c for c in me.parent().children if 'ExtUtils' in c.tags), None)).mod('FNSCommand')  # import
+
 # TouchDesigner's own UI locations: fixed by TD, not by a project.
 PANE_FIND = '/ui/panes/pane_find'
 # the registry's copy of bar_template in each find bar: FNS_PaneSearchRegistry
@@ -51,6 +53,42 @@ class SearchFixExt:
 		run('args[0].valid and args[0].extensionsReady'
 			' and args[0].ext.SearchFixExt.PatchAll()',
 			ownerComp, delayFrames=60, delayRef=op.TDResources)
+
+	def onInitTD(self) -> None:
+		# The slim ExtUtils has no announcer: announce past the registry's
+		# /sys promotion and this module's own compile.
+		run('args[0]._announceCommands()', self, delayFrames=60, delayRef=op.TDResources)
+
+	def _announceCommands(self) -> None:
+		FNSCommand.announce(self.ownerComp)
+
+	# ------------------------------------------------------------ commands
+
+	@FNSCommand.fns_command(label='Toggle SearchFix', state='Active')
+	def ToggleActive(self) -> dict:
+		"""Switch the Python find-bar search on or off; off is TouchDesigner's own find bar."""
+		par = self.ownerComp.par.Active
+		par.val = not par.eval()
+		return {'ok': True, 'active': bool(par.eval())}
+
+	@FNSCommand.fns_command(label='Toggle fuzzy find', state='Fuzzy')
+	def ToggleFuzzy(self) -> dict:
+		"""Also match loosely in the find bar: first letters of words, a typo or two."""
+		par = self.ownerComp.par.Fuzzy
+		par.val = not par.eval()
+		return {'ok': True, 'fuzzy': bool(par.eval())}
+
+	@FNSCommand.fns_command(label='Toggle legacy find', state='Legacy')
+	def ToggleLegacy(self) -> dict:
+		"""Search like TouchDesigner's own find bar: names that start with the text, case-sensitive."""
+		par = self.ownerComp.par.Legacy
+		par.val = not par.eval()
+		return {'ok': True, 'legacy': bool(par.eval())}
+
+	@FNSCommand.fns_command(label='Repatch find bars')
+	def RepatchFindBars(self) -> dict:
+		"""Apply the search to every find bar again, for example after TouchDesigner rebuilt one."""
+		return {'ok': True, 'patched': self.PatchAll()}
 
 	# ------------------------------------------------------------ patching
 

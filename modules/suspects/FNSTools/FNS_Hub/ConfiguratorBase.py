@@ -422,7 +422,14 @@ class ConfiguratorBase:
 		rather than at a stored index, because tool entries get their order
 		back from their own host pars independently: an absolute slot would
 		land the bracket wherever that slot happens to be this boot. A group
-		whose anchors have not registered yet is retried."""
+		whose anchors have not registered yet is retried.
+
+		An anchor cell holds the group's members in order, joined by
+		ANCHOR_SEP (a single name still works): the start bracket opens
+		before the first member that is registered, the end bracket closes
+		after the last. One named anchor made the whole group vanish on an
+		install without that tool -- the shipped FNSTools group hung on
+		Perform and HydroHomie, neither in the starter set (2026-10-10)."""
 		t = self._stateDat()
 		if t is None or api is None:
 			return
@@ -451,9 +458,16 @@ class ConfiguratorBase:
 			s, e = spec.get('groupstart'), spec.get('groupend')
 			if not s or not e:
 				continue
-			if s['anchor'] not in base or e['anchor'] not in base:
-				pending = True  # the wrapped tools have not registered yet
+			members = self._anchorMembers(s['anchor'], e['anchor'])
+			present = [n for n in members if n in base]
+			if len(present) < len(members):
+				# some members have not registered yet, or are not installed:
+				# bracket what is here now, and look again while retries last
+				pending = True
+			if not present:
 				continue
+			s = dict(s, anchor=min(present, key=base.index))
+			e = dict(e, anchor=max(present, key=base.index))
 			entries[s['name']] = {'virtual': '1', 'group_start': '1',
 								  'group_id': gid, 'label': s['label'], 'display': '1'}
 			entries[e['name']] = {'virtual': '1', 'group_end': '1',
@@ -490,6 +504,20 @@ class ConfiguratorBase:
 			run('args[0](args[1], args[2])', self._republishGroupMarkers, api,
 				attempts - 1, delayFrames=60, delayRef=op.TDResources)
 
+	ANCHOR_SEP = '|'
+
+	def _anchorMembers(self, start_anchor, end_anchor):
+		"""A group's members in order, from its two anchor cells. A list in
+		either cell is the whole membership; two single names (the older
+		form) are the group's first and last member."""
+		out = []
+		for cell in (start_anchor, end_anchor):
+			for n in str(cell or '').split(self.ANCHOR_SEP):
+				n = n.strip()
+				if n and n not in out:
+					out.append(n)
+		return out
+
 	def _decorateRestoredMarker(self, entry, table, row):
 		"""A restored marker comes back on the side it was created on (a
 		group cannot span a bar's fill pivot) and, on kinded surfaces, as an
@@ -509,7 +537,9 @@ class ConfiguratorBase:
 			# an emptied group has nothing to anchor to -- keep the stored
 			# spec (the dormant-group contract) instead of blank anchors
 			return
-		anchors = {'groupstart': members[0], 'groupend': members[-1]}
+		# the whole membership on the start bracket, so the group still forms
+		# on an install that lacks its first or last member
+		anchors = {'groupstart': self.ANCHOR_SEP.join(members), 'groupend': members[-1]}
 		for kind, name in (('groupstart', api._groupStartName(gid)),
 						   ('groupend', api._groupEndName(gid))):
 			info = widgets.get(name, {})

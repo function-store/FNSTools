@@ -196,7 +196,7 @@ try:
     # ------------------------------------------------------------ 3
     print('3. ExportPackage scrubs the artifact and never touches the live master')
     scrubbed = []
-    bm.__dict__['ScrubArtifact'] = lambda path: scrubbed.append(path) or 3
+    bm.__dict__['ScrubArtifact'] = lambda path, notices=None, identity=None: scrubbed.append(path) or 3
     live = marked_tree()
     before = [(o.path, sorted(o.tags), getattr(o.par, 'Vcoriginal', Par(None)).val)
               for o in [live] + live.findChildren()]
@@ -210,13 +210,13 @@ try:
     check('the result hashes the scrubbed file',
           res is not None and res['path'] == 'packaging/dist/FNS_Foo.tox' and len(res['sha256']) == 64)
 
-    def failing_scrub(path):
+    def failing_scrub(path, notices=None, identity=None):
         raise RuntimeError('save refused')
     bm.__dict__['ScrubArtifact'] = failing_scrub
     check('a failed scrub fails the export (no hash for a marked artifact)',
           bm.ExportPackage(marked_tree()) is None)
 
-    bm.__dict__['ScrubArtifact'] = lambda path: scrubbed.append(path) or 0
+    bm.__dict__['ScrubArtifact'] = lambda path, notices=None, identity=None: scrubbed.append(path) or 0
     scrubbed[:] = []
     embody.result = False
     check('a failed export returns None and is not scrubbed',

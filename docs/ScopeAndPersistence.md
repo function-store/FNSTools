@@ -100,7 +100,7 @@ people.
 |---|---|---|---|---|
 | *(defaults)* | yes | yes | yes | yes |
 | `Persistpars` **off** | **no** | **no** | yes | yes |
-| `Excludepars` / `Excludepages` pattern | **no** (matched names) | *unfiltered* — see below | yes | yes |
+| `Excludepars` / `Excludepages` pattern | **no** (matched names) | **no** (matched names) — see below | yes | yes |
 | `Autoload` **off** | **yes** | **no** | **yes** | **no** |
 | `Configscope = project` (toolkit-wide) | **no** | **no** | **no** | **no** |
 
@@ -121,15 +121,16 @@ symmetric: it gates the snapshot (`:481`) and the apply (`:1013`) through
 the same `info` flag. `Excludepars = '*'` is the equivalent for a tool
 that must keep its `state` roaming while no parameter does.
 
-### Exclusions are snapshot-side only
+### Exclusions apply both ways (since 2026-10-10)
 
-`Excludepars`/`Excludepages` are `tdu.match` patterns tested in
-`_snapshotPars`. `_applyPars` iterates whatever the section contains with
-**no pattern filter**. Adding a name to `Excludepars` therefore stops
-future writes, but a value written before the exclusion keeps being
-applied until that project saves again and replaces the section. It is
-self-correcting after one save on the machine that made the change — not
-immediately, and not at all on a machine that never saves.
+`Excludepars`/`Excludepages` are `tdu.match` patterns. Until 2026-10-10
+they were tested in `_snapshotPars` only, so a value written before an
+exclusion kept being applied until that project saved again. Snapshot,
+apply and the settings page now share one filter, `_roams`, so an excluded
+par is neither written nor applied from an older file. The same filter
+never roams operator references, the exclusion lists themselves, or (inside
+the toolkit, with the Hotkey Manager installed) hotkeys; see
+docs/ConfigCoverageReview.md.
 
 ### `Autoload` off does not stop the file being read for that tool
 

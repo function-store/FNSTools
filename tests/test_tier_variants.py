@@ -77,11 +77,11 @@ check('Packages() skips a variant master (no row, no catalog entry, no doc)',
 
 print('2. the manifest builder: one artifact per variant, under plus/')
 check('ExportPackage takes a suffix and names the file <name><suffix>.tox',
-      "def ExportPackage(comp, suffix=''):" in bm_src
+      "def ExportPackage(comp, suffix=''," in bm_src
       and "dest = _repo(DIST_DIR, comp.name + suffix + '.tox')" in bm_src)
 check('a variant exports from its source master or from the package master',
       "src_comp = _root().op(src_name) if src_name else comp" in bm_src
-      and "vart = ExportPackage(src_comp, suffix='.' + vid)" in bm_src)
+      and "vart = ExportPackage(src_comp, suffix='.' + vid," in bm_src)
 check('a non-exporting build carries the variant artifact from disk or the previous manifest',
       "built = _repo(DIST_DIR, '%s.%s.tox' % (name, vid))" in bm_src
       and "elif (prev_vars.get(vid) or {}).get('artifact'):" in bm_src)

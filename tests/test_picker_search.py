@@ -86,7 +86,9 @@ check('every field weight stays under 1, so strict hits outrank fuzzy ones',
       and len(re.findall(r'(?:NAME|TAG|META|DESC|HEAD|BODY) = ([0-9.]+)', BLOCK)) == 6)
 
 print('2. FNSFuzzy matches scripts/shared/FuzzyMatch.py')
-names = io.open(os.path.join(FIX, 'palette_names.txt'), encoding='utf-8').read().split()
+_NAMES_FILE = os.path.join(FIX, 'palette_names.txt')
+# private: a dump of the author's palette, withheld from the public mirror
+names = io.open(_NAMES_FILE, encoding='utf-8').read().split() if os.path.exists(_NAMES_FILE) else None
 cmd_rows = json.load(io.open(os.path.join(FIX, 'command_rows.json'), encoding='utf-8'))
 TOKENS = ['blur', 'nosie', 'mfo', 'fbg', 'lur', 'kinnect', 'opneext', 'che', 'movie_file',
           'randomise', 'colour', 'grey', 'centre', 'noise', 'hsv', 'x', 'feedbck', 'tex3d',
@@ -98,22 +100,26 @@ def py_token(t, n):
     return None if m is None else [m[0], round(m[1], 9)]
 
 
-want = [[py_token(t, n) for n in names] for t in TOKENS]
-got = node("""
-console.log(JSON.stringify(DATA.tokens.map(function (t) {
-  return DATA.names.map(function (n) {
-    var m = FNSFuzzy.matchToken(t, n);
-    return m ? [m[0], Math.round(m[1] * 1e9) / 1e9] : null;
-  });
-})));
-""", {'tokens': TOKENS, 'names': names})
-diff = [(TOKENS[i], names[j], want[i][j], got[i][j])
-        for i in range(len(TOKENS)) for j in range(len(names)) if want[i][j] != got[i][j]]
-hits = sum(1 for r in want for x in r if x)
-tiers = sorted({x[0] for r in want for x in r if x})
-check('match_token agrees on %d token x name pairs (%d hits, tiers %s)'
-      % (len(TOKENS) * len(names), hits, tiers), not diff, diff[:5])
-check('the corpus exercises every tier', tiers == list(range(7)), tiers)
+if names is None:
+    print('  SKIP  match_token parity over palette names: tests/fixtures/palette_names.txt '
+          'is not in this checkout (private fixture)')
+else:
+    want = [[py_token(t, n) for n in names] for t in TOKENS]
+    got = node("""
+    console.log(JSON.stringify(DATA.tokens.map(function (t) {
+      return DATA.names.map(function (n) {
+        var m = FNSFuzzy.matchToken(t, n);
+        return m ? [m[0], Math.round(m[1] * 1e9) / 1e9] : null;
+      });
+    })));
+    """, {'tokens': TOKENS, 'names': names})
+    diff = [(TOKENS[i], names[j], want[i][j], got[i][j])
+            for i in range(len(TOKENS)) for j in range(len(names)) if want[i][j] != got[i][j]]
+    hits = sum(1 for r in want for x in r if x)
+    tiers = sorted({x[0] for r in want for x in r if x})
+    check('match_token agrees on %d token x name pairs (%d hits, tiers %s)'
+          % (len(TOKENS) * len(names), hits, tiers), not diff, diff[:5])
+    check('the corpus exercises every tier', tiers == list(range(7)), tiers)
 
 QUERIES = ['blur', 'tmln', 'save proj', 'nosie', 'open ext', 'cmd pal', 'x']
 fields = [[[r['title'], 0.0, False], [r['category'] or '', 0.4, False], [r['path'], 0.7, True]]

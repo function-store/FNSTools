@@ -15,10 +15,13 @@ uniform int absTime;
 uniform int count;
 uniform bool nonCommercial;
 
+// FNSTools, 2026-10-11: CookBar is a layer of FNS_OverlayRegistry, composited
+// with other tools' layers and shown above the nodes. So the output is
+// premultiplied and transparent outside the bars, the fade becoming alpha; the
+// original matted every pixel onto the editor's background colour. `background`
+// stays in the signature so the calls below read as they always did.
 vec4 matte(vec4 forground, vec4 background, float opacity) {
-	vec3 rgb = forground.rgb * opacity + background.rgb * (1.0 - opacity);
-	vec4 rgba = vec4(rgb, 1.0);
-	return rgba;
+	return vec4(forground.rgb * opacity, opacity);
 }
 
 vec4 brightness(vec4 color, float brightness) {
@@ -177,7 +180,7 @@ void main() {
 	vec4 levelColor = !isMem ? vec4(lvl, alvl, 0.0, 1.0) : vec4(0.0, alvl, 1.0, 1.0) ;
 
 	// Apply Colors
-	vec4 color = bgColor;
+	vec4 color = vec4(0.0);  // transparent outside the bars
 	if (insideBar) {
 		if (cooking) {
 			if (insideLevel) {

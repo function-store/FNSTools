@@ -189,6 +189,17 @@ standalone plugin download (local mode, no console raised) and the
 toolkit package (exposed). Do not hand-edit an artifact for either case;
 `docs/FNS_Console.md` has the rule and the reasoning.
 
+## Shipped layout comes from a file
+
+Where a tool sits on the toolbar, navbar, main menu, op menu, pane-type
+menu and hub tabs, and the Hub configurators' built-ins, dividers and
+groups, ship from `packaging/surface_defaults.json`; every export applies
+it to the staged copy. Rearranging your own bar in the dev project changes
+nothing a user gets. To ship a new arrangement, arrange it, take a snapshot
+(`docs/ShippedSurfaceDefaults.md`), run `python tests/test_surface_defaults.py`
+and commit the file. A file naming a parameter a package no longer has
+fails that package's export on purpose.
+
 ## Regenerating the manifest
 
 ```python

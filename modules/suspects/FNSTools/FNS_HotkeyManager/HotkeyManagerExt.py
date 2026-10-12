@@ -91,8 +91,10 @@ class HotkeyManagerExt:
 		self.keyboardin_dat_pars = ['keys', 'shortcuts']
 		self.comp_pars_substrings = ['key', 'shortcut', 'hotkey']
 		# 'keyframe': Keyframer* pars contain 'key' (TimelineTools' Keyframerstatus
-		# listed as a binding, 2026-09-10); 'status': a status readout is never a binding.
-		self.comp_pars_exceptions = ['opshortcut', 'parentshortcut', 'arrowkeys', 'savehotkeys', 'loadhotkeys', 'shortcutactive', 'deletekey', 'keyword', 'keyframe', 'status', 'favourite', 'favorite']
+		# listed as a binding, 2026-09-10); 'status': a status readout is never a binding;
+		# 'license': the Updater's Licensekey, empty until a user enters one, would then
+		# read as a binding (2026-10-10). FNS_ConfigRegistry.HOTKEY_EXCEPTIONS mirrors this list.
+		self.comp_pars_exceptions = ['opshortcut', 'parentshortcut', 'arrowkeys', 'savehotkeys', 'loadhotkeys', 'shortcutactive', 'deletekey', 'keyword', 'keyframe', 'status', 'favourite', 'favorite', 'license']
 		self.comp_except = ['popMenu', 'popDialog', 'KeyModifiers', 'FNS_HotkeyManager']
 		# DAT `keys` values consisting only of these are modifier-listen setups, not hotkeys
 		self.ignored_keys = ['ctrl', 'alt', 'shift', 'cmd', 'esc', 'enter', 'tab']

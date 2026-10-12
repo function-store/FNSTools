@@ -195,6 +195,63 @@ class ConfigRegistryExt(RegistryBase):
 	SKIP_PAGES = ('About', 'Version Ctrl', 'Info', 'Callbacks', 'Common')
 	# Styles with no persistable value.
 	SKIP_STYLES = ('Pulse', 'Momentary', 'Header')
+	# Operator references name operators in THIS project; roamed into another
+	# they point at nothing or at the wrong thing (audit 2026-10-10: Output's
+	# Performwindow, TimelineTools' Animation, midiMapper's mapping table,
+	# Remote's Createtarget, ...). docs/ConfigCoverageReview.md
+	OP_REF_STYLES = ('OP', 'COMP', 'DAT', 'CHOP', 'TOP', 'SOP', 'MAT', 'POP',
+					 'Object', 'PanelCOMP')
+	# A tool's exclusion lists are its authored schema. Roamed, an old file
+	# put an old list back over a new release's and undid its exclusions.
+	NEVER_ROAM_PARS = ('Cfexcludepars', 'Cfexcludepages')
+	# Hotkeys belong to FNS_HotkeyManager (owner, 2026-10-10): inside the
+	# toolkit it persists every binding, with defaults and reset, so a config
+	# section carrying the same par was a second writer of one value. Its own
+	# discovery rule, plus 'license' (Updater's Licensekey is no hotkey).
+	HOTKEY_WORDS = ('key', 'shortcut', 'hotkey')
+	HOTKEY_EXCEPTIONS = ('opshortcut', 'parentshortcut', 'arrowkeys', 'savehotkeys',
+						 'loadhotkeys', 'shortcutactive', 'deletekey', 'keyword',
+						 'keyframe', 'status', 'favourite', 'favorite', 'license')
+	# Registry hosts whose layout pars sit on a CHILD of the tool (a toolbar
+	# button, a navbar widget): their owner is not the tool, so the tool's
+	# pars never held them and a user's reorder was lost on reload.
+	SURFACE_HOSTS = ('FNS_ToolbarRegistry', 'FNS_NavbarRegistry', 'FNS_MainMenuRegistry',
+					 'FNS_HubRegistry', 'FNS_OpMenuRegistry', 'FNS_PaneTypeRegistry')
+	SURFACE_HOST_PARS = ('Menuorder', 'Displayed', 'Barwidth', 'Align', 'Anchor',
+						 'Taborder', 'Tablabel')
+
+	def _hotkeysOwnedElsewhere(self, tool):
+		"""Does the Hotkey Manager persist this tool's hotkeys? Only for tools
+		inside the toolkit, and only when it is installed: without it, config
+		keeps carrying them as before."""
+		root = getattr(op, 'FNS', None)
+		if root is None or getattr(op, 'FNS_HOTKEY_MANAGER', None) is None:
+			return False
+		return tool == root or tool.path.startswith(root.path + '/')
+
+	def _isHotkeyPar(self, p):
+		if p.style not in ('Str', 'StrMenu', 'Menu'):
+			return False
+		low = p.name.lower()
+		return (any(w in low for w in self.HOTKEY_WORDS)
+				and not any(x in low for x in self.HOTKEY_EXCEPTIONS))
+
+	def _roams(self, p, info, hotkeys_elsewhere):
+		"""THE filter: does this custom par travel through the config file?
+		Snapshot, apply and the settings page all ask it, so what is not
+		written is also never applied from an older file."""
+		page_name = p.page.name
+		if page_name in self.SKIP_PAGES or self._matchAny(info.get('exclude_pages', ''), page_name):
+			return False
+		if p.style in self.SKIP_STYLES or p.readOnly:
+			return False
+		if self._matchAny(info.get('exclude_pars', ''), p.name):
+			return False
+		if p.name in self.NEVER_ROAM_PARS or p.style in self.OP_REF_STYLES:
+			return False
+		if hotkeys_elsewhere and self._isHotkeyPar(p):
+			return False
+		return True
 
 	# --- surface hooks (RegistryBase contract; the 'surface' is the file) ---
 
@@ -326,18 +383,36 @@ class ConfigRegistryExt(RegistryBase):
 	@property
 	def ConfigPath(self):
 		"""Absolute path of the aggregated config file. An explicit Configfile
-		par (Config page, set on the MASTER -- promotion carries it to the
-		global) overrides the user-palette default."""
-		override = ''
-		p = getattr(self.ownerComp.par, 'Configfile', None)
-		if p is not None:
-			try:
-				override = str(p.eval()).strip()
-			except Exception:
-				override = ''
+		par (Config page, set on the MASTER) overrides the user-palette
+		default.
+
+		The /sys global reads the master's when its own is empty. Promotion
+		does NOT carry it: every non-global copy calls _installGlobalRegistry
+		from postInit, hosts included, so whichever copy initializes first
+		at project open becomes the global and a tie keeps it. 45 of the 51
+		copies are hosts with an empty Configfile, so the dev checkout's
+		global read the shared file and every save wrote dev settings there
+		(measured 2026-10-09). In an install every shipped copy is scrubbed
+		empty, master included, so this changes nothing there."""
+		override = self._configFileOverride(self.ownerComp)
+		if not override and self._is_sys_global():
+			master = self._masterComp()
+			if master is not None and master != self.ownerComp:
+				override = self._configFileOverride(master)
 		if override:
 			return override.replace('\\', '/')
 		return _fnsPaletteRoot() + '/' + self.SUBFOLDER + '/' + self.FILE_NAME
+
+	@staticmethod
+	def _configFileOverride(comp):
+		"""`comp`'s Configfile, evaluated and stripped; '' when absent."""
+		p = getattr(comp.par, 'Configfile', None)
+		if p is None:
+			return ''
+		try:
+			return str(p.eval()).strip()
+		except Exception:
+			return ''
 
 	def _scopeIsProject(self):
 		"""True when Configscope says the config lives in the .toe only.
@@ -517,16 +592,10 @@ class ConfigRegistryExt(RegistryBase):
 		exact match that RETIRES a mismatched file, and a bump would discard
 		every settings file in the field for a change that breaks no reader."""
 		out = {}
-		exclude_pars = info.get('exclude_pars', '')
-		exclude_pages = info.get('exclude_pages', '')
+		hk = self._hotkeysOwnedElsewhere(tool)
 		for p in tool.customPars:
 			try:
-				page_name = p.page.name
-				if page_name in self.SKIP_PAGES or self._matchAny(exclude_pages, page_name):
-					continue
-				if p.style in self.SKIP_STYLES or p.readOnly:
-					continue
-				if self._matchAny(exclude_pars, p.name):
+				if not self._roams(p, info, hk):
 					continue
 				rec = {'mode': p.mode.name, 'val': self._jsonSafe(p.val)}
 				try:
@@ -546,18 +615,98 @@ class ConfigRegistryExt(RegistryBase):
 				debug(f'{self.REGISTRY_NAME}: snapshot {tool.path}.{p.name}: {e}')
 		return out
 
+	def _surfaceOwners(self, tool):
+		"""(relative path, owner, [tool pars]) for every surface host inside
+		`tool` whose layout pars live on a child of it -- a toolbar button,
+		a navbar widget. The tool's own surface pars ride in 'pars' already;
+		an owner inside another registered tool belongs to that tool."""
+		others = set()
+		for info in self.stored['PaneRegistry'].values():
+			pth = info.get('panel_path')
+			if pth and pth != tool.path:
+				others.add(pth)
+		found = {}
+		for host_name in self.SURFACE_HOSTS:
+			for host in tool.findChildren(name=host_name):
+				owner = host.parent()
+				if owner == tool:
+					continue
+				walk, foreign = owner, False
+				while walk is not None and walk != tool:
+					if walk.path in others:
+						foreign = True
+						break
+					walk = walk.parent()
+				if foreign or walk is None:
+					continue
+				for hp in self.SURFACE_HOST_PARS:
+					p = getattr(host.par, hp, None)
+					if p is None or p.mode != ParMode.BIND:
+						continue
+					expr = str(p.bindExpr or '')
+					if not expr.startswith('parent().par.'):
+						continue
+					name = expr[len('parent().par.'):].strip()
+					if name.isidentifier() and owner.par[name] is not None:
+						found.setdefault(owner.path, (owner, []))[1].append(name)
+		out = []
+		for path, (owner, names) in found.items():
+			out.append((path[len(tool.path) + 1:], owner, sorted(set(names))))
+		return out
+
+	def _snapshotSurfaces(self, tool):
+		"""{relative path: {par: value}} for the surface pars of the widgets
+		inside the tool (constant-mode only: an expression is authored)."""
+		out = {}
+		for rel, owner, names in self._surfaceOwners(tool):
+			for name in names:
+				p = owner.par[name]
+				if p.mode != ParMode.CONSTANT:
+					continue
+				out.setdefault(rel, {})[name] = self._jsonSafe(p.val)
+		return out
+
+	def _applySurfaces(self, tool, surfaces, canonical):
+		"""Put saved widget positions back. Only pars the tool still
+		publishes as surface pars are written; anything else is skipped."""
+		if not surfaces:
+			return 0
+		live = {rel: set(names) for rel, _owner, names in self._surfaceOwners(tool)}
+		applied = 0
+		for rel, pars in surfaces.items():
+			allowed = live.get(rel)
+			owner = tool.op(rel) if allowed else None
+			if owner is None:
+				continue
+			for name, val in (pars or {}).items():
+				p = owner.par[name]
+				if p is None or name not in allowed or p.mode != ParMode.CONSTANT:
+					continue
+				try:
+					if p.val != val:
+						p.val = val
+					applied += 1
+				except Exception as e:
+					debug(f'{self.REGISTRY_NAME}: {canonical!r}: surface {rel}.{name}: {e}')
+		return applied
+
 	def _applyPars(self, tool, pars_section, canonical):
 		"""Apply a saved par section onto the live tool. Per-par containment;
-		a par missing from the tool is skipped, NEVER created."""
+		a par missing from the tool is skipped, NEVER created. A par the tool
+		would no longer write (_roams) is not applied either: sections are
+		replaced only when a project saves, so an older file still carries
+		pars excluded since, and applying them undid the exclusion."""
 		applied = 0
 		missing = []
 		errors = []
+		info = self.stored['PaneRegistry'].get(canonical) or {}
+		hk = self._hotkeysOwnedElsewhere(tool)
 		for name, rec in (pars_section or {}).items():
 			p = getattr(tool.par, name, None)
 			if p is None or not p.isCustom:
 				missing.append(name)
 				continue
-			if p.style in self.SKIP_STYLES or p.readOnly:
+			if not self._roams(p, info, hk):
 				continue
 			try:
 				mode = rec.get('mode', 'CONSTANT')
@@ -627,6 +776,9 @@ class ConfigRegistryExt(RegistryBase):
 		section = {}
 		if info.get('persist_pars', '1') == '1':
 			section['pars'] = self._snapshotPars(tool, info)
+			surfaces = self._snapshotSurfaces(tool)
+			if surfaces:
+				section['surfaces'] = surfaces
 		module = self._callbackModule(info)
 		fn = getattr(module, 'onConfigSave', None) if module is not None else None
 		if callable(fn):
@@ -886,20 +1038,16 @@ class ConfigRegistryExt(RegistryBase):
 		are not constant-mode ship readonly so the page can show but never
 		fight a bind or expression."""
 		out = []
-		exclude_pars = info.get('exclude_pars', '')
-		exclude_pages = info.get('exclude_pages', '')
+		hk = self._hotkeysOwnedElsewhere(tool)
 		for g in tool.customParGroups:
 			try:
 				p0 = g[0]
 				page_name = p0.page.name
-				if page_name in self.SKIP_PAGES or page_name in self.UI_SKIP_PAGES \
-						or self._matchAny(exclude_pages, page_name):
-					continue
-				if p0.style in self.SKIP_STYLES or p0.readOnly:
+				if page_name in self.UI_SKIP_PAGES:
 					continue
 				comps = []
 				for p in g:
-					if self._matchAny(exclude_pars, p.name):
+					if not self._roams(p, info, hk):
 						continue
 					comps.append({'name': p.name,
 								  'val': self._jsonSafe(p.eval()),
@@ -1049,6 +1197,7 @@ class ConfigRegistryExt(RegistryBase):
 				continue
 			if info.get('persist_pars', '1') == '1':
 				self._applyPars(tool, section.get('pars'), canonical)
+				self._applySurfaces(tool, section.get('surfaces'), canonical)
 			state = section.get('state')
 			if state is not None:
 				module = self._callbackModule(info)
@@ -1171,6 +1320,7 @@ class ConfigRegistryExt(RegistryBase):
 			return False
 		if info.get('persist_pars', '1') == '1':
 			self._applyPars(tool, section.get('pars'), canonical_name)
+			self._applySurfaces(tool, section.get('surfaces'), canonical_name)
 		state = section.get('state')
 		if state is not None:
 			module = self._callbackModule(info)

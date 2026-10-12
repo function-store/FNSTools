@@ -179,6 +179,9 @@ a.chip.rec { text-decoration: none; color: inherit; }
   background: transparent; border-style: dashed; color: var(--text-dim);
 }
 .chip.placebtn:hover { border-color: var(--accent); color: var(--accent); }
+/* the single-tool download: an icon, not a word */
+.chip.dlbtn { padding: 3px 6px; line-height: 0; }
+.chip.dlbtn svg { display: block; }
 .chip.placebtn.on {
   border-style: solid; border-color: rgba(251,191,36,0.4);
   background: var(--accent-dim); color: var(--accent);
@@ -657,7 +660,7 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
   /* the card aligns its children to the top, so the body is stretched to
      the full card height for the corner to be the same on every card */
   .body.has-foot { display: flex; flex-direction: column; align-self: stretch; }
-  .card-foot { margin-top: auto; padding-top: 8px; display: flex; justify-content: flex-end; }
+  .card-foot { margin-top: auto; padding-top: 8px; display: flex; justify-content: flex-end; gap: 6px; flex-wrap: wrap; }
   .community-pointer { margin: 22px 0 8px; color: var(--text-dim); font-size: 13px; }
   .card.placed { border-style: dashed; border-color: var(--border-strong); background: var(--bg-2); }
 
@@ -1023,6 +1026,23 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
     <button class="btn btn-secondary" id="patreonkeep">Keep it ticked</button>
     <button class="btn btn-secondary" id="patreonrecheck" hidden>I just pledged</button>
     <button class="btn btn-primary" id="patreonsignin" hidden>Sign in with Patreon</button>
+  </div>
+</div></dialog>
+
+<dialog id="dlwarn"><div class="dlg">
+  <span class="eyebrow">SINGLE DOWNLOAD</span>
+  <h3>Downloading one tool on its own</h3>
+  <p>You can: drop the .tox into any project and the tool works by itself.
+    The intended way is an install, though, because a copy downloaded here
+    never updates itself.</p>
+  <p class="dlg-hint">To get fixes as they ship, tick the tools you want on
+    this page and press <b>Copy install script</b>, or
+    <a id="dlwarnboot" target="_blank" rel="noopener">download FNSTools.tox</a>
+    and pick your tools inside TouchDesigner.</p>
+  <div class="dlg-actions">
+    <button class="btn btn-quiet" id="dlwarncancel">Cancel</button>
+    <span class="spacer"></span>
+    <button class="btn btn-primary" id="dlwarnok">Understood</button>
   </div>
 </div></dialog>
 
@@ -2139,6 +2159,14 @@ function fnsBoot() {
     // its card keeps the New badge meanwhile.
     var list = Array.from(unseenAtLoad).map(function (n) { return byName[n]; })
       .filter(function (p) { return p && (!isPlus(p) || entitled(p)); }).sort(byTitle);
+    // A tool already in the selection asks nothing: it could only sit in
+    // the list ticked and greyed out as "already picked". It is recorded as
+    // shown and left out, so a look where every new tool is already picked
+    // opens no dialog at all (owner, 2026-10-07: "a non-state").
+    var had = list.filter(function (p) { return picked.has(p.name); })
+      .map(function (p) { return p.name; });
+    if (had.length) markSeen(had);
+    list = list.filter(function (p) { return !picked.has(p.name); });
     if (!d || !list.length) return;
     var names = list.map(function (p) { return p.name; });
     document.getElementById('newtitle').textContent = list.length === 1
@@ -2225,6 +2253,44 @@ function fnsBoot() {
   /** A tool's card. `hit` (a search result, FNSSearch.score) puts the
    *  category on it, since a ranked list has no section headings, and a
    *  line naming the docs words that found it when no card field did. */
+  // A single tool's .tox, straight from its card (website only, free tools
+  // only; Patreon tools wait for the web sign-in, docs/PatreonWebDownloads.md).
+  // The first press explains that an install is the intended way, since a
+  // lone copy never updates itself; "Understood" downloads and is
+  // remembered, so the note never shows again on this browser.
+  var DLWARN_KEY = 'fns.dlwarned';
+  function singleDownloadUrl(p) {
+    if (!window.FNS_SITE || served || !p || isPlus(p) || p.preview) return '';
+    var u = (p.artifact && p.artifact.url) || '';
+    return /^https:\/\//.test(u) ? u : '';
+  }
+  function startDownload(url) {
+    var a = document.createElement('a');
+    a.href = url;
+    a.setAttribute('download', '');
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+  function downloadTool(p) {
+    var url = singleDownloadUrl(p);
+    if (!url) return;
+    if (stored(DLWARN_KEY, null) === '1') { startDownload(url); return; }
+    var d = document.getElementById('dlwarn');
+    var boot = document.getElementById('dlwarnboot');
+    var rail = (M.rails || {})['FNSTools.tox'];
+    if (rail && rail.url) { boot.href = rail.url; boot.hidden = false; }
+    else boot.removeAttribute('href');
+    document.getElementById('dlwarnok').onclick = function () {
+      try { localStorage.setItem(DLWARN_KEY, '1'); } catch (e) {}
+      d.close();
+      startDownload(url);
+    };
+    document.getElementById('dlwarncancel').onclick = function () { d.close(); };
+    try { d.showModal(); } catch (e) { d.setAttribute('open', ''); }
+  }
+
   function card(p, hit) {
     var on = picked.has(p.name);
     var el = document.createElement('label');
@@ -2448,10 +2514,27 @@ function fnsBoot() {
       }
     });
     if (chips.children.length) body.appendChild(chips);
-    if (pb) {
+    var db = null;
+    if (singleDownloadUrl(p)) {
+      db = document.createElement('button');
+      db.type = 'button';
+      db.className = 'chip placebtn dlbtn';
+      db.innerHTML = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">'
+        + '<path d="M8 2.5v7.5M4.75 6.75 8 10l3.25-3.25M3 13.25h10" fill="none" stroke="currentColor"'
+        + ' stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      db.setAttribute('aria-label', 'Download ' + titleOf(p) + ' as a single .tox');
+      db.setAttribute('data-tip','Just this tool, as a single .tox. It works on its own but never updates itself; an install keeps it current.');
+      // the card is a <label>: without both, the press would also tick it
+      db.addEventListener('click', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        downloadTool(p);
+      });
+    }
+    if (pb || db) {
       var foot = document.createElement('div');
       foot.className = 'card-foot';
-      foot.appendChild(pb);
+      if (db) foot.appendChild(db);
+      if (pb) foot.appendChild(pb);
       body.appendChild(foot);
       body.classList.add('has-foot');
     }
@@ -3195,7 +3278,7 @@ function fnsBoot() {
     var counts = document.getElementById('welcomecounts');
     var authEl = document.getElementById('welcomeauth');
     if (!counts || !authEl) return;
-    refreshAccountOnce();
+    refreshAccount();
     var plus = tools.filter(isPlus);
     var priced = tools.filter(function (p) { return !isPlus(p) && pricingOf(p); });
     var free = tools.length - plus.length - priced.length;
@@ -3263,22 +3346,40 @@ function fnsBoot() {
       authEl.appendChild(docsLink(FNS_DOCS + '/patreon/', 'How unlocking works ↗', ''));
     }
   }
-  // The account the page loaded with can be stale: a recheck elsewhere can
-  // change it after this page was served (field report 2026-09-16, a Mac
-  // planned a Patreon tool from an old sign-in record). Ask once per
-  // session when the welcome opens, and reload if it moved, which is the
-  // same honest refresh a sign-in ends in.
-  function refreshAccountOnce() {
-    if (!served || !hasAuthRail || sessionFlag('fns.acctsync')) return;
-    sessionFlag('fns.acctsync', true);
+  // The account the page loaded with can be stale: a recheck, a sign-in or
+  // a lost session elsewhere can change it after this page was served
+  // (field report 2026-09-16, a Mac planned a Patreon tool from an old
+  // sign-in record). Ask whenever the welcome opens or the page comes
+  // back into view, at most every few seconds, and reload if the account
+  // moved, which is the same honest refresh a sign-in ends in. The whole
+  // account counts, not only its products: a lost session signed in again
+  // on the same tier changes no products, and comparing products alone
+  // left the page showing "signed out" until it was reloaded by hand
+  // (owner, 2026-10-12). Once per session missed any sign-in made outside
+  // the page after the first look.
+  var acctAskedAt = 0;
+  // Products and the connection only: the served account fills a default
+  // label ('supporter') that /auth/status leaves empty, so comparing labels
+  // reloaded the page on every look.
+  function acctKey(a) {
+    return JSON.stringify((a && a.products) || null)
+      + '|' + String(!(a && a.connected === false));
+  }
+  function refreshAccount() {
+    if (!served || !hasAuthRail) return;
+    var nowMs = Date.now();
+    if (nowMs - acctAskedAt < 5000) return;
+    acctAskedAt = nowMs;
     fetch('/auth/status').then(function (r) { return r.json(); })
       .then(function (st) {
-        var now = JSON.stringify(st.products || null);
-        var was = JSON.stringify((account && account.products) || null);
-        if (now !== was) location.reload();
+        if (acctKey(st) !== acctKey(account)) location.reload();
       })
       .catch(function () { /* no server answer: keep what the page has */ });
   }
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) refreshAccount();
+  });
+  window.addEventListener('focus', refreshAccount);
 
   function selection() {
     var chosen = Array.from(picked).sort();

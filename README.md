@@ -18,7 +18,7 @@ Most tools are free and MIT licensed, and their source is in this repository. So
 
 ## Some of the tools
 
-A few of the free ones, to give you the idea:
+As of v3.2.67 there are **[47 free tools](https://functionstore.tools/get/#free)** and **[24 that unlock with Patreon](https://functionstore.tools/get/#patreon)**; each link opens the picker filtered to that list. A few of the free ones, to give you the idea:
 
 - **[CommandPalette](https://functionstore.tools/docs/fns-commandpalette/)**: every command your tools declare, plus TouchDesigner's own palette components, in one ranked list on a hotkey.
 - **[SearchFix](https://functionstore.tools/docs/fns-searchfix/)**: the network editor's find bar finds any part of a name, in any case, with wildcards, optionally fuzzy and inside child networks.

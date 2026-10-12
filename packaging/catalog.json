@@ -614,6 +614,10 @@
     "scenes"
    ]
   },
+  "FNS_OverlayRegistry": {
+   "category": "Network",
+   "description": "One overlay over the network editor you are working in, composited from every tool that draws there: each tool hands over its own image, and this registry fits it over your view, stacks it with the rest and shows it above the nodes, without touching your network's display flags or annotations."
+  },
   "FNS_PaletteRegistry": {
    "category": "Core",
    "description": "Contribute tabs to TouchDesigner's Palette Browser: a tool publishes a native panel COMP and it appears beside the stock Palette tab, sized to the slot and notified on every tab change."
@@ -727,6 +731,16 @@
   "FNS_SearchPalette": {
    "category": "Interface",
    "description": "Search field for TouchDesigner's palette browser, installed into the palette on startup. Based on Yea Chen's TD-SearchPalette.",
+   "third_party": [
+    {
+     "name": "TD-SearchPalette by Yea Chen",
+     "url": "https://github.com/yeataro/TD-SearchPalette",
+     "license": "MIT",
+     "files": [
+      "packaging/licenses/TD-SearchPalette.txt"
+     ]
+    }
+   ],
    "recommended": true,
    "fits": [
     "speed",
@@ -850,11 +864,7 @@
   },
   "QuickMarks": {
    "category": "Network",
-   "description": "Bookmark network locations and jump back to them. Bookmarks stay project-local by design.",
-   "author": {
-    "name": "Alex Guevara",
-    "url": "https://alex-guevara.com"
-   },
+   "description": "Bookmark network locations and jump back to them with Ctrl+number. Your marks show on the network editor: a list in a corner you can click, and a pin at each marked spot. Bookmarks stay project-local by design. Based on Alex Guevara's QuickMarks.",
    "fits": [
     "network",
     "speed"
@@ -863,15 +873,22 @@
   },
   "CookBar": {
    "category": "Network",
-   "description": "Draws a bar above every operator in the network you are viewing: its cook time on top, its GPU memory below, so the expensive parts of a network stand out at a glance. Its toolbar button switches it on; right-click the button for a global Hog CHOP to stress-test against.",
-   "author": {
-    "name": "Anton Heestand",
-    "url": "https://github.com/heestand-xyz/cook_bar"
-   },
+   "description": "Draws a bar above every operator in the network you are viewing: its cook time on top, its GPU memory below, so the expensive parts of a network stand out at a glance, with the numbers beside them if you like. A Top List in a corner names the heaviest operators and takes you to one with a click. Its toolbar button switches it on; Ctrl+right-click the button for a global Hog CHOP to stress-test against. Based on Anton Heestand's Cook Bar.",
    "fits": [
     "network",
     "dev"
    ]
+  },
+  "FNS_POPOverlay": {
+   "category": "Network",
+   "description": "Shows each POP's attributes over the network editor: on every POP, the one under the mouse, the selected ones, or both, with point counts and each attribute's type and size. Monitor adds the first points' values for the POP you point at or select. Its toolbar button and Alt+Shift+O switch it on.",
+   "fits": [
+    "visual",
+    "art",
+    "dev"
+   ],
+   "access": "8323905",
+   "preview": true
   },
   "FNS_OpSequencer": {
    "category": "Time & sequencing",
@@ -900,6 +917,20 @@
     "time"
    ],
    "access": "8323905",
+   "preview": true
+  },
+  "FNS_GeoPilot": {
+   "category": "Control & mapping",
+   "homepage": "https://seq.functionstore.tools",
+   "description": "A Geometry COMP that moves itself: map a game controller, the keyboard or any CHOP and it flies, walks or drives, from a stunt plane to a person on foot, with ground contact, jumping and a preset sequencer for its poses. Put a CamSequencer on it for the head and the lens.",
+   "placement": "none",
+   "fits": [
+    "live",
+    "show",
+    "visual",
+    "art"
+   ],
+   "access": "8291595",
    "preview": true
   },
   "FNS_MixSequencer": {
@@ -988,7 +1019,18 @@
   "FNS_OpFamily": {
    "category": "Core",
    "description": "The FNS tab in the OP Create dialog: an operator family whose members are FNS tools placed from the store as one node each, with stubs for projects that travel and in-place updates that keep retained parameters and state. Built with TDFam.",
-   "companion": "family"
+   "companion": "family",
+   "third_party": [
+    {
+     "name": "TDFam",
+     "url": "https://github.com/dotsimulate/TDFam",
+     "license": "Apache 2.0",
+     "files": [
+      "packaging/licenses/TDFam-NOTICE.txt",
+      "packaging/licenses/TDFam-LICENSE.txt"
+     ]
+    }
+   ]
   },
   "FNS_RandomCHOP": {
    "category": "CHOPs & sensing",
@@ -1210,7 +1252,7 @@
   },
   "ParticlesGpuUltimate": {
    "category": "3D and Particles",
-   "description": "A GPU particle system driven by images: a thresholded source emits particles, look, life, turbulence, wind and force fields shape them, a fluid simulation can carry them, with raw colour, position and optical-flow inputs and one rendered output.",
+   "description": "A GPU particle system driven by images: a thresholded source emits particles, and look, life, turbulence, wind and force fields shape them, each optionally read from its own image, with a feedback pass for trails and one rendered output.",
    "placement": "none",
    "fits": [
     "art",

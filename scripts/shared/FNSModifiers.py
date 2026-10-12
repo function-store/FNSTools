@@ -130,6 +130,61 @@ def heldOr(name, fallback):
 	return bool(fallback) if value is None else value
 
 
+# Mouse buttons. TD has no "is a button down right now" either: panel
+# values (lselect...) only count presses that START on that panel, so a
+# drag that began elsewhere -- a parameter dragged in from the parameter
+# dialog -- shows as inside=1 with every select at 0 (measured 2026-10-07,
+# TD 2025.33070, and dragrollover never fired for a legacy-drop panel).
+_VK_BUTTON = {'left': 0x01, 'right': 0x02, 'middle': 0x04}
+_CG_BUTTON = {'left': 0, 'right': 1, 'middle': 2}
+
+_mac_buttons = None      # cached CGEventSourceButtonState, or False once failed
+
+
+def _buttonWindows(name):
+	import ctypes
+	code = _VK_BUTTON.get(name)
+	if code is None:
+		return None
+	# physical buttons: a left-handed swap is not applied here
+	return bool(ctypes.windll.user32.GetAsyncKeyState(code) & 0x8000)
+
+
+def _buttonMac(name):
+	"""macOS via CGEventSourceButtonState. UNVERIFIED -- see module docstring."""
+	global _mac_buttons
+	button = _CG_BUTTON.get(name)
+	if button is None or _mac_buttons is False:
+		return None
+	if _mac_buttons is None:
+		import ctypes, ctypes.util
+		path = ctypes.util.find_library('ApplicationServices')
+		if not path:
+			_mac_buttons = False
+			return None
+		fn = ctypes.cdll.LoadLibrary(path).CGEventSourceButtonState
+		fn.restype = ctypes.c_bool
+		fn.argtypes = [ctypes.c_uint32, ctypes.c_uint32]
+		_mac_buttons = fn
+	return bool(_mac_buttons(1, button))
+
+
+def buttonHeld(name='left'):
+	"""True / False / None for a mouse button ('left', 'right', 'middle'),
+	asked of the OS right now. None means CANNOT TELL. Never raises."""
+	key = str(name or '').strip().lower()
+	if key not in _VK_BUTTON:
+		return None
+	try:
+		if sys.platform == 'win32':
+			return _buttonWindows(key)
+		if sys.platform == 'darwin':
+			return _buttonMac(key)
+	except Exception:
+		return None
+	return None
+
+
 def state():
 	"""All four modifiers at once, for diagnostics. None where unknown."""
 	return {n: held(n) for n in _NAMES}

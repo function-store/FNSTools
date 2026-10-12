@@ -55,8 +55,8 @@ stamped while the hub is open appears without any rescan (verified).
 | `Tab Parameters` = a page scope (`*` = all) | `params` | a Parameter COMP on the tool, built-in pages off |
 
 `Tab Parameters` wins over `Tab Content`. `Tab Label` defaults to the canonical
-name; `Tab Order` defaults to 50 (the configurators sit at 10/20/30, the
-console at 90); `Shown in Hub` (`Displayed`) is what the hub's close button
+name; `Tab Order` defaults to 50 (the configurators sit at 10/20/30/40, the
+Overlay tab at 50, the console at 90); `Shown in Hub` (`Displayed`) is what the hub's close button
 writes back to, so a hidden tab stays hidden across projects through the
 tool's Registry page.
 

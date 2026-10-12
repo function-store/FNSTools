@@ -1435,8 +1435,19 @@ class TimelineRegistryExt(RegistryBase):
 		zone = str(info.get('zone') or '')
 		return zone if zone in self.ZONES else None
 
+	# The master was copied from FNS_ToolbarRegistry, whose Menuorder reads
+	# "Toolbar Order"; cloning never carries a host's own pars, so every host
+	# heals its label here (the tool's Registry page follows the host label).
+	ORDER_LABEL = 'Timeline Order'
+
+	def _healOrderLabel(self):
+		p = self.ownerComp.par['Menuorder']
+		if p is not None and p.label != self.ORDER_LABEL:
+			p.label = self.ORDER_LABEL
+
 	def _applyHostRegistration(self, force=False):
 		self._syncZoneMenu()
+		self._healOrderLabel()
 		if self._is_sys_global():
 			self._setRegStatus('Idle (global)')
 			return

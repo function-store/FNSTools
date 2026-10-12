@@ -3,26 +3,35 @@
 # par/table edits only). args[0] = resolved save path.
 exec(open('packaging/pre_release_common.py').read())
 
-# Cook Bar ships switched off, holding nothing from the network it last drew
-# in. Keys are stored as None rather than unstored: its scripts fetch them
-# with no default, and fetch() raises on a missing key.
+# Cook Bar ships switched off. It draws as a layer of FNS_OverlayRegistry
+# (docs/NetworkOverlayRegistry.md), so it holds no state about any network:
+# what the earlier backdrop method stored is dropped here too.
 _c0.par.Active.val = False
 _c0.par.Active.enable = True
 _c0.comment = ''
-for _k in ('targetCOMP', 'winWidth', 'winHeight'):
-    _c0.store(_k, None)
-# The view geometry stays NUMERIC: glsl_cook_bar's resolution and uniforms
-# read it by expression, and float(None) is an error the moment it cooks.
-for _k, _v in (('netX', 0.0), ('netY', 0.0), ('netZoom', 1.0),
-               ('netWidth', 640.0), ('netHeight', 360.0), ('netRatio', 1.0)):
-    _c0.store(_k, _v)
+for _k in ('targetCOMP', 'winWidth', 'winHeight', 'netX', 'netY', 'netZoom',
+           'netWidth', 'netHeight', 'netRatio', 'paneId', 'init', 'putBackForSave',
+           'hiddenDisplay', 'dimmedAnnotations'):
+    if _k in _c0.storage:
+        _c0.unstore(_k)
 _c0.store('active', False)
-_c0.store('hiddenDisplay', [])
-_c0.store('dimmedAnnotations', [])
 _p = _c0.par['Annotationalpha']
 if _p is not None:
     _p.val = 0.2
 _p = _c0.par['Maxops']
+if _p is not None:
+    _p.val = 100
+# the Top List margin and the Values option ship at their defaults
+_p = _c0.par['Topmargin']
+if _p is not None:
+    _p.val = 12
+_p = _c0.par['Showvalues']
+if _p is not None:
+    _p.val = False
+_p = _c0.par['Topcollapsed']
+if _p is not None:
+    _p.val = False
+_p = _c0.par['Toporder']
 if _p is not None:
     _p.val = 100
 
@@ -32,16 +41,24 @@ _hog = _c0.op('hog_global')
 if _hog is not None:
     _hog.par.active.val = False
 
-# The background TOP is renamed while the bar is on; ship its idle name.
-_bg = _c0.op('null_cook_bar_bg')
-if _bg is not None:
-    _bg.name = 'null_cook_bar_bg__deactivated'
+# The Values labels of the last frame drawn.
+_t = _c0.op('table_values')
+if _t is not None:
+    _t.text = 'x\ty\ttext\tfontalpha'
 
-# Its own background ops, if a pane was inside the tool while it was on.
-for _n in ('select_cook_bar_bg', 'text_cook_bar_suicide'):
-    _o = _c0.op(_n)
-    if _o is not None:
-        _o.destroy()
+# The Top List as last drawn: each row's label and the operator it frames,
+# and the network they were ranked in, are this checkout's operators
+# (v3.2.69's first staging carried them, 2026-10-12). Exact keys: unstore()
+# globs.
+_w = _c0.op('widget_top')
+if _w is not None:
+    if 'network' in _w.storage:
+        _w.unstore('network')
+    for _row in _w.findChildren(name='row*', maxDepth=1):
+        if _row.par['text'] is not None:
+            _row.par.text.val = ''
+        if 'opname' in _row.storage:
+            _row.unstore('opname')
 
 # The last frame's measurements of the network it was drawing.
 _t = _c0.op('table_op_info')

@@ -1,5 +1,141 @@
 # FNS tools changelog
 
+## v3.2.69 -- 2026-10-12
+
+- FNSTools.tox and FNS_Installer.tox 3.2.47 -> 3.2.48 -- the install picker notices a sign-in made elsewhere, and a session that came back, without reopening; the bootstrap carries updater 3.2.26
+- CookBar 1.0.1 -> 1.0.2 -- with its bars hidden from the network overlay and its Top List off, nothing of it runs; with only the Top List on, it skips the bars. The Top List no longer arrives showing operator names from the machine it was built on.
+- FNS_ColorUI 3.2.7 -> 3.2.8 -- ships with no saved color overrides: a release never carries the colors of the machine it was built on, only TD's defaults until yours load.
+- FNS_Console 3.2.16 -> 3.2.17 -- the Updates tab labels a Patreon update your account does not include as "needs your account".
+- FNS_OverlayRegistry 0.1.0 -> 0.1.1 -- uses about half the graphics memory while drawing (18 MB less at a typical network editor size): the transparent layer that fills the composite's second slot is now tiny. Panning and zooming the network editor no longer slows the frame: the overlay stays put while it still covers the view, and a widget waits for a zoom to settle before it moves back to its corner.
+- FNS_Updater 3.2.25 -> 3.2.26 -- a newer FNS family operator or op menu alternative now shows on the Updates tab when your store holds an older copy, and Update downloads the new .tox into the store (operators you already placed keep their version). A newer Patreon tool your account does not hold is listed with the reason and no longer counts as an update that never clears. The FNS tab no longer shows a version number its file does not have yet.
+- QuickMarks 3.2.6 -> 3.2.7 -- its overlay starts off: a fresh install draws nothing on the network editor until you switch on Mark List or Pins, or press Alt+Shift+M (v3.2.68 shipped it on). QuickMarks itself stays on, so the keys work from the start. While it is on, it does no per-frame work unless its list or its outlines are actually showing. The tool no longer carries the old marks of the machine it was built on.
+
+## v3.2.68 -- 2026-10-12
+
+- FNSTools.tox and FNS_Installer.tox 3.2.46 -> 3.2.47 -- the install picker refuses to add a second copy of a tool the project already has, and the bootstrap carries its MIT licence note and the notices for people and agents; the bootstrap carries updater 3.2.25
+- ChopBank 1.0.1 -> 1.0.2
+- ChopProcess 1.0.1 -> 1.0.2
+- CircularDistortionTOP 1.0.1 -> 1.0.2
+- ColorGen 1.0.0 -> 1.0.1
+- ColorGenPro 1.0.0 -> 1.0.1
+- ComplexMix 1.0.0 -> 1.0.1
+- ComplexOp 1.0.0 -> 1.0.1
+- ConstantCHOP 1.0.1 -> 1.0.2
+- CookBar 1.0.0 -> 1.0.1 -- its Max Ops and Annotation Alpha settings now survive updates, saved with the rest of your FNSTools settings. Active is deliberately not kept. the bars now draw over the network, above the nodes, through the new overlay registry. Your network's display flags, annotations and operators are left alone while they show; earlier versions switched the display flags off and faded the annotations, and anything left from that is cleaned up on start. New Top List: a small list in a corner of the network editor names the heaviest operators in the network you are viewing, by cook time (only what cooked in the last second) or GPU memory, switched with tabs along its top; click a row to select that operator and zoom to it. Top List, Rank By, List Corner, List Margin and List Rows set it up, and the arrow beside the tabs folds it. Its toolbar button reacts to every click (it could need several), and its toolbar settings are on Cook Bar's own Registry page. In a network with many operators the bars no longer pull the frame rate down: /FNSTools went from 12 fps to a steady 60. Reading an operator's cook time is slow while its network is open in an editor, and Cook Bar read it for every operator every frame; it now reads only operators in view, and only after they cook. New Values option: each bar's number written next to it, cook time above the operator and GPU memory below. New List Order sets the Top List's place among other tools' lists in its corner. Hiding Cook Bar's bars from the Overlay tab in FNS_Hub leaves Cook Bar running. Its toolbar icon now lights while Cook Bar is on; it showed the opposite.
+- EaseInterpolator 1.0.1 -> 1.0.2
+- ExpressionPOP 1.0.2 -> 1.0.3
+- FNS_AltSelect 3.2.5 -> 3.2.6
+- FNS_AutoCombine 3.2.6 -> 3.2.7
+- FNS_AutoRes 3.2.6 -> 3.2.7
+- FNS_Autosave 3.2.5 -> 3.2.6
+- FNS_BorderlessTD 3.2.7 -> 3.2.8 -- GridShow's toolbar order and display settings are on the tool's Registry page again, and moving GridShow on the toolbar no longer breaks them.
+- FNS_ColorUI 3.2.6 -> 3.2.7
+- FNS_CommandKit 3.2.3 -> 3.2.4
+- FNS_CommandPalette 3.2.12 -> 3.2.13
+- FNS_CommandRegistry 3.2.6 -> 3.2.7
+- FNS_ConfigHost 3.2.5 -> 3.2.6
+- FNS_ConfigRegistry 3.2.7 -> 3.2.8 -- where you put a tool's toolbar, navbar or menu button now survives a restart for the tools whose button sits inside them (Mute, Volume, CookBar, GridShow, MIDILearn and nine more); their settings never held it before. Settings that name this project's operators (Output's perform window, TimelineTools' animation, midiMapper's mapping table, ...) no longer travel into your other projects, and an exclusion now also stops an older settings file from bringing the value back. Hotkeys are saved by the Hotkey Manager only, no longer twice.
+- FNS_Console 3.2.15 -> 3.2.16 -- the Updates tab lists standalone copies under Needs attention, with a Take over button that shows what will happen first.
+- FNS_CustomParTools 3.2.9 -> 3.2.10 -- the toolbar button's tooltip describes what middle-click does now (collapse the selection with QuickCollapse) and mentions Alt+right-click for the documentation. Its four stock-TD hotkeys share one Keyboard In, and its navbar and toolbar parts read the modifier keys from one place, so each pane bar no longer runs its own keyboard listeners.
+- FNS_ExprHotStrings 3.2.6 -> 3.2.7
+- FNS_GlobalOutSelect 3.2.4 -> 3.2.5
+- FNS_GlobalVolControl 3.2.6 -> 3.2.7 -- the volume slider has a tooltip. The Mute icon now lights while the sound is muted; it showed the opposite.
+- FNS_HotkeyManager 3.2.6 -> 3.2.7 -- a licence key is never mistaken for a hotkey.
+- FNS_Hub 3.2.10 -> 3.2.11 -- hover over a tab to see what the tool does, and right-click it for its documentation or its parameters. The FNS button's right-click menu now also opens the documentation, the website, and Toolbar tool docs, a list of every toolbar tool that opens its docs page. a toolbar, navbar or main-menu group now forms around whichever of its tools are installed. It used to need the specific first and last tool it was built around, and vanished without them. New Overlay tab: every layer and corner widget that tools draw on the network editor, to reorder, hide (without switching the tool off), and move a widget to another corner or margin. Every change lands on the tool's own parameters.
+- FNS_HubRegistry 3.2.4 -> 3.2.5
+- FNS_HydroHomie 3.2.6 -> 3.2.7 -- with On Start Active on, the reminder now comes up when the project opens. Its extension only started once something touched it, so the startup check never ran.
+- FNS_MainMenuRegistry 3.2.4 -> 3.2.5
+- FNS_Misc 3.2.7 -> 3.2.8
+- FNS_NavbarRegistry 3.2.4 -> 3.2.5
+- FNS_OpFamily 0.1.7 -> 0.1.8 -- carries the TDFam NOTICE and the Apache 2.0 licence it is built with. turning off "Install On Start" for the FNS operator family now sticks across your projects; nothing else of the family's setup travels.
+- FNS_OpMenuMods 3.2.7 -> 3.2.8
+- FNS_OpMenuRegistry 3.2.5 -> 3.2.6 -- its Version reads the package version again (it had stuck at 1.1.1), so an update replaces the copy already running instead of tying with it.
+- FNS_OpTemplates 3.2.8 -> 3.2.9
+- FNS_OpToClipboard 3.2.6 -> 3.2.7
+- FNS_OpenExt 3.2.5 -> 3.2.6
+- FNS_Output 3.2.6 -> 3.2.7
+- FNS_OverlayRegistry 0.1.0 -- new. One overlay over the network editor you work in, composited from every tool that draws there and shown above the nodes; it follows your pane, leaves before every save, and costs nothing while no tool draws. Tools hand it one image and get back where to draw it. Tools can also pin a small clickable panel to a corner of the network editor, at a margin each tool sets; panels in one corner stack instead of overlapping. A layer now has two switches: Displayed is yours and only hides the layer, and the tool's own on/off decides whether it draws at all, so hiding a layer never switches its tool off. Corner widgets stay registered while hidden, and each names the parameters behind it, so the new Overlay tab in FNS_Hub can manage them.
+- FNS_PaletteRegistry 3.2.4 -> 3.2.5
+- FNS_PaneSearchRegistry 0.1.2 -> 0.1.3 -- its order parameter now reads "Find Bar Order"; it said "Toolbar Order", left over from the registry it was copied from.
+- FNS_PaneTypeRegistry 3.2.5 -> 3.2.6
+- FNS_ParOPDrop 3.2.7 -> 3.2.8
+- FNS_ParRandomizer 3.2.6 -> 3.2.7
+- FNS_ParentHierarchy 3.2.4 -> 3.2.5 -- its navbar position is remembered across restarts.
+- FNS_QuickCollapse 3.2.5 -> 3.2.6
+- FNS_QuickPane 3.2.5 -> 3.2.6
+- FNS_QuickTime 3.2.6 -> 3.2.7
+- FNS_ResetPLS 3.2.7 -> 3.2.8
+- FNS_SearchFix 0.2.4 -> 0.2.5 -- its settings (Active, Legacy, Fuzzy, Depth, Max Results, the find bar toggle and its shortcut) now survive updates. New quick-launch commands: Toggle SearchFix, Toggle fuzzy find, Toggle legacy find (each shows whether it is on) and Repatch find bars.
+- FNS_SearchPalette 3.2.6 -> 3.2.7 -- carries the MIT notice of Yea Chen's TD-SearchPalette, which it is based on.
+- FNS_SetSmoothness 3.2.6 -> 3.2.7
+- FNS_SwapOps 3.2.6 -> 3.2.7
+- FNS_SwitchOPs 3.2.5 -> 3.2.6
+- FNS_SwitchTools 1.1.5 -> 1.1.6
+- FNS_TimelineRegistry 3.2.4 -> 3.2.5 -- its order parameter now reads "Timeline Order"; it said "Toolbar Order", left over from the registry it was copied from.
+- FNS_ToolbarRegistry 3.2.5 -> 3.2.6 -- Alt+right-click (Option+right-click on macOS) any toolbar button to open that tool's documentation; the click still reaches the tool as before. Documentation links now open the page on functionstore.tools; most still pointed at the old GitHub wiki. A fresh install no longer scrambles the toolbar: tools that register one by one at startup used to land by a different numbering than the rest of the bar, which put TouchDesigner's own buttons among the FNS tools and left some tools out of order. The bar now re-sorts itself once after each burst of registrations.
+- FNS_Updater 3.2.24 -> 3.2.25 -- finds standalone copies of global tools anywhere in the project, a single .tox dropped in beside the toolkit, and takes one over on request: it moves into the toolkit with its settings, or is deleted when the toolkit has its own. A renamed tool in the toolkit is still recognised and updated, and gets its name back.
+- FNS_VSCodeTools 3.2.6 -> 3.2.7 -- Alt+right-click on its toolbar button opens its page on functionstore.tools, not the old wiki. no longer ships pointing at the toolkit author's own workspace file; it starts empty and names the workspace after your project.
+- FNS_iopBrowser 3.2.4 -> 3.2.5 -- its navbar position is remembered across restarts.
+- FeedbackDisplace 1.0.3 -> 1.0.4
+- FloatDataRecorder 1.0.1 -> 1.0.2
+- InstanceTrailer 1.0.0 -> 1.0.1
+- KinectSinglePlayer 1.0.0 -> 1.0.1
+- LayerSep3D 1.0.0 -> 1.0.1
+- LinkOPs 1.0.0 -> 1.0.1
+- MaskDraw 1.0.1 -> 1.0.2
+- MoveDetectDir 1.0.1 -> 1.0.2
+- OpenOp 1.0.0 -> 1.0.1
+- Particles2D_POP 1.0.1 -> 1.0.2
+- ParticlesGpuUltimate 1.0.1 -> 2.0.0 -- version 2. The fluid simulation is gone; Life, Turbulence and Wind can each read their own image (new in_life_source, in_turb_source and in_wind_source inputs), a Post page adds a feedback pass for trails with Dry / Wet, Forces come as radial, axial, vortex or spiral fields, and every parameter has a tooltip again. This is a breaking update for networks that use 1.x: the fluid input and the FLUID page are gone, and the inputs are now main, raw position, raw colour, optical flow, then the turbulence, wind and life sources (raw colour and raw position swapped places), so check what is wired in after updating.
+- PasteFromClipboard 3.2.6 -> 3.2.7
+- PrismTOP 1.0.2 -> 1.0.3
+- QuickMarks 3.2.5 -> 3.2.6 -- your marks now show on the network editor while QuickMarks is active. A mark list in a corner shows every mark by number and name with the one for the network you are in highlighted, and a click jumps there; outlines show the area each mark saved, labelled with its number and name. Right-click a mark in the list to rename it; a mark whose network is gone reads missing; the arrow on the title row folds the list. Mark List, List Corner, List Margin, Pins and Mark List Collapsed set them up. A fresh install no longer comes with the toolkit author's marks in it. New List Order sets the mark list's place among other tools' lists in its corner. Hiding the outlines from the Overlay tab in FNS_Hub leaves QuickMarks running. Alt+Shift+M, or Toggle QuickMarks overlay in quick-launch, hides or shows the list and the outlines together while your marks keep working (the Overlay Hotkey parameter). Changing the Shortcuts parameter now changes the keys; it had stopped reaching them.
+- RealRamp 1.0.1 -> 1.0.2
+- SeqMod 1.0.0 -> 1.0.1
+- SlideShow 1.0.2 -> 1.0.3
+- ThresholdColor 1.0.2 -> 1.0.3
+- TopToMidi 1.0.1 -> 1.0.2
+- midiMapper 3.2.6 -> 3.2.7 -- middle-clicking the MIDI Learn toolbar button resets all MIDI again (it raised an error), and Alt+right-click on it opens the docs without resetting anything.
+- oscMapper 3.2.4 -> 3.2.5
+
+The picker no longer announces a new tool you already have. A tool picked on the website and installed by the paste used to greet you again in TouchDesigner as "already picked"; the installer now records an installed tool as shown, and the console's new-tools count leaves installed tools out.
+
+
+
+
+
+
+
+
+Tools now carry their licence inside the file, as a note in their network, each from its next release on: the MIT licence in full for free tools, the Patreon licence for the rest, so a copy that travels on says what it is. The terms now say plainly that a Patreon tool may not be built into a tool, template or pack you hand on, and that handing a client a project that uses one, so they can run it, is fine.
+
+
+
+
+
+Global tools carry a small guard from their next release on: dropped into a project whose toolkit already has it, it releases its shortcut so the toolkit keeps working, and takes it back wherever no toolkit copy exists.
+
+The picker no longer installs a second copy of a tool that is already in the project as a single download: it says where the copy is and points at Take over in the console (arrives with the next installer rebuild). A copy with its <FNS:GLOBAL> tag removed is treated as your own and left alone. A new guide, Working with FNSTools in your project, says what an update replaces and how to keep your own version of a tool.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Group switches on the toolbar, navbar and main menu now show their state: a lighter background while the group is open, a darker one while it is collapsed.
+
+New installs get one deliberate toolbar layout: every FNS button inside an FNSTools group, sorted into Project, Control, Network and Parameters groups, with TouchDesigner's own buttons left as they are. Before, each tool shipped wherever it last sat in the author's own bar, two tools could share one slot, and the group disappeared when Perform or HydroHomie was not installed.
+Tools with a two-part parameter such as XY or RGB no longer raise a script error when it changes, from each tool's next release on.
+
 ## v3.2.67 -- 2026-10-07
 
 - CookBar 1.0.0 -- new tool, Anton Heestand's Cook Bar. A bar above every operator in the network you are viewing shows its cook time and GPU memory, in whichever network editor pane you are working in. FNSTools' copy stays out of your network while it is off, touches only the display flags of the network you are viewing, lowers its annotations' back colour so the bars show through, and puts both back when you leave. A toolbar button switches it on, in the slot the Hog button used to have; right-click opens its parameters like the other toolbar tools, Ctrl+right-click (or the Open Global Hog CHOP pulse) opens the Global Hog CHOP, and the button turns red while the Hog is on. Quick-launch commands: Toggle cook bar, Open Global Hog CHOP. Saving the project, or removing the tool, while the bars are on no longer leaves their changes in your network.
