@@ -10,6 +10,57 @@ features:
     anchor: drop-to-register
   - name: Contributing a tab
     anchor: contributing-a-tab
+feature_list:
+  - name: Open the hub
+    anchor: the-fns-button
+    does: Left-clicking the FNS button in the main-menu bar opens the hub on the tab you were last on; quick-launch offers Open FNS Hub too.
+  - name: FNS button menu
+    anchor: the-fns-button
+    does: 'Right-clicking the FNS button lists every tab, the console''s Settings and Install & remove pages, and Show entries that bring hidden tabs back.'
+  - name: Toolbar configurator
+    anchor: the-tabs
+    does: 'Reorders, groups, hides and shows the widgets on TouchDesigner''s bookmark bar and adds dividers between them; right-click a name for its docs.'
+  - name: Navbar configurator
+    anchor: the-tabs
+    does: 'Reorders pane-bar items, flips them between the left and right side, and shows, hides or groups them.'
+  - name: Main menu configurator
+    anchor: the-tabs
+    does: 'Arranges the main-menu bar including TouchDesigner''s own items, so your entries can sit between them; the TD button restores TD''s original order.'
+  - name: OP Create contributions
+    anchor: the-tabs
+    does: 'Reorders what tools add to the OP Create dialog (search words, row decorations, right-click items, filters) and switches any off without uninstalling its tool.'
+  - name: Network overlay layout
+    anchor: the-tabs
+    does: 'Reorders, shows and hides everything tools draw on the network editor, and moves each corner list to another corner with its own margin.'
+  - name: Console tab
+    anchor: the-tabs
+    does: 'Renders the toolkit''s web console (settings, install and remove, contributed tabs) inside the hub, running its browser only while the tab is shown.'
+  - name: Commands tab
+    anchor: the-tabs
+    does: 'Lists every command the command registry serves, hidden and built-in ones included, with tool and context, to star or hide; contributed by CommandPalette.'
+  - name: Tool tabs
+    anchor: the-tabs
+    does: 'Shows the larger UIs of installed tools, such as oscMapper, ExprHotStrings, GlobalOutSelect, SearchWords, midiMapper and OpColor, as hub tabs.'
+  - name: Arrange and hide tabs
+    anchor: the-tabs
+    does: 'Drag a tab onto another to reorder, right-click it for the owning tool''s parameters, and hide it with that tool''s Shown in Hub parameter.'
+  - name: Two tab bar styles
+    anchor: the-tabs
+    does: 'Tab Bar picks Rows, which wraps fixed-width tabs, or Strip, TouchDesigner''s single-row folder tabs with scroll arrows and a dropdown.'
+  - name: Roaming hub layout
+    anchor: the-tabs
+    does: 'Tab order, the active tab and the three configurators'' layouts roam with your settings through ConfigRegistry.'
+  - name: Drop to register
+    anchor: drop-to-register
+    does: 'Dropping a panel COMP on the FNS button or hub window offers Toolbar, Navbar or Main Menu and gives it a self-registering host, so it appears immediately.'
+  - name: Open a tab from Python
+    anchor: the-fns-button
+    does: '`op.FNS_HUBREGISTRY.Open(tab=''navbar'')` opens the hub on a tab by its canonical name, contributed tabs included.'
+    authors: true
+  - name: Contribute a tab
+    anchor: contributing-a-tab
+    does: 'A tool carrying a stamped FNS_HubRegistry host gets a tab showing itself, an inner panel, an operator through an OP Viewer, or a parameter page.'
+    authors: true
 ---
 
 Hub is the one place to manage the toolkit from inside TouchDesigner. It

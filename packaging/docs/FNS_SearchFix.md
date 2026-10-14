@@ -6,6 +6,34 @@ features:
     anchor: searching
   - name: The find bar
     anchor: the-find-bar
+feature_list:
+  - name: Match any part of a name
+    anchor: searching
+    does: Finds operators by any part of their name in any case; typed spaces become underscores and a split text needs every part to match.
+  - name: Wildcard patterns
+    anchor: searching
+    does: 'Patterns like `noise*`, `*out?` and `[ab]lur*` match whole names as in TouchDesigner''s pattern fields, and a leading `^` inverts the match.'
+  - name: Fuzzy matching
+    anchor: searching
+    does: 'When switched on, also finds word initials, a typo or two, or the letters in order, listed after every plain hit.'
+  - name: Best results first
+    anchor: searching
+    does: 'Exact names rank first, then names starting with the text, then word matches, then anywhere, with shallower operators before deeper ones.'
+  - name: Step through results
+    anchor: the-find-bar
+    does: 'The bar''s arrows step through results, the first is picked as you type, and with Home on the pane centres on the picked operator.'
+  - name: Deep search into child networks
+    anchor: the-find-bar
+    does: A per-pane Deep checkbox and depth field search networks inside the current one; picking a hit takes the pane into its network.
+  - name: Legacy search toggle
+    anchor: the-find-bar
+    does: A Legacy checkbox in the find bar brings back TouchDesigner's own search for every pane.
+  - name: Close the bar from inside it
+    anchor: the-find-bar
+    does: 'With Shortcut Closes Find Bar on, Ctrl+F also closes the find bar while you are typing in it.'
+  - name: Quick-launch commands
+    anchor: the-find-bar
+    does: 'Toggle SearchFix, Toggle fuzzy find and Toggle legacy find switch the parameters, and Repatch find bars reapplies the search to every bar.'
 ---
 
 ## Searching

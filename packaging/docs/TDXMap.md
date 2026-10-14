@@ -8,6 +8,18 @@ features:
     anchor: installing-from-the-toolkit
   - name: Updates and licensing
     anchor: updates-and-licensing
+feature_list:
+  - name: Drag-to-map MIDI controls
+    anchor: what-it-is
+    does: 'Drag a parameter onto a knob, fader or button in a web UI served from inside your project to map that MIDI control to it.'
+  - name: Banks per device
+    anchor: what-it-is
+    does: Switch banks independently on each MIDI device you map.
+  - name: Smart Learn
+    anchor: what-it-is
+    does: Smart Learn works out what the hardware sends.
+  - name: Button actions and 14-bit controls
+    does: 'Maps buttons to actions as well as continuous controls, and reads 14-bit controls.'
 ---
 
 ## What it is

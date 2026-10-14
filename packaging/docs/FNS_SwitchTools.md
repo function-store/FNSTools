@@ -6,6 +6,22 @@ features:
     anchor: what-it-is
   - name: Callbacks
     anchor: callbacks
+feature_list:
+  - name: Drive the switch index
+    anchor: what-it-is
+    does: 'Binds the target operator''s index to its own Index, driven by a slider, menu, CHOP or bound parameter, looping or clamping at the ends.'
+  - name: Cook only the live input
+    anchor: what-it-is
+    does: 'Every input the switch is not showing stops cooking and, optionally, unloads from the GPU, so only what is on screen costs.'
+  - name: Colour the live input
+    anchor: what-it-is
+    does: Colours the live input in the network editor.
+  - name: Reorder inputs in one click
+    anchor: what-it-is
+    does: 'Reorders, reverses, shuffles or aligns the operator''s inputs in one click.'
+  - name: Cooking and selection callbacks
+    anchor: callbacks
+    does: 'Create Callbacks makes a DAT with onCookingChange and onSelectionChange, reporting which inputs started or stopped cooking and which were selected.'
 ---
 
 ## What it is

@@ -6,6 +6,24 @@ features:
     anchor: toolbar-registry
   - name: For tool authors
     anchor: for-tool-authors
+feature_list:
+  - name: Central toolbar state
+    anchor: toolbar-registry
+    does: 'Holds which widgets are on the bar, their order and visibility, so installing or removing a tool never leaves a hole or dead button.'
+  - name: Mirror rail
+    anchor: toolbar-registry
+    does: 'Keeps TouchDesigner''s own bookmark bar in step with the registered set, so the bar reflects the registry with no button COMPs copied in.'
+  - name: Arrange the toolbar in Hub
+    anchor: toolbar-registry
+    does: 'The Toolbar tab of Hub reorders, groups, hides and shows widgets and adds dividers, with the layout following you across projects.'
+  - name: Register a tool on the bar
+    anchor: for-tool-authors
+    does: A tool ships a small host copy of the registry beside its widget and registers itself on load.
+    authors: true
+  - name: Drop a panel on the FNS button
+    anchor: for-tool-authors
+    does: 'Dropping any panel COMP on the FNS button stamps the host into it, the quickest way to put your own tool on the bar.'
+    authors: true
 ---
 
 ## Toolbar Registry

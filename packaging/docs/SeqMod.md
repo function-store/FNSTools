@@ -6,6 +6,17 @@ features:
     anchor: what-it-is
   - name: Callbacks
     anchor: callbacks
+feature_list:
+  - name: Follow a sequence's blocks
+    anchor: what-it-is
+    does: 'Point COMP at the target and set Seq Name, and SeqMod keeps the list of block parameters current as the sequence grows and shrinks.'
+  - name: Published block list
+    anchor: what-it-is
+    does: 'Publishes the block parameters as Par Names and as a table on out1, ready for a replicator, a UI builder or a script.'
+  - name: Add and remove callbacks
+    anchor: callbacks
+    does: Create Callbacks makes a DAT whose OnAddBlock and OnRemoveBlock hooks run once per block; errors are reported on SeqMod itself.
+    authors: true
 ---
 
 ## What it is

@@ -6,6 +6,19 @@ features:
     anchor: what-it-is
   - name: Outputs
     anchor: outputs
+feature_list:
+  - name: Bounds-based player selection
+    anchor: what-it-is
+    does: Watches a chosen joint of every tracked player and promotes one whose joint sits inside the box you define to active player.
+  - name: Stable player channels
+    anchor: what-it-is
+    does: 'The active player''s joints come out under a stable name, whichever of the six Kinect slots they occupy.'
+  - name: Automatic handover
+    anchor: what-it-is
+    does: 'When the active player walks out of the box, the next player in range takes over.'
+  - name: Active player flag
+    anchor: outputs
+    does: A separate CHOP output reports whether a player is active right now.
 ---
 
 ## What it is

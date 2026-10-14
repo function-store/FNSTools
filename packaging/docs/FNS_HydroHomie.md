@@ -4,6 +4,13 @@ summary: This toolbar icon reminds you to drink water every 45 minutes (can be c
 features:
   - name: HydroHomie
     anchor: hydrohomie
+feature_list:
+  - name: Drink water reminder
+    anchor: hydrohomie
+    does: 'Shows a small alert icon in the toolbar at each interval, 45 minutes by default; clicking it dismisses the reminder until the next one.'
+  - name: Enable and set the interval
+    anchor: hydrohomie
+    does: 'Right-click the icon to open its parameters, where you turn it on (it is off by default) and change the interval.'
 ---
 
 ## HydroHomie

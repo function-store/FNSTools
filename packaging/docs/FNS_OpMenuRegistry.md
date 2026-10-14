@@ -6,6 +6,36 @@ features:
     anchor: opmenu-registry
   - name: What tools contribute
     anchor: what-tools-contribute
+feature_list:
+  - name: Shared OP Create dialog surface
+    anchor: opmenu-registry
+    does: 'Arbitrates between tools that change the OP Create dialog, and the dialog goes back to stock when those tools are removed.'
+  - name: Operator alternatives
+    anchor: what-tools-contribute
+    does: 'Create a stock operator type with the shortcut held and installed alternatives are offered; one is placed with its wiring restored, several open a picker.'
+  - name: Alternatives from the store
+    anchor: what-tools-contribute
+    does: Alternatives from tools downloaded to your store but not in the project are offered below a divider and placed from disk; >> marks such types.
+  - name: Search word contributions
+    anchor: what-tools-contribute
+    does: 'Tools add extra words that match an operator type, so searching music finds Audio File In.'
+    authors: true
+  - name: Node-table row decorations
+    anchor: what-tools-contribute
+    does: 'Tools relabel rows in the node table, such as the >>> OpTemplates puts beside every type you have a template for.'
+    authors: true
+  - name: Right-click menu items
+    anchor: what-tools-contribute
+    does: 'Tools append entries after TouchDesigner''s own three in the dialog''s right-click menu, such as OpTemplates'' Edit Templates.'
+    authors: true
+  - name: Filter-chain nodes
+    anchor: what-tools-contribute
+    does: Tools splice Script DATs into the node table's filter chain to filter or rewrite the operator list itself.
+    authors: true
+  - name: Panel injection
+    anchor: what-tools-contribute
+    does: Tools wire Panel COMPs into the dialog at a named anchor.
+    authors: true
 ---
 
 ## OpMenu Registry

@@ -8,6 +8,36 @@ features:
     anchor: for-tool-authors
   - name: Several tabs from one tool
     anchor: several-tabs-from-one-tool
+feature_list:
+  - name: Tabs in the Palette Browser
+    anchor: palette-registry
+    does: 'Adds a tab strip above the Palette Browser''s list, with TD''s own Palette tab first and one tab per contributed panel.'
+  - name: Stock palette left intact
+    anchor: palette-registry
+    does: With nothing contributed the palette dialog stays as TouchDesigner ships it; the strip appears with the first registration and goes with the last.
+  - name: Back to the Palette tab
+    anchor: hotkey
+    does: SearchPalette's Ctrl+Shift+F switches to the stock Palette tab before focusing its search field; other tools can call ShowTab('palette') the same way.
+  - name: Register a tab from a host
+    anchor: for-tool-authors
+    does: 'A tool ships a small host copy whose Registration page sets the tab''s tool, canonical name, panel, label, order and visibility.'
+    authors: true
+  - name: Tab API from Python
+    anchor: for-tool-authors
+    does: 'RegisterTab(), Tabs(), SetTabDisplayed(), ShowTab(), CurrentTab() and UnregisterTab() on op.FNS_PALETTEREGISTRY manage tabs from code.'
+    authors: true
+  - name: Tab change callback
+    anchor: for-tool-authors
+    does: 'An optional Callbacks DAT gets onPaletteTab(canonical, previous) on every tab change.'
+    authors: true
+  - name: Panels fitted to the slot
+    anchor: for-tool-authors
+    does: 'A registered panel is resized to the slot, restored when the tab goes away, and keeps its state across tab switches, Web Render included.'
+    authors: true
+  - name: Several tabs from one tool
+    anchor: several-tabs-from-one-tool
+    does: 'The Tab sequence adds one tab per block, and a block without its own panel reuses the first tab''s panel.'
+    authors: true
 ---
 
 ## Palette Registry

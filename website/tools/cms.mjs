@@ -691,8 +691,9 @@ function runBuild() {
   return new Promise((resolve) => {
     const child = spawn(process.execPath, [path.join(HERE, 'build-site.mjs')], {
       cwd: WEB,
-      // the local preview shows community drafts, marked; the public build never does
-      env: { ...process.env, FNS_SHOW_DRAFTS: '1' },
+      // the local preview shows community drafts and, on /features/, preview
+      // packages, both marked; the public build never does
+      env: { ...process.env, FNS_SHOW_DRAFTS: '1', FNS_SHOW_PREVIEWS: '1' },
     });
     let out = '';
     child.stdout.on('data', (d) => { out += d; });

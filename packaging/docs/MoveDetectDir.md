@@ -6,6 +6,16 @@ features:
     anchor: what-it-is
   - name: Inputs and output
     anchor: inputs-and-output
+feature_list:
+  - name: Optical flow direction
+    anchor: what-it-is
+    does: 'Runs optical flow on the input image and measures how much of the flow points left, right, down and up.'
+  - name: Direction channels
+    anchor: inputs-and-output
+    does: 'Outputs LR and DU channels that swing toward the direction of movement once it passes a threshold, for swipe and gesture triggers.'
+  - name: Place from the FNS tab
+    anchor: what-it-is
+    does: Placed as one node from the FNS tab of the OP Create dialog.
 ---
 
 ## What it is

@@ -6,6 +6,25 @@ features:
     anchor: what-it-is
   - name: Inputs and outputs
     anchor: inputs-and-outputs
+feature_list:
+  - name: Paint and erase on the image
+    anchor: what-it-is
+    does: 'Open the panel and paint on the input image with the left button, erase with the right; the panel follows the input''s aspect.'
+  - name: Mask and masked image outputs
+    anchor: inputs-and-outputs
+    does: 'Outputs the drawn mask and the input inside the painted area, to key a composite, drive a Level or mark a projection surface.'
+  - name: Reset and button bar gestures
+    anchor: what-it-is
+    does: Middle-click resets the mask; Ctrl and middle-click toggles the button bar.
+  - name: Lock a finished mask
+    anchor: what-it-is
+    does: Lock keeps a finished mask from being changed by a stray click or reset.
+  - name: Save the mask with the project
+    anchor: what-it-is
+    does: 'Save Mask With Project bakes the mask into the component on every save, or now with Bake Mask Now, and restores it on reopen.'
+  - name: Place from the FNS tab
+    anchor: what-it-is
+    does: Pick it from the FNS tab of the OP Create dialog and it lands as one node.
 ---
 
 ## What it is

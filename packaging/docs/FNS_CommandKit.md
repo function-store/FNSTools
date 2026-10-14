@@ -6,6 +6,35 @@ features:
     anchor: command-kit
   - name: Adopting it
     anchor: adopting-it
+feature_list:
+  - name: Publish commands from any component
+    anchor: command-kit
+    does: Drop the kit in as a direct child and the methods you mark appear in the CommandPalette and the TDXL launcher.
+    authors: true
+  - name: Safe without a registry
+    anchor: command-kit
+    does: 'With no command registry in the session nothing happens and nothing errors, so the component works the same for people without the palette.'
+    authors: true
+  - name: Command decorator
+    anchor: decorator-derives-everything-from-your-code
+    does: 'The fns_command decorator derives label, help and prompted parameters from the method name, docstring and signature; Literal hints become menus.'
+    authors: true
+  - name: 'Context, state and identity options'
+    anchor: decorator-derives-everything-from-your-code
+    does: 'Decorator extras set a context for greying out, a live state chip, surface, capability, hidden, and a canonical identity shared across packages.'
+    authors: true
+  - name: 'Explicit spec, no imports'
+    anchor: explicit-spec-no-imports-at-all
+    does: Promote an FnsCommand spec instead of importing anything; the kit's README DAT describes the form.
+    authors: true
+  - name: Re-announce after changes
+    anchor: adopting-it
+    does: Call Announce() to republish the component after its command set changes at runtime.
+    authors: true
+  - name: Tell placed copies apart
+    anchor: rules-worth-knowing
+    does: Promote FnsInstance() and FnsToolName() so palettes distinguish multiple copies and favourites reach all of them (FNS_CommandRegistry 3.2.1 or newer).
+    authors: true
 ---
 
 ## Command Kit

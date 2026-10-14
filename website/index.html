@@ -512,6 +512,11 @@
     gap: 2px 24px;
     padding: 14px 18px 18px;
   }
+  /* generated: the fold's way into /features/, under the tools it lists */
+  .cat-more {
+    grid-column: 1 / -1; justify-self: start;
+    margin-top: 10px; font-size: 13.5px; font-weight: 500;
+  }
 
   /* ───── Free / Plus ───── */
   .tiers { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
@@ -708,7 +713,8 @@
       <h2>What's in the toolkit</h2>
       <p>
         <span class="js-fns-count">86</span> packages, each installing on its own. Core goes in as
-        a unit; everything else is optional. Open a category to see what is inside.
+        a unit; everything else is optional. Open a category to see what is inside, or
+        <a href="/features/">search every feature</a> to find a tool by what it does.
       </p>
     </div>
     <!-- TOOLS:START -->
@@ -750,6 +756,7 @@
             <div class="feat-icon" aria-hidden="true">▦</div>
             <div class="feat-text"><strong><a href="/docs/fns-searchpalette/">SearchPalette</a></strong><span>Search field for TouchDesigner's palette browser, installed into the palette on startup. Based on Yea Chen's TD-SearchPalette.</span></div>
           </div>
+          <a class="cat-more" href="/features/#interface">All 52 Interface features →</a>
         </div>
       </details>
       <details class="cat">
@@ -826,6 +833,7 @@
             <div class="feat-icon" aria-hidden="true">⇄</div>
             <div class="feat-text"><strong><a href="/docs/fns-switchops/">SwitchOPs</a></strong><span>One hotkey jumps focus back and forth between the last two operators you selected, across networks.</span></div>
           </div>
+          <a class="cat-more" href="/features/#network">All 84 Network features →</a>
         </div>
       </details>
       <details class="cat">
@@ -866,6 +874,7 @@
             <div class="feat-icon" aria-hidden="true">◎</div>
             <div class="feat-text"><strong><a href="/docs/fns-setsmoothness/">SetSmoothness</a></strong><span>Set Input/Viewer Smoothness on selected TOPs, or on every TOP in the network.</span></div>
           </div>
+          <a class="cat-more" href="/features/#parameters">All 46 Parameters features →</a>
         </div>
       </details>
       <details class="cat">
@@ -890,6 +899,7 @@
             <div class="feat-icon" aria-hidden="true">⚡</div>
             <div class="feat-text"><strong><a href="/docs/fns-resetpls/">ResetPLS</a></strong><span>Reset stateful operators (feedback, cache, timers, counts) across the project, with a pattern-based exception list. Bound to ctrl+0.</span></div>
           </div>
+          <a class="cat-more" href="/features/#project">All 19 Project features →</a>
         </div>
       </details>
       <details class="cat">
@@ -922,6 +932,7 @@
             <div class="feat-icon" aria-hidden="true">⌨</div>
             <div class="feat-text"><strong><a href="/docs/fns-vscodetools/">VSCodeTools</a></strong><span>VS Code integration: open externalized scripts, sync files and generate TouchDesigner type stubs.</span></div>
           </div>
+          <a class="cat-more" href="/features/#developer">All 24 Developer features →</a>
         </div>
       </details>
       <details class="cat">
@@ -938,6 +949,7 @@
             <div class="feat-icon" aria-hidden="true">✦</div>
             <div class="feat-text"><strong><a href="/docs/fns-hydrohomie/">HydroHomie</a></strong><span>A toolbar reminder to drink water at an interval you set. Off by default.</span></div>
           </div>
+          <a class="cat-more" href="/features/#miscellaneous">All 2 Miscellaneous features →</a>
         </div>
       </details>
       <details class="cat">
@@ -954,6 +966,7 @@
             <div class="feat-icon" aria-hidden="true">◷</div>
             <div class="feat-text"><strong><a href="/docs/fns-quicktime/">QuickTime</a></strong><span>A toolbar clock that hands out drag-and-drop time references for parameters: resettable and scalable absTime and absFrame, frame, and a progress value for perfect loops.</span></div>
           </div>
+          <a class="cat-more" href="/features/#time-sequencing">All 3 Time &amp; sequencing features →</a>
         </div>
       </details>
       <details class="cat">
@@ -982,6 +995,7 @@
             <div class="feat-icon" aria-hidden="true">⊙</div>
             <div class="feat-text"><strong><a href="/docs/tdxmap/">TDXMap</a><span class="plus-mark trial" title="A free 14-day trial of Pro, once per computer. After it the mapping editor needs a Function Store Patreon membership at the Base or Pro tier, or a Gumroad lifetime key; live MIDI to parameters keeps working without one, and your mappings are kept.">14-day trial, then Base or Pro</span></strong><span>MIDI controller mapping with a live web UI: multiple devices, banks, Smart Learn, button actions, 14-bit controls. Pro adds smoothing, pickup mode, easing curves, slot and modify modes.</span></div>
           </div>
+          <a class="cat-more" href="/features/#control-mapping">All 21 Control &amp; mapping features →</a>
         </div>
       </details>
       <details class="cat">
@@ -1022,6 +1036,7 @@
             <div class="feat-icon" aria-hidden="true">∿</div>
             <div class="feat-text"><strong><a href="/docs/toptomidi/">TopToMidi</a><span class="plus-mark" title="Unlocks with the Patreon Base tier or higher">Patreon:Base</span></strong><span>Samples an image at points you define and turns the pixel values into MIDI notes in a musical scale, with trigger gating, retrigger control, a MIDI-learned custom scale and output to a MIDI Out or VST CHOP.</span></div>
           </div>
+          <a class="cat-more" href="/features/#chops-sensing">All 39 CHOPs &amp; sensing features →</a>
         </div>
       </details>
       <details class="cat">
@@ -1078,6 +1093,7 @@
             <div class="feat-icon" aria-hidden="true">◧</div>
             <div class="feat-text"><strong><a href="/docs/thresholdcolor/">ThresholdColor</a></strong><span>A Threshold TOP that keeps the colour: pixels that pass the test come through in their original colour with a soft edge. An alternative for the Threshold TOP.</span></div>
           </div>
+          <a class="cat-more" href="/features/#visual">All 53 Visual features →</a>
         </div>
       </details>
       <details class="cat">
@@ -1106,6 +1122,7 @@
             <div class="feat-icon" aria-hidden="true">⁂</div>
             <div class="feat-text"><strong><a href="/docs/particlesgpuultimate/">ParticlesGpuUltimate</a><span class="plus-mark" title="Unlocks with the Patreon Pro tier or higher">Patreon:Pro</span></strong><span>A GPU particle system driven by images: a thresholded source emits particles, and look, life, turbulence, wind and force fields shape them, each optionally read from its own image, with a feedback pass for trails and one rendered output.</span></div>
           </div>
+          <a class="cat-more" href="/features/#3d-and-particles">All 25 3D and Particles features →</a>
         </div>
       </details>
       <details class="cat">
@@ -1138,6 +1155,7 @@
             <div class="feat-icon" aria-hidden="true">▶</div>
             <div class="feat-text"><strong><a href="/docs/fns-switchtools/">SwitchTools</a><span class="plus-mark" title="Unlocks with the Patreon Base tier or higher">Patreon:Base</span></strong><span>A companion for any Switch, Cross or multi-input operator: index by slider, menu or bind, loop or clamp, colour the live input, cook only the inputs in use and unload the rest from the GPU, plus reorder, reverse, randomize and align the inputs.</span></div>
           </div>
+          <a class="cat-more" href="/features/#show-output">All 17 Show &amp; output features →</a>
         </div>
       </details>
       <details class="cat">
@@ -1210,6 +1228,7 @@
             <div class="feat-icon" aria-hidden="true">◈</div>
             <div class="feat-text"><strong><a href="/docs/fns-updater/">Updater</a></strong><span>In-place toolkit updates, with settings preserved across the replacement.</span></div>
           </div>
+          <a class="cat-more" href="/features/#core">All 107 Core features →</a>
         </div>
       </details>
       <!-- TOOLS:END -->

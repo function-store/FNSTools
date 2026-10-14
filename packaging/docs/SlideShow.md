@@ -6,6 +6,19 @@ features:
     anchor: what-it-is
   - name: Output
     anchor: output
+feature_list:
+  - name: Play a folder of images
+    anchor: what-it-is
+    does: 'Point it at a folder and it plays the images in it, each fitted to the output resolution.'
+  - name: Timed or stepped playback
+    anchor: what-it-is
+    does: 'A Period advances slides by itself; with Period at zero, Next and Prev step through them.'
+  - name: Random order
+    anchor: what-it-is
+    does: Random shuffles the order and draws a new shuffle each time the folder has been played through.
+  - name: Crossfade between slides
+    anchor: what-it-is
+    does: Every change crossfades from the old slide to the new one on the out1 TOP.
 ---
 
 ## What it is

@@ -8,6 +8,23 @@ features:
     anchor: syncingexternalizing
   - name: Custom Parameters
     anchor: custom-parameters
+feature_list:
+  - name: Settings page in the browser
+    anchor: settings-ui
+    does: 'OpenSettingsUI() opens a browser page, served by Console on localhost, listing every registered tool with its version and editable parameters.'
+  - name: One settings file across projects
+    anchor: syncingexternalizing
+    does: 'Aggregates every tool''s custom parameters, plus extra state from tools like OpTemplates, into one JSON file in the User Palette, outside the .toe.'
+  - name: Automatic load and save
+    anchor: syncingexternalizing
+    does: 'Each tool loads its section once per session (Autoload, can be turned off per tool); settings save on project pre-save and before an update.'
+  - name: Save All and Load All
+    anchor: custom-parameters
+    does: Pulses on the master or any tool's Registry page sync every tool's settings to or from the JSON file at once.
+  - name: Host copy per tool
+    anchor: custom-parameters
+    does: 'A tool persists its settings by carrying a small host copy, shown as its Registry page, which forwards to the single promoted /sys registry.'
+    authors: true
 ---
 
 ## Settings UI

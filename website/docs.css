@@ -809,3 +809,76 @@ a.badge-surface:hover { color: var(--text); border-color: var(--accent); }
 /* Built with TDFam, on /community/#tdfam */
 .cm-families { margin-top: 56px; scroll-margin-top: 90px; }
 .cm-families > p { color: var(--text-dim); max-width: 68ch; }
+
+/* /features/: every package's feature_list on one page. A tool is its name,
+   markers and catalogue line over a hanging list of what it does; the filter
+   bar is added by the page's script and sticks under the site header. */
+.features-page { max-width: 1040px; margin: 0 auto; padding: 40px 24px 80px; }
+.features-page h1 { font-size: clamp(32px, 4.4vw, 44px); font-weight: 700; letter-spacing: -0.025em; margin: 0 0 14px; }
+.features-page .lede { font-size: 18px; max-width: 68ch; margin-bottom: 24px; }
+.fl-bar {
+  position: sticky; top: 69px; z-index: 5;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px;
+  padding: 12px 0; margin-bottom: 4px;
+  background: rgba(10,10,10,0.92); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+.fl-bar[hidden] { display: none; }
+.fl-bar input[type="search"] {
+  flex: 1 1 260px; min-width: 0;
+  font: inherit; font-size: 15px; color: var(--text);
+  background: var(--bg-2); border: 1px solid var(--border-strong); border-radius: 8px;
+  padding: 9px 12px;
+}
+.fl-bar input[type="search"]::placeholder { color: var(--text-faint); }
+.fl-bar input[type="search"]:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.fl-seg { display: inline-flex; border: 1px solid var(--border-strong); border-radius: 8px; overflow: hidden; }
+.fl-seg button {
+  font: inherit; font-size: 13px; color: var(--text-dim); background: var(--bg-2);
+  border: 0; padding: 8px 12px; cursor: pointer;
+}
+.fl-seg button + button { border-left: 1px solid var(--border-strong); }
+.fl-seg button[aria-pressed="true"] { color: var(--text); background: var(--accent-dim); box-shadow: inset 0 -2px 0 var(--accent); }
+.fl-seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.fl-check { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--text-dim); cursor: pointer; }
+.fl-check input { accent-color: var(--accent); margin: 0; }
+.fl-status { margin-left: auto; font-size: 13px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+.fl-jump { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13.5px; padding: 14px 0 4px; }
+.fl-jump a { color: var(--text-dim); }
+.fl-jump a:hover { color: var(--accent); }
+.fl-cat { scroll-margin-top: 150px; }
+.fl-cat[hidden], .fl-tool[hidden], .fl-feats li[hidden] { display: none; }
+.fl-cat h2 {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px;
+  font-size: 24px; font-weight: 650; letter-spacing: -0.015em;
+  margin: 44px 0 4px;
+}
+.fl-cat h2 .side-glyph { font-size: 18px; }
+.fl-count { font-size: 12.5px; font-weight: 500; letter-spacing: 0; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+.fl-pitch { margin: 0 0 6px; color: var(--text-faint); font-size: 14px; }
+.fl-tool { padding: 18px 0; border-top: 1px solid var(--border); }
+.fl-tool h3 { margin: 0 0 4px; font-size: 17px; font-weight: 650; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 0; }
+.fl-tool h3 a { color: var(--text); }
+.fl-tool h3 a:hover { color: var(--accent); }
+.fl-tool h3 .plus-mark { margin-left: 8px; }
+.plus-mark.fl-preview { color: #7dd3fc; background: #0c2633; border-color: rgba(125,211,252,0.3); }
+.fl-desc { margin: 0 0 10px; color: var(--text-dim); max-width: 75ch; font-size: 14.5px; }
+.fl-feats { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+.fl-feats li {
+  display: grid; grid-template-columns: minmax(0, 15em) minmax(0, 1fr); gap: 2px 18px;
+  font-size: 14.5px; line-height: 1.55;
+}
+.fl-name { font-weight: 500; min-width: 0; }
+span.fl-name { color: var(--text); }
+.fl-does { color: var(--text-dim); min-width: 0; }
+.fl-does code { font-size: 0.86em; background: var(--bg-2); border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; }
+.fl-note { margin-left: 6px; font-size: 12px; font-style: italic; color: var(--text-faint); white-space: nowrap; }
+.fl-note--authors { font-style: normal; color: var(--accent); }
+.fl-empty { padding: 48px 0; text-align: center; color: var(--text-faint); }
+@media (max-width: 720px) {
+  .features-page { padding: 28px 16px 64px; }
+  .fl-bar { top: 61px; }
+  .fl-status { margin-left: 0; width: 100%; }
+  .fl-feats li { grid-template-columns: minmax(0, 1fr); }
+  .fl-cat { scroll-margin-top: 230px; }
+}

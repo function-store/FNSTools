@@ -8,6 +8,29 @@ features:
     anchor: the-three-zones
   - name: For tool authors
     anchor: for-tool-authors
+feature_list:
+  - name: Stock bar when unused
+    anchor: timeline-registry
+    does: 'With nothing contributed the timeline bar stays stock, and it returns to its stock height when the last widget goes.'
+  - name: Background zone adds a row
+    anchor: the-three-zones
+    does: 'The background zone makes the bar taller by its own height, recomputed from the base each time so the bar never creeps taller.'
+  - name: Publish widgets to the timeline bar
+    anchor: timeline-registry
+    does: 'A tool publishes a panel COMP and it appears in the timeline bar, shown through mirrors so the stock blocks stay as they are.'
+    authors: true
+  - name: Three placement zones
+    anchor: the-three-zones
+    does: 'A widget sits beside the play controls, with the time-properties block, or as a full-width strip under the frame-ruler numbers.'
+    authors: true
+  - name: Registration host
+    anchor: for-tool-authors
+    does: 'A tool ships a small host copy whose Registration page names the COMP, canonical name, zone, order and whether it is displayed.'
+    authors: true
+  - name: Python registration API
+    anchor: for-tool-authors
+    does: 'RegisterWidget, UnregisterWidget and SetWidgetZone on op.FNS_TIMELINEREGISTRY add, remove and move widgets from Python; the zone settles a frame later.'
+    authors: true
 ---
 
 ## Timeline Registry

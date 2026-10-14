@@ -5,6 +5,28 @@ features:
   - name: VSCode Tools
     anchor: vscode-tools
     icon: VSCodeTools.png
+feature_list:
+  - name: Open the VS Code workspace
+    anchor: vscode-tools
+    does: Left-clicking the button opens the VS Code workspace once one is set up.
+  - name: Set up a workspace
+    anchor: vscode-tools
+    does: Right-clicking the button sets up a VS Code workspace.
+  - name: Sync a script to file
+    anchor: vscode-tools
+    does: Syncs the selected DAT to a file typed by its language or content; extension scripts go in a subfolder named after their parent.
+  - name: Choose the sync path
+    anchor: sync-settings
+    does: Forces the save dialog so the selected DAT syncs to another path or under another name.
+  - name: Clear a sync
+    anchor: vscode-tools
+    does: Clears the file sync of the selected DAT.
+  - name: Clear syncs before shipping
+    anchor: clearing-a-sync-before-you-ship
+    does: 'The Clear page drops syncs and the tool''s tags at a scope you pick, so the content lives in the .toe again.'
+  - name: Python typing stubs
+    anchor: stubs
+    does: 'The Stubs page deploys typing stubs for selected DATs and COMPs with extensions, and TouchDesigner''s built-in Python typings, through an integration of Stubser.'
 ---
 
 ## VSCode Tools

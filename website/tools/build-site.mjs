@@ -355,6 +355,13 @@ if (problems.length) {
 // From the catalog, not from the pages found: on the public mirror a
 // preview has no doc, and links to it must still be unlinked below.
 const previewNames = Object.keys(curated).filter((n) => curated[n].preview === true);
+// The one exception: /features/ can show them, marked, for a local preview.
+// FNS_SHOW_PREVIEWS=1 (the CMS's Build site sets it) keeps their docs for
+// that page only; the public build never sets it, so a forgotten flag hides
+// them. On the public mirror their docs are withheld, so there is nothing to
+// show either way.
+const SHOW_PREVIEWS = process.env.FNS_SHOW_PREVIEWS === '1';
+const previewPages = SHOW_PREVIEWS ? pages.filter((p) => curated[p.name].preview === true) : [];
 for (let i = pages.length - 1; i >= 0; i--) {
   if (curated[pages[i].name].preview === true) pages.splice(i, 1);
 }
@@ -520,6 +527,34 @@ for (const p of pages) p.html = unlinkPreviews(p.html);
 for (const g of guides) g.html = unlinkPreviews(g.html);
 for (const p of pages) checkLinks(p.html, p.file, p.slug);
 for (const g of guides) checkLinks(g.html, `content/guides/${g.file}`, `guides/${g.slug}`);
+
+// `feature_list` in a doc's frontmatter is what /features/ is built from: one
+// entry per thing the tool does, each pointing at the heading on the tool's
+// own page that explains it. Held to the same standard as a link, because it
+// is one: an anchor that is not a heading on that page refuses the build.
+const FEATURE_KEYS = new Set(['name', 'anchor', 'does', 'authors', 'platform']);
+const featuresOf = (p) => (Array.isArray(p.meta.feature_list) ? p.meta.feature_list : []);
+for (const p of [...pages, ...previewPages]) {
+  const list = p.meta.feature_list;
+  if (list === undefined) continue;
+  if (!Array.isArray(list)) {
+    fail(`${p.file}: feature_list must be a list`);
+    continue;
+  }
+  // a preview's page is not built, so its headings are read here
+  const ids = anchorsOf.get(p.slug) || new Set(
+    [...md.render(p.body).matchAll(/<h[2-6][^>]*\sid="([^"]+)"/g)].map((m) => m[1]));
+  list.forEach((f, i) => {
+    const where = `${p.file}: feature_list[${i}]`;
+    if (!f || typeof f !== 'object') { fail(`${where} is not a mapping`); return; }
+    for (const k of Object.keys(f)) if (!FEATURE_KEYS.has(k)) fail(`${where} has unknown key \`${k}\``);
+    if (typeof f.name !== 'string' || !f.name.trim()) fail(`${where} needs a \`name\``);
+    if (typeof f.does !== 'string' || !f.does.trim()) fail(`${where} (${f.name}) needs a \`does\` line`);
+    if (f.anchor !== undefined && !ids.has(String(f.anchor))) {
+      fail(`${where} (${f.name}): anchor #${f.anchor} is not a heading on /docs/${p.slug}/`);
+    }
+  });
+}
 
 const landingPath = path.join(WEB, 'index.html');
 if (fs.existsSync(landingPath)) {
@@ -1004,9 +1039,10 @@ function sidebar(currentSlug) {
   // the long-form guides (how the toolkit is built) live here on purpose.
   const endGuides = guides.filter((g) => g.section === 'reference');
   const reference = sideGroup('§', 'Reference', [
+    `      <li><a href="/features/">Feature list</a></li>`,
     `      <li><a href="/docs/${PARAMS_SLUG}/"${currentSlug === PARAMS_SLUG ? ' aria-current="page"' : ''}>Common parameters</a></li>`,
     ...endGuides.map(guideItem),
-  ].join('\n'), 1 + endGuides.length);
+  ].join('\n'), 2 + endGuides.length);
   return `<aside class="docs-side" id="docs-side">
   <div class="docs-search"><div id="search"></div></div>
 ${guideGroup}
@@ -1399,7 +1435,7 @@ ${sidebar(null)}
 <main class="docs-main docs-index" data-pagefind-body>
   <h1>Documentation</h1>
   <p class="lede">Setup instructions, shortcuts and reference for FNSTools.</p>
-  <p class="docs-index-note">For controls shared by all tools, see the <a href="/docs/${PARAMS_SLUG}/">common parameters</a> page.</p>
+  <p class="docs-index-note">For controls shared by all tools, see the <a href="/docs/${PARAMS_SLUG}/">common parameters</a> page. To find a tool by what it does, search the <a href="/features/">feature list</a>.</p>
   <p class="docs-index-note">Access labels show the lowest Patreon tier required. <a href="/patreon/">Membership and licence details →</a></p>
 ${guideCards}
 ${surfaceFilter()}
@@ -1474,6 +1510,11 @@ const grid = displayCategories.map((cat) => {
   const plusHere = inCat.filter((p) => isPlus(p.name)).length;
   const count = `${inCat.length} tool${inCat.length === 1 ? '' : 's'}`
     + (plusHere ? ` · ${plusHere} Patreon` : '');
+  // The fold lists tools; /features/ lists what they do, from the same pages.
+  const featHere = inCat.reduce((n, p) => n + featuresOf(p).length, 0);
+  const more = featHere
+    ? `\n          <a class="cat-more" href="/features/#${slugify(cat)}">All ${featHere} ${esc(cat)} features →</a>`
+    : '';
   // The first category a reader meets, whichever that now is -- never a
   // hardcoded name, which is how this stayed pinned to Core.
   return `      <details class="cat"${cat === displayCategories[0] ? ' open' : ''}>
@@ -1486,7 +1527,7 @@ const grid = displayCategories.map((cat) => {
           <span class="cat-count">${count}</span>
         </summary>
         <div class="cat-list">
-${items}
+${items}${more}
         </div>
       </details>`;
 }).filter(Boolean).join('\n');
@@ -1762,6 +1803,150 @@ ${body}
 </main>
 ${FOOT}`);
   console.log(`built /${slug}/`);
+}
+
+// ------------------------------------------ /features/ — every feature
+//
+// What every package does, one line per feature, from each doc's
+// `feature_list` frontmatter (validated with the links above), so a tool's
+// features are edited in the same file as its page and a released preview
+// joins the list with nothing else to do. Grouped and ordered like the docs:
+// the catalogue's categories with Core last, free tools first. The tool line
+// is the catalog description, the one the landing page and the docs index
+// show.
+//
+// A page of its own, outside /docs/: it answers "does the toolkit do X?",
+// the landing catalogue's question one level down, and it is a search and
+// filter tool that wants the full width. Outside /docs/ also keeps it out of
+// Pagefind, where a page repeating every tool page's words would come first
+// for almost any query.
+//
+// Previews are left out unless FNS_SHOW_PREVIEWS=1 (see previewPages). They
+// are marked and unlinked then, since their pages are not built.
+{
+  const mdInline = new MarkdownIt({ html: false, linkify: false });
+  const listed = [...pages, ...previewPages].filter((p) => featuresOf(p).length);
+  const missing = pages.filter((p) => !featuresOf(p).length).map((p) => p.name);
+  if (missing.length) {
+    console.log(`note: ${missing.length} package(s) have no feature_list in their doc, so /features/ leaves them out: ${missing.join(', ')}`);
+  }
+  const isPreview = (p) => curated[p.name].preview === true;
+  const toolOrder = (a, b) => Number(isPreview(a)) - Number(isPreview(b)) || docsToolOrder(a, b);
+  const featureItem = (p, f) => {
+    const name = isPreview(p) ? `<span class="fl-name">${esc(f.name)}</span>`
+      : `<a class="fl-name" href="/docs/${p.slug}/${f.anchor ? `#${esc(f.anchor)}` : ''}">${esc(f.name)}</a>`;
+    const notes = (f.platform ? `<span class="fl-note">${esc(f.platform)}</span>` : '')
+      + (f.authors ? '<span class="fl-note fl-note--authors">for tool authors</span>' : '');
+    return `        <li${f.authors ? ' data-authors' : ''}>${name}<span class="fl-does">${mdInline.renderInline(String(f.does))}${notes}</span></li>`;
+  };
+  const toolBlock = (p) => {
+    const title = isPreview(p) ? esc(p.title) : `<a href="/docs/${p.slug}/">${esc(p.title)}</a>`;
+    const marks = (isPlus(p.name) ? plusMark(p.name) : '') + variantMark(p.name) + trialMark(p.name)
+      + (isPreview(p) ? '<span class="plus-mark fl-preview" title="Not released: shown because FNS_SHOW_PREVIEWS=1">Preview</span>' : '');
+    const paid = isPlus(p.name) || Boolean(pricingOf(p.name));
+    return `    <article class="fl-tool" data-paid="${paid ? 1 : 0}">
+      <h3>${title}${marks}</h3>
+      <p class="fl-desc">${esc(p.description || p.meta.summary || '')}</p>
+      <ul class="fl-feats">
+${featuresOf(p).map((f) => featureItem(p, f)).join('\n')}
+      </ul>
+    </article>`;
+  };
+  const sections = displayCategories.map((cat) => {
+    const inCat = listed.filter((p) => p.category === cat).sort(toolOrder);
+    if (!inCat.length) return '';
+    const n = inCat.reduce((s, p) => s + featuresOf(p).length, 0);
+    return `  <section class="fl-cat" id="${slugify(cat)}" data-cat="${esc(cat)}">
+    <h2><span class="side-glyph" aria-hidden="true">${GLYPH[cat] || '·'}</span>${esc(cat)}<span class="fl-count">${inCat.length} tool${inCat.length === 1 ? '' : 's'} · ${n} feature${n === 1 ? '' : 's'}</span></h2>
+    ${CATEGORY_PITCH[cat] ? `<p class="fl-pitch">${esc(CATEGORY_PITCH[cat])}</p>` : ''}
+${inCat.map(toolBlock).join('\n')}
+  </section>`;
+  }).filter(Boolean).join('\n');
+  const total = listed.reduce((s, p) => s + featuresOf(p).length, 0);
+  const jump = displayCategories.filter((cat) => listed.some((p) => p.category === cat))
+    .map((cat) => `<a href="#${slugify(cat)}">${esc(cat)}</a>`).join('');
+  const shownPreviews = listed.filter(isPreview).length;
+  fs.mkdirSync(path.join(WEB, 'features'), { recursive: true });
+  fs.writeFileSync(path.join(WEB, 'features', 'index.html'), `${head(
+    'Every feature | FNSTools for TouchDesigner',
+    `All ${total} features of the ${listed.length} FNSTools packages, grouped by category, each linked to the part of the tool's documentation that explains it.`,
+    `${SITE}/features/`, { noindex: SHOW_PREVIEWS })}
+<!-- GENERATED by tools/build-site.mjs from the feature_list frontmatter in packaging/docs/ — do not edit here -->
+${header('/features/')}
+<main class="features-page" data-previews="${SHOW_PREVIEWS ? 'shown' : 'hidden'}">
+  <h1>Every feature</h1>
+  <p class="lede">What each of the ${listed.length} packages can do, ${total} features in all. Each one links to the section of the tool's page that explains it.${shownPreviews ? ` Includes ${shownPreviews} unreleased preview${shownPreviews === 1 ? '' : 's'}, marked.` : ''}</p>
+  <div class="fl-bar" id="fl-bar" hidden>
+    <input type="search" id="fl-q" placeholder="Search features: MIDI, find bar, hotkey…" autocomplete="off" aria-label="Search features">
+    <div class="fl-seg" role="group" aria-label="Access">
+      <button type="button" data-access="all" aria-pressed="true">All</button>
+      <button type="button" data-access="free" aria-pressed="false">Free</button>
+      <button type="button" data-access="paid" aria-pressed="false">Patreon</button>
+    </div>
+    <label class="fl-check" for="fl-authors"><input type="checkbox" id="fl-authors" checked> For tool authors</label>
+    <span class="fl-status" id="fl-status" aria-live="polite"></span>
+  </div>
+  <nav class="fl-jump" aria-label="Categories">${jump}</nav>
+${sections}
+  <p class="fl-empty" id="fl-empty" hidden>No feature matches. Try fewer words, or set the filters back to All.</p>
+</main>
+<script>
+(function () {
+  // Progressive: the page is complete without this; it adds the filter bar.
+  var bar = document.getElementById('fl-bar');
+  if (!bar) return;
+  bar.hidden = false;
+  var q = document.getElementById('fl-q');
+  var authors = document.getElementById('fl-authors');
+  var status = document.getElementById('fl-status');
+  var empty = document.getElementById('fl-empty');
+  var access = 'all';
+  var tools = Array.prototype.slice.call(document.querySelectorAll('.fl-tool'));
+  var index = tools.map(function (t) {
+    var head = (t.querySelector('h3').textContent + ' ' + t.querySelector('.fl-desc').textContent + ' '
+      + t.closest('.fl-cat').getAttribute('data-cat')).toLowerCase();
+    var items = Array.prototype.slice.call(t.querySelectorAll('.fl-feats li')).map(function (li) {
+      return { li: li, text: li.textContent.toLowerCase(), authors: li.hasAttribute('data-authors') };
+    });
+    return { el: t, head: head, paid: t.getAttribute('data-paid') === '1', items: items };
+  });
+  function apply() {
+    var words = q.value.toLowerCase().split(/\\s+/).filter(Boolean);
+    var hit = function (text) { return words.every(function (w) { return text.indexOf(w) !== -1; }); };
+    var nTools = 0, nFeats = 0;
+    index.forEach(function (t) {
+      var ok = access === 'all' || (access === 'paid') === t.paid;
+      var whole = ok && hit(t.head);
+      var shown = 0;
+      t.items.forEach(function (it) {
+        var on = ok && (authors.checked || !it.authors) && (whole || hit(t.head + ' ' + it.text));
+        it.li.hidden = !on;
+        if (on) shown++;
+      });
+      t.el.hidden = !shown;
+      if (shown) { nTools++; nFeats += shown; }
+    });
+    document.querySelectorAll('.fl-cat').forEach(function (sec) {
+      sec.hidden = !sec.querySelector('.fl-tool:not([hidden])');
+    });
+    empty.hidden = nTools > 0;
+    status.textContent = nFeats + ' feature' + (nFeats === 1 ? '' : 's') + ' in ' + nTools + ' tool' + (nTools === 1 ? '' : 's');
+  }
+  var timer;
+  q.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(apply, 80); });
+  authors.addEventListener('change', apply);
+  bar.querySelector('.fl-seg').addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    access = b.getAttribute('data-access');
+    this.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+    apply();
+  });
+  apply();
+})();
+<\/script>
+${FOOT}`);
+  console.log(`built /features/ (${listed.length} tools, ${total} features${SHOW_PREVIEWS ? `, previews shown: ${shownPreviews}` : ', previews left out'})`);
 }
 
 // ------------------------------------------- /community/ — other creators
@@ -2394,11 +2579,13 @@ if (fs.existsSync(cfgSrc)) {
 
   // House style: no em-dashes and no double-hyphen asides in reader-facing
   // prose. Reported per page so the habit cannot creep back in unnoticed.
+  // A doc's feature_list is prose too: it is printed on /features/.
+  const featureProse = (p) => (p.meta ? featuresOf(p).map((f) => `${f.name} ${f.does}`).join(' ') : '');
   const dashy = [
     ...pages,
     ...guides.map((g) => ({ name: `guides/${g.slug}`, body: g.body, description: g.summary })),
   ].filter((p) => /—|(?<=\S) -- (?=\S)/.test(
-    p.body.replace(/<!--[\s\S]*?-->/g, '') + ' ' + (p.description || '')));
+    p.body.replace(/<!--[\s\S]*?-->/g, '') + ' ' + (p.description || '') + ' ' + featureProse(p)));
   if (dashy.length) {
     console.log(`note: ${dashy.length} page(s) use an em-dash or " -- " in prose `
       + `(house style is plain punctuation): ${dashy.map((p) => p.name).join(', ')}`);
@@ -2411,7 +2598,7 @@ if (fs.existsSync(cfgSrc)) {
     ...guides.map((g) => ({ name: `guides/${g.slug}`, body: g.body, description: g.summary })),
   ].filter((p) => /\brather than\b/i.test(
     p.body.replace(/<!--[\s\S]*?-->/g, '').replace(/```[\s\S]*?```/g, '')
-      + ' ' + (p.description || '')));
+      + ' ' + (p.description || '') + ' ' + featureProse(p)));
   if (contrasty.length) {
     console.log(`note: ${contrasty.length} page(s) say "rather than" in prose `
       + `(house style states what a thing does, without the foil): `

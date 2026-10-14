@@ -4,6 +4,19 @@ summary: 'Links the parameters of several operators so a change on one lands on 
 features:
   - name: What it is
     anchor: what-it-is
+feature_list:
+  - name: Link operators by pattern
+    anchor: what-it-is
+    does: 'Name operators by pattern (`noise*`, `level1 level2`) and a parameter changed on one is written to the others, with expressions and modes by default.'
+  - name: Operator and parameter exceptions
+    anchor: what-it-is
+    does: 'Except leaves matching operators out, and Par Except leaves parameters out, such as t? seed to keep transforms and seeds independent.'
+  - name: Constant-only linking
+    anchor: what-it-is
+    does: 'Constant Only links only parameters in constant mode on both sides, so an expression on one operator is never overwritten.'
+  - name: Automatic list or one-shot sync
+    anchor: what-it-is
+    does: 'With Auto on the list follows operators as they are added, renamed or removed; with Auto off, Sync rescans on demand.'
 ---
 
 ## What it is

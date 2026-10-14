@@ -10,6 +10,34 @@ features:
     anchor: inputs-and-outputs
   - name: Processing while idle
     anchor: processing-while-idle
+feature_list:
+  - name: Sample an image at points
+    anchor: what-it-is
+    does: 'A SOP''s points or a TOP''s pixels say where the input image is read, and each sample point becomes a note.'
+  - name: Index mode
+    anchor: what-it-is
+    does: 'Each sample point triggers its own note whenever its pixel passes the threshold, so a pattern sweeping across the picture plays an arpeggio.'
+  - name: Value mode
+    anchor: what-it-is
+    does: 'The pixel''s brightness picks the note, quantised to Steps.'
+  - name: Scale mapping
+    anchor: what-it-is
+    does: 'Maps notes into a scale from a root note and octave, including custom scales you type in.'
+  - name: Scale learned from a MIDI keyboard
+    anchor: what-it-is
+    does: 'Learns a scale live from a MIDI keyboard through a MIDI In CHOP, so you can duet with the picture.'
+  - name: Trigger gating
+    anchor: what-it-is
+    does: Gates note triggers so busy scenes do not spray notes.
+  - name: MIDI Out and VST output
+    anchor: what-it-is
+    does: 'Sends the notes to a MIDI Out CHOP, an Audio VST CHOP or both, and outputs them as a CHOP for anything else.'
+  - name: Sampling preview and values
+    anchor: inputs-and-outputs
+    does: 'out_viz draws the sampling points over the input, and out_sampled gives the sampled values as a TOP and as a CHOP.'
+  - name: Install the mingus dependency
+    anchor: setup
+    does: 'Install mingus writes a requirements file and hands it to the Python Environment Manager, which installs it into the linked environment in the background.'
 ---
 
 ## What it is

@@ -6,6 +6,21 @@ features:
     anchor: what-it-is
   - name: Inputs and output
     anchor: inputs-and-output
+feature_list:
+  - name: Ring distortion around a centre
+    anchor: what-it-is
+    does: Pushes the image in rings around a centre you place; Frequency sets how many rings and Amplitude how far pixels move.
+  - name: Animated Phase
+    anchor: what-it-is
+    does: 'Animating Phase spins the rings outward or inward, for example driven from a CHOP for a ripple.'
+  - name: Mode blend
+    anchor: what-it-is
+    does: Mode blends between the distortion's two characters.
+  - name: Edge extend choice
+    does: Choose how the input extends past its edge.
+  - name: Place from the FNS tab
+    anchor: what-it-is
+    does: Pick it from the FNS tab of the OP Create dialog and it lands as one node.
 ---
 
 ## What it is

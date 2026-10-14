@@ -10,6 +10,32 @@ features:
     anchor: stubs-and-updates
   - name: Credits
     anchor: credits
+feature_list:
+  - name: FNS tab in OP Create
+    anchor: what-it-is
+    does: 'Adds an FNS tab beside COMP, TOP, CHOP and the others, whose entries place FNS tools into the current network as one operator each.'
+  - name: Optional tab
+    anchor: what-it-is
+    does: 'Turn the tab off or on from Pick Tools, the FNS Tab in OP Create toggle or Remove Operator Family; the choice sticks.'
+  - name: Members mirrored from the store
+    anchor: where-the-operators-come-from
+    does: 'The updater syncs entitled store packages into the family folder, so the tab lists exactly the members the machine holds, also shown in the Palette.'
+  - name: Members as operator alternatives
+    anchor: where-the-operators-come-from
+    does: 'A member can also be offered as an operator alternative, such as Random when you create a Noise CHOP with the alternatives shortcut held.'
+  - name: Stub operators for travel
+    anchor: stubs-and-updates
+    does: 'Stub Family Operators turns placed members into light placeholders keeping wiring, position, retained parameters and state; Replace Family Stubs brings the real operators back.'
+  - name: Update placed operators in place
+    anchor: stubs-and-updates
+    does: 'Update Family Operators upgrades every placed member to the newest version in the family folder, applying its retained parameters and state.'
+  - name: Family quick-launch commands
+    anchor: stubs-and-updates
+    does: 'Stub, Replace, Update, Sync Family From Store and Remove Operator Family run as quick-launch commands without dialogs, each optionally limited to the current network.'
+  - name: Manifest-declared retention
+    anchor: stubs-and-updates
+    does: Each member's manifest declares which parameters and which state survive a stub or an update.
+    authors: true
 ---
 
 ## What it is

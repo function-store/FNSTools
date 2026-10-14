@@ -6,6 +6,16 @@ features:
     anchor: autocombine
   - name: Only the operator you dropped
     anchor: only-the-operator-you-dropped
+feature_list:
+  - name: Alt-place combine defaults
+    anchor: autocombine
+    does: 'Placing a generator TOP such as Noise, Circle or Rectangle with Alt held sets Combine with Input, Operation, Pixel Format and, for Noise, RGB.'
+  - name: Configurable defaults
+    anchor: autocombine
+    does: The values applied are set on the component's own parameters.
+  - name: Only the dropped operator
+    anchor: only-the-operator-you-dropped
+    does: Acts only on the operator that just appeared in the network you view; operators surfacing deeper down or large batches are left alone.
 ---
 
 ## AutoCombine

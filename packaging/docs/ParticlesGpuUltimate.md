@@ -6,6 +6,28 @@ features:
     anchor: what-it-is
   - name: Inputs and output
     anchor: inputs-and-output
+feature_list:
+  - name: Image-driven emission
+    anchor: what-it-is
+    does: The source image is thresholded to decide where particles are born and what colour they carry.
+  - name: Look and life
+    anchor: what-it-is
+    does: 'Look sets the particles'' material, size and fades; Life sets how long they last and maps their life to size and alpha.'
+  - name: Turbulence and wind
+    anchor: what-it-is
+    does: Turbulence and Wind push particles with fields that read an image's dark and bright sides differently.
+  - name: Placed force fields
+    anchor: what-it-is
+    does: 'Forces adds radial, axial, vortex or spiral fields that you place.'
+  - name: Separate effector images
+    anchor: what-it-is
+    does: 'Life, Turbulence and Wind each read their own connected image, so a different picture decides where particles live longer, swirl or drift.'
+  - name: Feedback trails
+    anchor: what-it-is
+    does: 'Post runs the render through a feedback pass for trails, mixed in with Dry / Wet, composited over the source or a background colour.'
+  - name: Raw maps and optical flow
+    anchor: inputs-and-output
+    does: 'Optional raw position and colour maps replace the ones derived from the source, and an optical-flow map moves the particles.'
 ---
 
 ## What it is

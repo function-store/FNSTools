@@ -4,6 +4,16 @@ summary: Hold Alt and drag a selected operator to leave a Select in its place.
 features:
   - name: Alt-drag to Select
     anchor: alt-drag-to-select
+feature_list:
+  - name: Alt-drag to create a Select
+    anchor: alt-drag-to-select
+    does: 'Alt-dragging a selected TOP, CHOP, SOP, DAT, POP or panel COMP snaps it back and leaves a Select pointed at it where you drop.'
+  - name: Ready-to-use Select
+    anchor: alt-drag-to-select
+    does: 'The new Select is wired, selected and current, viewer on and tinted, with Match Size on for panels, all as a single undo step.'
+  - name: Tagged for later sweeps
+    anchor: alt-drag-to-select
+    does: 'Every operator it creates is tagged FNS_AltSelect, so a Find or `findChildren(tags=...)` sweep can locate them later.'
 ---
 
 ## Alt-drag to Select

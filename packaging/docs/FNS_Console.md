@@ -20,6 +20,58 @@ features:
     anchor: developing-on-it
   - name: Troubleshooting
     anchor: troubleshooting
+feature_list:
+  - name: Open on a chosen tab
+    anchor: opening-it
+    does: 'The Open Settings, Pick Tools and Open Console pulses, or `op.FNS_CONSOLE.Open()` from Python, open the console on the tab you want.'
+  - name: Panel or system browser
+    anchor: opening-it
+    does: 'Shows in the toolkit root''s webBrowser panel if there is one, else the system browser; the tab sits in the URL, so reloads keep it.'
+  - name: Settings for every tool
+    anchor: the-tabs
+    does: 'Shows every registered tool as a section card with parameters grouped by page, a scroll-spy jump list and search across all tools.'
+  - name: 'Config scope, export and import'
+    anchor: the-tabs
+    does: 'The Settings header switches global or project scope, exports settings to a JSON file with a download, and imports a document, keeping sections for later installs.'
+  - name: Install and remove tab
+    anchor: the-tabs
+    does: 'Serves the installer''s picker in the console: check a tool to install it, uncheck an installed one to remove it while its settings are kept.'
+  - name: Show or hide contributed tabs
+    anchor: managing-tabs
+    does: 'The ⋯ button at the end of the tab bar lists every contributed tab with a show/hide checkbox, saved to that tool''s Shown in Console parameter.'
+  - name: Console or local panel per tool
+    anchor: exposure-shipped-dormant-enabled-by-the-install
+    does: Each tool's Expose to Console parameter chooses between publishing to the console and keeping its own panel; the installer switches it on once at install.
+  - name: Local server only while in use
+    anchor: how-it-runs
+    does: 'Runs on 127.0.0.1 on the first free port in 36710-36759, switched on by Open and off after ten idle minutes; each open project has its own.'
+  - name: Renders only while visible
+    anchor: how-it-runs
+    does: 'The root''s webBrowser panel renders only while its window is open or its viewer is active, so a closed console cooks nothing.'
+  - name: Contribute a tab
+    anchor: contributing-a-tab
+    does: 'A stamped FNS_Console host publishes a tool''s self-contained HTML page as an iframe tab, with an optional API DAT defining onConsoleRequest.'
+    authors: true
+  - name: Local browser hand-off
+    anchor: contributing-a-tab
+    does: 'While a tool''s tab is exposed the console switches that tool''s own browser panel off, and back on when exposure ends, or calls OnConsoleExposure instead.'
+    authors: true
+  - name: Stamp or register from Python
+    anchor: contributing-a-tab
+    does: 'StampHost stamps a console host into a tool; RegisterTab adds a tab without a host, which is ephemeral and must be re-registered on start.'
+    authors: true
+  - name: HTTP API
+    anchor: http-api
+    does: 'Routes on the console port list and show or hide tabs, read and set tool parameters, export, import, switch scope, and forward installer and tab requests.'
+    authors: true
+  - name: Python API
+    anchor: python-api
+    does: 'op.FNS_CONSOLE offers Open, Close, Url, Tabs, SetTabDisplayed, RegisterTab, UnregisterTab and ServeTab; OpenSettingsUI on the config registry forwards here.'
+    authors: true
+  - name: Hot-synced sources
+    anchor: developing-on-it
+    does: 'Disk edits to the externalized console sources hot-sync into the master and the /sys global, so the running console uses them on the next request.'
+    authors: true
 ---
 
 The console is the one place to look at and steer an installed toolkit

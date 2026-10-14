@@ -4,6 +4,13 @@ summary: 'A one-button shortcut to a deeply nested operator: drop the operator o
 features:
   - name: What it is
     anchor: what-it-is
+feature_list:
+  - name: Keep a nested operator at hand
+    anchor: what-it-is
+    does: 'Drag an operator onto the Op field once and OpenOp keeps a reference to it wherever you place it, such as beside a control panel.'
+  - name: Open windows on a pulse
+    anchor: what-it-is
+    does: 'The Open pulse brings up the operator''s parameter window, viewer window or both, from wherever you are in the network.'
 ---
 
 ## What it is

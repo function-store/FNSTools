@@ -7,6 +7,49 @@ features:
   - name: Open Templates
     anchor: open-templates
     icon: OpTemplates.png
+feature_list:
+  - name: Template by drag and drop
+    anchor: defining-a-template
+    does: Drop an operator with the parameter settings you want onto the toolbar icon to keep it as a template for its type.
+  - name: Edit Templates from OP Create
+    anchor: defining-a-template
+    does: 'Right-click an operator in the OP Create dialog and pick Edit Templates..., or make a Base COMP named after the OPType, to define its templates.'
+  - name: Several templates per type
+    anchor: defining-a-template
+    does: Define multiple named templates for one operator type and choose between them from a menu when placing.
+  - name: Operator chains as templates
+    anchor: defining-a-template
+    does: Operators chained after the template operator are placed together with it.
+  - name: Template snippets
+    anchor: template-snippets
+    does: 'A Base COMP inside the type''s container holds a whole network, such as a Render TOP with geometry, camera and light, extracted on placement.'
+  - name: Substitute an operator with a COMP
+    anchor: template-snippets
+    does: A Base COMP placed inside a snippet's Base COMP lets a template replace the operator with a COMP.
+  - name: Place a template on create
+    anchor: templates-usage
+    does: Hold the alternatives shortcut while placing an operator marked >>> in the OP Create dialog and it is replaced by its template.
+  - name: Insert into a connection
+    anchor: templates-usage
+    does: 'Templates, chains and snippets can be inserted between connected operators, with In/Out OPs in a snippet marking its input and output.'
+  - name: Shared alternatives menu
+    anchor: since-31-templates-are-op-alternatives
+    does: 'Templates are listed in OpMenuRegistry''s menu beside other tools offering that type, with store-only tools below a divider and a >> mark.'
+  - name: 'Global, project or config library scope'
+    anchor: maintaining-optemplates
+    does: 'Library Scope keeps the library as a palette .tox shared by every project, an OpTemplatesLibrary component in the project, or follows Config Scope.'
+  - name: Push project templates to global
+    anchor: maintaining-optemplates
+    does: 'Push To Global copies the project set to the global file on demand, asking first when the file already exists.'
+  - name: Save from the toolbar icon
+    anchor: maintaining-optemplates
+    does: 'Under global scope, middle-click the toolbar icon or press Save Templates to save; right-click opens the custom parameters.'
+  - name: Library adoption on upgrade
+    anchor: upgrading-from-an-older-fnstools
+    does: 'On first start it renames the old palette folder and adopts the most recently saved older library, keeping the replaced one beside it.'
+  - name: Open Templates window
+    anchor: open-templates
+    does: 'Opens a floating window of the current templates container; right-click for custom parameters, middle-click to save.'
 ---
 
 ## OpTemplates

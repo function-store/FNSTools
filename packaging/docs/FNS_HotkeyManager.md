@@ -4,6 +4,25 @@ summary: 'Allows for externalized toolkit hotkeys:'
 features:
   - name: HotkeyManager
     anchor: hotkeymanager
+feature_list:
+  - name: Project-wide hotkey discovery
+    anchor: hotkeymanager
+    does: 'Scans every top-level component except ui, sys and local for hotkey keyboardin CHOPs/DATs and shortcut-named parameters, one row per binding.'
+  - name: Rebind by pressing keys
+    anchor: hotkeymanager
+    does: Click a Hotkey cell and press the new keys (Esc cancels); a combo used elsewhere asks you to press it again to force it.
+  - name: Reset a binding
+    anchor: hotkeymanager
+    does: Right-click a Hotkey cell to reset that binding to its default.
+  - name: Conflict detection
+    anchor: hotkeymanager
+    does: Combos bound by more than one tool are flagged in Status; clicking it jumps to and cycles through the rows sharing that combo.
+  - name: Persist bindings across projects
+    anchor: hotkeymanager
+    does: 'Toolkit hotkeys always persist; others persist when tagged FNS_hotkeys or toggled in the Persist column, saved via ConfigRegistry and restored on load.'
+  - name: 'Save, load and defaults'
+    anchor: hotkeymanager
+    does: 'Save, Load and Load Default pulses and a Force Default toggle sit on the component''s own custom parameters.'
 ---
 
 ## HotkeyManager

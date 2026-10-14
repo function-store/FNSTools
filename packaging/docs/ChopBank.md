@@ -6,6 +6,28 @@ features:
     anchor: what-it-is
   - name: Input and output
     anchor: input-and-output
+feature_list:
+  - name: Per-channel processing blocks
+    anchor: what-it-is
+    does: 'Each block processes one channel with its own range remap, exponent curve, Zero Below, lag and a speed mode that turns it into a running total.'
+  - name: Build the bank with Snap Input
+    anchor: what-it-is
+    does: 'Snap Input makes one block per incoming channel, named after it and holding its value; a new block copies the previous block''s settings.'
+  - name: Add channels not in the input
+    anchor: what-it-is
+    does: 'A block with no matching input channel outputs its own Value, so the bank can add channels the input lacks.'
+  - name: Gain before and after
+    does: Gain is applied before and after the bank's processing.
+  - name: Alternative for Math and Constant CHOP
+    anchor: what-it-is
+    does: 'Create a Math CHOP or Constant CHOP with the alternatives shortcut held and ChopBank is offered in its place, wired into the same spot.'
+  - name: Place from the FNS tab
+    anchor: what-it-is
+    does: Pick it from the FNS tab of the OP Create dialog and it lands as one node.
+  - name: Blocks as properties
+    anchor: what-it-is
+    does: 'With Promote to Property on, each block is a property on the node that reads and sets its Value from Python.'
+    authors: true
 ---
 
 ## What it is

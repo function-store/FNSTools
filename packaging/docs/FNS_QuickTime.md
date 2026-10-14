@@ -5,6 +5,16 @@ features:
   - name: QuickTime
     anchor: quicktime
     icon: QuickTime.png
+feature_list:
+  - name: Drag-and-drop time references
+    anchor: quicktime
+    does: 'Left-click the icon for a popup of absTime, absFrame, frame and progress (current frame over end frame, for perfect loops) to drag onto parameters.'
+  - name: Scalable clock
+    anchor: quicktime
+    does: 'Multiplier scales absTime and absFrame, 1 for real time and 0.5 for half speed; right-click the icon to reach it.'
+  - name: Reset the timers
+    anchor: quicktime
+    does: 'Sets the internal timers back to zero, the same as pulsing Reset on the component.'
 ---
 
 ## QuickTime

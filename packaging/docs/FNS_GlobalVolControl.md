@@ -5,6 +5,13 @@ features:
   - name: Mute and Volume
     anchor: mute-and-volume
     icon: GlobalVol.png
+feature_list:
+  - name: Master volume slider
+    anchor: mute-and-volume
+    does: 'Sets TouchDesigner''s application-wide output level from the toolbar, leaving the Volume on every Audio Device Out and Audio Play CHOP unchanged.'
+  - name: Mute
+    anchor: mute-and-volume
+    does: 'The speaker button silences output without moving the slider, so unmuting returns to the same level.'
 ---
 
 ## Mute and Volume

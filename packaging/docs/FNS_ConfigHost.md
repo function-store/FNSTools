@@ -6,6 +6,23 @@ features:
     anchor: config-host
   - name: Adopting it
     anchor: adopting-it
+feature_list:
+  - name: Roaming settings for any component
+    anchor: config-host
+    does: Drop it inside a component and that component's custom parameters are written into the shared settings file and restored on load.
+  - name: Parameter and page exclusions
+    anchor: adopting-it
+    does: Excludepars and Excludepages leave named parameters or whole parameter pages out of what is saved.
+  - name: Registry page on the parent
+    anchor: adopting-it
+    does: 'Promotepars mirrors the key parameters onto the parent as a bound Registry page, so it can be configured without opening the host.'
+  - name: Named settings section
+    anchor: the-one-thing-to-get-right
+    does: 'Canonicalname sets the section the settings are stored under, defaulting to the component''s name; renaming it orphans values saved under the old name.'
+  - name: Save and load callbacks
+    anchor: adopting-it
+    does: An optional callbacks DAT receives save and load hooks; the Createcallbacks pulse writes a starter.
+    authors: true
 ---
 
 ## Config Host

@@ -4,6 +4,17 @@ summary: 'TD main-menu surface registry, including project-name display. The raw
 features:
   - name: Main Menu Registry
     anchor: main-menu-registry
+feature_list:
+  - name: 'Order, hide and place entries'
+    anchor: main-menu-registry
+    does: 'Holds the order, visibility and left/right placement of every main-menu entry, TD''s own built-in items and tool-published ones alike.'
+  - name: Edit from the Hub MainMenu tab
+    anchor: main-menu-registry
+    does: 'The MainMenu tab of Hub, opened from the FNS button in the bar, reorders, hides or groups entries, TD''s own items included.'
+  - name: Publish an entry from a tool
+    anchor: main-menu-registry
+    does: 'A tool ships a small host copy of the registry beside its widget to get a main-menu entry, reachable globally as op.FNS_MAINMENUREGISTRY.'
+    authors: true
 ---
 
 ## Main Menu Registry

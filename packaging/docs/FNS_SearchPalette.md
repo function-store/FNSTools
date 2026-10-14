@@ -6,6 +6,31 @@ features:
     anchor: tdx-searchpalette
   - name: Search hotkey
     anchor: search-hotkey
+feature_list:
+  - name: Search field in the palette browser
+    anchor: tdx-searchpalette
+    does: 'Installs a search field into TouchDesigner''s palette browser on project start while Auto Install is on, with Install and Uninstall pulses.'
+  - name: Focus search by hotkey
+    anchor: search-hotkey
+    does: Brings TouchDesigner's own palette tab to the front and focuses the search field in place; the combo is rebindable in HotkeyManager.
+  - name: Word navigation in the field
+    anchor: editing-the-search-text
+    does: 'The search field is a Text COMP, so it edits like TouchDesigner''s own text fields, including Ctrl+Left and Ctrl+Right to jump by word.'
+  - name: Ranked substring search
+    anchor: search-behavior
+    does: 'Matches substrings case-insensitively, combines multiple words, and ranks exact, prefix and word-start matches first, alphabetical within each group.'
+  - name: Wildcards and exclusions
+    anchor: search-behavior
+    does: 'Words with `*` or `?` match as front-anchored patterns, and a word prefixed with `-` removes its matches from the results.'
+  - name: Fuzzy fallback
+    anchor: search-behavior
+    does: 'When nothing matches literally, retries each word as the other side''s spelling, as initials, as a typo, and last as letters in order.'
+  - name: Folder search
+    anchor: search-behavior
+    does: 'A word containing / matches the palette folder instead of the name, so tools/ alone lists a whole folder; toggleable with Folder Search.'
+  - name: Latest version only
+    anchor: search-behavior
+    does: Collapses numbered or duplicate copies of one component to the latest-modified file; toggleable with the Latest Version Only parameter.
 ---
 
 ## TDX_SearchPalette

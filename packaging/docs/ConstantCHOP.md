@@ -6,6 +6,26 @@ features:
     anchor: what-it-is
   - name: Input and outputs
     anchor: input-and-outputs
+feature_list:
+  - name: Typed constants
+    anchor: what-it-is
+    does: 'A Type menu makes every constant a float, integer, toggle, four-value tuple, string, file or folder path, or operator reference, keeping values that convert.'
+  - name: Channels plus a table
+    anchor: input-and-outputs
+    does: 'Numbers, toggles and tuples come out as CHOP channels, and every constant also comes out as a DAT table of names and values.'
+  - name: Snap from the input
+    anchor: what-it-is
+    does: 'Snap Input turns whatever is wired in into constants, one per channel, named and valued from it.'
+  - name: Alternative for the Constant CHOP
+    anchor: what-it-is
+    does: Create a Constant CHOP with the alternatives shortcut held and ConstantCHOP is offered in its place.
+  - name: Place from the FNS tab
+    anchor: what-it-is
+    does: Pick it from the FNS tab of the OP Create dialog and it lands as one node.
+  - name: Constants as properties
+    anchor: what-it-is
+    does: 'With Promote to Property on, each constant is a property that reads and sets it, a _out property reads the output, and a prefix avoids clashes.'
+    authors: true
 ---
 
 ## What it is

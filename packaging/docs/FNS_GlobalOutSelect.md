@@ -4,6 +4,16 @@ summary: 'Your Global OP Shortcuts in a tree, with every Out operator inside the
 features:
   - name: GlobalOutSelect
     anchor: globaloutselect
+feature_list:
+  - name: Tree of shortcuts and outs
+    anchor: globaloutselect
+    does: 'Lists your Global OP Shortcuts in a tree with the out operators found inside each, refreshed on demand with Refresh.'
+  - name: Drag rows out as Selects
+    anchor: globaloutselect
+    does: Dragging a row into a network editor places a Select pointing at that operator.
+  - name: 'Open viewer, parameters or network'
+    anchor: globaloutselect
+    does: 'A row opens a viewer, the parameters, or a floating network editor at the referenced location.'
 ---
 
 ## GlobalOutSelect

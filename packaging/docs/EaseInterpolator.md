@@ -6,6 +6,19 @@ features:
     anchor: what-it-is
   - name: Inputs and output
     anchor: inputs-and-output
+feature_list:
+  - name: Eased crossfade
+    anchor: what-it-is
+    does: 'Blends each channel of the first input into the matching channel of the second as Select runs from 0 to 1, along an easing curve.'
+  - name: Classic easing curves
+    anchor: what-it-is
+    does: 'Linear, or sine, quad, cubic, quart, quint, expo, circ, back, elastic and bounce curves in In, Out and In-Out forms.'
+  - name: Custom ease from a CHOP
+    anchor: what-it-is
+    does: 'Custom Ease reads the curve from the optional third input, so any shape drawn in a CHOP becomes the transition.'
+  - name: Place from the FNS tab
+    anchor: what-it-is
+    does: Placed as one node from the FNS tab of the OP Create dialog.
 ---
 
 ## What it is

@@ -9,6 +9,13 @@ features:
         does: Collapse the selection into a `Base COMP` straight away
       - keys: Ctrl+Shift+W
         does: Collapse, but ask for the COMP's name and parent shortcut first
+feature_list:
+  - name: One-key collapse
+    anchor: quickcollapse
+    does: 'Moves the selected nodes into a new Base COMP, wired as they were, as one undo step that also returns you to the original network.'
+  - name: Collapse with name and shortcut
+    anchor: quickcollapse
+    does: 'Asks first, in a small dialog, for the new COMP''s name and parent shortcut, then collapses the selection.'
 ---
 
 ## QuickCollapse
