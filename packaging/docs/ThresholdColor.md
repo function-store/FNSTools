@@ -6,6 +6,16 @@ features:
     anchor: what-it-is
   - name: Inputs and output
     anchor: inputs-and-output
+feature_list:
+  - name: Colour-keeping threshold
+    anchor: what-it-is
+    does: Pixels the Comparator removes go black while every other pixel keeps its exact RGB.
+  - name: Soft edge
+    anchor: what-it-is
+    does: Soften feathers the boundary between kept and removed pixels.
+  - name: Alternative for the Threshold TOP
+    anchor: what-it-is
+    does: 'Create a Threshold TOP with the alternatives shortcut held and ThresholdColor is offered in its place, wired into the same spot.'
 ---
 
 ## What it is

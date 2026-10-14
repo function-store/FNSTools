@@ -6,6 +6,16 @@ features:
     anchor: autores
   - name: Only the operator you dropped
     anchor: only-the-operator-you-dropped
+feature_list:
+  - name: Project-following resolution
+    anchor: autores
+    does: 'Sets a newly placed generator TOP to Parent Panel Size where available, otherwise to an expression using parent.Project''s size, falling back to the component''s resolution.'
+  - name: Default colour format
+    anchor: autores
+    does: Also sets the new TOP's RGB and Pixel Format parameters to the component's defaults where available.
+  - name: Acts only on the dropped operator
+    anchor: only-the-operator-you-dropped
+    does: 'Leaves operators from package reloads, replicators or loading components alone, and skips a batch too large to be a drop with a Textport note.'
 ---
 
 ## AutoRes

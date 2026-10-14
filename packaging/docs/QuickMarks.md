@@ -6,6 +6,28 @@ features:
     anchor: quickmarks
   - name: On the network editor
     anchor: on-the-network-editor
+feature_list:
+  - name: Save a mark
+    anchor: quickmarks
+    does: Stores your current network location in one of ten numbered slots (Ctrl+Option+number on macOS).
+  - name: Jump to a mark
+    anchor: quickmarks
+    does: Takes you back to a saved mark from anywhere in the project.
+  - name: Remove a mark
+    anchor: quickmarks
+    does: Clears a numbered slot (Option instead of Alt on macOS).
+  - name: Marks saved with the project
+    anchor: quickmarks
+    does: Marks are stored on the component and saved in the project file; switching Active off hides the shortcuts but keeps the marks.
+  - name: Clickable mark list
+    anchor: on-the-network-editor
+    does: 'A corner list shows each mark by number and name, highlights the current network and dims missing ones; click to jump, right-click to rename.'
+  - name: Mark outlines
+    anchor: on-the-network-editor
+    does: 'Pins draws the area that was on screen when each mark was stored, with its number and name, in the network you are viewing.'
+  - name: Toggle the overlay
+    anchor: on-the-network-editor
+    does: 'Hides or shows the mark list and outlines together, also from quick-launch, while marks and Ctrl+number keep working.'
 ---
 
 ## QuickMarks

@@ -12,6 +12,22 @@ features:
     anchor: custom-search-keywords
   - name: Dotsimulate's OpType acronyms
     anchor: dotsimulates-optype-acronyms
+feature_list:
+  - name: IO filter buttons
+    anchor: gregs-io-filters
+    does: 'Buttons at the top right of the OP Create dialog show only IO operators, only non-IO operators, or all of them.'
+  - name: Custom search keywords
+    anchor: custom-search-keywords
+    does: 'Give any operator type your own search words, so typing music finds Audio File In; the table syncs across project files.'
+  - name: Keyword table in Hub
+    anchor: custom-opmenu-search-keywords
+    does: 'The keyword definitions are edited in a table, also reachable as the SearchWords tab of Hub.'
+  - name: Acronym search
+    anchor: dotsimulates-optype-acronyms
+    does: 'Type an operator type''s initials, such as m f o, to find Movie File Out.'
+  - name: Removable registry-based mods
+    anchor: opmenu-mods
+    does: 'The mods apply through OpMenuRegistry, so several tools can decorate the dialog together and it returns to stock when they are removed.'
 ---
 
 ## Custom OpMenu Search Keywords

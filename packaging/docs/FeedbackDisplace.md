@@ -6,6 +6,22 @@ features:
     anchor: what-it-is
   - name: Inputs and output
     anchor: inputs-and-output
+feature_list:
+  - name: Feedback with opacity and blur
+    anchor: what-it-is
+    does: 'Runs the feedback loop through a composite with an opacity and a blur, so trails, smears and echoes come straight from the parameters.'
+  - name: Noise or image displacement
+    anchor: what-it-is
+    does: 'Warps every pass by a built-in animated noise, or by a displacement map wired into the in_displace input instead.'
+  - name: Per-pass transform
+    anchor: what-it-is
+    does: 'Applies a transform on every pass for drift, zoom and spin, including infinite zooms.'
+  - name: Reset and dry/wet mix
+    anchor: what-it-is
+    does: 'Resets the loop, and mixes the loop''s output against the input with Dry / Wet Mix.'
+  - name: Feedback TOP alternative
+    anchor: what-it-is
+    does: 'Offered in place of a Feedback TOP created with the alternatives shortcut held, wired into the same spot; also on the OP Create dialog''s FNS tab.'
 ---
 
 ## What it is

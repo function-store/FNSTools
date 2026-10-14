@@ -5,6 +5,16 @@ features:
   - name: ParOpDrop
     anchor: paropdrop
     icon: ParOpDrop.png
+feature_list:
+  - name: Parameter operators by drop
+    anchor: paropdrop
+    does: 'Inside a COMP, drop one of its custom parameters on the toolbar button with modifiers to create a Parameter CHOP, Parameter DAT or Parameter Execute DAT.'
+  - name: Execute DATs from operator drops
+    anchor: paropdrop
+    does: 'Drop a CHOP, one channel or a DAT on the button for a CHOP Execute or DAT Execute DAT already watching it.'
+  - name: Hotkeys over parameters
+    anchor: paropdrop
+    does: 'Hover a parameter and press a hotkey to create a Parameter CHOP, Parameter DAT or Parameter Execute DAT without dragging.'
 ---
 
 ## ParOpDrop

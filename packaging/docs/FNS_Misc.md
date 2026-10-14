@@ -7,6 +7,16 @@ features:
     icon: QuickMouse.png
   - name: Background Viewer
     anchor: background-viewer
+feature_list:
+  - name: Global Mouse In CHOP
+    anchor: global-mouse-chop
+    does: 'A popup with a global Mouse In CHOP whose channels you drag straight onto parameters, with no operator to place first.'
+  - name: Background viewer toggle
+    anchor: background-viewer
+    does: Turns the current pane's backdrop TOP and CHOP viewers on or off in one click.
+  - name: Clear TOP display flags
+    anchor: background-viewer
+    does: Right-click the Background Viewer button to turn off the display flag on every TOP in the current network.
 ---
 
 ## Global Mouse CHOP

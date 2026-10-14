@@ -4,6 +4,13 @@ summary: Press Ctrl+Tab to jump back and forth between the last two operators yo
 features:
   - name: SwitchOPs
     anchor: switchops
+feature_list:
+  - name: Toggle between last two operators
+    anchor: switchops
+    does: 'Jumps focus back to the operator you were on before this one, and back again on the next press.'
+  - name: Jump back across networks
+    anchor: switchops
+    does: 'Remembers the last two selected operators wherever they are, so after diving into a component you return without retracing the path.'
 ---
 
 ## SwitchOPs

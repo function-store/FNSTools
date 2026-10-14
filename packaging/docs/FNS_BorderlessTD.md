@@ -13,6 +13,32 @@ hotkeys:
 # HotkeyManager cannot discover; see the "fixed key" sentence below.
 fixed_keys:
   - Shift+Esc
+feature_list:
+  - name: Hide the title bar
+    anchor: borderlesstd
+    does: Shows and hides TouchDesigner's window title bar.
+    platform: Windows only
+  - name: Hide the timeline
+    anchor: borderlesstd
+    does: Shows and hides the timeline.
+  - name: Escape key for the title bar
+    anchor: borderlesstd
+    does: Shift+Esc puts the title bar back; the Use Shift-Esc to undo toggle turns this fixed key off once you no longer need it.
+  - name: Borderless on start
+    anchor: borderlesstd
+    does: 'On Start goes borderless as the project opens with no key press, and State on Startup decides whether the timeline starts hidden.'
+  - name: Full screen control
+    anchor: borderlesstd
+    does: Fix Fullscreen On Start re-asserts full screen after opening; turning off Force Full Screen lets TouchDesigner run borderless in a smaller window.
+  - name: Hide menu buttons
+    anchor: borderlesstd
+    does: 'Removes the Wiki, Forum and Tutorials links from the main-menu bar.'
+  - name: Project name in the menu bar
+    anchor: borderlesstd
+    does: 'Shows the project file''s name in the main-menu bar, where the hidden title bar would normally carry it.'
+  - name: Pause indicator
+    anchor: borderlesstd
+    does: 'While playback is paused, recolours a chosen TouchDesigner UI colour element to Pause State Color, standing in for the hidden timeline''s indicator.'
 ---
 
 ## BorderlessTD

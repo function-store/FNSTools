@@ -5,6 +5,34 @@ features:
   - name: Global ResetPLS
     anchor: global-resetpls
     icon: ResetPLS.png
+feature_list:
+  - name: Reset everything at once
+    anchor: global-resetpls
+    does: 'Pulses resetpulse and similar parameters on every operator the search finds, from the Reset pulse or the hotkey.'
+  - name: Search root and depth
+    anchor: conf
+    does: 'Root sets where the search starts, and Limit Depth with Depth caps how far down it reaches.'
+  - name: Exceptions
+    anchor: conf
+    does: 'Except lists operators to skip, and Exceptions Limit also excludes everything under an excepted COMP.'
+  - name: Reset on startup
+    anchor: conf
+    does: Reset On Startup pulses Reset automatically when the project starts.
+  - name: Operator type toggles
+    anchor: top-chop-sop-comp
+    does: 'Toggles per TOP, CHOP, SOP and COMP type choose which operators are reset, with Enable/Disable All to set them together.'
+  - name: Custom reset parameter names
+    anchor: top-chop-sop-comp
+    does: 'COMPs and Script operators are reset through parameters named Reset or Resetpulse, and Edit Custom Reset Pars adds more names.'
+  - name: Reset the timeline
+    anchor: misc
+    does: Reset Timeline also sends the root timeline to the frame set in Reset Frame.
+  - name: onReset callback
+    anchor: misc
+    does: 'Create Callbacks makes a text DAT for an onReset script, which runs on every reset while Callback is on.'
+  - name: Static pattern exceptions
+    anchor: misc
+    does: 'Static Exceptions holds pattern match strings, prefixed with ^, for components that should always be excluded.'
 ---
 
 ## Global ResetPLS

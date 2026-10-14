@@ -4,6 +4,22 @@ summary: Browse the internal operators and the OP tree of the network you are in
 features:
   - name: iop Browser
     anchor: iop-browser
+feature_list:
+  - name: Add an iop by drop
+    anchor: iop-browser
+    does: 'Dropping an operator on the button adds it as an internal operator shortcut of the current network, root included; CustomParTools, if installed, asks for the name.'
+  - name: Browse available iops
+    anchor: iop-browser
+    does: 'Clicking the button opens a popup listing the iops available from the current COMP, those of every parent from the nearest up.'
+  - name: Drag or navigate to an iop
+    anchor: iop-browser
+    does: 'Drag any listed iop straight into the network editor, or use the list to navigate to it.'
+  - name: Searchable OP tree
+    anchor: iop-browser
+    does: 'The popup carries the network''s OP tree with search, for finding an operator without leaving the pane.'
+  - name: Opened by ParentHierarchy
+    anchor: iop-browser
+    does: ParentHierarchy opens the browser for you when both are installed.
 ---
 
 ## iop Browser

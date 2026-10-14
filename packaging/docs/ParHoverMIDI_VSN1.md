@@ -10,6 +10,31 @@ features:
     anchor: setup
   - name: Updates
     anchor: updates
+feature_list:
+  - name: Hover and turn to adjust
+    anchor: what-it-is
+    does: 'Hover the mouse over any parameter and turn an endless relative MIDI encoder to change it; any such encoder works, not only the VSN1.'
+  - name: Screen and LED feedback
+    anchor: what-it-is
+    does: The VSN1's screen shows the parameter under the mouse and its LEDs show state.
+  - name: Step size switching
+    anchor: setup
+    does: The buttons under the VSN1 screen switch the step size the encoders use.
+  - name: Parameter slots and banks
+    anchor: setup
+    does: Save the hovered parameter to a slot for instant recall across banks; long-press primary buttons for slots and step buttons for banks.
+  - name: 'Reset, default and clamp shortcuts'
+    anchor: what-it-is
+    does: 'Device buttons run shortcuts for reset, default and clamp on the hovered parameter.'
+  - name: ParGroup control
+    anchor: what-it-is
+    does: Parameter groups such as RGB or XYZ turn as one; this needs TouchDesigner 2025.
+  - name: Network zoom and pan
+    anchor: what-it-is
+    does: 'With no parameter under the mouse, the encoders zoom and pan the network editor.'
+  - name: Custom parameter help
+    anchor: setup
+    does: Holding Alt over any custom parameter of the component shows its help.
 ---
 
 ## What it is

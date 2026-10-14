@@ -6,6 +6,22 @@ features:
     anchor: pane-search-registry
   - name: For tool authors
     anchor: for-tool-authors
+feature_list:
+  - name: Controls in every find bar
+    anchor: pane-search-registry
+    does: 'Copies a published panel COMP into every network editor pane''s find bar after Home, one copy per pane, including panes opened later.'
+  - name: Register through a host copy
+    anchor: for-tool-authors
+    does: 'A tool ships a host copy whose Registration page names the panel COMP, a canonical name, its order and whether it is displayed.'
+    authors: true
+  - name: Python widget API
+    anchor: for-tool-authors
+    does: 'RegisterWidget(), UnregisterWidget(), RefreshWidget() and Instance() add, remove, refresh and find a find bar contribution from Python.'
+    authors: true
+  - name: Reach the find bar's operators
+    anchor: for-tool-authors
+    does: A script in the contributed panel reaches the bar's search field and the pane's network path through me.parent(2).
+    authors: true
 ---
 
 ## Pane Search Registry

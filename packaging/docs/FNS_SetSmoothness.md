@@ -5,6 +5,19 @@ features:
   - name: Set Input/Viewer Smoothness
     anchor: set-inputviewer-smoothness
     icon: Set Smoothness.png
+feature_list:
+  - name: Set smoothness on selected TOPs
+    anchor: set-inputviewer-smoothness
+    does: 'Click the toolbar button, pick a filtering mode, and it is written to the selected TOPs.'
+  - name: Apply to every TOP
+    anchor: set-inputviewer-smoothness
+    does: Hold Alt while picking to write the mode to every TOP in the current network instead.
+  - name: Change one setting at a time
+    anchor: set-inputviewer-smoothness
+    does: 'Setting either to Use Input leaves each TOP''s existing value alone, so Input and Viewer Smoothness change separately.'
+  - name: Quick-launch commands
+    anchor: set-inputviewer-smoothness
+    does: 'Smoothness → selected and Smoothness → all run the same actions as quick-launch commands, with no toolbar button needed.'
 ---
 
 ## Set Input/Viewer Smoothness

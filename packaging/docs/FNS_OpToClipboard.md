@@ -4,6 +4,13 @@ summary: 'Pressing Ctrl(Cmd)+Shift+C will copy the currently selected OP name to
 features:
   - name: OpToClipboard
     anchor: optoclipboard
+feature_list:
+  - name: Copy an operator reference
+    anchor: optoclipboard
+    does: Copies a reference to the selected operator; its trailing @ resolves to the right relative or shortcut path once pasted into an expression.
+  - name: Copy a parameter reference
+    anchor: copying-a-parameter-reference
+    does: 'Over a parameter the same shortcut copies `op(''geo1'')@.par.tx`, or the whole group as `.parGroup.t` when over a multi-field row''s name.'
 ---
 
 ## OpToClipboard

@@ -6,6 +6,22 @@ features:
     anchor: what-it-is
   - name: Inputs and output
     anchor: inputs-and-output
+feature_list:
+  - name: Emit from a source image
+    anchor: what-it-is
+    does: 'The image on in_source decides where particles are born, each with a life, a mass and a drag.'
+  - name: Curl noise and wind effectors
+    anchor: what-it-is
+    does: 'A curl noise field and a wind with variance move the particles, each read through an image lookup so a texture can steer them.'
+  - name: Motion trails
+    anchor: what-it-is
+    does: Trails stretch the points along their motion.
+  - name: Points out for your own render
+    anchor: inputs-and-output
+    does: 'Outputs the simulated point cloud on out_loopout, ready for a Render TOP with your own material or any POP that takes points.'
+  - name: Carry points into the loop
+    anchor: inputs-and-output
+    does: The optional in_loopin POP input carries existing points into the simulation loop.
 ---
 
 ## What it is

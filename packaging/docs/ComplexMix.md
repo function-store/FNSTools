@@ -6,6 +6,19 @@ features:
     anchor: what-it-is
   - name: Inputs and outputs
     anchor: inputs-and-outputs
+feature_list:
+  - name: Complex operations on UV fields
+    anchor: what-it-is
+    does: 'Treats each pixel pair of two UV fields as complex numbers and adds, subtracts, multiplies, divides or raises one to the other.'
+  - name: Per-pixel weighting
+    anchor: what-it-is
+    does: 'A third input weights the combination per pixel, so the mix can follow a mask or an animated gradient.'
+  - name: Sample an image through the result
+    anchor: inputs-and-outputs
+    does: 'Samples the in1 image through the combined coordinates, so two ComplexOp warps become their sum, product or quotient.'
+  - name: Chainable UV output
+    anchor: inputs-and-outputs
+    does: out2 outputs the combined UV field for chaining into another sampler.
 ---
 
 ## What it is

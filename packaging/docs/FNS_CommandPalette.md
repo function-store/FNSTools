@@ -19,6 +19,56 @@ local_keys:
   - Alt+S
   - Alt+Up
   - Alt+Down
+feature_list:
+  - name: Palette over the current network
+    anchor: commandpalette
+    does: 'Opens a small window over the network you are in with one input, a ranked list and a footer saying what Enter will do.'
+  - name: Context-aware ranking
+    anchor: commandpalette
+    does: 'Commands whose context matches where you were rank first: the parameter under the mouse, then the current or selected operator, then the network.'
+  - name: Typo-tolerant word matching
+    anchor: commandpalette
+    does: 'Every typed word must hit; strict matches rank first, then initials, typos and letters in order, with British and American spellings treated alike.'
+  - name: Step through command parameters
+    anchor: commandpalette
+    does: 'Enter on a command that declares parameters walks them one at a time, as filtered pick rows for menus or text fields showing type and default.'
+  - name: Place palette components
+    anchor: palette-components
+    does: 'TouchDesigner''s palette components, your own folders included, load into the network attached to the mouse for placing, or can be dragged into any pane.'
+  - name: Scoping prefixes
+    anchor: prefixes
+    does: 'A leading character scopes the list: `>` for commands with TouchDesigner built-ins, `?` for tool commands, `=` for components, `#` for one tool''s commands.'
+  - name: Navigate the network
+    anchor: prefixes
+    does: 'Typing `/`, `./` or `../` browses networks from the root, from where you came, or up a level, drilling in with Right and out with Left.'
+  - name: Stars and hidden commands
+    anchor: prefixes
+    does: 'Ctrl+D stars a command or component so it leads its tier; Ctrl+H hides a command, which the Commands tab can show again.'
+  - name: Query history
+    anchor: prefixes
+    does: Alt+Up and Alt+Down cycle through the queries you have run before.
+  - name: Install tools from the palette
+    anchor: prefixes
+    does: 'A tool not in the project but installable shows as an Install entry; Enter installs it, downloading it first when needed.'
+  - name: Rank by usage
+    anchor: prefixes
+    does: 'Commands you run often rank higher, the lift fading over a couple of weeks unused and only breaking ties; launcher quick-launch runs count too.'
+  - name: Command presets
+    anchor: prefixes
+    does: 'Alt+S saves a command, with any parameter values entered so far, as a named preset that runs on Enter without prompting.'
+  - name: Commands per tool copy
+    anchor: prefixes
+    does: 'When a tool is placed more than once, each copy''s commands carry its searchable label, and a preset saved from one runs on that copy only.'
+  - name: Commands tab in Hub
+    anchor: commands-tab
+    does: 'Lists every registered command, hidden ones included, with Star and Hidden toggles, a filter, Refresh, Open palette and Clear usage.'
+  - name: Rebindable hotkey and roaming favourites
+    anchor: hotkey-and-persistence
+    does: 'The hotkey is managed in HotkeyManager, and favourites, presets, hidden commands and history persist through ConfigRegistry globally or per project.'
+  - name: Call extension methods
+    anchor: prefixes
+    does: 'The `~` prefix lists public methods of promoted extensions on the subject COMP, completes them in the input and calls them with typed arguments.'
+    authors: true
 ---
 
 ## CommandPalette

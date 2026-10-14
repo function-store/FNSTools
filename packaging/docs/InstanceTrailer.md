@@ -6,6 +6,19 @@ features:
     anchor: what-it-is
   - name: Inputs and outputs
     anchor: inputs-and-outputs
+feature_list:
+  - name: Trail of recent frames
+    anchor: what-it-is
+    does: 'Caches incoming frames while an input is wired and lays the latest Depth frames side by side, oldest at one end, newest at the other.'
+  - name: Shaped sample spacing
+    anchor: what-it-is
+    does: 'Direction and Expval shape how samples spread through the cache, so the trail bunches near the present or fans out into the past.'
+  - name: CHOP output for instancing
+    anchor: inputs-and-outputs
+    does: 'A second output carries the trail as a CHOP in the same layout as the texture, for instanced geometry or CHOP-side use.'
+  - name: Place from the FNS tab
+    anchor: what-it-is
+    does: Pick it from the FNS tab of the OP Create dialog and it lands as one node.
 ---
 
 ## What it is

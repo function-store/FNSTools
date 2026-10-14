@@ -4,6 +4,13 @@ summary: Simple OSC mapping tool by AlphaMoonbase.berlin.
 features:
   - name: oscMapper
     anchor: oscmapper
+feature_list:
+  - name: Learn-based OSC mapping
+    anchor: oscmapper
+    does: 'Drag parameters onto the UI, learn, and move a fader or knob to assign it.'
+  - name: Mapping range
+    anchor: oscmapper
+    does: Set the min/max range a mapped control drives.
 ---
 
 ## oscMapper

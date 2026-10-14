@@ -6,6 +6,30 @@ features:
     anchor: parent-hierarchy
   - name: Extensions
     anchor: extensions
+feature_list:
+  - name: Alt-hover shortcut view
+    anchor: parent-hierarchy
+    does: 'Hold Alt over a COMP in the pane-bar path to see its parent shortcut, global shortcut and internal operators.'
+  - name: Ctrl-hover parameter view
+    anchor: parent-hierarchy
+    does: Hold Ctrl to see the iop target's relative path and every custom parameter with its value; press Ctrl again to poll the values.
+  - name: Click to copy a reference
+    anchor: parent-hierarchy
+    does: 'Clicking any listed item copies a reference to it, ready to paste into an expression or script.'
+  - name: Open parameter customisation
+    anchor: parent-hierarchy
+    does: Right-clicking a listed parameter opens the parameter customisation window for it.
+  - name: iopBrowser integration
+    anchor: parent-hierarchy
+    does: 'With iopBrowser installed, the same hover also lists the internal operators in its browser.'
+  - name: Extension API on hover
+    anchor: extensions
+    does: 'Each COMP lists its extensions by Extension Name or class; hovering one expands its promoted methods with signatures, properties and typed attributes.'
+    authors: true
+  - name: Copy extension calls
+    anchor: extensions
+    does: 'Clicking an extension or member copies an ext. reference, such as `ext.TimelineToolsExt.AcceptsDrop(items)`, with the signature intact.'
+    authors: true
 ---
 
 ## Parent Hierarchy

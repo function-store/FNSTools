@@ -8,6 +8,13 @@ features:
 hotkeys:
   - keys: alt.shift.s
     does: Swap the two selected operators in place
+feature_list:
+  - name: Swap two operators
+    anchor: swap-ops
+    does: 'Swaps the two selected operators in the same network editor pane, from the toolbar button or the hotkey.'
+  - name: Mirror a line of operators
+    anchor: swap-ops
+    does: 'With several operators selected in a line, swapping mirrors their order.'
 ---
 
 ## Swap OPs

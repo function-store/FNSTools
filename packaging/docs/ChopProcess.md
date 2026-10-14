@@ -6,6 +6,25 @@ features:
     anchor: what-it-is
   - name: Input and output
     anchor: input-and-output
+feature_list:
+  - name: Limit and remap with a curve
+    anchor: what-it-is
+    does: Limits incoming values to a range and remaps that range onto another through an exponent curve.
+  - name: Zero Below
+    anchor: what-it-is
+    does: 'Makes the bottom of the input range output 0, so a fader switches fully off at its lowest point yet starts usefully once moved.'
+  - name: Lag smoothing
+    anchor: what-it-is
+    does: Glides toward new values with a lag.
+  - name: Speed mode
+    anchor: what-it-is
+    does: Treats the result as a speed and outputs its running total instead.
+  - name: Whole fader bank in one node
+    anchor: what-it-is
+    does: 'Processes every input channel, so one node shapes a whole fader bank; with nothing connected, the Value parameter is processed instead.'
+  - name: Math CHOP alternative
+    anchor: what-it-is
+    does: 'Create a Math CHOP with the alternatives shortcut held and ChopProcess is offered in its place, wired into the same spot.'
 ---
 
 ## What it is

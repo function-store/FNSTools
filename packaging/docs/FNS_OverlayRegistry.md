@@ -10,6 +10,34 @@ features:
     anchor: managing-the-overlay
   - name: For tool authors
     anchor: for-tool-authors
+feature_list:
+  - name: One shared overlay
+    anchor: overlay-registry
+    does: 'Stacks every tool''s layer into one image shown above the nodes of the network editor you work in; with nothing drawing, nothing runs.'
+  - name: Follows the network editor view
+    anchor: overlay-registry
+    does: 'The overlay follows pan, zoom and network changes, keeps everything in place at any zoom and stays sharp on high DPI screens.'
+  - name: Leaves your network untouched
+    anchor: overlay-registry
+    does: 'Switches no display flag, dims no annotation, is not one of your operators and is taken out before every project save.'
+  - name: Corner widgets
+    anchor: widgets
+    does: Tools can pin small clickable panels to a corner of the network editor that keep their size at any zoom and stack without overlapping.
+  - name: Manage layers in Hub
+    anchor: managing-the-overlay
+    does: 'FNS_Hub''s Overlay tab lists every layer and widget: reorder them, hide one without switching its tool off, or move a widget''s corner or margin.'
+  - name: Publish a layer
+    anchor: for-tool-authors
+    does: 'A tool ships a host copy naming its layer TOP, stacking order and Displayed and Layer Active switches, or calls RegisterWidget() from Python.'
+    authors: true
+  - name: View data for layers
+    anchor: for-tool-authors
+    does: 'The host''s View page and View() give the covered network rectangle, render resolution, units per pixel and zoom; NetworkToPixel() converts network positions to pixels.'
+    authors: true
+  - name: Panel widget API
+    anchor: for-tool-authors
+    does: RegisterPanelWidget() pins a tool's panel COMP to a corner with an order and margin; UnregisterPanelWidget() takes it away.
+    authors: true
 ---
 
 ## Overlay Registry

@@ -6,6 +6,13 @@ features:
     anchor: what-it-is
   - name: Inputs and outputs
     anchor: inputs-and-outputs
+feature_list:
+  - name: Three-stream recording
+    anchor: what-it-is
+    does: 'Rec writes a float texture such as a depth point cloud, a colour texture and a CHOP such as skeleton data to files at once.'
+  - name: Timeline playback with offset
+    anchor: what-it-is
+    does: 'Plays the three files back in step with the timeline, with a frame offset to line them up, as textures and channels.'
 ---
 
 ## What it is

@@ -13,6 +13,37 @@ features:
     icon: HogCHOP.png
   - name: Your network stays as it is
     anchor: your-network-stays-as-it-is
+feature_list:
+  - name: Toggle from toolbar or command
+    anchor: turning-it-on
+    does: 'Switch the bars on from the toolbar button, the Toggle cook bar command or Active; they follow you between networks and panes.'
+  - name: Bar count budget
+    anchor: turning-it-on
+    does: 'Max OPs caps how many in-view operators get bars, counted from the middle of the view, 100 by default and up to 250.'
+  - name: Cook-time bars
+    anchor: reading-the-bars
+    does: 'A bar above each operator shows CPU plus GPU cook time, green to red up to 1 ms, growing taller past it and striped while cooking.'
+  - name: GPU memory bars
+    anchor: reading-the-bars
+    does: 'A bar below each operator shows the GPU memory it holds, cyan to blue up to 100 MB, growing taller up to 1 GB.'
+  - name: COMP totals
+    anchor: reading-the-bars
+    does: 'On a COMP, the bars add up the cook time and GPU memory of everything inside it, with stripes moving while anything inside cooks.'
+  - name: Numeric values
+    anchor: reading-the-bars
+    does: 'Values writes each bar''s number beside it, cook time above and GPU memory below, updating ten times a second.'
+  - name: Top List of heaviest operators
+    anchor: top-list
+    does: A corner list names the heaviest operators by cook time or GPU memory; clicking a row selects that operator and zooms to it.
+  - name: Shared overlay settings in Hub
+    anchor: top-list
+    does: Hub's Overlay tab sets list placement for every network-editor overlay tool and can hide the bars or the list without switching Cook Bar off.
+  - name: Global Hog CHOP stress test
+    anchor: global-hog-chop
+    does: Ctrl+right-click the toolbar button to open a global Hog CHOP that eats part of each frame; the button turns red while it is on.
+  - name: Leaves the network untouched
+    anchor: your-network-stays-as-it-is
+    does: 'The bars draw through the shared network overlay, which leaves before every save, so display flags, annotations and operators stay as they were.'
 ---
 
 It is based on [Anton Heestand's Cook Bar](https://github.com/heestand-xyz/cook_bar).

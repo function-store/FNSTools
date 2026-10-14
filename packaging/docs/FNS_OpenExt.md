@@ -4,6 +4,13 @@ summary: Press Ctrl+E on a COMP to open its promoted extension in your external 
 features:
   - name: OpenExt
     anchor: openext
+feature_list:
+  - name: Open extension by hotkey
+    anchor: openext
+    does: Opens the current COMP's first promoted extension in the external editor TouchDesigner is set to use; nothing happens on a COMP without one.
+  - name: Quick-launch command
+    anchor: openext
+    does: 'Also published as the quick-launch command Open extension of current, so it runs from the command palette without the hotkey.'
 ---
 
 ## OpenExt

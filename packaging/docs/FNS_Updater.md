@@ -9,6 +9,19 @@ features:
     anchor: self-update-feature
   - name: Notes after an update
     anchor: notes-after-an-update
+feature_list:
+  - name: Update indicator on the help icon
+    anchor: wiki
+    does: 'The toolbar ? icon gets a yellow border when any installed package has an update; clicking it prompts to update, otherwise it opens the wiki.'
+  - name: Update only changed packages
+    anchor: self-update-feature
+    does: 'Fetches only the packages that changed from the store, verifies each download''s hash and replaces just those, leaving uninstalled packages uninstalled.'
+  - name: Settings kept across updates
+    anchor: self-update-feature
+    does: Saves all tool configs to a JSON file before updating and reloads each replaced tool's saved configs afterwards.
+  - name: Release notes after an update
+    anchor: notes-after-an-update
+    does: 'Shows that release''s notes once on the first project open after an update; Show Notes After Update turns it off, and Hub''s Updates tab keeps them.'
 ---
 
 ## Wiki

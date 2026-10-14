@@ -6,6 +6,25 @@ features:
     anchor: what-it-is
   - name: Inputs and outputs
     anchor: inputs-and-outputs
+feature_list:
+  - name: Complex-plane warp
+    anchor: what-it-is
+    does: 'Reads each pixel''s UV as a complex number, runs it through the chosen function and samples the input image at the result.'
+  - name: Complex function set
+    anchor: what-it-is
+    does: 'Offers square, root, exp, log, inverse, and the trigonometric and hyperbolic families with their inverses.'
+  - name: Iteration
+    anchor: what-it-is
+    does: Applies the function several times in a row.
+  - name: Pre and post transform
+    anchor: what-it-is
+    does: A transform before and after the function moves the point of interest to where the function does something worth seeing.
+  - name: Mapped UV output
+    anchor: inputs-and-outputs
+    does: 'A second output carries the mapped UV field, for feeding another sampler.'
+  - name: Edge handling and border mask
+    anchor: inputs-and-outputs
+    does: 'Offers a choice of edge handling, and a borders output masks where the mapped UV left the image.'
 ---
 
 ## What it is

@@ -17,6 +17,7 @@ website/content/guides/*.md guides and reference pages, one per file (hand-writt
 website/docs/              GENERATED — gitignored, built on every deploy
 website/get/               GENERATED — gitignored, the online configurator
 website/patreon/           GENERATED — gitignored, from content/patreon.html
+website/features/          GENERATED — gitignored, from feature_list in packaging/docs/
 website/catalog.json       GENERATED — gitignored, the tool feed functionstore.xyz reads
 ```
 
@@ -93,6 +94,41 @@ Each links to the next one down and the deep page links back up, so a
 reader can stop at any rung. The internal record behind the deep page is
 `docs/ArchitectureResearch.md`. Guides are not in the CMS; edit the
 markdown.
+
+## Features
+
+`/features/` lists what every package does, one line per feature, each
+linking to the heading on the tool's page that explains it. It is built
+from the `feature_list` in each doc's frontmatter (see Frontmatter below),
+so a tool's features are edited in the same file as its page. A search box,
+a Free/Patreon switch and a tool-author toggle filter it in place; without
+script the whole list is still there.
+
+It is a page of its own, not a guide under `/docs/`. It answers the
+landing catalogue's question one level down ("does the toolkit do X?"), it
+wants the full width a docs sidebar would take, and outside `/docs/` it
+stays out of Pagefind, where a page repeating every tool page's words would
+come first for almost any search. The way in is the landing page: the
+"What's in the toolkit" intro links it, and every category fold ends with
+"All N <category> features →" pointing at that category's section. The docs
+sidebar's Reference group and the docs index link it too.
+
+The tool line is the catalog description, the same one the landing page
+and the docs index show. Tools are grouped and ordered as in the docs
+(Core last, free first), with the same Patreon and trial markers.
+
+**Previews are left out** unless the build runs with `FNS_SHOW_PREVIEWS=1`,
+which shows them marked, unlinked (their pages are not built) and noindexed.
+The CMS's **Build site** sets it for the local preview, the same way it sets
+`FNS_SHOW_DRAFTS=1`; the public build never does, so a forgotten flag hides
+them. A preview's `feature_list` lives in its own doc, which the public mirror
+already withholds, and when the preview is released its features join the
+page with nothing else to do.
+
+The build refuses an entry whose `anchor` is not a heading on that tool's
+page, an unknown key, or an entry without `name` and `does`, and notes any
+released package with no `feature_list`. `python tests/test_feature_list.py`
+fails until every released package has one.
 
 ## Free and Patreon
 
@@ -216,8 +252,8 @@ npm run serve     # http://localhost:3000
 | `npm run pages` | pages only — leaves the existing search index alone |
 | `npm run search` | re-index only |
 
-**Do not commit `website/docs/`, `website/get/` or `website/patreon/`** — all
-three are gitignored.
+**Do not commit `website/docs/`, `website/get/`, `website/patreon/` or
+`website/features/`** — all of them are gitignored.
 Vercel runs this same build on every deploy, so the generated tree exists
 only on your machine (for preview) and on the deploy. Build output in git
 is what used to let the site drift from its sources, and it needed a CI
@@ -248,7 +284,12 @@ with `git diff`, undo with `git checkout -- packaging/`.
 - **Save** is `⌘S`. The window warns before you navigate away dirty.
 - **Build site** runs `build-site.mjs` and shows its output, including the
   validation failures — so a link to a heading that does not exist surfaces
-  here rather than at deploy time.
+  here rather than at deploy time. It sets `FNS_SHOW_DRAFTS=1` and
+  `FNS_SHOW_PREVIEWS=1`, so the local preview also shows community drafts
+  and, on `/features/`, preview packages, both marked.
+- **`feature_list` is not edited here yet.** The editor keeps it on save
+  (it sends the whole frontmatter back), but you change it in the markdown
+  file.
 - **Features are derived, not typed.** The list re-syncs from the `##`
   headings in the body as you write, keeping the icon and hotkeys attached
   to each surviving anchor. That is what keeps `features[]` anchors and the
@@ -344,8 +385,23 @@ features:                         # drives the "On this page" list
       - {keys: "Ctrl+Alt+Drag", does: "Promote as iop"}
 platforms: [windows]              # omit when it runs everywhere
 video: "https://youtu.be/j43gZ0MB2xo"
+feature_list:                     # what the tool does, for /features/
+  - name: Create an extension with QuickExt
+    anchor: quickext              # a heading on this page; omit to link the page
+    does: Adds a Python extension to the parent with simplified default code.
+  - name: Declare parameters in code
+    anchor: declare-parameters
+    does: Helpers such as `Float` and `Menu` create custom parameters from an extension.
+    authors: true                 # for people building tools on the toolkit
+    platform: Windows only        # only when the feature is limited to one
 ---
 ```
+
+`features` and `feature_list` are different lists. `features` is the page's
+sections, derived from its `##` headings, and drives "On this page".
+`feature_list` is what the tool can do, written by hand, one sentence each
+in `does` (backticks become code), and drives `/features/`. Several entries
+can point at the same heading.
 
 Author credit is not frontmatter: it lives in `catalog.json` as
 `author {name, url}` (edited in the CMS package editor), and the build

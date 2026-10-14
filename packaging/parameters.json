@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "release": "v3.2.69",
+ "release": "v3.2.70",
  "td_build": "2025.33070",
  "packages": {
   "ChopBank": [
@@ -15373,6 +15373,24 @@
     "page": "POP Overlay"
    },
    {
+    "name": "Monitorwhich",
+    "label": "Monitor Which",
+    "style": "Menu",
+    "help": "Which POPs the monitor reads: the one under the mouse (else the first selected one), or the one under the mouse and every selected one, up to 4.",
+    "default": "both",
+    "menu": [
+     {
+      "name": "pointer",
+      "label": "Under the Mouse, else Selected"
+     },
+     {
+      "name": "both",
+      "label": "Under the Mouse and Selected"
+     }
+    ],
+    "page": "Monitor"
+   },
+   {
     "name": "Monitorpoints",
     "label": "Monitor Points",
     "style": "Int",
@@ -20464,7 +20482,7 @@
     "label": "Show In Timeline Strip",
     "style": "Toggle",
     "help": "Publish this background as the strip behind TD's timeline ruler. Bound to the registry host, so it is the same switch as Autoregister.",
-    "default": true,
+    "default": false,
     "section": true,
     "page": "Background"
    },
@@ -26809,6 +26827,86 @@
     "default": 50
    }
   ],
+  "FNS_MainMenuRegistry": [
+   {
+    "name": "Createcallbacks",
+    "label": "Create Callbacks",
+    "style": "Pulse",
+    "help": "Spawn a 'mainmenu_callbacks' DAT into the tool (from the registry's template) and point the Callback parameter at it. Idempotent: an existing DAT is adopted, never overwritten. The hooks are optional lifecycle notifications: onRegistered, onUnregistered, onDisplayChanged, onSideChanged."
+   },
+   {
+    "name": "Autoregister",
+    "label": "Auto-register",
+    "style": "Toggle",
+    "help": "When on, keep this widget published into the global toolbar registry while this component exists.",
+    "default": false
+   },
+   {
+    "name": "Register",
+    "label": "Register",
+    "style": "Pulse",
+    "help": "Publish once into the global toolbar registry, even if Auto-register is off."
+   },
+   {
+    "name": "Unregister",
+    "label": "Unregister",
+    "style": "Pulse",
+    "help": "Take this tool's contribution back out of the registry and turn Autoregister off, so it stays out. Register puts it back."
+   },
+   {
+    "name": "Regstatus",
+    "label": "Registration Status",
+    "style": "Str",
+    "help": "Read-only status of this host registration.",
+    "default": "",
+    "readonly": true
+   },
+   {
+    "name": "Menuorder",
+    "label": "Menu Bar Order",
+    "style": "Int",
+    "help": "Preferred order among registered widgets, managed by the global registry. -1 = no preference (append at the end).",
+    "default": -1
+   },
+   {
+    "name": "Align",
+    "label": "Menu Bar Side",
+    "style": "Menu",
+    "help": "Which side of the pane bar's path area this item docks to. Left sits after TD's own left-hand icons; right sits between the path area and TD's right-hand icons.",
+    "default": "right",
+    "menu": [
+     {
+      "name": "left",
+      "label": "Left"
+     },
+     {
+      "name": "right",
+      "label": "Right"
+     }
+    ]
+   },
+   {
+    "name": "Anchor",
+    "label": "Anchor After",
+    "style": "Str",
+    "help": "Pin this entry into the gap directly AFTER a named stock menu-bar item (e.g. 'tutorials'), overriding the left/right side band. Resolved live each sync: a vanished anchor falls back to the side band and heals if the item returns. Empty = normal side placement.",
+    "default": ""
+   },
+   {
+    "name": "Displayed",
+    "label": "Displayed",
+    "style": "Toggle",
+    "help": "Default visibility of the widget in the toolbar (managed by the global registry).",
+    "default": true
+   },
+   {
+    "name": "Barwidth",
+    "label": "Bar Width",
+    "style": "Int",
+    "help": "Width of this widget in the toolbar. 0 = auto (follow the widget). Persisted here; the registry writes manager edits back.",
+    "default": 0
+   }
+  ],
   "FNS_NavbarRegistry": [
    {
     "name": "Autoregister",
@@ -27064,7 +27162,8 @@
    "FNS_ConfigRegistry"
   ],
   "FNS_Autosave": [
-   "FNS_ConfigRegistry"
+   "FNS_ConfigRegistry",
+   "FNS_MainMenuRegistry"
   ],
   "FNS_BackupCleaner": [
    "FNS_ConfigRegistry",
@@ -27254,7 +27353,9 @@
   "FNS_AltSelect": [],
   "FNS_AutoCombine": [],
   "FNS_AutoRes": [],
-  "FNS_Autosave": [],
+  "FNS_Autosave": [
+   "mainmenu"
+  ],
   "FNS_BackupCleaner": [
    "hub"
   ],
@@ -27492,6 +27593,21 @@
     "order": 0
    }
   ],
+  "FNS_Autosave": [
+   {
+    "surface": "mainmenu",
+    "widget": "button_autosave",
+    "label": "Autosave",
+    "order": 5,
+    "side": "left",
+    "icon": {
+     "op": "text",
+     "font": "Material Design Icons",
+     "codepoint": "U+F04E8",
+     "file": "FNS_Autosave-mainmenu.png"
+    }
+   }
+  ],
   "FNS_BackupCleaner": [
    {
     "surface": "hub",
@@ -27520,7 +27636,7 @@
     "surface": "toolbar",
     "widget": "gridshow",
     "label": "GridShow",
-    "order": 37,
+    "order": 33,
     "icon": {
      "op": "text",
      "font": "Material Design Icons",
@@ -27639,7 +27755,7 @@
     "surface": "hub",
     "widget": "HotkeyUI",
     "label": "HotkeyManager",
-    "order": 110
+    "order": 115
    }
   ],
   "FNS_Hub": [
@@ -27721,7 +27837,7 @@
     "surface": "hub",
     "widget": "FNS_MediaBrowser",
     "label": "Media",
-    "order": 70
+    "order": 71
    }
   ],
   "FNS_Misc": [
@@ -27729,11 +27845,11 @@
     "surface": "toolbar",
     "widget": "background1",
     "label": "BackgroundTOPs",
-    "order": 36,
+    "order": 34,
     "icon": {
      "op": "text",
      "font": "Material Design Icons",
-     "codepoint": "U+F0247",
+     "codepoint": "U+F0248",
      "file": "FNS_Misc-toolbar.png"
     }
    },
@@ -27953,7 +28069,7 @@
     "surface": "toolbar",
     "widget": "inputsmoothness1",
     "label": "InputSmoothness",
-    "order": 33,
+    "order": 35,
     "icon": {
      "op": "text",
      "font": "Material Design Icons",
@@ -27967,7 +28083,7 @@
     "surface": "toolbar",
     "widget": "button_swapOPs",
     "label": "SwapOPs",
-    "order": 34,
+    "order": 36,
     "icon": {
      "op": "text",
      "font": "Material Design Icons",
@@ -28131,7 +28247,7 @@
    "label": "Package Version",
    "style": "Str",
    "help": "The package version the FNS updater compares against the release manifest.",
-   "default": "1.0.2"
+   "default": "1.0.3"
   },
   {
    "name": "Author",
@@ -28226,6 +28342,12 @@
    "help": "Which build this copy is (base or pro): set by the release hook per edition; the FNS updater and installer read it beside Pkgversion.",
    "default": "",
    "readonly": true
+  },
+  {
+   "name": "Openhelp",
+   "label": "Documentation",
+   "style": "Pulse",
+   "help": "Open this tool's page on the FNSTools documentation site."
   },
   {
    "name": "Lastupdated",

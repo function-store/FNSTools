@@ -6,6 +6,20 @@ features:
     anchor: navbar-registry
   - name: For tool authors
     anchor: for-tool-authors
+feature_list:
+  - name: Widgets in every pane bar
+    anchor: navbar-registry
+    does: 'Registered widgets are stamped into the default pane bar and each live one, so they show in every pane, including panes opened later.'
+  - name: Navbar layout in Hub
+    anchor: navbar-registry
+    does: 'Hub''s Navbar tab reorders pane-bar items, flips them between left and right, and shows or hides them; the layout roams with your config.'
+  - name: Panel COMP to navbar package
+    anchor: for-tool-authors
+    does: Dropping any panel COMP on the FNS button registers it as its own self-installing navbar package.
+  - name: Host copy registration
+    anchor: for-tool-authors
+    does: A tool that wants a pane-bar widget ships a host copy of this registry and registers on load.
+    authors: true
 ---
 
 ## Navbar Registry

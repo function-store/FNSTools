@@ -6,6 +6,25 @@ features:
     anchor: colorui
   - name: In the console
     anchor: in-the-console
+feature_list:
+  - name: Recolour UI elements
+    anchor: colorui
+    does: Recolour any TouchDesigner UI element by choosing it from a dropdown.
+  - name: Operator family colours
+    anchor: colorui
+    does: 'Recolour whole operator families, POPs included.'
+  - name: Local save with auto-load
+    anchor: colorui
+    does: 'Saving colours locally stores them in the component, from where they can be loaded automatically on startup.'
+  - name: JSON export and import
+    anchor: colorui
+    does: Export colour settings to JSON and import them again; imported settings take precedence over local ones.
+  - name: OpColor tab in Hub
+    anchor: colorui
+    does: 'The colour UI is available as the OpColor tab of Hub, the FNS button in the main-menu bar.'
+  - name: Console tab in the browser
+    anchor: in-the-console
+    does: 'With Expose on, the same colour UI is served in the browser as the ColorUI tab of Console, the toolkit''s web front.'
 ---
 
 ## ColorUI

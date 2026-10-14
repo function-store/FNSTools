@@ -8,6 +8,22 @@ features:
     anchor: inputs-and-outputs
   - name: Palette behavior
     anchor: palette-behavior
+feature_list:
+  - name: Full cosine palette coefficients
+    anchor: what-it-is
+    does: 'Sets offset, amplitude, period, phase and exponent for red, green and blue, giving gradients that loop cleanly and animate with a single phase.'
+  - name: RGB and D mode
+    anchor: what-it-is
+    does: 'Collapses the coefficients to one offset, amplitude and exponent when you want fewer controls.'
+  - name: Blackout region
+    anchor: what-it-is
+    does: 'Reserves part of the palette for black, by extending the length or taking it from the colours, with a soft edge you shape.'
+  - name: Palette strip output
+    anchor: inputs-and-outputs
+    does: 'out_col outputs the palette as a colour strip, and Length sets how many colours the lookup holds.'
+  - name: Colour an image through the palette
+    anchor: inputs-and-outputs
+    does: out_lookup colours the input image through the palette; with nothing wired a built-in 0 to 1 ramp shows the palette.
 ---
 
 ## What it is

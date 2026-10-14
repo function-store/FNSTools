@@ -5,6 +5,22 @@ features:
   - name: ExprHotStrings
     anchor: exprhotstrings
 video: 'https://www.youtube.com/watch?v=j43gZ0MB2xo'
+feature_list:
+  - name: Abbreviation table
+    anchor: exprhotstrings
+    does: 'Abbreviations in the first column expand to the Expands column''s string when used as a parameter expression, for example `#AT` to `absTime.seconds`.'
+  - name: Inline expansion
+    anchor: exprhotstrings
+    does: 'With Replace inline on (off by default), abbreviations expand inside a longer expression and can be combined, as in `#AT * 0.2`.'
+  - name: Wrap a path in op()
+    anchor: exprhotstrings
+    does: '`#@` wraps what follows in `op(''...'')`, so `#@noise1.par.amp` becomes `op(''noise1'').par.amp`; it has its own enable toggle.'
+  - name: Parent shortcut abbreviations
+    anchor: exprhotstrings
+    does: '`#!` resolves to the closest parent shortcut and `#!!` adds `.par` after it, both behind their own enable toggle.'
+  - name: Promote a parameter while typing
+    anchor: exprhotstrings
+    does: '`#@!` (Bind) and `#@~` (Expression) promote the parameter you are typing in to its parent via CustomParTools, using its own name or one you supply.'
 ---
 
 ## ExprHotStrings

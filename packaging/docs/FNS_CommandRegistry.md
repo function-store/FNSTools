@@ -10,6 +10,46 @@ features:
     anchor: built-in-commands
   - name: For consumers
     anchor: for-consumers
+feature_list:
+  - name: Tag-based tool discovery
+    anchor: command-registry
+    does: 'Finds tools tagged fnscommands and harvests their commands, so a tool installed before any palette or launcher still appears when one arrives.'
+  - name: Curation that survives moves
+    anchor: what-a-command-carries
+    does: 'Favourites, hidden flags and presets are keyed on tool name and command id, so they survive a tool being moved in the network.'
+  - name: Presets per copy or pinned
+    anchor: tools-with-several-copies
+    does: 'A preset runs on every copy of a tool, or is pinned to one instance label and waits quietly where no copy carries it.'
+  - name: Built-in TouchDesigner commands
+    anchor: built-in-commands
+    does: 'Serves TouchDesigner''s own actions, such as the Textport, dialogs, pane changes, saving, recent files, realtime, perform mode and cook rate, badged TD in the palette.'
+  - name: Newest version wins for duplicates
+    anchor: built-in-commands
+    does: 'When two packages offer the same canonical command, the newest package version is served and the other set aside, so the list never doubles.'
+  - name: Tools work without it
+    anchor: command-registry
+    does: 'Every call a tool makes is guarded, so with no registry in the session nothing happens and nothing errors.'
+    authors: true
+  - name: Commands derived from methods
+    anchor: what-a-command-carries
+    does: 'Builds each command''s label, help and prompted parameters from the method''s name, docstring and signature, with type hints setting input styles.'
+    authors: true
+  - name: 'Declared context, surface and state'
+    anchor: what-a-command-carries
+    does: 'Tools declare what a command acts on, where it is offered, where its live value lives, its capability group and a cross-package canonical id.'
+    authors: true
+  - name: Commands for each tool copy
+    anchor: tools-with-several-copies
+    does: 'Each copy of a multi-copy tool registers its commands under its own path, labelled by FnsInstance() and grouped under one name by FnsToolName().'
+    authors: true
+  - name: Declaration validation
+    anchor: tools-with-several-copies
+    does: 'Enforces limits at harvest (24 commands per tool, 6 parameters, 5 contexts, 8 surfaces) and rejects malformed declarations with a reason.'
+    authors: true
+  - name: Consumer API
+    anchor: for-consumers
+    does: 'Commands(), Run(key, args), RescanTools(), Shadowed() and Version() let a palette or launcher list, run and re-harvest commands and check the contract version.'
+    authors: true
 ---
 
 ## Command Registry

@@ -7,6 +7,16 @@ hotkeys:
 features:
   - name: QuickPane
     anchor: quickpane
+feature_list:
+  - name: Split by drag gesture
+    anchor: quickpane
+    does: 'With a COMP selected, hold the modifiers and drag toward a side to open a pane there, inside the COMP and homed; repeat to close it.'
+  - name: Split by arrow keys
+    anchor: quickpane
+    does: 'With a COMP selected, an arrow shortcut splits on that side and drops you into the component; the same key closes the pane it opened.'
+  - name: Split pane command
+    anchor: quickpane
+    does: 'A Split pane quick-launch command asks for the direction, defaulting to right, so it can be run from the command palette.'
 ---
 
 ## QuickPane

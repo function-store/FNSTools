@@ -6,6 +6,29 @@ features:
     anchor: hub-registry
   - name: For tool authors
     anchor: for-tool-authors
+feature_list:
+  - name: Self-healing Hub tabs
+    anchor: hub-registry
+    does: 'Keeps one entry per Hub tab with label, order and visibility, injects a mirror or viewer for each, and prunes tabs whose tool is gone.'
+  - name: Hidden tabs stay hidden
+    anchor: for-tool-authors
+    does: 'Closing a tab in Hub writes Shown in Hub back to its host, so a hidden tab stays hidden across projects.'
+  - name: Contribute a tab through a host
+    anchor: for-tool-authors
+    does: 'A host copy names the tab: the tool''s own panel, a mirrored panel COMP, or an OP Viewer of a DAT/CHOP/TOP/SOP/POP.'
+    authors: true
+  - name: Parameter page tabs
+    anchor: for-tool-authors
+    does: 'Tab Parameters shows a Parameter COMP view of chosen pages of the tool, or every page with `*`, as a Hub tab.'
+    authors: true
+  - name: Python tab API
+    anchor: for-tool-authors
+    does: 'RegisterTab(), Tabs(), SetTabDisplayed(), Open(tab=) and OpenDocs() register, list, show and open Hub tabs from Python.'
+    authors: true
+  - name: Tab exposure callback
+    anchor: for-tool-authors
+    does: An extension implementing OnHubExposure(exposed) learns when its tab is shown; a palette Web Browser has its Active switched for it.
+    authors: true
 ---
 
 ## Hub Registry

@@ -6,6 +6,20 @@ features:
     anchor: pane-type-registry
   - name: For tool authors
     anchor: for-tool-authors
+feature_list:
+  - name: Custom pane types in the dropdown
+    anchor: pane-type-registry
+    does: 'A COMP joins the pane bar''s pane-type dropdown; picking it turns the pane into that COMP with the entry''s owner, pane type, window behaviour and callbacks.'
+  - name: Recall a pane setup by name
+    anchor: pane-type-registry
+    does: 'Entries are named and persistent, so a pane setup you reach for every session is one dropdown pick away.'
+  - name: Registered rows on right-click
+    anchor: for-tool-authors
+    does: 'Entries appear in the dropdown for every pane, and right-clicking the pane-type menu reaches the registered rows.'
+  - name: Register a tool as a pane type
+    anchor: for-tool-authors
+    does: 'A tool ships a host copy of the registry and registers on load, declaring its COMP, pane type, and window actions or callbacks to fire on recall.'
+    authors: true
 ---
 
 ## Pane Type Registry

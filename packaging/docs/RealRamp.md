@@ -6,6 +6,19 @@ features:
     anchor: what-it-is
   - name: Inputs and output
     anchor: inputs-and-output
+feature_list:
+  - name: Phase and period ramp
+    anchor: what-it-is
+    does: 'Computes the gradient in a shader from a phase and a period, so driving Phase from a CHOP cycles the ramp smoothly forever.'
+  - name: Four geometries
+    anchor: what-it-is
+    does: 'Draws the ramp vertical, horizontal, radial or circular.'
+  - name: Repeat or mirror
+    anchor: what-it-is
+    does: Extends the gradient past one period by repeating or mirroring it.
+  - name: Resolution from input
+    anchor: inputs-and-output
+    does: An optional TOP input sets the output resolution when connected.
 ---
 
 ## What it is

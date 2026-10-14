@@ -21,6 +21,83 @@ features:
     anchor: path-bar-mods
   - name: Modules
     anchor: modules
+feature_list:
+  - name: Promote a parameter by drop
+    anchor: custompar-tools
+    does: Dropping a parameter on the button promotes it to the parent's custom parameters on the active page and binds it automatically.
+  - name: Customise a promotion on drop
+    anchor: customparcustomize
+    does: 'Hold Ctrl while dropping to set label and name and, for sliders, min, max, clamping and default; Tab and Shift+Tab jump between fields.'
+  - name: Menu parameter from a Table DAT
+    anchor: custompar-tools
+    does: Dropping a Table DAT on the button adds a new menu parameter that uses the table as its menu source.
+  - name: Promote all of a COMP's parameters
+    anchor: custompar-tools
+    does: Dropping a COMP on the button promotes all of its custom parameters to the parent and binds them.
+  - name: Open parameters and component editors
+    anchor: custompar-tools
+    does: Click opens the parent's parameters and Shift+click the selected operator's; right-click opens the parent's component editor and Shift+right-click the selected one's.
+  - name: Clear dangling binds and expressions
+    anchor: custompar-tools
+    does: 'Switches parameters with a broken bind or a failing expression to constant and clears script errors, on the selected COMP and its immediate children.'
+  - name: Promote an operator as an iop
+    anchor: custompar-tools
+    does: Dragging an operator onto the button with Ctrl+Alt held adds it to the parent as an internal operator shortcut (iop).
+  - name: Add a parent shortcut
+    anchor: custompar-tools
+    does: Adds a parent shortcut to the parent COMP from the button.
+  - name: Create an extension with QuickExt
+    anchor: quickext
+    does: Adds a Python extension to the parent with simplified default code and a docked ExtUtils; also offered under Add in the Component Editor's Extension section.
+  - name: Collapse the selection
+    anchor: custompar-tools
+    does: Middle-clicking the button collapses the selected nodes through QuickCollapse when it is installed; hold Ctrl or Shift to name the result first.
+  - name: Parameter and editor hotkeys
+    anchor: touchdesigner-shortcuts
+    does: 'Open the parameter dialog or the component editor for the selected operator or the current network''s COMP, by keyboard or from the command palette.'
+  - name: Promote the hovered parameter
+    anchor: quickparcustom
+    does: 'Promotes the parameter under the cursor to the parent as a bind or, with Shift, an expression; an already promoted one opens its customisation instead.'
+  - name: Customise or rebind the hovered parameter
+    anchor: quickparcustom
+    does: 'Opens customisation for the parameter under the cursor, or toggles it between Bind and Expression, without selecting anything.'
+  - name: Promote onto a path-bar parent
+    anchor: path-bar-mods
+    does: 'Dropping a parameter on a parent in the path bar promotes it there; a Ctrl+Alt drop promotes an operator as an iop, root included.'
+  - name: Open a parent from the path bar
+    anchor: path-bar-mods
+    does: Middle-clicking a parent in the path bar opens its parameter window; a long middle-click opens its customise window.
+  - name: Switch modules on and off
+    anchor: modules
+    does: 'The Modules page turns each of nine sub-modules on or off independently, persisted through ConfigRegistry, withdrawing the surfaces a disabled module owns.'
+  - name: Parameters as extension properties
+    anchor: usage-examples-in-your-extension-class
+    does: 'CustomParHelper gives an extension eval and par properties for custom parameters, parameter groups and sequences, with include and exclude lists per parameter or page.'
+    authors: true
+  - name: Callbacks found by method name
+    anchor: usage-examples-in-your-extension-class
+    does: 'Extension methods named `onPar<Name>`, `onParGroup<Name>` or `onSeq<Name>N`, or general `onValueChange` and `onPulse`, run when matching parameters change or pulse.'
+    authors: true
+  - name: Declare parameters in code
+    anchor: usage-examples-in-your-extension-class
+    does: 'Helpers such as Float, Int, Menu and RGB create custom parameters from an extension''s `__init__` or class body, with page, range and help text.'
+    authors: true
+  - name: Name your own parameter handlers
+    anchor: naming-the-handler-yourself
+    does: 'Decorators such as `@CustomParHelper.onPar(''Speed'')` bind any method to a parameter, and unknown parameters or name collisions are reported in the log.'
+    authors: true
+  - name: Execute callbacks without nodes
+    anchor: usage-examples
+    does: 'NoNode registers CHOP, DAT and parameter execute callbacks from extension code without dedicated execute DATs, and marks watched operators with a colour.'
+    authors: true
+  - name: Keyboard shortcuts from code
+    anchor: usage-examples
+    does: '`NoNode.RegisterKeyboardShortcut` binds a key such as `ctrl.k` to an extension method, and DeregisterKeyboardShortcut removes it again.'
+    authors: true
+  - name: Declare NoNode callbacks with decorators
+    anchor: declaring-callbacks-on-the-method
+    does: 'Decorators on methods declare CHOP, DAT, parameter and keyboard callbacks that HarvestCallbacks registers, logging any target that does not resolve.'
+    authors: true
 ---
 
 ## CustomPar Tools
