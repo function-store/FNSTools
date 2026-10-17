@@ -1341,6 +1341,8 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
   <div class="dlg-actions">
     <span class="spacer"></span>
     <button class="btn btn-secondary" id="dlgreload" hidden>Reload picker</button>
+    <button class="btn btn-secondary" id="dlgcancel" hidden
+            data-tip="Stop waiting for this sign-in or membership check. Nothing you picked changes.">Cancel</button>
     <button class="btn btn-quiet" id="close">Close</button>
   </div>
 </div></dialog>
@@ -1380,8 +1382,8 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
 <script>
 window.FNS_MANIFEST = {
  "schema": 1,
- "release": "v3.2.73",
- "notes": "The install picker keeps your place when a Patreon sign-in or \"I just pledged\" refreshes it: your ticks stay, an open install step re-plans with the tools the sign-in unlocked, and the newly unlocked tool is announced on your next visit instead of in the middle of the install (arrives with the next installer and bootstrap rebuild).",
+ "release": "v3.2.74",
+ "notes": "The install picker keeps your place when a Patreon sign-in or \"I just pledged\" refreshes it: your ticks stay, an open install step re-plans with the tools the sign-in unlocked, and the newly unlocked tool is announced on your next visit instead of in the middle of the install (arrives with the next installer and bootstrap rebuild).\n\n\nThe install picker never gets stuck waiting on Patreon: a membership check gives up after a minute with a clear message, a browser sign-in after ten, a refused check says why at once, and a new Cancel button stops the wait. Your ticks and step stay as they are either way. A sign-in made right after pledging gets one quiet re-check half a minute later, so a pledge Patreon had not confirmed yet still shows up without pressing anything (arrives with the next installer and bootstrap rebuild).",
  "channel": "stable",
  "base_url": "https://storage.functionstore.tools/fnstools",
  "toolkit": {
@@ -1600,12 +1602,12 @@ window.FNS_MANIFEST = {
   "QuickMarks"
  ],
  "agent_skill": {
-  "version": "v3.2.73",
+  "version": "v3.2.74",
   "path": "packaging/dist/agent-skill.json",
-  "bytes": 516778,
-  "sha256": "a794593813df5d15b66c72c619418d720d5c7fbf0528445237fe0875ebf57b1c",
+  "bytes": 516871,
+  "sha256": "d6fa607c261c1157b9d42a54ab6f56892c3e23314cf4b0a2bd21aae7af6aea16",
   "files": 91,
-  "url": "https://storage.functionstore.tools/fnstools/v3.2.73/agent-skill.json"
+  "url": "https://storage.functionstore.tools/fnstools/v3.2.74/agent-skill.json"
  },
  "packages": [
   {
@@ -1737,7 +1739,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/ChopBank.tox",
     "bytes": 168902,
     "sha256": "64fee2e2b8c6ce9f14dc20218749580a5437c6fc5e8676a98fb4b62509e3d67d",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/ChopBank.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/ChopBank.tox"
    },
    "search": {
     "head": "add blocks build output perchannel processing",
@@ -1806,7 +1808,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/ChopProcess.tox",
     "bytes": 111014,
     "sha256": "f1ac9962b0c07eebf443e5f4c27e28c1379e915d41080dd269aec3adb2298aeb",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/ChopProcess.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/ChopProcess.tox"
    },
    "search": {
     "head": "bank fader input output smoothing",
@@ -1872,7 +1874,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/CircularDistortionTOP.tox",
     "bytes": 33950,
     "sha256": "ea6aaf12e6163bba9014e0dcf7cfa1e82886bb4ee692722489100793c25a7d7d",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/CircularDistortionTOP.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/CircularDistortionTOP.tox"
    },
    "search": {
     "head": "animated extend inputs output ring",
@@ -1929,7 +1931,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/ColorGen.tox",
     "bytes": 10734,
     "sha256": "e41417a029e8169f380318ea4971101132c1be35b7d5e8f5299ee04845285f22",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/ColorGen.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/ColorGen.tox"
    },
    "search": {
     "head": "animate col formula image inputs outcol outlookup outputs strip",
@@ -1987,7 +1989,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/ColorGenPro.tox",
     "bytes": 13806,
     "sha256": "525c2786dfa5a803c1bae67c28fb6efad6813091a90e58dcf0a08770079388b5",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/ColorGenPro.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/ColorGenPro.tox"
    },
    "search": {
     "head": "behavior coefficients col edge image inputs outcol outlookup outputs region strip",
@@ -2045,7 +2047,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/ComplexMix.tox",
     "bytes": 16430,
     "sha256": "139348876d49d01c0923fee99b002e75ff80b6822280928f06f5ad9222a04a68",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/ComplexMix.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/ComplexMix.tox"
    },
    "search": {
     "head": "chainable inputs operations output outputs perpixel pixel sample weighting",
@@ -2103,7 +2105,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/ComplexOp.tox",
     "bytes": 18566,
     "sha256": "6eb6655fb3bc13ae3e46de34ee352911a9f3067529fe9d1479edc3a38fb3d8b2",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/ComplexOp.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/ComplexOp.tox"
    },
    "search": {
     "head": "borders complexplane inputs inverses output",
@@ -2235,7 +2237,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/ConstantCHOP.tox",
     "bytes": 152310,
     "sha256": "633ef66f89b2938a937034ef5246a3b2fcef9cb7e9b0e1942cbf257a4ad945f6",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/ConstantCHOP.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/ConstantCHOP.tox"
    },
    "search": {
     "head": "channels constants outputs plus properties table",
@@ -2327,7 +2329,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/CookBar.tox",
     "bytes": 327718,
     "sha256": "1a34bf5ba0985104101de525b33f83b1f104ccae3fd9594bf2b5d53c9e3d1219",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/CookBar.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/CookBar.tox"
    },
    "search": {
     "head": "active bars bottom budget command cooking cookingoff cooktime count holds hub leaves long margin marker max numeric ops order overlay rank reading rows settings shared showing stays toggle totals turning untouched values",
@@ -2412,7 +2414,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/EaseInterpolator.tox",
     "bytes": 14046,
     "sha256": "473641ca6f784da05d3f02f4ffc9b6081f67a784946d617dfc6033c3e2dffa44",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/EaseInterpolator.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/EaseInterpolator.tox"
    },
    "search": {
     "head": "curves eased incustomease inputs output",
@@ -2477,7 +2479,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/ExpressionPOP.tox",
     "bytes": 150622,
     "sha256": "f91b21cbaf2ac1bdb7d17e42bfa04d2086413ba6529ed28499abe79cdbca4731",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/ExpressionPOP.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/ExpressionPOP.tox"
    },
    "search": {
     "head": "code generated gpu info inputs line linebyline outcode outinfo outpop outputs result",
@@ -2550,7 +2552,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FeedbackDisplace.tox",
     "bytes": 113358,
     "sha256": "907eb2b033bf05e83162eb9fa1bc6e62a8ec0ddb42301eef4499ddbdb843af94",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/FeedbackDisplace.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FeedbackDisplace.tox"
    },
    "search": {
     "head": "blur image indisplace inputs output",
@@ -2611,7 +2613,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FloatDataRecorder.tox",
     "bytes": 13094,
     "sha256": "1091d5e80cee03d56c898700a1cb8c0b6cf9ca9133df3db13948d2f36b662aff",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/FloatDataRecorder.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FloatDataRecorder.tox"
    },
    "search": {
     "head": "inputs outcolor outpointcloud outputs recording stream threestream",
@@ -2675,7 +2677,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_AltSelect.tox",
     "bytes": 134870,
     "sha256": "a60dec55aa490bd6b81b0872ae1c49efb404e4621ae9fd372ef4c39ac968130e",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_AltSelect.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_AltSelect.tox"
    },
    "search": {
     "head": "active altdrag drag hold later leave match ready readytouse selected size sweeps tagged",
@@ -2688,7 +2690,7 @@ window.FNS_MANIFEST = {
    "kind": "tool",
    "category": "Network",
    "description": "Hold Alt while placing a generator TOP to have it come in pre-set to composite over its input.",
-   "version": "3.2.8",
+   "version": "3.2.9",
    "help_url": "https://functionstore.tools/docs/fns-autocombine/",
    "surfaces": [],
    "shortcut": "AUTO_COMBINE",
@@ -2730,12 +2732,12 @@ window.FNS_MANIFEST = {
     "art",
     "speed"
    ],
-   "whatsnew": "",
+   "whatsnew": "No longer raises \"Invalid OP object\" when operators are deleted in the network it watches; the watcher that reports new and deleted operators tripped over the operators that had just been deleted.",
    "artifact": {
     "path": "packaging/dist/FNS_AutoCombine.tox",
-    "bytes": 149686,
-    "sha256": "0970b987841720a86158bbe2c750939260e02cc46dde203fb457577de204205f",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_AutoCombine.tox"
+    "bytes": 149966,
+    "sha256": "221f7c0374e06373cc54f8a961d1ab01cafbd5acca76c9f9533ed08c7363479b",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_AutoCombine.tox"
    },
    "search": {
     "head": "altplace configurable defaults dropped format operation",
@@ -2748,7 +2750,7 @@ window.FNS_MANIFEST = {
    "kind": "tool",
    "category": "Network",
    "description": "Hold Alt while placing a generator TOP to have its resolution follow the project (or the panel it sits in).",
-   "version": "3.2.8",
+   "version": "3.2.9",
    "help_url": "https://functionstore.tools/docs/fns-autores/",
    "surfaces": [],
    "shortcut": "AUTO_RES",
@@ -2790,12 +2792,12 @@ window.FNS_MANIFEST = {
     "speed",
     "show"
    ],
-   "whatsnew": "",
+   "whatsnew": "No longer raises \"Invalid OP object\" when operators are deleted in the network it watches; the watcher that reports new and deleted operators tripped over the operators that had just been deleted.",
    "artifact": {
     "path": "packaging/dist/FNS_AutoRes.tox",
-    "bytes": 152406,
-    "sha256": "5b8c6de49bfcc8dd7f86ed426c2a56edaa4bbf86671e307f79142f9c4dc173c6",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_AutoRes.tox"
+    "bytes": 152694,
+    "sha256": "7c773b2214e53846d9e114c21639984166ae1b27cc51ffa242bf45073441139c",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_AutoRes.tox"
    },
    "search": {
     "head": "acts available color custom dropped expression following format holding mac output parent projectfollowing sets size type",
@@ -2917,7 +2919,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_Autosave.tox",
     "bytes": 227110,
     "sha256": "35d191ecd9a73f906af6992e69fcbf062309bb3320c904998b9fbd659673b6aa",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_Autosave.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_Autosave.tox"
    },
    "search": {
     "head": "interrupting interval main mode modified mouse overwrite projects rest saving show skip status staying timed toggle unchanged wait",
@@ -2960,7 +2962,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_BackupCleaner.tox",
     "bytes": 390414,
     "sha256": "ae279d357c444c87eb316f26e05ee53b105ab1fd171ac1eb5ec4d9d9174e5155",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/FNS_BackupCleaner.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_BackupCleaner.tox"
    }
   },
   {
@@ -3035,7 +3037,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_BeatMod.tox",
     "bytes": 528280,
     "sha256": "ee46812b647b1cee7d0f2d410a9885fc9d0a4587744ab1b0500acf56d01d04df",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/FNS_BeatMod.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_BeatMod.tox"
    }
   },
   {
@@ -3111,7 +3113,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_BorderlessTD.tox",
     "bytes": 378078,
     "sha256": "8b96584bd9c54ddde0d697d3ceb8a3f5e4e93028a0e879c68eabbd739df3e34d",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_BorderlessTD.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_BorderlessTD.tox"
    },
    "search": {
     "head": "bar buttons cleaner color control enable esc escape fix force full fullscreen hide indicator key pause screen shift shiftesc show start startup state title undo windows",
@@ -3185,7 +3187,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_CamSequencer.tox",
     "bytes": 312288,
     "sha256": "d945daf05d7ceaf1f1d925011084d646d2a2ce99292e222806cf4172146a7af3",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/FNS_CamSequencer.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_CamSequencer.tox"
    }
   },
   {
@@ -3235,7 +3237,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_Collect.tox",
     "bytes": 223606,
     "sha256": "478d5bf515f0e9e9ec574e35a968efc0f959d5f65f254cfd87d71b11af6e9c67",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/FNS_Collect.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_Collect.tox"
    }
   },
   {
@@ -3434,7 +3436,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_ColorUI.tox",
     "bytes": 312038,
     "sha256": "a4b44dd2091635cfc4f7985cfe78dca94e012f0a6a51d9376569336078c4d0c7",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_ColorUI.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_ColorUI.tox"
    },
    "search": {
     "head": "auto autoload browser colors console element elements export expose families hub import json load local locally opcolor presets recolor save saving share",
@@ -3478,7 +3480,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_CommandKit.tox",
     "bytes": 39902,
     "sha256": "a532c428a89cffac538594b0d04895a832336c06eeb544f204e614f8c327f3b0",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_CommandKit.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_CommandKit.tox"
    },
    "search": {
     "head": "adopting announce apart changes child code commandpalette context copies decorator derives direct everything explicit identity ids imports knowing main options permanent placed readme reannounce rules safe serves state synchronously tdxl tell thread throughout worth",
@@ -3661,7 +3663,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_CommandPalette.tox",
     "bytes": 325886,
     "sha256": "b8e31048b6d720413ba91396d976c26a9384b5aa87918fc063d81cd5fbbea36e",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_CommandPalette.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_CommandPalette.tox"
    },
    "search": {
     "head": "call complete context contextaware copies copy current drag extension hands history install matching methods mouse navigate persistence plus prefixes presets press query rank ranking rebindable roaming row run scope scoping several star stars step tolerant typo typotolerant usage word",
@@ -4088,7 +4090,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_CommandRegistry.tox",
     "bytes": 99286,
     "sha256": "fefdb998c3291aadb456afe1921791981edd481504cc6786f6192b4cab143795",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_CommandRegistry.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_CommandRegistry.tox"
    },
    "search": {
     "head": "apart api based built builtin carries commandpalette consumers context copies copy curation declaration declared depend derived duplicates methods moves newest pinned presets registries several stands state surface survives tagbased tdxl tray validation version wins work",
@@ -4337,7 +4339,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_ConfigHost.tox",
     "bytes": 106486,
     "sha256": "a2faa8db9f0cc6bd67eb5af466605633d5f797be49112a10c8e776a5ddeb0dd9",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_ConfigHost.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_ConfigHost.tox"
    },
    "search": {
     "head": "adopting callbacks key load named parent registration section stored thing",
@@ -4583,7 +4585,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_ConfigRegistry.tox",
     "bytes": 105926,
     "sha256": "0cda4c77af504061d0b4678afb1af95bbc6edeee4371d04cf42dc26a539af196",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_ConfigRegistry.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_ConfigRegistry.tox"
    },
    "search": {
     "head": "automatic browser components console contents copy core couple custom exceptions expr exprhotstrings externalizing file global host hot load optemplates pls probably reset resetpls save states strings synchronize syncing templates",
@@ -4766,7 +4768,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_Console.tox",
     "bytes": 118478,
     "sha256": "e48f3671f297ad34816e4647bcf50fed09864570252d7417ff0487a65108315d",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_Console.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_Console.tox"
    },
    "search": {
     "head": "api browser canonical checkout chosen color colorui concern config contained contribute contributed contributing dat developing dormant enabled example export expose exposure expression hand handoff hide host hot hotsynced http idle import label local locked managing minutes names opening order owns panel python reexpression register registry remove renders runs scope self selfcontained server shipped show shown sibling someone source sources stamp status surface switches synced system tabs take ten troubleshooting verbatim visible worked",
@@ -4779,7 +4781,7 @@ window.FNS_MANIFEST = {
    "kind": "tool",
    "category": "Parameters",
    "description": "Promote parameters to a parent with binds or expressions, customize name/label/range on drop, plus extension creation, parent shortcuts, parameter clearing and IOP promotion. Also carries the pane-bar drag-drop hijack and path-cell injection, and four stock-TouchDesigner shortcuts for opening parameters and the COMP editor.",
-   "version": "3.2.12",
+   "version": "3.2.13",
    "help_url": "https://functionstore.tools/docs/fns-custompartools/",
    "surfaces": [
     "navbar",
@@ -5000,12 +5002,12 @@ window.FNS_MANIFEST = {
     "dev",
     "speed"
    ],
-   "whatsnew": "the Wiki pulse on ExtUtils (the helper QuickExt docks to every extension) opens the QuickExt section of this site; it opened the retired GitHub wiki.",
+   "whatsnew": "No longer raises \"Invalid OP object\" when operators are deleted in the network it watches; the watcher that reports new and deleted operators tripped over the operators that had just been deleted. This is the watcher behind QuickExt.",
    "artifact": {
     "path": "packaging/dist/FNS_CustomParTools.tox",
-    "bytes": 1169410,
-    "sha256": "032208d64790b5bddeb3c1618c8ea08a463ac20f8967bf0cf4215c382ae49804",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_CustomParTools.tox"
+    "bytes": 1180234,
+    "sha256": "c7e0aaa257a4e50e4c98f31185c6aa8f136ed5994e3e87654bc67b6091f2c7c8",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_CustomParTools.tox"
    },
    "search": {
     "head": "active add additive alongside alt alternative altleftclick applied arity base binding callback callbacks change class clear clearpars cmd code collapse collision creates ctrl current cursor custompar customparcustomize customparhelper dangling dat declaration declare declaring decorators documented draganddrop editors enforced exactly examples execute existing expected export ext features five found handler handlers harvesting helper hotkeys hovered icon importing inherit init invoked jump key keyboard leftclick longer mac manipulate method middle middleclick mods modules myhotkeys names naming navbar new nodes nonode params pars pathbar properties quick quickext quickly quickparcustom rebind rebuilds reharvesting reported resolve resolved returns rightclick runs scratch seeded selected selection shift shiftleftclick shiftrightclick signatures static strings strongly style switch table target targets usage value visible works",
@@ -5078,7 +5080,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_ExprHotStrings.tox",
     "bytes": 199766,
     "sha256": "6574d9c67495b6220f78964bbe87e08fc94aa9540728b9e79e2a18c17de615ab",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_ExprHotStrings.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_ExprHotStrings.tox"
    },
    "search": {
     "head": "abbreviation bind breakdown expansion expression important inline parent path promote table tube typing wrap youtube",
@@ -5156,7 +5158,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_GeoPilot.tox",
     "bytes": 355096,
     "sha256": "d8bf19afb05e05f907e6fa5ce59f336f3d98cc5c28be4e8a71147395f2ff4cc7",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/FNS_GeoPilot.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_GeoPilot.tox"
    }
   },
   {
@@ -5195,7 +5197,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_GlobalOutSelect.tox",
     "bytes": 273782,
     "sha256": "61692bdea0625e3fa3aa267fa8e3b1b0ffc36755d5ac32bb574783afd4df41c6",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_GlobalOutSelect.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_GlobalOutSelect.tox"
    },
    "search": {
     "head": "jump outs refresh row rows selects viewer",
@@ -5276,7 +5278,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_GlobalVolControl.tox",
     "bytes": 274550,
     "sha256": "dcbe215f9c4573ef07820052481214f046fb9923271dd674e70e15cc10b3cdb4",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_GlobalVolControl.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_GlobalVolControl.tox"
    },
    "search": {
     "head": "application applicationwide master mute overall slider wide",
@@ -5455,7 +5457,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_HotkeyManager.tox",
     "bytes": 258070,
     "sha256": "2640c41dd1c6c6898eafa6d529318fb41b95d9f184e59e683701f773cc176582",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_HotkeyManager.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_HotkeyManager.tox"
    },
    "search": {
     "head": "allows binding bindings cell column conflicts defaults externalized hotkeys keys load persist pressing projects projectwide rebind reset rightclick save wide",
@@ -5594,7 +5596,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_Hub.tox",
     "bytes": 1193426,
     "sha256": "60bbfc35404a48b1407cbbfb00d8da8d353b5bf8165f287f303437704681deef",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_Hub.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_Hub.tox"
    },
    "search": {
     "head": "arrange commands configurator contribute contributing contributions corner hide layout leftclick margin opmenu overlay python rightclick roaming rows show strip styles",
@@ -5732,7 +5734,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_HubRegistry.tox",
     "bytes": 86950,
     "sha256": "2393d2a2e253625f07de64ff7249aa2f3d1e2ce5de18767110963ba4f4100b36",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_HubRegistry.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_HubRegistry.tox"
    },
    "search": {
     "head": "api authors callback content exposure healing help hidden host label order python self selfhealing show shown stay url",
@@ -5817,7 +5819,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_HydroHomie.tox",
     "bytes": 212622,
     "sha256": "0c80e7d25b379396465efe05e793700279c6a2a2f54806079d649db0b1364fdb",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_HydroHomie.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_HydroHomie.tox"
    },
    "search": {
     "head": "changed enable icon minutes reminds",
@@ -5862,7 +5864,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_iopBrowser.tox",
     "bytes": 222982,
     "sha256": "0e9875e9715746b77d4459fc9341e3c5f694d2167b896911e9ee76f614ff6dba",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_iopBrowser.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_iopBrowser.tox"
    },
    "search": {
     "head": "add available bars drag drop hierarchy iops navigate parent parenthierarchy searchable",
@@ -6057,7 +6059,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_MainMenuRegistry.tox",
     "bytes": 95110,
     "sha256": "6d02921a955106112d03d96cbb424d3487e5d236fd69a4c7cde913ad2282312a",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_MainMenuRegistry.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_MainMenuRegistry.tox"
    },
    "search": {
     "head": "edit entries entry hide hub order publish",
@@ -6111,7 +6113,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_MediaBrowser.tox",
     "bytes": 228078,
     "sha256": "eacb51f9a4c0c181235399ec725075175b357eedaed96ba5a2220f1bffa64c05",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/FNS_MediaBrowser.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_MediaBrowser.tox"
    }
   },
   {
@@ -6183,7 +6185,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_Misc.tox",
     "bytes": 259070,
     "sha256": "2ee1cc88eca3a82278f5e75dbe0fc257fc15ee2da8e9a4ba7860acec0a740787",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_Misc.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_Misc.tox"
    },
    "search": {
     "head": "clear display drive flags interaction",
@@ -6243,7 +6245,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_MixSequencer.tox",
     "bytes": 52382,
     "sha256": "9e3a5b2642e5ac4397848c347d7091ad11321f94fcdb296ed48f6848f6adf3d0",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/FNS_MixSequencer.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_MixSequencer.tox"
    }
   },
   {
@@ -6429,7 +6431,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_NavbarRegistry.tox",
     "bytes": 98174,
     "sha256": "fbc78f9c97044741dd4f2cd98b366614d833c8463901b856db4dc41e0ff75d74",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_NavbarRegistry.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_NavbarRegistry.tox"
    },
    "search": {
     "head": "authors copy host hub layout package panel registration",
@@ -6495,7 +6497,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_OpenExt.tox",
     "bytes": 134158,
     "sha256": "e6af06f8e0bf8ccd001c8a11d6dc4795908549d7c95054cfab0cfcb28f09ff5a",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_OpenExt.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_OpenExt.tox"
    },
    "search": {
     "head": "command ctrl current edit editor external hotkey launch press promoted quick quicklaunch",
@@ -6699,7 +6701,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_OpFamily.tox",
     "bytes": 329958,
     "sha256": "1847cf5c4304115497db92d6aba26aa6b0ed101fcac98c22ae68c09c7a6bdb92",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_OpFamily.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_OpFamily.tox"
    },
    "search": {
     "head": "add alternatives come commands credits declared launch manifest manifestdeclared mirrored operators optional quick quicklaunch remove replace retention stub sync update",
@@ -6769,7 +6771,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_OpMenuMods.tox",
     "bytes": 353846,
     "sha256": "ba589d32ccb4fd233de7e99b9af889c7cfb3278fed39cef0b921e44823790de5",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_OpMenuMods.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_OpMenuMods.tox"
    },
    "search": {
     "head": "acronyms based custom define dotsimulate filters greg hub keyword opmenu optype registry registrybased removable searchwords table words",
@@ -6964,7 +6966,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_OpMenuRegistry.tox",
     "bytes": 107142,
     "sha256": "85590f3468083b1208979f551388af5e0af6119ed97f5ddf9862175cadafb4ef",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_OpMenuRegistry.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_OpMenuRegistry.tox"
    },
    "search": {
     "head": "alternatives chain contribute contributions filterchain injection nodes nodetable opmenu panel shared store table word",
@@ -7024,7 +7026,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_OpSequencer.tox",
     "bytes": 117126,
     "sha256": "053c4aff4006aa3774330275b6217e7cd18c129f26d95400382235d7999d95eb",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/FNS_OpSequencer.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_OpSequencer.tox"
    }
   },
   {
@@ -7033,7 +7035,7 @@ window.FNS_MANIFEST = {
    "kind": "tool",
    "category": "Network",
    "description": "A library of preconfigured operator templates to drop into a network.",
-   "version": "3.2.11",
+   "version": "3.2.12",
    "help_url": "https://functionstore.tools/docs/fns-optemplates/",
    "surfaces": [
     "opmenu",
@@ -7265,12 +7267,12 @@ window.FNS_MANIFEST = {
     "speedCHOP",
     "triggerCHOP"
    ],
-   "whatsnew": "",
+   "whatsnew": "No longer raises \"Invalid OP object\" when operators are deleted in the network it watches; the watcher that reports new and deleted operators tripped over the operators that had just been deleted.",
    "artifact": {
     "path": "packaging/dist/FNS_OpTemplates.tox",
-    "bytes": 393528,
-    "sha256": "c65d01bafb14d2ddac5bc8133343c5cda3dcfaa5b139986c05b162e1bbe52924",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_OpTemplates.tox"
+    "bytes": 396752,
+    "sha256": "a806da465f7e8692b1ec27b59fbbfc1ba72fddc7287f932387de159b8c50be3e",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_OpTemplates.tox"
    },
    "search": {
     "head": "addition adoption alternatively alternatives appear avoid base bypass chains clicking config connection cooking defining definitions disable drag edit errors exciting external feature fnstools follow global icon important innovative insert issues known libraries lives maintaining middle middleclick middleclicking needed older packages palette performance probably push registry rightclick save saved saving scope several shared snippets start strongly substitute suggested template toolbar turned type untouched upgrade upgrading usage user window",
@@ -7352,7 +7354,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_OpToClipboard.tox",
     "bytes": 136702,
     "sha256": "77fe987d7e82666e017fc40ccd94b4451f21cb9dd992cc32950f6e20d6b1086b",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_OpToClipboard.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_OpToClipboard.tox"
    },
    "search": {
     "head": "cmd copying ctrl currently easily expressions pressing references shift",
@@ -7449,7 +7451,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_Output.tox",
     "bytes": 207582,
     "sha256": "286cb55ab06e48a18589e1a12fca25026f880e8f77b856930f3d53896e14a27d",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_Output.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_Output.tox"
    },
    "search": {
     "head": "choose drag leftclick rightclick",
@@ -7617,7 +7619,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_OverlayRegistry.tox",
     "bytes": 98846,
     "sha256": "4ec06498f1927952da6b8872ca66fdfcc408468f2a2b4c04135d985037076e14",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_OverlayRegistry.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_OverlayRegistry.tox"
    },
    "search": {
     "head": "active api authors corner data displayed drawing follows host hub layer layers leaves manage managing margin order panel publish runs shared shown untouched widget widgets",
@@ -7780,7 +7782,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_PaletteRegistry.tox",
     "bytes": 91358,
     "sha256": "07842e759e7085bfe3c5b915a4416e344d8d32a01285908c286d79ec6680756c",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_PaletteRegistry.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_PaletteRegistry.tox"
    },
    "search": {
     "head": "api authors callback callbacks canonical dat expose fitted host hotkey intact label order panels python register registered resized reuses several shown",
@@ -7918,7 +7920,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_PaneSearchRegistry.tox",
     "bytes": 85782,
     "sha256": "04e77d1258ef4d83ada669abe88b877dcc552501f6df424c9a7a060e459be461",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_PaneSearchRegistry.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_PaneSearchRegistry.tox"
    },
    "search": {
     "head": "api authors contributed controls host operators python reach register stays widget",
@@ -8089,7 +8091,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_PaneTypeRegistry.tox",
     "bytes": 174366,
     "sha256": "256fd8d92dfdeda34a6024a13badaa950965e586400869c5f826a04578753305",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_PaneTypeRegistry.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_PaneTypeRegistry.tox"
    },
    "search": {
     "head": "authors custom entry recall register registered rightclick rows setup types",
@@ -8224,7 +8226,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_ParentHierarchy.tox",
     "bytes": 201126,
     "sha256": "22afce1d037f3b7ba2002e8c4d9441250537d5a24bff664dd79c22e7d9507789",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_ParentHierarchy.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_ParentHierarchy.tox"
    },
    "search": {
     "head": "althover api browser calls ctrlhover customization expands extension extensions integration iop iopbrowser navbar row shortcuts view",
@@ -8313,7 +8315,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_ParOPDrop.tox",
     "bytes": 202942,
     "sha256": "9635b032f1a48fa21ef14eec2c7f6f39b59c55f4d6f8a5f9ba4db7aaf0489177",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_ParOPDrop.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_ParOPDrop.tox"
    },
    "search": {
     "head": "alt channel comps ctrl dats dragdrop drops exec hotkeys operators opt param pars shift single",
@@ -8481,7 +8483,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_ParRandomizer.tox",
     "bytes": 199478,
     "sha256": "7f3cc14fb648bc95dffa4088e305c73ac7b6b4d8a06cb4a3314ab12dace6b59a",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_ParRandomizer.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_ParRandomizer.tox"
    },
    "search": {
     "head": "ctrl current defaults drag dragdrop drop hotkey hovered reset rightclick selected shift store",
@@ -8533,7 +8535,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_POPOverlay.tox",
     "bytes": 295574,
     "sha256": "8be91989f9fc7f9a3f0a8437da970a5faa46788c4b204ee0880f62619dd96801",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/FNS_POPOverlay.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_POPOverlay.tox"
    }
   },
   {
@@ -8660,7 +8662,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_PreviewPanel.tox",
     "bytes": 891370,
     "sha256": "d515ee01bbf3c6366b963232da5c5d287814050549b6e897c4a4b0350465f746",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/FNS_PreviewPanel.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_PreviewPanel.tox"
    }
   },
   {
@@ -8717,7 +8719,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_ProSceneChanger.tox",
     "bytes": 120806,
     "sha256": "f68c192403662db2ff305c0894d8a33bfc787ea708999a89bc2bd25cb7af5d5d",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/FNS_ProSceneChanger.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_ProSceneChanger.tox"
    }
   },
   {
@@ -8800,7 +8802,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_QuickCollapse.tox",
     "bytes": 148358,
     "sha256": "14528e05e15773fffd38a24449c53f938a1d58be4a6991660eef4f220505ba24",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_QuickCollapse.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_QuickCollapse.tox"
    },
    "search": {
     "head": "base key keystroke nodes onekey parent selected",
@@ -8890,7 +8892,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_QuickPane.tox",
     "bytes": 137374,
     "sha256": "8d44e3fb46bf06bece8972590abd5d25211cb8d67330804a9c8fa12388fa28d6",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_QuickPane.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_QuickPane.tox"
    },
    "search": {
     "head": "arrow command drag gesture hand hold keys modifiers panes peek press ratio split splitting",
@@ -8949,7 +8951,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_QuickTime.tox",
     "bytes": 195662,
     "sha256": "84d15ab4c1fc6241275e00e6e99c3b6cc73130a293245245925c277be7d16930",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_QuickTime.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_QuickTime.tox"
    },
    "search": {
     "head": "middle middleclick multiplier reset timers",
@@ -9028,7 +9030,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_RandomCHOP.tox",
     "bytes": 128758,
     "sha256": "d12a7368bfac2b04b434f54de90aad6e8ab62378f01e970130fcbaf3009fefff",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/FNS_RandomCHOP.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_RandomCHOP.tox"
    }
   },
   {
@@ -9080,7 +9082,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_Remote.tox",
     "bytes": 272982,
     "sha256": "e74e74bb681120c495e8fcdf7ec66ca2e4054af21a63d911dae2705cbff884bc",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/FNS_Remote.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_Remote.tox"
    }
   },
   {
@@ -9185,7 +9187,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_ResetPLS.tox",
     "bytes": 216526,
     "sha256": "f84543289582084c5a235e0154f9e061fbbb4ad5fcc1612c9fd12f404d52a225",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_ResetPLS.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_ResetPLS.tox"
    },
    "search": {
     "head": "base breakdown callback callbacks conf container custom dat dats depth disable edit enable everything except exceptions frame global limit misc names onreset optypes pars ptypes root script search sop startup static timeline toggles tube type youtube",
@@ -9306,7 +9308,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_SearchFix.tox",
     "bytes": 210278,
     "sha256": "9347a851f1aba13cc0fd49bcaa75517b8ae9cc7df0a731942e14f43ffd4ad908",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_SearchFix.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_SearchFix.tox"
    },
    "search": {
     "head": "bars best close closes commands deep finds launch match matching mean patterns quick quicklaunch repatch results searching spaces step underscores wildcard",
@@ -9352,7 +9354,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_SearchPalette.tox",
     "bytes": 135070,
     "sha256": "9309b17fee3b67a88473138d27d3455cbe75dc219abc421fb523869527bd2727",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_SearchPalette.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_SearchPalette.tox"
    },
    "search": {
     "head": "auto behavior case caseinsensitive editing exclude exclusions fallback focus folder fuzzy hotkey insensitive install latest multiple navigation ranked rebindable results substring tdx tdxsearchpalette text uninstall version wildcards word words work",
@@ -9432,7 +9434,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_SetSmoothness.tox",
     "bytes": 256686,
     "sha256": "116b1728117c9fe1569fc6c153143c5f9d60b754a90c0b7bd45cccd568f75fc3",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_SetSmoothness.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_SetSmoothness.tox"
    },
    "search": {
     "head": "apply change commands common launch opening quick quicklaunch setting time toolbar",
@@ -9492,7 +9494,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_SimpleSceneChanger.tox",
     "bytes": 101086,
     "sha256": "2267a1ce0ada426c929c9bd59d361b7c6e1bbf5edab28e587c4c667bf1c11f0e",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/FNS_SimpleSceneChanger.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_SimpleSceneChanger.tox"
    }
   },
   {
@@ -9556,7 +9558,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_SwapOps.tox",
     "bytes": 197694,
     "sha256": "c403bdc4fd08aa591e7ea9049a3ae56a657cafd159c2e650c59f9f93f2ad464a",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_SwapOps.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_SwapOps.tox"
    },
    "search": {
     "head": "cases different line mirror operators selected works",
@@ -9626,7 +9628,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_SwitchOPs.tox",
     "bytes": 134846,
     "sha256": "b67839d17bdedbdeb33c8a1ecbcd8e80107948c2e1d38dcd95cc32da521b60a0",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_SwitchOPs.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_SwitchOPs.tox"
    },
    "search": {
     "head": "active ctrl jump press toggle",
@@ -9695,7 +9697,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_SwitchTools.tox",
     "bytes": 122254,
     "sha256": "84c6ef347a18f6b2cdbce98765a9ecc19fd15aed66ec94815717cc4e4cc35ab2",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/FNS_SwitchTools.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_SwitchTools.tox"
    },
    "search": {
     "head": "callbacks cooking drive selection",
@@ -9883,7 +9885,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_TimelineRegistry.tox",
     "bytes": 102878,
     "sha256": "e2b29f6124cdec518595704aaec293022c8964f84179f04ca08edaca02b99e48",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_TimelineRegistry.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_TimelineRegistry.tox"
    },
    "search": {
     "head": "adds api authors background contributed grow host placement python registration stays three unused widgets zone zones",
@@ -9986,7 +9988,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_TimelineTools.tox",
     "bytes": 404622,
     "sha256": "2c1b692540a632ac93cae762452d978430539c23d2d89ea828b579af4665b218",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/FNS_TimelineTools.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_TimelineTools.tox"
    }
   },
   {
@@ -10177,7 +10179,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_ToolbarRegistry.tox",
     "bytes": 92782,
     "sha256": "12737cfd0d6f0a891b1b20f9c6f4afefe9b241803819e0a13acb8038189300b7",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_ToolbarRegistry.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_ToolbarRegistry.tox"
    },
    "search": {
     "head": "arrange authors central drop host hub panel register state",
@@ -10190,7 +10192,7 @@ window.FNS_MANIFEST = {
    "kind": "core",
    "category": "Core",
    "description": "In-place toolkit updates, with settings preserved across the replacement.",
-   "version": "3.2.28",
+   "version": "3.2.29",
    "help_url": "https://functionstore.tools/docs/fns-updater/",
    "surfaces": [],
    "shortcut": "FNS_UPDATER",
@@ -10235,6 +10237,11 @@ window.FNS_MANIFEST = {
      "name": "CachedToken",
      "signature": "()",
      "doc": "A still-valid download token, or ''."
+    },
+    {
+     "name": "CancelPending",
+     "signature": "()",
+     "doc": "Stop waiting on a sign-in or a membership check (the picker's Cancel)."
     },
     {
      "name": "Check",
@@ -10553,12 +10560,12 @@ window.FNS_MANIFEST = {
      "hidden": true
     }
    ],
-   "whatsnew": "the licence key, the licence product, the update endpoints (Base URL, Gate URL) and the store folder no longer travel between projects through the settings file; Active, Use Discovery, Show Progress, Show Notes and Keep Store still do. new quick-launch command Install agent skill copies the FNSTools agent skill into the project (.claude/skills/fnstools) or the user skills folder, idempotent by version; a store refresh now also fetches the skill bundle and lays it out beside the FNS family folder in the palette. when an update finishes replacing packages, the Hub's toolbar, navbar and main-menu group brackets are re-placed around the settled bar, and the updater tells the Hub while a pass is still replacing packages so no group is dropped mid-update.",
+   "whatsnew": "Sign in in the picker, when it takes over a Patreon session this computer already holds, now asks Patreon for your membership right away; it used to keep the session's old answer (up to six hours) so a fresh pledge needed \"I just pledged\". A sign-in or membership check left waiting by a reload of the updater no longer reads \"checking\" forever.",
    "artifact": {
     "path": "packaging/dist/FNS_Updater.tox",
-    "bytes": 225054,
-    "sha256": "2c891bdbfd3d4b158574a52201ca669cf25e2254ea1ef1614dad9abcad43ef00",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_Updater.tox"
+    "bytes": 225710,
+    "sha256": "5da4e297760a6739c5d0e38ec40cb7a39560c48c7671c6e1fc0f89880bdbea2e",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_Updater.tox"
    },
    "search": {
     "head": "agent changed clicking feature help icon indicator install notes packages release self selfupdate show skill update wiki",
@@ -10645,7 +10652,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/FNS_VSCodeTools.tox",
     "bytes": 719320,
     "sha256": "9740dee636b2e1b2ac6d472096b548a75cfe63df8007164207be01c2eee643c2",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_VSCodeTools.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_VSCodeTools.tox"
    },
    "search": {
     "head": "alt breakdown choose clear clearing ctrl file leftclick path python rightclick script settings shift ship shipping syncs typing vscode workspace youtube",
@@ -10706,7 +10713,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/InfinityCHOP.tox",
     "bytes": 11374,
     "sha256": "2a90c61f3b126de6194cdd0bb7c9820bac0aaa9127ef17395ec2e14dc8eb3e1f",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/InfinityCHOP.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/InfinityCHOP.tox"
    }
   },
   {
@@ -10759,7 +10766,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/InstanceTrailer.tox",
     "bytes": 11902,
     "sha256": "3f0538bdb08e75b491452c6796d599b8bae88c064b796b4ce16db7fe5c746e06",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/InstanceTrailer.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/InstanceTrailer.tox"
    },
    "search": {
     "head": "drive inputs last output outputs ready sample",
@@ -10816,7 +10823,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/KinectSinglePlayer.tox",
     "bytes": 12414,
     "sha256": "84fc9369675d1a1d3497162ca240b0b89e7c779d7dc0b9fef23a3b446167fd9a",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/KinectSinglePlayer.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/KinectSinglePlayer.tox"
    },
    "search": {
     "head": "automatic based boundsbased flag handover outactive outputs outsingleplayer selection",
@@ -10877,7 +10884,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/LayerSep3D.tox",
     "bytes": 44070,
     "sha256": "565322900ebb0b87f5111549bbac9210fd0d7fb81139168b6482624293f75eb9",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/LayerSep3D.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/LayerSep3D.tox"
    },
    "search": {
     "head": "chopdriven color curve edges incolor inmask inmix inputs insoftness instanced inthreshold mask outlayers output outputs overrides perlayer separate slice source texture",
@@ -10933,7 +10940,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/LinkOPs.tox",
     "bytes": 12142,
     "sha256": "a614770482e6542dab9d5abcd5c1a3692b815a631bb343feae74c11fffd4234a",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/LinkOPs.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/LinkOPs.tox"
    },
    "search": {
     "head": "automatically constant constantonly constants current leave linking list optionally pattern",
@@ -10990,7 +10997,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/MaskDraw.tox",
     "bytes": 105358,
     "sha256": "86838dd1dbf0b2c4d5c287445aa873e724d4f091f567b23e6c8b62ec1589cfa6",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/MaskDraw.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/MaskDraw.tox"
    },
    "search": {
     "head": "bar debug display erase finished gestures inputs outmask outmasked save toggles",
@@ -11092,7 +11099,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/midiMapper.tox",
     "bytes": 345422,
     "sha256": "1f9670bf59d392da8ece65f279e5617f5413d6a97be23b6c400bb71d25f6cb44",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/midiMapper.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/midiMapper.tox"
    },
    "search": {
     "head": "across alpha alphamoonbase alt auto autolearn autoreset berlin cmd device drag draganddrop dragdrop dragdropping drop knob leftclick mapping middle middleclick moonbase move new osc par pls projects reset resetmidipls rightclick simple startup stuck",
@@ -11152,7 +11159,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/MoveDetectDir.tox",
     "bytes": 14638,
     "sha256": "56f88d76a361c944cbf8f340ce321238b2d1ebffbd53479656a2e1acb855d63c",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/MoveDetectDir.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/MoveDetectDir.tox"
    },
    "search": {
     "head": "inputs output",
@@ -11209,7 +11216,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/OpenOp.tox",
     "bytes": 9942,
     "sha256": "de6ba42d18550aa0b01b2761aa406e2c8a33dcd9aec3f6455d623b0b8dab1167",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/OpenOp.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/OpenOp.tox"
    },
    "search": {
     "head": "hand windows",
@@ -11318,7 +11325,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/oscMapper.tox",
     "bytes": 240110,
     "sha256": "eb7fef37a63f582469a8e6c7b033b4898d04dcbf5658ca04afe232996ac973ae",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/oscMapper.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/oscMapper.tox"
    },
    "search": {
     "head": "alpha alphamoonbase based berlin learn learnbased mapping moonbase range simple",
@@ -11379,7 +11386,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/Particles2D_POP.tox",
     "bytes": 15430,
     "sha256": "bbeda20409dc886a25d601838259697a2c3ae531442f23c33c5a102cdaca7c6b",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/Particles2D_POP.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/Particles2D_POP.tox"
    },
    "search": {
     "head": "carry effector emit ineffectorcurl ineffectorwind inloopin inputs insource loopin loopout motion outloopout output",
@@ -11479,7 +11486,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/ParticlesGpuUltimate.tox",
     "bytes": 516206,
     "sha256": "c7df6537437dfd353a61c3b38aaecda131a34a5a7265a4a738e29b9d7363b330",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/ParticlesGpuUltimate.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/ParticlesGpuUltimate.tox"
    },
    "search": {
     "head": "col effector emission flow imagedriven incolraw inlifesource inmain inoptflowraw inposraw inputs inturbsource inwindsource main maps optflow optical placed pos raw separate turb",
@@ -11667,7 +11674,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/PasteFromClipboard.tox",
     "bytes": 212278,
     "sha256": "bd6571c6c569032b4b6e56a9a194f2a713a4e2c289034cbd35bc94e8591cbfa2",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/PasteFromClipboard.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/PasteFromClipboard.tox"
    },
    "search": {
     "head": "alt annotate copy directly folder locked save",
@@ -11747,7 +11754,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/PrismTOP.tox",
     "bytes": 118478,
     "sha256": "ae712525f0c42471a11a3c46e586234606ad4ede864d9d1b5c3370b7ea776ff6",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/PrismTOP.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/PrismTOP.tox"
    },
    "search": {
     "head": "edges inputs original output rotation soft stacking swinging underlay",
@@ -11999,7 +12006,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/QuickMarks.tox",
     "bytes": 214374,
     "sha256": "1ae088c7bde042807f474ca6293a7303b209d55379ba543e60e428d8929b9da5",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/QuickMarks.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/QuickMarks.tox"
    },
    "search": {
     "head": "active change clickable hotkey mark order outlines overlay picks pins recall remove save saved spots starts straight switches ten toggle unless",
@@ -12044,7 +12051,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/RealRamp.tox",
     "bytes": 112326,
     "sha256": "563339c037606765bed02c8b9768c799f4b80c451a77fad04013204eeb604d5d",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/RealRamp.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/RealRamp.tox"
    },
    "search": {
     "head": "animated four geometries glsl input inputs mirror output repeat resolution",
@@ -12115,7 +12122,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/SeqMod.tox",
     "bytes": 24622,
     "sha256": "8323a9f6e2090ad3a157f32c0b97e443d04c9e1d24ea4c40a841159164acb0c9",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/SeqMod.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/SeqMod.tox"
    },
    "search": {
     "head": "add callbacks come follow remove tells",
@@ -12239,7 +12246,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/SlideShow.tox",
     "bytes": 18942,
     "sha256": "956983c0baa34805b4deaee1e8a902f1a3fc88cbe0730f7421c5595b05a65466",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/SlideShow.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/SlideShow.tox"
    },
    "search": {
     "head": "play playback",
@@ -12285,7 +12292,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/ThresholdColor.tox",
     "bytes": 109774,
     "sha256": "9bf7712e5cef7e7b27212c0021ce938c26c9188abcc538e75dbd94dffb23ade4",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/ThresholdColor.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/ThresholdColor.tox"
    },
    "search": {
     "head": "colorkeeping inputs instead keeping output white",
@@ -12401,7 +12408,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/TopToMidi.tox",
     "bytes": 115158,
     "sha256": "c6bf22bff87446f2ddaeac43da78202e1c06a9efca3e26b4cd949791df18b325",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.73/TopToMidi.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/TopToMidi.tox"
    },
    "search": {
     "head": "audio dependency idle index inputs install keyboard mapping mingus mode outnotes outputs outsampled outsampledchop outviz preview processing sample sampled sampling scales setup value viz",
@@ -12450,7 +12457,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/ParHoverMIDI_VSN1.tox",
     "bytes": 362816,
     "sha256": "eaab30dc48f656e2408be67c01626426f61ce2feb0b9256f1a64d163c1f064d0",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/ParHoverMIDI_VSN1.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/ParHoverMIDI_VSN1.tox"
    },
    "search": {
     "head": "custom help install pan setup size switching turn updates",
@@ -12504,7 +12511,7 @@ window.FNS_MANIFEST = {
     "path": "packaging/dist/TDXMap.tox",
     "bytes": 934742,
     "sha256": "339116402eff423173e944862f7f623c3cede0c1593b6a5ac2328d87a65ac4ba",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.73/TDXMap.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/TDXMap.tox"
    },
    "search": {
     "head": "base day device drag dragtomap installable installing licence licensing picker product toolkit trial updates",
@@ -15703,10 +15710,12 @@ function fnsBoot() {
   // browser chrome, so a page that asks to be reloaded asks for something
   // the reader cannot do (field report 2026-09-17). Every auth wait
   // carries the reload button; nothing else shows it.
-  function showDialog(text, installable, hint, reloadable) {
+  function showDialog(text, installable, hint, reloadable, cancellable) {
     var dlg = document.getElementById('dlg');
     document.getElementById('out').textContent = text;
     document.getElementById('dlgreload').hidden = !reloadable;
+    // only while a sign-in or a membership check is being waited on
+    document.getElementById('dlgcancel').hidden = !cancellable;
     var h = document.getElementById('dlghint');
     h.textContent = hint || '';
     h.hidden = !hint;
@@ -15949,7 +15958,7 @@ function fnsBoot() {
             JSON.stringify({ key: key, package: sel.value }),
             function (res) {
               showDialog(res.text, false);
-              if (res.ok) { inp.value = ''; watchAuth(); }
+              if (res.ok) { inp.value = ''; startAuthWatch(); }
             });
         });
         redeemRow.appendChild(sel);
@@ -15965,19 +15974,19 @@ function fnsBoot() {
     authActions.signIn = function () {
       post('/auth/signin', '{}', function (res) {
         showDialog(res.text, false);
-        if (res.ok) watchAuth();
+        if (res.ok) startAuthWatch(!/checking your membership/i.test(res.text || ''));
       });
     };
     authActions.recheck = function () {
       post('/auth/recheck', '{}', function (res) {
         showDialog(res.text, false);
-        if (res.ok) watchAuth();
+        if (res.ok) startAuthWatch();
       });
     };
     function doSignIn() {
       post('/auth/signin', '{}', function (res) {
         showDialog(res.text, false);
-        if (res.ok) watchAuth();
+        if (res.ok) startAuthWatch(!/checking your membership/i.test(res.text || ''));
       });
     }
     if (support) {
@@ -16047,7 +16056,7 @@ function fnsBoot() {
             // second arg false ON PURPOSE: true unhides the Install
             // button, and a recheck acknowledgment is not an install
             showDialog(res.text, false);
-            if (res.ok) watchAuth();
+            if (res.ok) startAuthWatch();
           });
         });
       }
@@ -16074,25 +16083,70 @@ function fnsBoot() {
     }
     var before = acctSig(account);
     var authPolls = 0;
+    var authStarted = 0;
+    var authCancelled = false;
+    // An answer is still coming while the status reads like one of these
+    // (ExtAuth.TRANSITIONAL_STATUS). Never a reason to wait unbounded: the
+    // updater settles every flow (timeout, refusal, a reinit's reset), and
+    // this page has its own two limits besides.
+    var SETTLING = /checking|waiting|finishing/i;
+    var SETTLE_LIMIT_MS = 20000;   // the record changed but still "checking"
+    // How long a wait may last. A browser sign-in is a round trip the
+    // person makes on whatever device, so it gets ten minutes; a check
+    // (I just pledged, a licence key, an adopted session) is one gate call
+    // that times out on its own in under a minute, so a minute here.
+    var CHECK_LIMIT_MS = 60000;
+    var BROWSER_LIMIT_MS = 600000;
+    var authLimit = CHECK_LIMIT_MS;
+    /** Start (or restart) the wait for a sign-in or recheck outcome. */
+    function startAuthWatch(browser) {
+      authCancelled = false;
+      authPolls = 0;
+      authStarted = Date.now();
+      authLimit = browser ? BROWSER_LIMIT_MS : CHECK_LIMIT_MS;
+      watchAuth();
+    }
+    // Cancel: stop waiting here AND drop the pending flow in the updater,
+    // so nothing later reloads the page under the reader. Their picks and
+    // screen are untouched; the dialog says where the account stands.
+    document.getElementById('dlgcancel').addEventListener('click', function () {
+      authCancelled = true;
+      post('/auth/cancel', '{}', function (res) {
+        showDialog('Cancelled. ' + (res && res.text ? 'Account: ' + res.text + '.' : '')
+                   + '\nYou can sign in or check again any time.', false);
+      });
+    });
     // Ten minutes, not one: the wait is a browser round trip through
     // Patreon on whatever device the person reaches for, and a watcher
     // that gave up after 60 seconds left the page frozen on "finish in
     // your browser" for good (field report 2026-09-17).
     function watchAuth() {
-      if (++authPolls > 400) {
-        showDialog('Still waiting for the browser. Sign in there, then '
-                   + 'reload the picker.', false, undefined, true);
+      if (authCancelled) return;
+      ++authPolls;
+      if (Date.now() - authStarted > authLimit) {
+        showDialog(authLimit === BROWSER_LIMIT_MS
+          ? 'Still waiting for the browser. Sign in there, then reload the picker.'
+          : 'No answer from the membership check. Nothing you picked changed; '
+            + 'try I just pledged again in a moment, or reload the picker.',
+          false, undefined, true);
         return;
       }
       setTimeout(function () {
+        if (authCancelled) return;
         fetch('/auth/status').then(function (r) { return r.json(); })
           .then(function (st) {
+            if (authCancelled) return;
+            var settling = !!(st.status && SETTLING.test(st.status));
             // ANY change to the record: products, the connection state,
             // the account label, or the moment the gate last confirmed
             // it. A sign-in on an account entitled to nothing changes no
             // products, and watching products alone waited for a change
-            // that could never come.
-            if (acctSig(st) !== before) {
+            // that could never come. A change that arrives while a
+            // membership check is still out (an adopted session, then its
+            // recheck) waits for the check, at most SETTLE_LIMIT_MS, so the
+            // page does not refresh onto the cached answer.
+            if (acctSig(st) !== before
+                && (!settling || Date.now() - authStarted > SETTLE_LIMIT_MS)) {
               showDialog((st.status || 'Done.') + '\nRefreshing the picker…', false);
               setTimeout(reloadKeepingPlace, 900);
               return;
@@ -16101,20 +16155,60 @@ function fnsBoot() {
             // flow narrates itself as waiting/finishing/checking, and
             // stopping on the first of those froze the dialog there
             // while the sign-in completed behind it
-            if (st.status && !/checking|waiting|finishing/i.test(st.status)) {
+            if (st.status && !settling) {
               showDialog(st.status, false, undefined, true);
               return;
             }
-            var secs = Math.round(authPolls * 1.5);
+            var secs = Math.round((Date.now() - authStarted) / 1000);
             showDialog((st.status || 'Waiting for the browser…')
                        + '\nStill waiting, ' + secs + 's. You can leave this '
-                       + 'open; it refreshes by itself when the sign-in lands.',
-                       false, undefined, true);
+                       + 'open; it refreshes by itself when '
+                       + (authLimit === BROWSER_LIMIT_MS ? 'the sign-in lands.' : 'the check answers.')
+                       + ' Cancel stops waiting.',
+                       false, undefined, true, true);
             watchAuth();
           })
           .catch(function () { watchAuth(); });
       }, 1500);
     }
+
+    // One quiet retry for a brand-new pledge. Patreon can take a moment to
+    // report a pledge as active, so a sign-in made right after pledging may
+    // come back entitled to nothing. When the page loads on a session the
+    // gate confirmed in the last two minutes that unlocks nothing here, it
+    // asks once more after 30 seconds, without a dialog; a change reloads
+    // (keeping the place), anything else changes nothing on screen. Once
+    // per tab, so it can never loop.
+    (function quietRecheck() {
+      if (!account || account.connected === false) return;
+      if ((account.products || []).some(function (n) { return byName[n]; })) return;
+      if (!(Date.now() / 1000 - (account.checked_at || 0) < 120)) return;
+      try {
+        if (sessionStorage.getItem('fns.quietrecheck')) return;
+        sessionStorage.setItem('fns.quietrecheck', '1');
+      } catch (e) { return; }
+      setTimeout(function () {
+        fetch('/auth/recheck', {method: 'POST', headers: {'Content-Type': 'application/json'},
+                                body: '{}'})
+          .then(function (r) { return r.json(); })
+          .then(function (res) {
+            if (!res || !res.ok) return;
+            var tries = 0;
+            (function look() {
+              if (++tries > 15 || authCancelled) return;
+              setTimeout(function () {
+                fetch('/auth/status').then(function (r) { return r.json(); })
+                  .then(function (st) {
+                    if (acctKey(st) !== acctKey(account)) { reloadKeepingPlace(); return; }
+                    if (st.status && SETTLING.test(st.status)) look();
+                  })
+                  .catch(function () { /* the server is gone: nothing to do */ });
+              }, 2000);
+            })();
+          })
+          .catch(function () { /* the server is gone: nothing to do */ });
+      }, 30000);
+    })();
   })();
 
   function post(uri, body, onDone) {

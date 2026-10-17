@@ -1341,6 +1341,8 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
   <div class="dlg-actions">
     <span class="spacer"></span>
     <button class="btn btn-secondary" id="dlgreload" hidden>Reload picker</button>
+    <button class="btn btn-secondary" id="dlgcancel" hidden
+            data-tip="Stop waiting for this sign-in or membership check. Nothing you picked changes.">Cancel</button>
     <button class="btn btn-quiet" id="close">Close</button>
   </div>
 </div></dialog>
@@ -4335,10 +4337,12 @@ function fnsBoot() {
   // browser chrome, so a page that asks to be reloaded asks for something
   // the reader cannot do (field report 2026-09-17). Every auth wait
   // carries the reload button; nothing else shows it.
-  function showDialog(text, installable, hint, reloadable) {
+  function showDialog(text, installable, hint, reloadable, cancellable) {
     var dlg = document.getElementById('dlg');
     document.getElementById('out').textContent = text;
     document.getElementById('dlgreload').hidden = !reloadable;
+    // only while a sign-in or a membership check is being waited on
+    document.getElementById('dlgcancel').hidden = !cancellable;
     var h = document.getElementById('dlghint');
     h.textContent = hint || '';
     h.hidden = !hint;
@@ -4581,7 +4585,7 @@ function fnsBoot() {
             JSON.stringify({ key: key, package: sel.value }),
             function (res) {
               showDialog(res.text, false);
-              if (res.ok) { inp.value = ''; watchAuth(); }
+              if (res.ok) { inp.value = ''; startAuthWatch(); }
             });
         });
         redeemRow.appendChild(sel);
@@ -4597,19 +4601,19 @@ function fnsBoot() {
     authActions.signIn = function () {
       post('/auth/signin', '{}', function (res) {
         showDialog(res.text, false);
-        if (res.ok) watchAuth();
+        if (res.ok) startAuthWatch(!/checking your membership/i.test(res.text || ''));
       });
     };
     authActions.recheck = function () {
       post('/auth/recheck', '{}', function (res) {
         showDialog(res.text, false);
-        if (res.ok) watchAuth();
+        if (res.ok) startAuthWatch();
       });
     };
     function doSignIn() {
       post('/auth/signin', '{}', function (res) {
         showDialog(res.text, false);
-        if (res.ok) watchAuth();
+        if (res.ok) startAuthWatch(!/checking your membership/i.test(res.text || ''));
       });
     }
     if (support) {
@@ -4679,7 +4683,7 @@ function fnsBoot() {
             // second arg false ON PURPOSE: true unhides the Install
             // button, and a recheck acknowledgment is not an install
             showDialog(res.text, false);
-            if (res.ok) watchAuth();
+            if (res.ok) startAuthWatch();
           });
         });
       }
@@ -4706,25 +4710,70 @@ function fnsBoot() {
     }
     var before = acctSig(account);
     var authPolls = 0;
+    var authStarted = 0;
+    var authCancelled = false;
+    // An answer is still coming while the status reads like one of these
+    // (ExtAuth.TRANSITIONAL_STATUS). Never a reason to wait unbounded: the
+    // updater settles every flow (timeout, refusal, a reinit's reset), and
+    // this page has its own two limits besides.
+    var SETTLING = /checking|waiting|finishing/i;
+    var SETTLE_LIMIT_MS = 20000;   // the record changed but still "checking"
+    // How long a wait may last. A browser sign-in is a round trip the
+    // person makes on whatever device, so it gets ten minutes; a check
+    // (I just pledged, a licence key, an adopted session) is one gate call
+    // that times out on its own in under a minute, so a minute here.
+    var CHECK_LIMIT_MS = 60000;
+    var BROWSER_LIMIT_MS = 600000;
+    var authLimit = CHECK_LIMIT_MS;
+    /** Start (or restart) the wait for a sign-in or recheck outcome. */
+    function startAuthWatch(browser) {
+      authCancelled = false;
+      authPolls = 0;
+      authStarted = Date.now();
+      authLimit = browser ? BROWSER_LIMIT_MS : CHECK_LIMIT_MS;
+      watchAuth();
+    }
+    // Cancel: stop waiting here AND drop the pending flow in the updater,
+    // so nothing later reloads the page under the reader. Their picks and
+    // screen are untouched; the dialog says where the account stands.
+    document.getElementById('dlgcancel').addEventListener('click', function () {
+      authCancelled = true;
+      post('/auth/cancel', '{}', function (res) {
+        showDialog('Cancelled. ' + (res && res.text ? 'Account: ' + res.text + '.' : '')
+                   + '\nYou can sign in or check again any time.', false);
+      });
+    });
     // Ten minutes, not one: the wait is a browser round trip through
     // Patreon on whatever device the person reaches for, and a watcher
     // that gave up after 60 seconds left the page frozen on "finish in
     // your browser" for good (field report 2026-09-17).
     function watchAuth() {
-      if (++authPolls > 400) {
-        showDialog('Still waiting for the browser. Sign in there, then '
-                   + 'reload the picker.', false, undefined, true);
+      if (authCancelled) return;
+      ++authPolls;
+      if (Date.now() - authStarted > authLimit) {
+        showDialog(authLimit === BROWSER_LIMIT_MS
+          ? 'Still waiting for the browser. Sign in there, then reload the picker.'
+          : 'No answer from the membership check. Nothing you picked changed; '
+            + 'try I just pledged again in a moment, or reload the picker.',
+          false, undefined, true);
         return;
       }
       setTimeout(function () {
+        if (authCancelled) return;
         fetch('/auth/status').then(function (r) { return r.json(); })
           .then(function (st) {
+            if (authCancelled) return;
+            var settling = !!(st.status && SETTLING.test(st.status));
             // ANY change to the record: products, the connection state,
             // the account label, or the moment the gate last confirmed
             // it. A sign-in on an account entitled to nothing changes no
             // products, and watching products alone waited for a change
-            // that could never come.
-            if (acctSig(st) !== before) {
+            // that could never come. A change that arrives while a
+            // membership check is still out (an adopted session, then its
+            // recheck) waits for the check, at most SETTLE_LIMIT_MS, so the
+            // page does not refresh onto the cached answer.
+            if (acctSig(st) !== before
+                && (!settling || Date.now() - authStarted > SETTLE_LIMIT_MS)) {
               showDialog((st.status || 'Done.') + '\nRefreshing the picker…', false);
               setTimeout(reloadKeepingPlace, 900);
               return;
@@ -4733,20 +4782,60 @@ function fnsBoot() {
             // flow narrates itself as waiting/finishing/checking, and
             // stopping on the first of those froze the dialog there
             // while the sign-in completed behind it
-            if (st.status && !/checking|waiting|finishing/i.test(st.status)) {
+            if (st.status && !settling) {
               showDialog(st.status, false, undefined, true);
               return;
             }
-            var secs = Math.round(authPolls * 1.5);
+            var secs = Math.round((Date.now() - authStarted) / 1000);
             showDialog((st.status || 'Waiting for the browser…')
                        + '\nStill waiting, ' + secs + 's. You can leave this '
-                       + 'open; it refreshes by itself when the sign-in lands.',
-                       false, undefined, true);
+                       + 'open; it refreshes by itself when '
+                       + (authLimit === BROWSER_LIMIT_MS ? 'the sign-in lands.' : 'the check answers.')
+                       + ' Cancel stops waiting.',
+                       false, undefined, true, true);
             watchAuth();
           })
           .catch(function () { watchAuth(); });
       }, 1500);
     }
+
+    // One quiet retry for a brand-new pledge. Patreon can take a moment to
+    // report a pledge as active, so a sign-in made right after pledging may
+    // come back entitled to nothing. When the page loads on a session the
+    // gate confirmed in the last two minutes that unlocks nothing here, it
+    // asks once more after 30 seconds, without a dialog; a change reloads
+    // (keeping the place), anything else changes nothing on screen. Once
+    // per tab, so it can never loop.
+    (function quietRecheck() {
+      if (!account || account.connected === false) return;
+      if ((account.products || []).some(function (n) { return byName[n]; })) return;
+      if (!(Date.now() / 1000 - (account.checked_at || 0) < 120)) return;
+      try {
+        if (sessionStorage.getItem('fns.quietrecheck')) return;
+        sessionStorage.setItem('fns.quietrecheck', '1');
+      } catch (e) { return; }
+      setTimeout(function () {
+        fetch('/auth/recheck', {method: 'POST', headers: {'Content-Type': 'application/json'},
+                                body: '{}'})
+          .then(function (r) { return r.json(); })
+          .then(function (res) {
+            if (!res || !res.ok) return;
+            var tries = 0;
+            (function look() {
+              if (++tries > 15 || authCancelled) return;
+              setTimeout(function () {
+                fetch('/auth/status').then(function (r) { return r.json(); })
+                  .then(function (st) {
+                    if (acctKey(st) !== acctKey(account)) { reloadKeepingPlace(); return; }
+                    if (st.status && SETTLING.test(st.status)) look();
+                  })
+                  .catch(function () { /* the server is gone: nothing to do */ });
+              }, 2000);
+            })();
+          })
+          .catch(function () { /* the server is gone: nothing to do */ });
+      }, 30000);
+    })();
   })();
 
   function post(uri, body, onDone) {
