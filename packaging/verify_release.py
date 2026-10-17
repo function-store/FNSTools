@@ -80,6 +80,23 @@ def main():
         else:
             rails_ok += 1
             print('rail %s v%s matches on both paths' % (rail, r.get('version')))
+    # The agent skill's transport document rides every release beside the
+    # rails (docs/AgentSkill.md section 4) and is verified the same way.
+    skill = m.get('agent_skill') or {}
+    if isinstance(skill, dict) and skill.get('sha256'):
+        local = os.path.join('packaging', 'dist', 'agent-skill.json')
+        if not os.path.exists(local):
+            bad.append(('agent-skill.json', 'NO_LOCAL', '', ''))
+        else:
+            want = sha(io.open(local, 'rb').read())
+            if skill['sha256'] != want:
+                bad.append(('agent-skill.json', 'MANIFEST_DISAGREES', skill['sha256'][:12], want[:12]))
+            else:
+                got_v = sha(fetch('%s/%s/agent-skill.json' % (BASE, REL)))
+                if got_v != want:
+                    bad.append(('agent-skill.json', 'MISMATCH', got_v[:12], ''))
+                else:
+                    print('agent skill %s matches on the versioned path' % skill.get('version'))
     if bad:
         print('\n*** %d MISMATCH ***' % len(bad))
         for n, s, gv, gl in bad:

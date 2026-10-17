@@ -33,6 +33,11 @@ class ConfiguratorExt(ConfiguratorBase):
 	HAS_DIVIDERS = True
 	HAS_WIDTH = True
 
+	# the Reset toolbar pulse (ConfiguratorBase, "Reset toolbar")
+	RESET_PAR = 'Resettoolbar'
+	RESET_LABEL = 'Reset toolbar'
+	RESET_PAGE = 'Toolbar'
+
 	# kind, name, order, width, display
 	DEFAULT_STATE = (
 		('divider', 'Divider1', '1', '33', '1'),
@@ -42,6 +47,9 @@ class ConfiguratorExt(ConfiguratorBase):
 		('divider', 'Divider5', '20', '3', '1'),
 		('divider', 'Divider6', '23', '3', '1'),
 	)
+
+	def _onResettoolbarPulse(self, par):
+		self.PromptRestoreShippedLayout()
 
 	def _builtinWidgets(self):
 		"""Panels anchored to the bar's emptypanel that are not our mirrors."""

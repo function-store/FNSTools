@@ -45,6 +45,7 @@ void main() {
 	bool insideStripe = false;
 
 	bool cooking = false;
+	bool parked = false;
 	float cookLevel = 0;
 	
 	float opacity = 0.0;
@@ -62,7 +63,9 @@ void main() {
 		float opMargin = extraInfo[i][0];
 
 		// op and children cook info
-		bool opIsCOMP = bool(extraInfo[i][1]);
+		bool opIsCOMP = extraInfo[i][1] > 0.5;
+		// FNSTools, 2026-10-15: 2 marks a COMP whose cooking is switched off
+		bool opParked = extraInfo[i][1] > 1.5;
 		bool opCooking = bool(cookInfo[i][0]);
 		float opCookLevel = cookInfo[i][1];
 		float opGpuMemLevel = gpuMem[i][0];
@@ -89,6 +92,7 @@ void main() {
 		float cookLevelRel = edgeRel * _opCookLevel;
 		if (_opCookLevel < 1.0) cookLevelRel = edgeRel;
 		if (_opCookLevel > 10.0) cookLevelRel = edgeRel * 10.0;
+		if (opParked) cookLevelRel = edgeRel;   // a parked COMP's bar stays at its base height
 		float cookGpuMemLevelLevelRel = edgeRel * _opGpuMemLevelRel;
 		if (_opGpuMemLevelRel < 1.0) cookGpuMemLevelLevelRel = edgeRel;
 		if (_opGpuMemLevelRel > 10.0) cookGpuMemLevelLevelRel = edgeRel * 10.0;
@@ -105,7 +109,14 @@ void main() {
 		if ((x > l) && (x < r)) {
 			if ((y > tb) && (y < tt)) {
 				insideBar = true;
-				
+				parked = opParked;
+				if (parked) {
+					// static hatch, no level and no motion: not slow, switched off
+					float hatch = (float(x) - opOriginX - (float(y) - tb)) / zoom;
+					insideStripe = mod(hatch, 12.0) > 6.0;
+					break;
+				}
+
 				cooking = _opCooking;
 				cookLevel = _opCookLevel;
 				if (cookLevel > 1) cookLevel = 1;
@@ -181,7 +192,9 @@ void main() {
 
 	// Apply Colors
 	vec4 color = vec4(0.0);  // transparent outside the bars
-	if (insideBar) {
+	if (insideBar && parked) {
+		color = matte(vec4(vec3(insideStripe ? 0.62 : 0.3), 1.0), bgColor, 0.9);
+	} else if (insideBar) {
 		if (cooking) {
 			if (insideLevel) {
 				if (insideStripe) {

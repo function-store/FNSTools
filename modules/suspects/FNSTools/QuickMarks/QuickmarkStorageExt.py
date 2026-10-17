@@ -131,6 +131,7 @@ class QuickmarkStorageExt:
     ### store / retrieve ###
 
     def StoreQuickmark(self, key):
+        """Store the current pane's network, current operator, position and zoom under a slot key."""
         # Get current pane details and store it
         current_pane = ui.panes.current
         # Workaround to get precise position and zoom of the network
@@ -153,6 +154,7 @@ class QuickmarkStorageExt:
         self.custom_print(f"QuickMarks {self._label(key)} is set to: {quickmark_value['current_network']}")
 
     def UnstoreQuickmark(self, key):
+        """Clear a slot's mark and name."""
         # Unstores the quickmark specified by the key
         block = self._block(key)
         label = self._label(key)
@@ -161,6 +163,7 @@ class QuickmarkStorageExt:
         self.custom_print(f"QuickMarks {label} unstored")
 
     def RetrieveQuickmark(self, key):
+        """Jump the current pane to a stored mark (network, current operator, position, zoom); returns the mark."""
         # Get the quickmark from the sequence block
         quickmark = self.GetQuickmark(key)
         if quickmark and 'current_network' in quickmark:
@@ -168,19 +171,63 @@ class QuickmarkStorageExt:
             if target is None or not target.isCOMP:
                 self.custom_print(f"QuickMarks {self._label(key)}: stored network {quickmark['current_network']} no longer exists")
                 return quickmark
-            ui.panes.current.owner = target
+            pane = ui.panes.current
+            pane.owner = target
             if 'current_child' in quickmark:
                 child_op = op(quickmark['current_child'])
                 if child_op:
                     child_op.current = True
                     child_op.selected = True
 
-            ui.panes.current.x = quickmark.get('x', 0)
-            ui.panes.current.y = quickmark.get('y', 0)
-            ui.panes.current.zoom = quickmark.get('zoom', 1)
+            view = (quickmark.get('x', 0), quickmark.get('y', 0), quickmark.get('zoom', 1))
+            self._applyView(pane, view)
+            # The editor can take the network switch late (measured: with
+            # the UI busy, view writes made right after it landed on the
+            # network being LEFT, and the new one opened at its own last
+            # view), so the jump sometimes needed a second press
+            # (2026-10-16; the original called this twice for it). Check
+            # and re-apply over the next frames until the view holds.
+            self._watchView(pane.id, target.path, view, self.VIEW_TRIES, 0)
 
             self.custom_print(f"QuickMarks Jump to {self._label(key)}")
         return quickmark
+
+    VIEW_TRIES = 10         # frames a jump keeps checking its view
+    VIEW_SETTLED = 2        # frames the view must hold before it stops
+
+    @staticmethod
+    def _applyView(pane, view):
+        pane.x, pane.y, pane.zoom = view
+
+    @staticmethod
+    def _viewIs(pane, view):
+        x, y, zoom = view
+        return (abs(pane.x - x) < 0.5 and abs(pane.y - y) < 0.5
+                and abs(pane.zoom - zoom) < 1e-4)
+
+    def _watchView(self, pane_id, path, view, tries, held):
+        run('args[0].valid and args[0].ext.QuickmarkStorageExt.settleView(*args[1:])',
+            self.ownerComp, pane_id, path, view, tries, held,
+            delayFrames=1, delayRef=op.TDResources)
+
+    def settleView(self, pane_id, path, view, tries, held):
+        """Wiring: one frame of a jump's check. Applies the stored view once
+        the pane really shows the mark's network, and stops when it has held
+        for VIEW_SETTLED frames, after VIEW_TRIES, or when the pane is gone
+        or the user has moved on (a manual pan inside the window is
+        overridden for at most VIEW_TRIES frames)."""
+        pane = next((p for p in ui.panes if p.id == pane_id and p.open), None)
+        if pane is None or tries <= 0:
+            return
+        if pane.owner is not None and pane.owner.path == path:
+            if self._viewIs(pane, view):
+                held += 1
+                if held >= self.VIEW_SETTLED:
+                    return
+            else:
+                held = 0
+                self._applyView(pane, view)
+        self._watchView(pane_id, path, view, tries - 1, held)
 
     def GetQuickmark(self, key):
         """The stored dict for a slot, or None. Never navigates."""
@@ -577,6 +624,7 @@ class QuickmarkStorageExt:
     ### hotkeys ###
 
     def HandleShortcut(self, shortcutName):
+        """Called by the hotkey watcher with the pressed combo: recall, store or clear the slot the digit names, toggle the overlay, or toggle Active."""
         if self._isOverlayShortcut(shortcutName):
             self.ToggleOverlay()
             return
@@ -588,9 +636,8 @@ class QuickmarkStorageExt:
 
         elif shortcutName.startswith('ctrl.') and 'alt.' not in shortcutName and 'shift.' not in shortcutName:
             if parent().par.Active:
-                # Once. The doubled call this carried was never explained; measured
-                # on 2025.33070, a pane keeps x/y/zoom set in the same call as its
-                # owner switch (unchanged two frames later), so one call is right.
+                # Once: RetrieveQuickmark re-applies the view a frame later
+                # itself, which is what the doubled call here used to cover.
                 self.RetrieveQuickmark(key_number)
 
         # For storing the quickmark with 'ctrl.' but not 'ctrl.alt.' or 'ctrl.0'

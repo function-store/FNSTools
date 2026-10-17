@@ -103,11 +103,26 @@ class OverlayRegistryExt(RegistryBase):
 			self._ensureLayerActive()
 		if self.ownerComp == self._masterComp() or self._is_sys_global():
 			self._retireWidgetLayoutPage()
+		self._inInit = False
 		if self._is_sys_global():
-			self._ensureViewPars()
-			self._ensureOverlayOps()
-			self._sweepStrayOverlays()
-			self._syncSurface()
+			# One frame later, never inside construction: TD builds this
+			# instance by evaluating ext0object, and every operator read
+			# while it runs (execute_frame's text and Active, the layer
+			# slots) becomes a dependency of that expression. Then any toggle
+			# that flipped execute_frame rebuilt the extension, and the new
+			# instance swept and redrew the overlay in the user's network
+			# mid-click: a toolbar button needed a re-hover (2026-10-12).
+			run("args[0].valid and args[0].ext.OverlayRegistryExt._globalSetup()",
+				self.ownerComp, delayFrames=1, delayRef=op.TDResources)
+
+	def _globalSetup(self):
+		"""The global's own network and surface, outside construction."""
+		if not self._is_sys_global():
+			return
+		self._ensureViewPars()
+		self._ensureOverlayOps()
+		self._sweepStrayOverlays()
+		self._syncSurface()
 
 	def onDestroyTD(self):
 		# a reinit or a removal: the annotation lives in the user's network,
@@ -120,11 +135,13 @@ class OverlayRegistryExt(RegistryBase):
 		super().onDestroyTD()
 
 	def _preInit(self):
+		self._inInit = True			# construction: no operator reads (see postInit)
 		self._overlay = None		# the annotation showing the composite
 		self._frame = None			# (rect, resolution, scale, zoom, pane pixels) as last placed
 		self._paneId = None			# the network editor followed
 		self._ticks = 0
 		self._widgetAnns = {}		# canonical -> the annotation showing that widget
+		self._parkedWidgets = set()	# canonicals whose annotation is hidden in place
 		self._widgetZoom = None		# the zoom seen last frame, and the frames it has held
 		self._zoomHeld = 0
 
@@ -135,6 +152,21 @@ class OverlayRegistryExt(RegistryBase):
 		if not self._is_sys_global():
 			self.stored['PaneRegistry'].clear()
 
+	# Layer slots made up front, so showing a layer re-points one and never
+	# creates a child (see _syncSurface).
+	LAYER_SLOTS = 6
+
+	def _layerSlot(self, i, comp):
+		"""The i-th Select TOP feeding the composite, made only when it never
+		existed (beyond LAYER_SLOTS shown at once)."""
+		name = '%s%d' % (self.LAYER_PREFIX, i)
+		sel = self.ownerComp.op(name)
+		if sel is None:
+			sel = self.ownerComp.create(selectTOP, name)
+			sel.nodeX = comp.nodeX - 400
+			sel.nodeY = comp.nodeY + 200 * (i + 1)
+		return sel
+
 	def _syncSurface(self, attempts=40):
 		"""Idempotent: one Select TOP per shown layer, wired into the
 		composite top layer first, and the frame driver on only while there
@@ -142,28 +174,33 @@ class OverlayRegistryExt(RegistryBase):
 		self._pane_sync_queued = False
 		if not self._is_sys_global():
 			return
+		if getattr(self, '_inInit', False):
+			return			# RegistryBase.postInit's call: _globalSetup syncs a frame later
 		comp = self.ownerComp.op('comp_layers')
 		clear = self.ownerComp.op('constant_clear')
 		if comp is None or clear is None:
 			return
 		self._pruneDeadLayers(sync=False)
 		shown = self._shownLayers()
-		keep = set()
 		selects = []
 		for i, (canonical, layer) in enumerate(reversed(shown)):	# highest order on top
-			name = self.LAYER_PREFIX + tdu.legalName(canonical)
-			keep.add(name)
-			sel = self.ownerComp.op(name)
-			if sel is None:
-				sel = self.ownerComp.create(selectTOP, name)
+			sel = self._layerSlot(i, comp)
 			if sel.par.top.eval() != layer:
 				sel.par.top = layer.path
-			sel.nodeX = comp.nodeX - 400
-			sel.nodeY = comp.nodeY + 200 * (len(shown) - i)
 			selects.append(sel)
+		# Slots stay when their layer goes: creating a child here rebuilds
+		# this extension (the ext0object expression looks its DAT up by name
+		# and re-evaluates when a child appears), and the rebuilt instance
+		# swept and redrew the overlay in the user's network on every toolbar
+		# click that showed a layer (2026-10-12). Only legacy per-tool slots
+		# are destroyed, which does not rebuild it.
 		for o in self.ownerComp.ops(self.LAYER_PREFIX + '*'):
-			if o.name not in keep:
+			if o in selects:
+				continue
+			if not o.name[len(self.LAYER_PREFIX):].isdigit():
 				o.destroy()
+			elif o.par.top.val:
+				o.par.top = ''
 		# A Composite TOP needs two sources ("Not enough sources specified"
 		# with one, measured): the clear layer fills the second slot at rest.
 		wanted = selects + [clear]
@@ -340,9 +377,18 @@ class OverlayRegistryExt(RegistryBase):
 	def _maxPixels(self):
 		"""The render's longest side: MAX_PIXELS, or the Non-Commercial
 		licence's TOP limit (CookBar halved its image there for the same
-		reason)."""
+		reason).
+
+		The limit is 1280 on the LONGEST side, aspect kept, so capping that
+		side keeps the asked size equal to the drawn size and the View pars
+		true. Measured 2026-10-15 under app.addNonCommercialLimit: 2000x1000
+		drew 1280x640, 1280x1000 and 1000x1280 were untouched, 2000x2000
+		drew 1280x1280. Detected with licenses.isNonCommercial: `type` reads
+		'TouchDesigner Non-Commercial', so the old `== 'Non-Commercial'`
+		never matched and an NC user got a TOP drawn smaller than the View
+		pars said (TDXCollab's cursors landed outside the image)."""
 		try:
-			if licences.type == 'Non-Commercial':
+			if licenses.isNonCommercial:
 				return min(self.MAX_PIXELS, self.NON_COMMERCIAL_MAX)
 		except Exception:
 			pass
@@ -407,6 +453,12 @@ class OverlayRegistryExt(RegistryBase):
 				run("args[0].valid and args[0].cook(force=True)", back,
 					delayFrames=frames, delayRef=op.TDResources)
 		mark.par.enable = False		# cannot be clicked or dragged
+		# An annotation encloses the operators inside its area by default, and
+		# this one is fitted over the whole view: every node on screen was
+		# "inside" it, and dragging a container out to the FNS button gave no
+		# drop menu while the overlay showed (owner, 2026-10-14). An image
+		# encloses nothing.
+		mark.par.encloseops = False
 		mark.par.layerzone = 'abovenodes'
 		mark.par.Mode = 'annotate'
 		mark.par.Titletext = ''
@@ -544,8 +596,15 @@ class OverlayRegistryExt(RegistryBase):
 		annotation is undone at once; held while a zoom moves
 		(WIDGET_SETTLE)."""
 		names = {c for c, _p, _s in widgets}
+		registered = set(self._widgetSpecs().keys())
 		for canonical in [c for c in self._widgetAnns if c not in names]:
-			self._removeWidget(canonical)
+			# A widget whose tool switched off is parked, not destroyed: making
+			# and deleting an annotation in the viewed network on every toolbar
+			# click (CookBar's Top List) lost the button's press, 2026-10-12.
+			if canonical in registered:
+				self._parkWidget(canonical)
+			else:
+				self._removeWidget(canonical)
 		if pane is None:
 			self._removeWidgets()
 			return
@@ -567,11 +626,13 @@ class OverlayRegistryExt(RegistryBase):
 			if ann is not None and (not ann.valid or ann.parent() != net):
 				self._removeWidget(canonical)
 				ann = None
-			fresh = ann is None
-			if fresh:
+			fresh = ann is None or canonical in self._parkedWidgets
+			if ann is None:
 				ann = self._createWidget(net, panel, canonical)
 				if ann is None:
 					continue
+			else:
+				self._unparkWidget(canonical, ann)
 			w = max(1.0, float(panel.width)) / zoom
 			h = max(1.0, float(panel.height)) / zoom
 			anchor = spec.get('anchor', 'topleft')
@@ -624,6 +685,7 @@ class OverlayRegistryExt(RegistryBase):
 			for frames in (1, 10):
 				run("args[0].valid and args[0].cook(force=True)", back,
 					delayFrames=frames, delayRef=op.TDResources)
+		ann.par.encloseops = False		# a widget encloses nothing either
 		ann.par.layerzone = 'abovenodes'
 		ann.par.Mode = 'annotate'
 		ann.par.Titletext = ''
@@ -640,7 +702,30 @@ class OverlayRegistryExt(RegistryBase):
 		self._widgetAnns[canonical] = ann
 		return ann
 
+	def _parkWidget(self, canonical):
+		"""Hide a widget's annotation in place: nothing drawn, nothing to
+		click, no size. _placeWidgets brings it back when it is shown."""
+		ann = self._widgetAnns.get(canonical)
+		if ann is None or not ann.valid:
+			self._widgetAnns.pop(canonical, None)
+			self._parkedWidgets.discard(canonical)
+			return
+		if canonical in self._parkedWidgets:
+			return
+		ann.par.Opviewerdisplay = False
+		ann.par.enable = False
+		ann.nodeWidth, ann.nodeHeight = 1, 1
+		self._parkedWidgets.add(canonical)
+
+	def _unparkWidget(self, canonical, ann):
+		if canonical not in self._parkedWidgets:
+			return
+		ann.par.Opviewerdisplay = True
+		ann.par.enable = True
+		self._parkedWidgets.discard(canonical)
+
 	def _removeWidget(self, canonical):
+		self._parkedWidgets.discard(canonical)
 		ann = self._widgetAnns.pop(canonical, None)
 		if ann is not None and ann.valid:
 			ann.destroy()
@@ -701,6 +786,43 @@ class OverlayRegistryExt(RegistryBase):
 		self._removeWidget(canonical)
 		self._syncSurface()
 		return True
+
+	def _merge_pane_registry_from(self, other_registry, prefer_other=False):
+		"""Layers ride the base's entry table; widgets live in their own
+		storage, so a takeover (a newer registry replacing the global) carries
+		them across here too. Before 0.2.0 the new global started without any
+		widget until its tool registered again (TDXCollab, 2026-10-12)."""
+		super()._merge_pane_registry_from(other_registry, prefer_other=prefer_other)
+		try:
+			other = dict(other_registry.fetch('widgets', {}, search=False) or {})
+		except Exception:
+			return
+		if not other:
+			return
+		specs = self._widgetSpecs()
+		changed = False
+		for name, spec in other.items():
+			if prefer_other or name not in specs:
+				specs[name] = dict(spec)
+				changed = True
+		if changed:
+			self.ownerComp.store('widgets', specs)
+
+	def _dropParallelTable(self):
+		"""No widget table either off the global (see the base): a master
+		that relayed widgets through a takeover must not shadow the next."""
+		super()._dropParallelTable()
+		if self._is_sys_global():
+			return
+		glob = self._global_registry()
+		if glob is None or glob == self.ownerComp:
+			return
+		# storage.get, not fetch(): this runs in postInit, during the
+		# extension's construction, and a fetch() there makes the COMP depend
+		# on its own storage -- a "Cook dependency loop" warning naming only
+		# the COMP after every reinit (TDXCollab, 2026-10-15)
+		if self.ownerComp.storage.get('widgets'):
+			self.ownerComp.unstore('widgets')
 
 	def PanelWidgets(self):
 		"""The registered widget names."""
@@ -868,6 +990,11 @@ class OverlayRegistryExt(RegistryBase):
 		comp.par.prefit = 'fill'			# the 8x8 clear layer relies on it
 		comp.par.outputresolution = 'custom'
 		comp.par.resolutionw.expr, comp.par.resolutionh.expr = res_w, res_h
+		# The aspect comes from the resolution, never from an input: on "Use
+		# Input" it followed input 0, and with the 8x8 clear layer (or any
+		# layer of another shape) there the overlay drew squished into a
+		# square (TDCollab partner view, 2026-10-12; 2975x1519 read aspect 1.0).
+		comp.par.outputaspect = 'resolution'
 		comp.par.format = 'rgba8fixed'
 		null = c.op('null_overlay')
 		if null is None:
@@ -875,6 +1002,8 @@ class OverlayRegistryExt(RegistryBase):
 			null.nodeX, null.nodeY = 1400, -600
 		if comp not in null.inputs:
 			null.inputConnectors[0].connect(comp)
+		for i in range(self.LAYER_SLOTS):
+			self._layerSlot(i, comp)
 		frame = c.op('execute_frame')
 		if frame is None:
 			frame = c.create(executeDAT, 'execute_frame')
@@ -1013,6 +1142,7 @@ class OverlayRegistryExt(RegistryBase):
 		self._syncSurface()
 
 	def UnregisterWidget(self, canonical_name):
+		"""Remove a layer from the overlay and recomposite (forwarded to the /sys global)."""
 		if not self._is_sys_global():
 			api = self._registryApi()
 			if api is not self:
@@ -1024,6 +1154,7 @@ class OverlayRegistryExt(RegistryBase):
 
 	# RegistryBase healing calls self.UnregisterPanel(name); alias it.
 	def UnregisterPanel(self, canonical_name):
+		"""RegistryBase's teardown name for UnregisterWidget."""
 		return self.UnregisterWidget(canonical_name)
 
 	def _validateWidget(self, widget_op):
@@ -1081,6 +1212,14 @@ class OverlayRegistryExt(RegistryBase):
 			return
 		prev = self.stored['HostCanonical']
 		api = self._registryApi()
+		if api is self:
+			# No live global yet: a fresh install brings the host up before
+			# the /sys copy's extension is ready, RegisterWidget is ignored,
+			# and with the registry watch off nothing republishes it until a
+			# save. Cook Bar stayed hidden until Unregister/Register (2026-10-14).
+			self._retryHostRegistration(force)
+			return
+		self._hostRetriesLeft = self._HOST_RETRIES
 		if prev and prev != canonical:
 			self._unregisterOwnedMenuName(prev, api=api)
 		api.RegisterWidget(
@@ -1094,6 +1233,20 @@ class OverlayRegistryExt(RegistryBase):
 		self.stored['HostCanonical'] = canonical
 		self._setRegStatus(f'Registered: {canonical} -> {layer.path}')
 		self._ensureToolRegistryPage()
+
+	_HOST_RETRIES = 20			# x 30 frames: ten seconds for the global to come up
+
+	def _retryHostRegistration(self, force):
+		"""Register again a little later, while the global is not live."""
+		left = getattr(self, '_hostRetriesLeft', self._HOST_RETRIES)
+		if left <= 0:
+			self._setRegStatus('Error: no global overlay registry')
+			return
+		self._hostRetriesLeft = left - 1
+		self._setRegStatus('Waiting for the global overlay registry')
+		run("args[0].valid and args[0].extensionsReady and "
+			"args[0].ext.OverlayRegistryExt._applyHostRegistration(force=args[1])",
+			self.ownerComp, force, delayFrames=30, delayRef=op.TDResources)
 
 	def onParAutoregister(self, _par, _val, _prev):
 		self._hostExtFromPar(_par)._applyHostRegistration()

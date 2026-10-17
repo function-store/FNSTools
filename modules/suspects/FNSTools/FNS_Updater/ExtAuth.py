@@ -227,6 +227,7 @@ class ExtAuth:
 		return str(p.eval()).strip() or default
 
 	def GateUrl(self):
+		"""The entitlement gate's base URL (the Gateurl parameter, the production gate by default)."""
 		return self._par('Gateurl', DEFAULT_GATE).rstrip('/')
 
 	def _gateRequest(self, wc, url, data='{}', token=None):
@@ -434,6 +435,7 @@ class ExtAuth:
 		return rec
 
 	def IsSignedIn(self):
+		"""Whether an account record is stored on this install."""
 		return self.Account() is not None
 
 	def Entitlements(self):
@@ -444,6 +446,7 @@ class ExtAuth:
 		return list(acct.get('products') or [])
 
 	def IsEntitled(self, package):
+		"""Whether the stored account holds a package."""
 		return package in self.Entitlements()
 
 	def _routesFor(self, package):
@@ -485,6 +488,7 @@ class ExtAuth:
 		return ('Your current tier does not include %s.' % package)
 
 	def AuthStatus(self):
+		"""A one-line account status for the UI: signed out, or the tier label and the package count."""
 		acct = self.Account()
 		if acct is None:
 			return 'signed out'
@@ -882,6 +886,7 @@ class ExtAuth:
 		return True
 
 	def SignOut(self):
+		"""Revoke the device session at the gate, best effort, and forget the account locally."""
 		# Revoke AT THE GATE before forgetting locally: a sign-out that
 		# only clears the keystore leaves the device token valid forever,
 		# which is a promise the button's label makes and must keep
@@ -957,6 +962,7 @@ class ExtAuth:
 		return {'ok': True, 'why': 'checking (async)'}
 
 	def OnRedeemResponse(self, statusCode, data):
+		"""Web Client DAT callback for the licence redeem request: store the products a key unlocks, or report the refusal."""
 		self._redeem_pending = False
 		ok, payload = self._readJson(statusCode, data)
 		if not ok:
@@ -996,12 +1002,15 @@ class ExtAuth:
 	# ------------------------------------------------------------------
 
 	def Signin(self, par):
+		"""Pulse handler for the Signin parameter: SignIn()."""
 		self.SignIn()
 
 	def Signout(self, par):
+		"""Pulse handler for the Signout parameter: SignOut()."""
 		self.SignOut()
 
 	def Redeemlicense(self, par):
+		"""Pulse handler for the Redeemlicense parameter: RedeemKey()."""
 		self.RedeemKey()
 
 	# ------------------------------------------------------------------

@@ -740,6 +740,14 @@ class HotkeyManagerExt:
 					col_prefix = f"{_type.lower()}_{_par_name}"
 				_val = _data.get(f"{col_prefix}_val", '')
 				_expr = _data.get(f"{col_prefix}_expr", '')
+				# A par that follows another by plain expression is not a
+				# binding the manager owns (only app.osName expressions are,
+				# fns-hotkey-conformance 1a/3). A row saved before it became a
+				# follower would write a constant over the expression: QuickMarks'
+				# keyboardin lost Alt+Shift+M that way on every start (2026-10-12).
+				if (not _expr and _par.mode == ParMode.EXPRESSION and _par.expr
+						and 'app.osName' not in _par.expr):
+					continue
 				if _expr:
 					_par.expr = _expr
 					applied += 1
@@ -1027,6 +1035,7 @@ class HotkeyManagerExt:
 		self.RefreshUI()
 
 	def CancelCapture(self):
+		"""Abandon a key capture in progress and refresh the UI."""
 		kb = self.ownerComp.op('HotkeyUI/keyboardin_capture')
 		if kb is not None:
 			kb.par.active = False
@@ -1157,6 +1166,7 @@ class HotkeyManagerExt:
 	# ------------------------------------------------------------------
 
 	def OpenUI(self):
+		"""Open the hotkey manager window, refreshing the bindings and the conflict list first."""
 		ui_comp = self.ownerComp.op('HotkeyUI')
 		if ui_comp is None:
 			fnsLog("HotkeyUI not built yet")

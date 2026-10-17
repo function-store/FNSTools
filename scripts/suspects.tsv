@@ -104,6 +104,7 @@ path
 /FNSTools/FNS_TimelineTools/FNS_Markers
 /FNSTools/FNS_TimelineTools/FNS_Waveform
 /FNSTools/FNS_TimelineTools/FNS_Keyframer
+/FNSTools/FNS_TimelineTools/FNS_AudioAnalysis
 /FNSTools/FNS_TimelineTools/FNS_TimelineBackground
 /FNSTools/FloatDataRecorder
 /FNSTools/FNS_CommandPalette
@@ -172,7 +173,9 @@ path
 /FNSTools/PrismTOP/FNS_OpMenuRegistry/FNS_About/ExtUtilsMinimal/CustomParHelper
 /FNSTools/RealRamp/glsl3_pixel
 /FNSTools/RealRamp/pre_release
+/FNSTools/RealRamp/opmenu_callbacks
 /FNSTools/RealRamp/FNS_OpMenuRegistry/FNS_About/ExtUtilsMinimal/CustomParHelper
+/FNSTools/RealRamp/script_keys_callbacks
 /FNSTools/ComplexOp/pre_release
 /FNSTools/ComplexOp/complex_functions1
 /FNSTools/SlideShow/Playback/folder1_callbacks
@@ -223,6 +226,7 @@ path
 /FNSTools/FNS_Collect/FNS_ConfigRegistry/FNS_About/ExtUtilsMinimal/CustomParHelper
 /FNSTools/FNS_ColorUI/FNS_About/ExtUtilsMinimal/CustomParHelper
 /FNSTools/FNS_ColorUI/ExtColorUI
+/FNSTools/FNS_ColorUI/pre_release
 /FNSTools/FNS_Console/FNS_About/ExtUtilsMinimal/CustomParHelper
 /FNSTools/FNS_OpenExt/FNS_About/ExtUtilsMinimal/CustomParHelper
 /FNSTools/FNS_OpenExt/ExtOpenExt
@@ -239,6 +243,7 @@ path
 /FNSTools/ConstantCHOP/FNS_OpMenuRegistry/FNS_About/ExtUtilsMinimal/CustomParHelper
 /FNSTools/FNS_Autosave/FNS_About/ExtUtilsMinimal/CustomParHelper
 /FNSTools/FNS_Autosave/FNS_ConfigRegistry/FNS_About/ExtUtilsMinimal/CustomParHelper
+/FNSTools/FNS_Autosave/FNS_MainMenuRegistry/FNS_About/ExtUtilsMinimal/CustomParHelper
 /FNSTools/FNS_GeoPilot/menus
 /FNSTools/FNS_GeoPilot/HeadExt
 /FNSTools/FNS_GeoPilot/PilotExt
@@ -385,6 +390,7 @@ path
 /FNSTools/FNS_TimelineTools/FNS_About/ExtUtilsMinimal/CustomParHelper
 /FNSTools/FNS_TimelineTools/FNS_Keyframer/KeyframerExt
 /FNSTools/FNS_TimelineTools/FNS_Keyframer/drop_callbacks
+/FNSTools/FNS_TimelineTools/FNS_AudioAnalysis/AudioAnalysisExt
 /FNSTools/FNS_TimelineTools/FNS_ConfigRegistry/FNS_About/ExtUtilsMinimal/CustomParHelper
 /FNSTools/FloatDataRecorder/pre_release
 /FNSTools/FNS_CommandPalette/CommandCuration
@@ -541,7 +547,3 @@ path
 /TDXLauncherUtility/TDXLUPalette/FNS_PaletteRegistry/FNS_About/ExtUtils/CustomParHelper
 /TDXLauncherUtility/TDXLUPalette/FNS_PaletteRegistry/RegistryBase
 /TDXLauncherUtility/TDXLUPalette/FNS_PaletteRegistry/PaletteRegistryExt
-/FNSTools/ParticlesGpuUltimate/parexec1
-/FNSTools/RealRamp/opmenu_callbacks
-/FNSTools/RealRamp/script_keys_callbacks
-/FNSTools/FNS_ColorUI/pre_release

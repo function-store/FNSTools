@@ -68,6 +68,9 @@ class ConfiguratorBase:
 	def __init__(self, ownerComp):
 		self.ownerComp = ownerComp
 		self._ensureState()
+		# a frame later, never inside construction: creating a child while
+		# the extension is being built re-evaluates it (the rebuild trap)
+		run('args[0]()', self._ensureResetPulse, delayFrames=5, delayRef=op.TDResources)
 		run('args[0]()', self._boot, delayFrames=90, delayRef=op.TDResources)
 
 	def _log(self, msg):
@@ -324,9 +327,10 @@ class ConfiguratorBase:
 
 	def _seedFirstAdoption(self, api, unordered, prev):
 		"""First adoption: keep TD's items in the order TD had them, ahead
-		of anything already there."""
+		of anything already there. A boot pass: it places (no tool's host
+		is written), see _placeSequence."""
 		rest = [n for n in prev if n not in set(unordered)]
-		api.SetWidgetSequence(unordered + rest)
+		self._placeSequence(api, unordered + rest)
 
 	def _adoptBuiltins(self, api):
 		"""Bring TD's stock items under management so they can be reordered,
@@ -387,6 +391,7 @@ class ConfiguratorBase:
 		while staying adopted so they can be rearranged again. Moving them to
 		the front of the sequence is what un-groups them: membership is
 		positional."""
+		self._markChanged()     # a user edit: this surface's layout roams (see _markChanged)
 		api = self._api()
 		if api is None:
 			return
@@ -413,7 +418,9 @@ class ConfiguratorBase:
 
 	# --- groups: bracket pairs this component owns --------------------------
 
-	def _republishGroupMarkers(self, api, attempts=6):
+	MARKER_RESTORE_MAX_LOOKS = 900     # one look a second: 15 minutes, then give up
+
+	def _republishGroupMarkers(self, api, attempts=6, seen=None, looks=0):
 		"""Re-create the group brackets around the entries they wrap, and
 		re-apply each group's collapsed state.
 
@@ -429,7 +436,21 @@ class ConfiguratorBase:
 		before the first member that is registered, the end bracket closes
 		after the last. One named anchor made the whole group vanish on an
 		install without that tool -- the shipped FNSTools group hung on
-		Perform and HydroHomie, neither in the starter set (2026-10-10)."""
+		Perform and HydroHomie, neither in the starter set (2026-10-10).
+
+		The brackets are PLACED, never numbered in: the pass goes through
+		PlaceWidgetSequence (_placeSequence), so no tool's host is written
+		and a tool at its shipped slot stays there. And a missing member is
+		not a verdict while tools are still coming and going: an in-session
+		update replaces packages one per frame for minutes, each tool's host
+		unregistering and registering again, and six looks a second apart
+		dropped the FNSTools and Project groups on the owner's update
+		(2026-10-17). So an attempt is spent only on a look at a SETTLED
+		registry -- the same tools as the look before, and no update
+		applying (_updateInProgress); a group none of whose members is
+		present is retried like any other; MARKER_RESTORE_MAX_LOOKS bounds
+		the whole thing. FNS_Updater also re-runs the publish when its apply
+		finishes (RepublishOwned)."""
 		t = self._stateDat()
 		if t is None or api is None:
 			return
@@ -489,7 +510,7 @@ class ConfiguratorBase:
 			seq.append(n)
 			for _gid, ename, _a in ends.get(n, []):
 				seq.append(ename)
-		api.SetWidgetSequence(seq)
+		self._placeSequence(api, seq)
 		for r in range(1, t.numRows):
 			if t[r, 'kind'].val != 'group':
 				continue
@@ -500,9 +521,29 @@ class ConfiguratorBase:
 			if api.GroupVisible(gid) != visible:
 				api.SetGroupVisible(gid, visible)
 		api._syncSurface()
-		if pending and attempts > 0:
-			run('args[0](args[1], args[2])', self._republishGroupMarkers, api,
-				attempts - 1, delayFrames=60, delayRef=op.TDResources)
+		if not pending:
+			return
+		now = frozenset(base)
+		settled = seen is not None and now == seen and not self._updateInProgress()
+		if settled:
+			attempts -= 1
+		looks += 1
+		if attempts > 0 and looks < self.MARKER_RESTORE_MAX_LOOKS:
+			run('args[0](args[1], args[2], args[3], args[4])', self._republishGroupMarkers,
+				api, attempts, now, looks, delayFrames=60, delayRef=op.TDResources)
+
+	def _updateInProgress(self):
+		"""Is FNS_Updater replacing packages right now (its IsApplying)? No
+		updater, or one without the method, reads as not updating; the
+		settled-registry test in _republishGroupMarkers covers those."""
+		upd = getattr(op, 'FNS_UPDATER', None)
+		fn = getattr(upd, 'IsApplying', None) if upd is not None else None
+		if not callable(fn):
+			return False
+		try:
+			return bool(fn())
+		except Exception:
+			return False
 
 	ANCHOR_SEP = '|'
 
@@ -583,6 +624,180 @@ class ConfiguratorBase:
 		self.Refresh()
 		return True
 
+	# --- Reset toolbar: back to the shipped layout (2026-10-17) ----------------
+	#
+	# A project whose boot passes renumbered the bar before 2026-10-17 holds
+	# dense numbers in two places: the tools' own layout pars in its .toe, and
+	# the shared settings file, where they read as the user's choices and
+	# load into every project. Nothing can tell those from a real arrangement,
+	# so the heal is the user's call: a pulse on the configurator (the
+	# subclass that offers it names the par in RESET_PAR), confirmed by a
+	# dialog, nothing stored and nothing gated. Pressing it twice is harmless.
+
+	RESET_PAR = None                  # e.g. 'Resettoolbar' on the Toolbar tab
+	RESET_LABEL = 'Reset'
+	RESET_PAGE = 'Layout'
+	RESET_DAT = 'parexec_reset'
+	# the host pars a release stamps (surface_defaults.Apply, through the
+	# host's bind to the tool's own par); FNS_ConfigRegistry.SURFACE_HOST_PARS
+	# minus the Hub's tab pars, which are not a bar's
+	SHIPPED_HOST_PARS = ('Menuorder', 'Displayed', 'Barwidth', 'Align', 'Anchor')
+	LAYOUT_TAG = 'fns_layoutdefaults'  # surface_defaults.LAYOUT_TAG; FNS_ConfigRegistry._LAYOUT_TAG
+	STATE_DEFAULT = 'state_default'    # surface_defaults.STATE_DEFAULT; config_callbacks.STATE_DEFAULT
+	RESET_DAT_TEXT = (
+		"# Built by ConfiguratorBase (_ensureResetPulse): the configurator's own\n"
+		"# pulses. One dispatcher; the handlers live on the extension as\n"
+		"# _on<Par>Pulse(par).\n"
+		"\n"
+		"def onPulse(par):\n"
+		"\text = parent().extensions[0]\n"
+		"\thandler = getattr(ext, '_on%sPulse' % par.name, None)\n"
+		"\tif handler is None:\n"
+		"\t\tdebug('%s: no handler for pulse %s' % (parent().name, par.name))\n"
+		"\t\treturn\n"
+		"\thandler(par)\n"
+		"\treturn\n"
+	)
+
+	def _ensureResetPulse(self):
+		"""Get-or-create the pulse and its callback DAT (code owns the schema;
+		a reinit re-asserts it and never touches a value)."""
+		if not self.RESET_PAR or not self.ownerComp.valid:
+			return
+		comp = self.ownerComp
+		page = None
+		for pg in comp.customPages:
+			if pg.name == self.RESET_PAGE:
+				page = pg
+				break
+		if page is None:
+			page = comp.appendCustomPage(self.RESET_PAGE)
+		found = [p for p in comp.customPars if p.tupletName == self.RESET_PAR]
+		if not found:
+			page.appendPulse(self.RESET_PAR)
+			found = [p for p in comp.customPars if p.tupletName == self.RESET_PAR]
+		elif found[0].style != 'Pulse':
+			self._log('par %s is %s, declared Pulse: refusing to replace it'
+					  % (self.RESET_PAR, found[0].style))
+			return
+		par = found[0]
+		par.label = self.RESET_LABEL
+		par.help = ('Put this surface back to the layout it shipped with: every tool '
+					'returns to its stamped slot, TD\'s own items, dividers and groups '
+					'to the shipped table, and the settings file stops replaying the '
+					'old positions. Your own arrangement of this surface is lost.')
+		d = comp.op(self.RESET_DAT)
+		if d is None:
+			d = comp.create(parameterexecuteDAT, self.RESET_DAT)
+			ext_dat = comp.op('ConfiguratorExt')
+			# beside the extension DAT, one grid step to its left
+			d.nodeX = (ext_dat.nodeX - 200) if ext_dat is not None else -600
+			d.nodeY = ext_dat.nodeY if ext_dat is not None else 0
+		if d.text != self.RESET_DAT_TEXT:
+			d.text = self.RESET_DAT_TEXT
+		for name, val in (('ops', '..'), ('pars', self.RESET_PAR), ('onpulse', 1),
+						  ('valuechange', 0), ('active', 1)):
+			p = getattr(d.par, name, None)
+			if p is not None and str(p.val) != str(val):
+				p.val = val
+
+	def PromptRestoreShippedLayout(self):
+		"""The pulse: ask first, since the user's own arrangement goes with it."""
+		if self._api() is None:
+			self._log('no registry: nothing to reset')
+			return
+		op.TDResources.PopDialog.OpenDefault(
+			text=f"Put the {self.CFG_NAME.replace('Configurator', '').lower()} back to the "
+				 f"layout it shipped with?\n\nEvery tool returns to its stamped slot, "
+				 f"TouchDesigner's {self.BUILTIN_NOUN} and your {self.OWN_NOUN} to the "
+				 f"shipped table, and the settings file stops replaying the old positions. "
+				 f"Your own arrangement of this bar is lost.",
+			title=self.RESET_LABEL,
+			buttons=['Reset', 'Cancel'],     # short: the dialog's buttons clip a long label
+			callback=self._onRestoreShippedDialog,
+			escButton=2, enterButton=1)
+
+	def _onRestoreShippedDialog(self, info):
+		if info.get('buttonNum') == 1:
+			self.RestoreShippedLayout()
+
+	def RestoreShippedLayout(self):
+		"""Put this surface back to the layout it shipped with. Every tool whose
+		release stamped its place (owner tagged LAYOUT_TAG) returns to its
+		stamped default; the configurator's table returns to its shipped copy
+		(STATE_DEFAULT) where one exists; and once the tools have
+		re-registered at their defaults the brackets are re-placed and the
+		settings file rewritten, so it stops replaying the old positions
+		(its records then read value equals default, which never applies).
+		Counts as the user's edit (_markChanged). Returns the number of tool
+		pars it moved."""
+		api = self._api()
+		if api is None:
+			return None
+		self._markChanged()     # a user edit: this surface's layout roams (see _markChanged)
+		moved = self._resetTaggedHosts(api)
+		shipped = self.ownerComp.op(self.STATE_DEFAULT)
+		if shipped is not None and shipped.numRows > 1:
+			self.RestoreState([[c.val for c in r] for r in shipped.rows()])
+		else:
+			self.RepublishOwned()
+		# a host par callback lands a frame late and the tool re-registers
+		# at its default then: re-place the brackets and save after that
+		run('args[0]()', self._finishRestoreShipped, delayFrames=10, delayRef=op.TDResources)
+		self._log(f'restored the shipped layout: {moved} tool par(s) back to their defaults')
+		return moved
+
+	def _resetTaggedHosts(self, api):
+		"""Each published entry's host par that a release stamped, back to its
+		default. The host par is bound to the tool's own par (parent().par.X);
+		the default lives there, and so does the tag."""
+		moved = 0
+		for info in api.Widgets.values():
+			if info.get('adopted') == '1' or info.get('virtual') == '1':
+				continue
+			host = api._resolveSourceRegistry(info)
+			owner = host.parent() if host is not None else None
+			if owner is None or self.LAYOUT_TAG not in owner.tags:
+				continue
+			for hp in self.SHIPPED_HOST_PARS:
+				p = getattr(host.par, hp, None)
+				if p is None or p.mode != ParMode.BIND:
+					continue
+				expr = str(p.bindExpr or '')
+				if not expr.startswith('parent().par.'):
+					continue
+				tp = owner.par[expr[len('parent().par.'):].strip()]
+				if tp is None or tp.mode != ParMode.CONSTANT or tp.val == tp.default:
+					continue
+				tp.val = tp.default
+				moved += 1
+		return moved
+
+	def _finishRestoreShipped(self):
+		self.RepublishOwned()
+		cfg = getattr(op, 'FNS_CONFIGREGISTRY', None)
+		if cfg is None or not cfg.valid or not cfg.extensionsReady:
+			self._log('no config registry: the settings file keeps the old positions')
+			return
+		try:
+			cfg.SaveAll()
+		except Exception as e:
+			self._log(f'settings save after the reset failed: {e}')
+
+	def RepublishOwned(self):
+		"""Re-run the boot publish against the registry as it stands now:
+		dividers, adopted built-ins and their stored orders, and the group
+		brackets around whichever members are registered. FNS_Updater calls
+		it when an apply finishes, so a bracket placed around a partial
+		group while packages were mid-replacement closes around the whole
+		group. Idempotent, and writes no host (see _placeSequence)."""
+		api = self._api()
+		if api is None:
+			return False
+		self._publishOwned(api)
+		self.Refresh()
+		return True
+
 	def SnapshotState(self):
 		"""State-table rows for a roamed config payload (header included),
 		with every LIVE group's collapsed state refreshed from the registry
@@ -648,15 +863,49 @@ class ConfiguratorBase:
 				cur = i + 1
 			keyed.append((stored.get(name, cur), i, name))
 		keyed.sort()
-		api.SetWidgetSequence([n for _, _, n in keyed])
+		# a boot pass: the owned entries are placed around the tools, whose
+		# hosts are not written (see _placeSequence)
+		self._placeSequence(api, [n for _, _, n in keyed])
 
 	# --- registry access ------------------------------------------------------
+
+	def _markChanged(self):
+		"""Tell the registry the user changed this surface's layout, so the next
+		project save writes it to the settings file (RegistryBase
+		markLayoutChanged). Called from the user's edits only: boot adoption,
+		RestoreState and the group re-placement retries change the layout too,
+		and a project that merely loaded must not spread what it loaded."""
+		api = self._api()
+		fn = getattr(api, 'markLayoutChanged', None) if api is not None else None
+		if fn is not None:
+			fn()
 
 	def _api(self):
 		reg = getattr(op, self.REGISTRY_SHORTCUT, None) if self.REGISTRY_SHORTCUT else None
 		if reg is not None and hasattr(reg.ext, self.REGISTRY_EXT):
 			return getattr(reg.ext, self.REGISTRY_EXT)
 		return None
+
+	def _placeSequence(self, api, names):
+		"""Arrange the surface in the given order the way an AUTOMATIC pass
+		may: through the registry's PlaceWidgetSequence, which moves no
+		published tool and writes no host, so a tool at its shipped slot
+		stays there and FNS_ConfigRegistry keeps reading it as unchanged.
+		Only the user's own edits go through SetWidgetSequence
+		(PushSequence), which renumbers 1..N and writes every number back.
+		Boot passes used to renumber too, and wrote dense numbers over the
+		shipped slots of every tool after a missing one; those then roamed
+		as the user's choices (docs/ShippedSurfaceDefaults.md). An adapter
+		without the placing primitive gets the old call, and says so once."""
+		names = [n for n in names if n]
+		fn = getattr(api, 'PlaceWidgetSequence', None)
+		if fn is not None:
+			return fn(names)
+		if not getattr(self, '_place_fallback_logged', False):
+			self._place_fallback_logged = True
+			self._log('registry has no PlaceWidgetSequence: an automatic pass is '
+					  'renumbering through SetWidgetSequence')
+		return api.SetWidgetSequence(names)
 
 	# --- list building ----------------------------------------------------------
 
@@ -943,6 +1192,7 @@ class ConfiguratorBase:
 		first child. A group cannot straddle a bar's fill pivot, so the
 		moved block also adopts the side of the row it lands under -- which
 		is what makes dragging across the left/right boundary work."""
+		self._markChanged()     # a user edit: this surface's layout roams (see _markChanged)
 		api = self._api()
 		if api is None or not paths or not moved_indices:
 			return
@@ -993,35 +1243,43 @@ class ConfiguratorBase:
 	# --- edits (each persists to its owner) -----------------------------------
 
 	def PushSequence(self, names):
+		"""The user's reorder: renumber through the registry (every host
+		written, see SetWidgetSequence) and persist what this component
+		owns. Boot passes do not come here (_placeSequence)."""
 		api = self._api()
 		if api is not None:
 			api.SetWidgetSequence([n for n in names if n])
-			widgets = api.Widgets
-			# persist new positions for everything THIS component owns --
-			# dividers and both ends of every group bracket
-			for name in self._ownedNames():
-				info = widgets.get(name)
-				if info and 'menu_order' in info:
-					cols = {'order': info['menu_order']}
-					if self.HAS_SIDES:
-						cols['side'] = info.get('side', 'right')
-					self._writeState(self._ownedKind(info), name, **cols)
-			# adopted built-ins have no host publisher -- their order persists
-			# HERE (entries live in /sys, which is not saved), or a reorder
-			# would not survive a restart
-			for name, info in widgets.items():
-				if info.get('adopted') == '1' and 'menu_order' in info:
-					self._writeState('builtin', name, order=info['menu_order'],
-									 display=info.get('display', '1'))
-			# a reorder can change which entries a bracket wraps -- re-derive
-			# every LIVE group's anchors from the sequence that now stands
-			# (dormant groups are absent from Groups and keep their spec)
-			if self.HAS_GROUPS:
-				for gid in api.Groups:
-					self._writeMarkerState(api, gid)
+			self._persistOwnedOrders(api)
 		self.Refresh()
 
+	def _persistOwnedOrders(self, api):
+		"""Write the positions the registry now holds into the state table
+		for everything THIS component owns."""
+		widgets = api.Widgets
+		# dividers and both ends of every group bracket
+		for name in self._ownedNames():
+			info = widgets.get(name)
+			if info and 'menu_order' in info:
+				cols = {'order': info['menu_order']}
+				if self.HAS_SIDES:
+					cols['side'] = info.get('side', 'right')
+				self._writeState(self._ownedKind(info), name, **cols)
+		# adopted built-ins have no host publisher -- their order persists
+		# HERE (entries live in /sys, which is not saved), or a reorder
+		# would not survive a restart
+		for name, info in widgets.items():
+			if info.get('adopted') == '1' and 'menu_order' in info:
+				self._writeState('builtin', name, order=info['menu_order'],
+								 display=info.get('display', '1'))
+		# a reorder can change which entries a bracket wraps -- re-derive
+		# every LIVE group's anchors from the sequence that now stands
+		# (dormant groups are absent from Groups and keep their spec)
+		if self.HAS_GROUPS:
+			for gid in api.Groups:
+				self._writeMarkerState(api, gid)
+
 	def ToggleShow(self, name):
+		self._markChanged()     # a user edit: this surface's layout roams (see _markChanged)
 		api = self._api()
 		info = api.Widgets.get(name) if api is not None else None
 		if info is None:
@@ -1057,6 +1315,7 @@ class ConfiguratorBase:
 
 	def ToggleSide(self, name):
 		"""Flip a widget between the left and right of the bar's pivot."""
+		self._markChanged()     # a user edit: this surface's layout roams (see _markChanged)
 		if not self.HAS_SIDES:
 			return
 		api = self._api()
@@ -1096,6 +1355,7 @@ class ConfiguratorBase:
 	def _onWidthDialog(self, info):
 		if info.get('buttonNum') != 1:
 			return
+		self._markChanged()     # a user edit: this surface's layout roams (see _markChanged)
 		det = info.get('details') or {}
 		name = det.get('canonical')
 		txt = str(info.get('enteredText', '') or '').strip()
@@ -1140,6 +1400,7 @@ class ConfiguratorBase:
 	def _onGroupDialog(self, info):
 		if info.get('buttonNum') != 1:
 			return
+		self._markChanged()     # a user edit: this surface's layout roams (see _markChanged)
 		det = info.get('details') or {}
 		txt = str(info.get('enteredText', '') or '').strip()
 		api = self._api()
@@ -1184,6 +1445,7 @@ class ConfiguratorBase:
 		groups included -- comes along. On a sided surface every selected
 		row must be on one side (a group cannot span the fill pivot), and on
 		a kinded one only aligned widgets can be grouped."""
+		self._markChanged()     # a user edit: this surface's layout roams (see _markChanged)
 		if not self.HAS_GROUPS:
 			self._log('this surface has no groups')
 			return None
@@ -1217,6 +1479,7 @@ class ConfiguratorBase:
 	def DissolveGroup(self, gid):
 		"""Remove a group's brackets. Members stay exactly where they are and
 		keep their own Show state, so anything it was hiding comes back."""
+		self._markChanged()     # a user edit: this surface's layout roams (see _markChanged)
 		api = self._api()
 		if api is None or not gid:
 			return
@@ -1251,6 +1514,7 @@ class ConfiguratorBase:
 		self.DissolveGroupFor(self.SelectedName())
 
 	def AddDivider(self):
+		self._markChanged()     # a user edit: this surface's layout roams (see _markChanged)
 		if not self.HAS_DIVIDERS:
 			return
 		api = self._api()
@@ -1267,6 +1531,7 @@ class ConfiguratorBase:
 		self.PushSequence(api.WidgetSequence)
 
 	def RemoveSelected(self):
+		self._markChanged()     # a user edit: this surface's layout roams (see _markChanged)
 		api = self._api()
 		sel = self.SelectedName()
 		if api is not None and sel:
@@ -1340,6 +1605,7 @@ class ConfiguratorBase:
 		surface. Returns the accepted COMP; the actual stamping runs a few
 		frames later -- copying a clone-bound COMP inside the drop-event
 		stack has crashed TD, so it is never done inline."""
+		self._markChanged()     # a user edit: this surface's layout roams (see _markChanged)
 		if not self.SUPPORTS_DROP or not self._isPackageable(comp):
 			return None
 		run('args[0](args[1])', self._stampPackage, comp.path,

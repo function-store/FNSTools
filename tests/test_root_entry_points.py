@@ -32,7 +32,8 @@ ns = {}
 exec(re.search(r"^COMP_NAME = .*$", src, re.M).group(0), ns)
 exec(src[src.index('ROOT_ENTRY_POINTS = ('):src.index('# Toggles beside the pulses')], ns)
 start = src.index('ROOT_PULSE_TEXT = (')
-exec(src[start:src.index('\n\n', src.index('% (COMP_NAME, COMP_NAME))', start))], ns)
+exec(re.search(r"^REMOVE_PATREON_WINDOW = .*$", src, re.M).group(0), ns)
+exec(src[start:src.index('\n\n', src.index('% (REMOVE_PATREON_WINDOW, COMP_NAME, COMP_NAME))', start))], ns)
 
 print('1. the entry points')
 names = [n for n, _, _ in ns['ROOT_ENTRY_POINTS']]

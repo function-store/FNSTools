@@ -256,6 +256,45 @@ check('the overlay and a widget force-cook their viewer only on a resize',
 check('a widget follows a pan live and waits for a zoom to settle',
       'WIDGET_SETTLE = 3' in ext and 'if cur != rect and (fresh or not settling):' in _place)
 
+# Aspect (2026-10-12, TDCollab partner view squished into a square): on "Use
+# Input" the composite took input 0's aspect, the 8x8 clear layer's included.
+check('the composite takes its aspect from its resolution, never an input',
+      "comp.par.outputaspect = 'resolution'" in ext)
+_common = io.open(os.path.join(_ROOT, 'packaging', 'pre_release_common.py'), encoding='utf-8').read()
+check('a release strips the network notes, keeps licence notes and referenced ones',
+      "_notes = _c0.findChildren(type=annotateCOMP, includeUtility=True)" in _common
+      and "_a.name.startswith('fns_license') or _isReferenced(_a)" in _common)
+
+# Toolbar clicks needed a re-hover (2026-10-12): every layer toggle rebuilt
+# the /sys extension (reads of execute_frame during construction became
+# dependencies of ext0object; creating a child re-evaluated it), and the new
+# instance swept and redrew the overlay mid-click.
+check('the global sets itself up a frame after construction, never inside it',
+      "run(\"args[0].valid and args[0].ext.OverlayRegistryExt._globalSetup()\"" in ext
+      and "if getattr(self, '_inInit', False):" in ext and "self._inInit = True" in ext)
+check('layers use a fixed pool of Select TOPs, made up front and re-pointed',
+      'LAYER_SLOTS = 6' in ext and 'sel = self._layerSlot(i, comp)' in ext
+      and 'for i in range(self.LAYER_SLOTS):' in ext)
+check('a widget whose tool switches off is parked, not destroyed',
+      'self._parkWidget(canonical)' in ext and 'self._unparkWidget(canonical, ann)' in ext
+      and 'ann.par.Opviewerdisplay = False' in ext)
+check('in-network loggers ship with only their header row',
+      "_lg in _c0.findChildren(name='Logger', type=COMP, includeUtility=True)" in _common)
+
+check('the overlay annotation encloses no operators (it covers the whole view)', 'mark.par.encloseops = False' in ext)
+check('a widget annotation encloses none either', 'ann.par.encloseops = False' in ext)
+check('a host with no live global retries instead of reporting Registered',
+      'if api is self:' in ext and 'self._retryHostRegistration(force)' in ext)
+check('the retry is bounded and resets on success',
+      '_HOST_RETRIES = ' in ext and 'self._hostRetriesLeft = self._HOST_RETRIES' in ext)
+check('Non-Commercial is detected with licenses.isNonCommercial, never the type string',
+      'licenses.isNonCommercial' in ext and "licences.type == 'Non-Commercial'" not in ext)
+check('a takeover carries the widget table across',
+      'def _merge_pane_registry_from' in ext and "other_registry.fetch('widgets'" in ext)
+check('the master drops its relayed widget table',
+      "self.ownerComp.unstore('widgets')" in ext)
+check('the widget cleanup reads storage without forming a dependency',
+      "self.ownerComp.storage.get('widgets')" in ext and "fetch('widgets', None" not in ext)
 print()
 if FAILS:
     print('FAILED %d: %s' % (len(FAILS), ', '.join(FAILS)))

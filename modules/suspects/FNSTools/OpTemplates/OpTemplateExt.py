@@ -776,6 +776,7 @@ class OpTemplateExt:
 ####################################################################	
 
 	def DropOp(self, _op):
+		"""Store a dropped operator as a template for its operator type."""
 		fnsLog(f'OpTemplates: storing {_op.path} as template for {_op.OPType}')
 		comp = self.createOrReturnTypeBase(_op.OPType, allowCooking=False)
 		self.colorNewBase([comp])
@@ -795,6 +796,7 @@ class OpTemplateExt:
 		return comp
 
 	def OpenTemplateBase(self, optype):
+		"""Open the template base of an operator type in a floating network editor, creating it when needed."""
 		comp = self.createOrReturnTypeBase(optype)
 		self.colorNewBase([comp])
 		self.RefreshCachedTemplates()
@@ -807,17 +809,20 @@ class OpTemplateExt:
 				self.ColorBaseCOMPbyName(_op)
 
 	def OnTemplatesUpdate(self, new_ops):
+		"""Called when the templates network changes: refresh the cache and color the new bases."""
 		self.RefreshCachedTemplates()
 		self.colorNewBase(new_ops)
 		pass
 
 
 	def RefreshCachedTemplates(self):
+		"""Drop the cached Templates listing so the next read rebuilds it."""
 		if hasattr(self, 'Templates'):  # This will check if 'my_property' is cached
 			del self.__dict__['Templates']
 
 
 	def ColorBaseCOMPbyName(self, _op):
+		"""Color a template base by the operator family its name contains."""
 		def find_first_match(input_str, criteria):
 			for c in criteria:
 				if c in input_str:
@@ -838,6 +843,7 @@ class OpTemplateExt:
 
 
 	def OpenTemplatesFloating(self):
+		"""Open the templates network in a floating network editor."""
 		p = ui.panes.createFloating(type=PaneType.NETWORKEDITOR, name="Templates")
 		p.owner = self.templatesCOMP
 	
@@ -861,6 +867,7 @@ class OpTemplateExt:
 		return _fnsPaletteRoot() + '/' + self._librarySubfolder()
 
 	def ExternalPathExpr(self, name=None):
+		"""The expression for the global library file's path under the palette, for the externaltox parameter."""
 		# the global file is always named after the tool's own base, whatever
 		# library is active (the project library is a .toe citizen)
 		if name == None:
@@ -869,6 +876,7 @@ class OpTemplateExt:
 	
 	@property
 	def ExternalPath(self):
+		"""The global library file's path, evaluated."""
 		return eval(self.ExternalPathExpr())
 
 	

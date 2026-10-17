@@ -23,6 +23,9 @@ feature_list:
   - name: Cook-time bars
     anchor: reading-the-bars
     does: 'A bar above each operator shows CPU plus GPU cook time, green to red up to 1 ms, growing taller past it and striped while cooking.'
+  - name: Cooking-off marker
+    anchor: reading-the-bars
+    does: 'A COMP whose cooking is switched off gets a grey hatched bar, and Values reads cooking off, so a frozen network explains itself.'
   - name: GPU memory bars
     anchor: reading-the-bars
     does: 'A bar below each operator shows the GPU memory it holds, cyan to blue up to 100 MB, growing taller up to 1 GB.'
@@ -88,6 +91,7 @@ Each operator can get two bars: cook time above it and GPU memory below it.
 | The bar grows taller and fades toward its top | Past 1 ms, up to ten times its height at 10 ms |
 | Diagonal stripes moving along it | The operator cooked this frame or the last one |
 | A dim bar that stands still | It is not cooking now; the bar shows its last cook |
+| A grey hatched bar on a COMP | Its cooking is switched off, by hand or by a tool such as a scene changer's Control Cook; nothing inside it cooks until it is switched back on |
 
 **The bottom bar is GPU memory.** Operators that hold none have no bottom bar.
 
@@ -108,7 +112,7 @@ around their outline.
 
 **Values** writes each bar's number next to it: the cook time above the
 operator and the GPU memory below it, dimmer while the operator is not
-cooking. Operators too small on screen to fit a number get none, so zoom in to
+cooking; a COMP whose cooking is switched off reads cooking off. Operators too small on screen to fit a number get none, so zoom in to
 read more of them. The numbers change ten times a second so they stay
 readable. Values is off unless you switch it on.
 

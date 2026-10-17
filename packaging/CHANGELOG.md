@@ -1,5 +1,204 @@
 # FNS tools changelog
 
+## v3.2.72 -- 2026-10-17
+
+- FNS_Hub 3.2.13 -> 3.2.14 -- group brackets survive an in-session update: the restore keeps looking while tools are still being replaced and spends its retries only on a settled bar, a group none of whose members is present yet is retried, and a new RepublishOwned re-places the brackets once an update has finished. A Reset toolbar pulse on the Toolbar tab (its parameters, page Toolbar) puts the bar back to the layout it shipped with after asking: every tool to its stamped slot, TD's own items, dividers and groups to the shipped table, and the settings file stops replaying the old positions. For a project whose bar came out of an update with tools tied at one number.
+- FNS_MainMenuRegistry 3.2.6 -> 3.2.7 -- same rule as the toolbar; the automatic passes place entries per side without writing any tool's position, including the first adoption of TD's own items.
+- FNS_NavbarRegistry 3.2.6 -> 3.2.7 -- same rule as the toolbar; the automatic passes place entries per side without writing any tool's position.
+- FNS_TimelineRegistry 3.2.6 -> 3.2.7 -- same rule as the toolbar; a PlaceWidgetSequence that writes no host, for the automatic passes.
+- FNS_ToolbarRegistry 3.2.7 -> 3.2.8 -- the Hub's boot passes no longer renumber the bar; a tool keeps its shipped slot and group brackets, dividers and TD's own buttons are placed between the tools (new PlaceWidgetSequence), so an in-session update no longer leaves tools tied at one number or roams positions the user never chose.
+- FNS_Updater 3.2.27 -> 3.2.28 -- the licence key, the licence product, the update endpoints (Base URL, Gate URL) and the store folder no longer travel between projects through the settings file; Active, Use Discovery, Show Progress, Show Notes and Keep Store still do. New quick-launch command Install agent skill copies the FNSTools agent skill into the project (.claude/skills/fnstools) or the user skills folder, idempotent by version; a store refresh now also fetches the skill bundle and lays it out beside the FNS family folder in the palette. When an update finishes replacing packages, the Hub's toolbar, navbar and main-menu group brackets are re-placed around the settled bar, and the updater tells the Hub while a pass is still replacing packages so no group is dropped mid-update.
+- FNSTools.tox and FNS_Installer.tox 3.2.49 -> 3.2.72 -- the install picker's home is the list of tools: a start screen, then the catalog with the picks ticked and the set as a drawer over it, then an install screen that brings you back to the tools; the Patreon chips have their own colour; the bootstrap carries updater 3.2.28
+
+The install picker is a wizard whose home is the list of tools: a start screen with the starting points, then the catalog with your picks ticked and your set as a drawer over it, then an install screen that shows the plan, the progress and the result and brings you back to the tools; the Patreon chips and the With Patreon label have their own colour, apart from the one that marks a ticked tool.
+The toolkit now ships an agent skill: a reference bundle for a coding agent (Claude Code, and any agent that reads the Agent Skills format) with one page per public package listing its promoted API, quick-launch commands, hotkeys and parameters, rendered from the manifest at every build, checked against the release build before a release can ship, and placed into a project by the Install agent skill command.
+
+## v3.2.71 -- 2026-10-17
+
+- ChopBank 1.0.3 -> 1.0.4
+- ChopProcess 1.0.3 -> 1.0.4
+- CircularDistortionTOP 1.0.3 -> 1.0.4
+- ColorGen 1.0.2 -> 1.0.3
+- ColorGenPro 1.0.2 -> 1.0.3
+- ComplexMix 1.0.2 -> 1.0.3
+- ComplexOp 1.0.2 -> 1.0.3
+- ConstantCHOP 1.0.3 -> 1.0.4 -- switching Type no longer breaks the parameters. The value used to land outside its block and Snap Input was renamed; now every block keeps its name and its value converts to the new type.
+- CookBar 1.0.3 -> 1.0.4 -- a COMP whose cooking is switched off (by hand, or by a scene changer's Control Cook) now shows a grey hatched bar, and Values reads "cooking off", so a frozen network explains itself.
+- EaseInterpolator 1.0.3 -> 1.0.4
+- ExpressionPOP 1.0.4 -> 1.0.5
+- FNS_AltSelect 3.2.6 -> 3.2.7
+- FNS_AutoCombine 3.2.7 -> 3.2.8
+- FNS_AutoRes 3.2.7 -> 3.2.8
+- FNS_Autosave 3.2.7 -> 3.2.8 -- Wait For Mouse Rest (off by default) holds a due save until the mouse has rested for Mouse Rest seconds, so the save never interrupts a drag; the mouse is watched only while a save waits. Turning Active on or off, or changing the interval, from the parameter dialog or the main menu button now takes effect at once (it used to wait for the next reload).
+- FNS_BorderlessTD 3.2.9 -> 3.2.10
+- FNS_ColorUI 3.2.9 -> 3.2.10
+- FNS_CommandKit 3.2.4 -> 3.2.5
+- FNS_CommandPalette 3.2.14 -> 3.2.15
+- FNS_CommandRegistry 3.2.7 -> 3.2.8
+- FNS_ConfigHost 3.2.6 -> 3.2.7
+- FNS_ConfigRegistry 3.2.8 -> 3.2.9 -- your toolbar, navbar, main menu and hub tab arrangement follows you between projects only where you changed it; everything else takes each release's layout. A project is saved into your settings only after you rearrange something in it, so opening and saving a project never spreads whatever layout it happened to load with. Before, a settings file replayed an older release's order over the new one, and tools added by an update landed out of place.
+- FNS_Console 3.2.17 -> 3.2.18 -- after an install from Pick Tools, the console opens in the FNS Hub alone; the picker's own window used to stay open beside it.
+- FNS_CustomParTools 3.2.11 -> 3.2.12 -- the Wiki pulse on ExtUtils (the helper QuickExt docks to every extension) opens the QuickExt section of this site; it opened the retired GitHub wiki.
+- FNS_ExprHotStrings 3.2.7 -> 3.2.8
+- FNS_GlobalOutSelect 3.2.6 -> 3.2.7
+- FNS_GlobalVolControl 3.2.8 -> 3.2.9
+- FNS_HotkeyManager 3.2.8 -> 3.2.9
+- FNS_Hub 3.2.12 -> 3.2.13 -- a configurator's groups and dividers follow you between projects only once you change them, so a new release's layout reaches you. An arrangement saved before this update is not reapplied once.
+- FNS_HubRegistry 3.2.5 -> 3.2.6
+- FNS_HydroHomie 3.2.8 -> 3.2.9
+- FNS_MainMenuRegistry 3.2.5 -> 3.2.6
+- FNS_Misc 3.2.9 -> 3.2.10
+- FNS_NavbarRegistry 3.2.5 -> 3.2.6
+- FNS_OpFamily 0.1.9 -> 0.1.10
+- FNS_OpMenuMods 3.2.9 -> 3.2.10
+- FNS_OpMenuRegistry 3.2.6 -> 3.2.7
+- FNS_OpTemplates 3.2.10 -> 3.2.11
+- FNS_OpToClipboard 3.2.7 -> 3.2.8
+- FNS_OpenExt 3.2.6 -> 3.2.7
+- FNS_Output 3.2.8 -> 3.2.9
+- FNS_OverlayRegistry 0.2.1 -- dragging a container from the network editor onto the FNS button shows the Register menu again while an overlay is showing; the overlay no longer encloses the operators under it. A tool's layer (Cook Bar) now shows on a fresh install without a manual Unregister and Register: a host that comes up before the global registry waits for it. on a Non-Commercial licence the overlay is drawn at the size it reports, so layers line up (it used to miss the licence, and TD drew it smaller than layers expected); interactive widgets stay on screen when a newer version of the registry takes over. This is version 0.2.1, shared with TDXCollab; it also no longer leaves a "cook dependency loop" warning on the registry after its extension reinitialises.
+- FNS_PaletteRegistry 3.2.5 -> 3.2.6
+- FNS_PaneSearchRegistry 0.1.4 -> 0.1.5
+- FNS_PaneTypeRegistry 3.2.6 -> 3.2.7
+- FNS_ParOPDrop 3.2.9 -> 3.2.10
+- FNS_ParRandomizer 3.2.8 -> 3.2.9
+- FNS_ParentHierarchy 3.2.6 -> 3.2.7
+- FNS_QuickCollapse 3.2.6 -> 3.2.7
+- FNS_QuickPane 3.2.7 -> 3.2.8
+- FNS_QuickTime 3.2.8 -> 3.2.9
+- FNS_ResetPLS 3.2.9 -> 3.2.10
+- FNS_SearchFix 0.2.6 -> 0.2.7
+- FNS_SearchPalette 3.2.8 -> 3.2.9 -- the Help page's version cell no longer raises a warning in a project whose file name carries no version numbers: upstream's authoring stamp now falls back to the stamped version.
+- FNS_SetSmoothness 3.2.8 -> 3.2.9
+- FNS_SwapOps 3.2.8 -> 3.2.9
+- FNS_SwitchOPs 3.2.6 -> 3.2.7
+- FNS_SwitchTools 1.1.7 -> 1.1.8 -- setting Switch OP on a freshly placed SwitchTools now binds the switch straight away, and pointing it at an operator that is not a switch no longer breaks the next change.
+- FNS_TimelineRegistry 3.2.5 -> 3.2.6
+- FNS_ToolbarRegistry 3.2.6 -> 3.2.7
+- FNS_Updater 3.2.26 -> 3.2.27 -- an operator tool installed inside the toolkit before it became an FNS family member (ThresholdColor) is now actually updated; the update used to refresh only the store copy, so the same update was offered again after every run.
+- FNS_VSCodeTools 3.2.8 -> 3.2.9
+- FNS_iopBrowser 3.2.6 -> 3.2.7
+- FeedbackDisplace 1.0.5 -> 1.0.6
+- FloatDataRecorder 1.0.3 -> 1.0.4
+- InstanceTrailer 1.0.2 -> 1.0.3
+- KinectSinglePlayer 1.0.2 -> 1.0.3
+- LayerSep3D 1.0.2 -> 1.0.3
+- LinkOPs 1.0.2 -> 1.0.3
+- MaskDraw 1.0.3 -> 1.0.4
+- MoveDetectDir 1.0.3 -> 1.0.4
+- OpenOp 1.0.2 -> 1.0.3
+- Particles2D_POP 1.0.3 -> 1.0.4
+- ParticlesGpuUltimate 2.0.1 -> 2.0.2
+- PasteFromClipboard 3.2.8 -> 3.2.9
+- PrismTOP 1.0.4 -> 1.0.5
+- QuickMarks 3.2.8 -> 3.2.9 -- Ctrl+number lands on the stored view on the first press. The network editor sometimes takes the switch a few frames late and opened the network at its old view, so a jump could need a second press; the jump now checks its view for a few frames and puts it back if the editor overwrote it.
+- RealRamp 1.0.3 -> 1.0.4
+- SeqMod 1.0.2 -> 1.0.3
+- SlideShow 1.0.4 -> 1.0.5
+- ThresholdColor 1.0.4 -> 1.0.5
+- TopToMidi 1.0.3 -> 1.0.4 -- in Index mode Steps now always matches the number of sample points, including when the Sampler changes or the tool loads already in Index mode (it used to keep a stale count such as 25).
+- midiMapper 3.2.8 -> 3.2.9
+- oscMapper 3.2.6 -> 3.2.7
+- FNSTools.tox and FNS_Installer.tox 3.2.48 -> 3.2.49 -- the install picker is a guided wizard: a start screen, Find my set, your set as the home screen with the catalog behind it, and an install screen that shows the plan, the progress and the script to paste, with a landing per flavor; the bootstrap carries updater 3.2.27
+- FNSTools-DevKit.zip, new -- the eleven registries, each as its own tox, with a README and the licence, for building a tool against FNSTools without installing the toolkit
+
+The shipped toolbar, navbar, menu and hub tab places are now each tool's defaults, so every tool with a place on those surfaces is re-released with this fix.
+Pick Tools questionnaire: "How do you like to work?" takes more than one answer, the components question asks about Python and custom parameters separately (custom parameters recommends Custom Par Tools), and the result list drops the "because" lines.
+The toolkit's web browser panel no longer raises an error when its window closes.
+
+
+
+
+
+Released tools no longer carry the old Info Header blocks (author machine and project name) at the top of their scripts: the release export strips them from every package and refuses to ship one it cannot strip.
+
+
+
+
+
+
+
+
+
+The toolkit container has a new Remove Patreon Tools pulse on its FNSTools page, for a project file you publish, sell or share: it removes every Patreon tool from the project, installed or placed in your networks. The first press lists them in the Textport and a second within 10 seconds removes them (arrives with the next installer and bootstrap rebuild).
+
+
+
+
+
+Every registry, and every tool that carries a registry host: placed in a project without the toolkit (a standalone copy of a tool, or a registry from the developer kit), the host switches its cloning off instead of crashing TouchDesigner on its next parameter write, and switches it back on when the toolkit arrives.
+
+A developer kit, FNSTools-DevKit.zip, is a new download beside the installer: the eleven registries, each as its own tox, with a README, for building a tool against FNSTools without installing the toolkit. Linked from the website, the getting-started guide and the repository README.
+
+## v3.2.70 -- 2026-10-13
+
+- ChopBank 1.0.2 -> 1.0.3 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- ChopProcess 1.0.2 -> 1.0.3 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- CircularDistortionTOP 1.0.2 -> 1.0.3 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- ColorGen 1.0.1 -> 1.0.2 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- ColorGenPro 1.0.1 -> 1.0.2 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- ComplexMix 1.0.1 -> 1.0.2 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- ComplexOp 1.0.1 -> 1.0.2 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- ConstantCHOP 1.0.2 -> 1.0.3 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- CookBar 1.0.2 -> 1.0.3 -- its toolbar button answers every click again, also while QuickMarks is on.
+- EaseInterpolator 1.0.2 -> 1.0.3 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- ExpressionPOP 1.0.3 -> 1.0.4 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- FNS_Autosave 3.2.6 -> 3.2.7 -- a button in TouchDesigner's main menu, next to the project name, turns autosave on and off and shows whether it is on.
+- FNS_BorderlessTD 3.2.8 -> 3.2.9 -- Alt+right-click on its toolbar button opens its documentation page also when the tool runs on its own, outside the toolkit (it opened the old wiki).
+- FNS_ColorUI 3.2.8 -> 3.2.9
+- FNS_CommandPalette 3.2.13 -> 3.2.14
+- FNS_CustomParTools 3.2.10 -> 3.2.11 -- Alt+right-click on its toolbar button opens its documentation page also when the tool runs on its own, outside the toolkit (it opened the old wiki).
+- FNS_GlobalOutSelect 3.2.5 -> 3.2.6
+- FNS_GlobalVolControl 3.2.7 -> 3.2.8 -- Alt+right-click on its toolbar button opens its documentation page also when the tool runs on its own, outside the toolkit (it opened the old wiki).
+- FNS_HotkeyManager 3.2.7 -> 3.2.8 -- no longer overwrites a tool's own hotkey setting with an older saved value when TouchDesigner starts.
+- FNS_Hub 3.2.11 -> 3.2.12
+- FNS_HydroHomie 3.2.7 -> 3.2.8 -- its button is on the toolbar from the start; it shipped hidden, so the reminder, which shows in that button, never came up.
+- FNS_Misc 3.2.8 -> 3.2.9 -- Alt+right-click on its toolbar button opens its documentation page also when the tool runs on its own, outside the toolkit (it opened the old wiki).
+- FNS_OpFamily 0.1.8 -> 0.1.9
+- FNS_OpMenuMods 3.2.8 -> 3.2.9
+- FNS_OpTemplates 3.2.9 -> 3.2.10 -- Alt+right-click on its toolbar button opens its documentation page also when the tool runs on its own, outside the toolkit (it opened the old wiki).
+- FNS_Output 3.2.7 -> 3.2.8 -- Alt+right-click on its toolbar button opens its documentation page also when the tool runs on its own, outside the toolkit (it opened the old wiki).
+- FNS_OverlayRegistry 0.1.1 -> 0.1.2 -- the overlay keeps the shape of your network editor; with some layers it was drawn squeezed into a square. toolbar buttons that switch an overlay (CookBar, POPOverlay) answer every click again; the registry no longer rebuilds itself and redraws the network editor's overlay on each switch.
+- FNS_PaneSearchRegistry 0.1.3 -> 0.1.4
+- FNS_ParOPDrop 3.2.8 -> 3.2.9 -- Alt+right-click on its toolbar button opens its documentation page also when the tool runs on its own, outside the toolkit (it opened the old wiki). its key follows the tool's Keys setting again after a restart.
+- FNS_ParRandomizer 3.2.7 -> 3.2.8 -- Alt+right-click on its toolbar button opens its documentation page also when the tool runs on its own, outside the toolkit (it opened the old wiki).
+- FNS_ParentHierarchy 3.2.5 -> 3.2.6
+- FNS_QuickPane 3.2.6 -> 3.2.7 -- its hotkeys follow the tool's Shortcuts setting again after a restart.
+- FNS_QuickTime 3.2.7 -> 3.2.8 -- Alt+right-click on its toolbar button opens its documentation page also when the tool runs on its own, outside the toolkit (it opened the old wiki).
+- FNS_ResetPLS 3.2.8 -> 3.2.9 -- Alt+right-click on its toolbar button opens its documentation page also when the tool runs on its own, outside the toolkit (it opened the old wiki). its hotkey follows the tool's Shortcut setting again after a restart.
+- FNS_SearchFix 0.2.5 -> 0.2.6
+- FNS_SearchPalette 3.2.7 -> 3.2.8
+- FNS_SetSmoothness 3.2.7 -> 3.2.8 -- Alt+right-click on its toolbar button opens its documentation page also when the tool runs on its own, outside the toolkit (it opened the old wiki).
+- FNS_SwapOps 3.2.7 -> 3.2.8 -- Alt+right-click on its toolbar button opens its documentation page also when the tool runs on its own, outside the toolkit (it opened the old wiki).
+- FNS_SwitchTools 1.1.6 -> 1.1.7 -- the About page has a Documentation button that opens its documentation page; the button to the author's links is labelled Author Links.
+- FNS_VSCodeTools 3.2.7 -> 3.2.8 -- Alt+right-click on its toolbar button opens its documentation page also when the tool runs on its own, outside the toolkit (it opened the old wiki).
+- FNS_iopBrowser 3.2.5 -> 3.2.6
+- FeedbackDisplace 1.0.4 -> 1.0.5 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- FloatDataRecorder 1.0.2 -> 1.0.3 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- InstanceTrailer 1.0.1 -> 1.0.2 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- KinectSinglePlayer 1.0.1 -> 1.0.2 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- LayerSep3D 1.0.1 -> 1.0.2 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- LinkOPs 1.0.1 -> 1.0.2 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- MaskDraw 1.0.2 -> 1.0.3 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- MoveDetectDir 1.0.2 -> 1.0.3 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- OpenOp 1.0.1 -> 1.0.2 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- Particles2D_POP 1.0.2 -> 1.0.3 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- ParticlesGpuUltimate 2.0.0 -> 2.0.1 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- PasteFromClipboard 3.2.7 -> 3.2.8
+- PrismTOP 1.0.3 -> 1.0.4 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- QuickMarks 3.2.7 -> 3.2.8 -- Alt+Shift+M toggles the overlay again after a restart.
+- RealRamp 1.0.2 -> 1.0.3 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- SeqMod 1.0.1 -> 1.0.2 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- SlideShow 1.0.3 -> 1.0.4 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- ThresholdColor 1.0.3 -> 1.0.4 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- TopToMidi 1.0.2 -> 1.0.3 -- the About page's Link opens its documentation page again on a placed copy (it opened a missing page named after the copy, such as colorgen1).
+- midiMapper 3.2.7 -> 3.2.8 -- Alt+right-click on its toolbar button opens its documentation page also when the tool runs on its own, outside the toolkit (it opened the old wiki).
+- oscMapper 3.2.5 -> 3.2.6
+
+The /get page has a download icon on each free tool's card: the tool on its own as a single .tox, with a one-time note that an install keeps it up to date.
+Tools no longer ship the notes written on their own networks; only their licence notes stay inside.
+Tools that keep a log inside them (ColorUI, HotkeyManager, PasteFromClipboard) ship with it empty.
+
 ## v3.2.69 -- 2026-10-12
 
 - FNSTools.tox and FNS_Installer.tox 3.2.47 -> 3.2.48 -- the install picker notices a sign-in made elsewhere, and a session that came back, without reopening; the bootstrap carries updater 3.2.26

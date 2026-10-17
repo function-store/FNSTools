@@ -1017,6 +1017,7 @@ class CommandPaletteExt:
 		return self._curation().favourites()
 
 	def ToggleFavourite(self, key: str) -> bool:
+		"""Flip a command's favourite flag in the curation; returns the new state."""
 		on = key not in self.Favourites()
 		self._curation().set_favourite(key, on)
 		return on
@@ -1083,6 +1084,7 @@ class CommandPaletteExt:
 	# command still runs: authoring the preset is the opt-in.
 
 	def ListPresets(self) -> list:
+		"""Every saved preset: label, target command and baked arguments."""
 		# not Presets(): that name is the DECLARED PAR above, and a method of
 		# the same name would shadow the declaration before Init ever saw it
 		return self._curation().presets()
@@ -1094,6 +1096,7 @@ class CommandPaletteExt:
 		return preset
 
 	def DeletePreset(self, preset_id: str) -> bool:
+		"""Remove a saved preset by id; False when there is none."""
 		if not self._curation().delete_preset(preset_id):
 			return False
 		self._catalogue = None
@@ -1162,6 +1165,7 @@ class CommandPaletteExt:
 		return reg.Commands()
 
 	def IsHidden(self, key: str) -> bool:
+		"""Whether a command is hidden from the palette's listing, by the user's override or the tool's own default."""
 		default = next((bool(c.get('hidden')) for c in self._registryCommands()
 						if self._identity(c) == key), False)
 		return bool(self._overrides().get(key, default))
@@ -1490,6 +1494,7 @@ class CommandPaletteExt:
 		return True
 
 	def IsOpen(self):
+		"""Whether the palette window is open right now."""
 		win = self._ui('window')
 		return bool(win is not None and win.isOpen)
 

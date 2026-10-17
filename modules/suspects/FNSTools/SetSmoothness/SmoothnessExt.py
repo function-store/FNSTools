@@ -52,10 +52,12 @@ class SmoothnessExt:
 		FNSCommand.announce(self.ownerComp)
 
 	def OnSelected(self):
+		"""Set the configured smoothness on the selected operators; called by the hotkey."""
 		selected = ui.panes.current.owner.selectedChildren
 		self.setSmoothness(selected)
 
 	def OnAll(self):
+		"""Set the configured smoothness on every operator in the current network."""
 		selected = ui.panes.current.owner.ops('*')
 		self.setSmoothness(selected)
 

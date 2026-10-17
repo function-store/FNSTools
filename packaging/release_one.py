@@ -580,7 +580,20 @@ RAIL_SOURCES = (('packaging', 'build_installer.py'),
                 ('packaging', 'configurator', 'index.html'),
                 ('packaging', 'webBrowser.tox'))
 RAIL_ARTIFACTS = (('packaging', 'dist', 'FNSTools.tox'),
-                  ('packaging', 'dist', 'FNS_Installer.tox'))
+                  ('packaging', 'dist', 'FNS_Installer.tox'),
+                  ('packaging', 'dist', 'FNSTools-DevKit.zip'))
+# The developer kit (docs/DeveloperKit.md) is built from the registry
+# artifacts, not from the installer sources: it is stale when one of those
+# toxes, or build_installer.py, is newer than it. Keep DEVKIT_PACKAGES in
+# step with build_installer.DEVKIT_PACKAGES (tests/test_devkit.py pins it).
+DEVKIT_RAIL = 'FNSTools-DevKit.zip'
+DEVKIT_PACKAGES = (
+    'FNS_ToolbarRegistry', 'FNS_NavbarRegistry', 'FNS_MainMenuRegistry',
+    'FNS_OpMenuRegistry', 'FNS_PaneTypeRegistry', 'FNS_PaletteRegistry',
+    'FNS_TimelineRegistry', 'FNS_PaneSearchRegistry', 'FNS_HubRegistry',
+    'FNS_ConfigRegistry', 'FNS_CommandRegistry')
+DEVKIT_SOURCES = (('packaging', 'build_installer.py'),) + tuple(
+    ('packaging', 'dist', n + '.tox') for n in DEVKIT_PACKAGES)
 ROOT_SUSPECT = ('modules', 'suspects', 'FNSTools.tox')
 
 
@@ -712,14 +725,17 @@ def _staleRails():
     goes, so a stale one publishes under fresh hashes -- the manifest
     promises bytes nobody built. The bootstrap is additionally a copy of
     the live root, so a root landed after the last build makes it stale
-    too, even when no packaging code changed."""
+    too, even when no packaging code changed. The developer kit answers to
+    its own sources, the registry artifacts (DEVKIT_SOURCES)."""
     newest_src = max([_mtime(*p) for p in RAIL_SOURCES] + [_mtime(*ROOT_SUSPECT)])
+    newest_kit = max(_mtime(*p) for p in DEVKIT_SOURCES)
     stale = []
     for parts in RAIL_ARTIFACTS:
         rel = '/'.join(parts)
+        newest = newest_kit if parts[-1] == DEVKIT_RAIL else newest_src
         if not os.path.exists(_repo(*parts)):
             stale.append(rel + ' (never built)')
-        elif _mtime(*parts) < newest_src:
+        elif _mtime(*parts) < newest:
             stale.append(rel)
     return stale
 
@@ -895,6 +911,201 @@ def _variantProblems():
     return out
 
 
+# --- the agent skill gate (docs/AgentSkill.md section 5) ---------------------
+# Drift is the whole risk of a shipped skill: a page that names a method the
+# toolkit no longer has is worse than no page, because the agent trusts it.
+# So every `op.<Shortcut>` and `op.<Shortcut>.<Method>(` the AUTHORED pages
+# name (SKILL.md, references/registries.md) is resolved against the DIST
+# build, never the live project: the dist tox is what ships, and the live
+# master can hold a method that never exported. The generated pages need no
+# gate: they are reflected from the build they ship with.
+
+def _distCopies(names):
+    """packaging/dist/<name>.tox for each name, loaded into ONE cooking-off
+    holder in /sys/quiet (the staging class ScrubArtifact uses), as
+    (holder, {name: loaded COMP or None}). The caller destroys the holder."""
+    quiet = op('/sys/quiet') or op('/sys')
+    holder = quiet.create(baseCOMP, 'fns_agent_skill_gate')
+    holder.allowCooking = False
+    out = {}
+    for name in names:
+        path = _repo(DIST_DIR, name + '.tox')
+        if not os.path.exists(path):
+            out[name] = None
+            continue
+        try:
+            out[name] = holder.loadTox(path)
+        except Exception as e:
+            debug('preflight: could not load %s (%s)' % (path, e))
+            out[name] = None
+    return holder, out
+
+
+def _extensionTargets(comp):
+    """[(DAT name, class name)] the extension slots of `comp` name, read
+    off the slot expressions without initialising anything."""
+    skill = _agentSkill()
+    out = []
+    try:
+        for i in range(comp.seq.ext.numBlocks):
+            p = comp.seq.ext[i].par.object
+            expr = p.expr if p.mode == ParMode.EXPRESSION else str(p.val)
+            t = skill.ExtensionTarget(expr)
+            if t:
+                out.append(t)
+    except Exception as e:
+        debug('preflight: extension slots of %s unreadable (%s)' % (comp.path, e))
+    return out
+
+
+def _classSources(comp):
+    """The text of every DAT under `comp` that defines a class, for the
+    static resolver (the extension's own DAT and the bases it inherits,
+    such as RegistryBase, which sits in a DAT of its own)."""
+    out = []
+    for d in comp.findChildren(type=textDAT):
+        try:
+            text = d.text
+        except Exception:
+            continue
+        if 'class ' in text:
+            out.append(text)
+    return out
+
+
+def _agentSkillProblems():
+    """Every way the authored agent skill pages disagree with the release:
+    a shortcut no package declares, a method the dist build's extension
+    class does not define, a bundle on disk that is not the one the
+    manifest describes (an authored page edited after the last Build()).
+    [] when the skill is releasable."""
+    skill = _agentSkill()
+    problems = []
+    pages = skill.AuthoredPages()
+    if not pages:
+        return ['no authored agent skill pages under packaging/agent_skill/']
+    try:
+        with open(_repo(PKG_DIR, 'manifest.json'), 'r', encoding='utf-8') as f:
+            man = json.load(f)
+    except Exception as e:
+        return ['manifest unreadable (%s)' % e]
+
+    # 1. the bundle on disk is the one the manifest publishes
+    block = man.get('agent_skill') or {}
+    tpath = _repo(DIST_DIR, 'agent-skill.json')
+    bundle = _repo(DIST_DIR, 'agent-skill', skill.BUNDLE_NAME)
+    if not block or not os.path.exists(tpath):
+        problems.append('no agent skill transport document (packaging/dist/'
+                        'agent-skill.json) -- rebuild the manifest')
+    else:
+        if _sha256(tpath) != block.get('sha256'):
+            problems.append('packaging/dist/agent-skill.json is not the document the '
+                            'manifest describes -- rebuild the manifest')
+        vpath = os.path.join(bundle, 'VERSION')
+        version = ''
+        if os.path.exists(vpath):
+            with open(vpath, 'r', encoding='utf-8') as f:
+                version = f.read().strip()
+        if version != str(man.get('release', '')):
+            problems.append('agent skill VERSION %r is not the manifest release %r -- '
+                            'rebuild the manifest' % (version, man.get('release', '')))
+        for rel, text in pages:
+            built = os.path.join(bundle, *rel.split('/'))
+            cur = None
+            if os.path.exists(built):
+                with open(built, 'r', encoding='utf-8') as f:
+                    cur = f.read()
+            if cur != text:
+                problems.append('authored page packaging/agent_skill/%s changed since the '
+                                'manifest was built -- rebuild the manifest' % rel)
+
+    # 2. every name the pages mention resolves in the dist build
+    mentioned = {}
+    for rel, text in pages:
+        names = skill.MentionedNames(text)
+        for sc in names['shortcuts']:
+            mentioned.setdefault(sc, {'pages': set(), 'methods': set()})['pages'].add(rel)
+        for sc, meth in names['methods']:
+            mentioned.setdefault(sc, {'pages': set(), 'methods': set()})['methods'].add(meth)
+    rows = man.get('packages') or []
+    by_shortcut = {r['shortcut']: r for r in rows if r.get('shortcut')}
+    by_global = {r['global_shortcut']: r for r in rows if r.get('global_shortcut')}
+    root_sc = str(_root().par.opshortcut.eval())
+    to_load = {}
+    for sc, info in sorted(mentioned.items()):
+        if sc == root_sc:
+            # the toolkit root: a container with no extension, so a method
+            # on it is a mistake on the page, not a missing export
+            for meth in sorted(info['methods']):
+                problems.append('op.%s.%s(): the toolkit root has no promoted '
+                                'methods' % (sc, meth))
+            continue
+        row = by_shortcut.get(sc) or by_global.get(sc)
+        if row is None:
+            problems.append('op.%s is named by %s but no package in the manifest '
+                            'declares it' % (sc, ', '.join(sorted(info['pages']))))
+            continue
+        to_load[row['name']] = (sc, row, info)
+    if not to_load:
+        return problems
+    holder, loaded = _distCopies(sorted(to_load))
+    try:
+        for name, (sc, row, info) in sorted(to_load.items()):
+            comp = loaded.get(name)
+            if comp is None:
+                problems.append('op.%s: no dist build of %s (packaging/dist/%s.tox) to '
+                                'verify it against -- export the package first'
+                                % (sc, name, name))
+                continue
+            sources = _classSources(comp)
+            targets = _extensionTargets(comp)
+            members = set()
+            shortcut_ok = False
+            if row.get('shortcut'):
+                # .val, never .eval(): nothing is evaluated on a staged copy
+                shortcut_ok = str(comp.par.opshortcut.val) == sc
+            for dat, cls in targets:
+                found = skill.ClassMembers(sources, cls)
+                if found:
+                    members |= found
+                if not row.get('shortcut') and skill.ClassConstant(sources, cls, 'SHORTCUT') == sc:
+                    shortcut_ok = True
+            if not shortcut_ok:
+                problems.append('op.%s: the dist build of %s does not carry that '
+                                'shortcut' % (sc, name))
+            if info['methods'] and not members:
+                problems.append('op.%s: the extension class of %s cannot be read in the '
+                                'dist build, so %s cannot be verified'
+                                % (sc, name, ', '.join(sorted(info['methods']))))
+                continue
+            for meth in sorted(info['methods']):
+                if meth not in members or not meth[:1].isupper():
+                    problems.append('op.%s.%s() is named by the agent skill but the dist '
+                                    'build of %s has no such promoted member'
+                                    % (sc, meth, name))
+    finally:
+        holder.destroy()
+    return problems
+
+
+def _agentSkillUndocumented(rows=None):
+    """How many promoted members the manifest carries with no docstring:
+    the docstring backlog (docs/AgentSkill.md section 5, check 2). A
+    warning, not a gate, until it reaches zero."""
+    if rows is None:
+        try:
+            with open(_repo(PKG_DIR, 'manifest.json'), 'r', encoding='utf-8') as f:
+                rows = json.load(f).get('packages') or []
+        except Exception:
+            return 0
+    n = 0
+    for r in rows:
+        for m in r.get('api') or []:
+            if isinstance(m, dict) and m.get('kind') not in ('attribute', 'stored') and not (m.get('doc') or '').strip():
+                n += 1
+    return n
+
+
 def Preflight(names=None, quiet=False):
     """The checklist, run before anything ships. Nothing here mutates.
 
@@ -976,6 +1187,20 @@ def Preflight(names=None, quiet=False):
                         + '; '.join(foreign_problems)
                         + ' -- run packaging/foreign_sync.py (the CMS '
                         'Sync foreign button), then rebuild the manifest')
+    skill_problems = _agentSkillProblems()
+    if skill_problems:
+        blockers.append('agent skill (docs/AgentSkill.md section 5): '
+                        + '; '.join(skill_problems))
+    # Check 2 of docs/AgentSkill.md section 5. A warning while the backlog
+    # was being worked off; a BLOCKER since the pass of 2026-10-17 brought
+    # it to zero, so it cannot climb back: a promoted method added without a
+    # docstring reaches the agent's page as a bare signature.
+    undocumented = _agentSkillUndocumented()
+    if undocumented:
+        blockers.append('agent skill: %d promoted member(s) have no docstring -- the '
+                        'pages would list them with the signature only; write the '
+                        'first sentence (docs/AgentSkill.md section 5), rebuild '
+                        'the manifest' % undocumented)
     if unknown:
         warnings.append('not shippable packages, will be skipped: '
                         + _some(unknown))
@@ -997,6 +1222,8 @@ def Preflight(names=None, quiet=False):
               'warnings': warnings, 'unlanded': unlanded, 'rippled': rippled,
               'stale_rails': rails, 'severed_mirrors': severed,
               'gated_leak_risks': leak_risks,
+              'agent_skill_problems': skill_problems,
+              'agent_skill_undocumented': undocumented,
               'noted': noted, 'unnoted': unnoted,
               'git_dirty': len(dirty)}
     if not quiet:

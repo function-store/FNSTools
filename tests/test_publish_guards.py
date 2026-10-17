@@ -108,6 +108,59 @@ def main():
     check('first release stages', r.get('ok') is True, r)
     check('  reports no removals', r.get('removed') == [], r.get('removed'))
 
+    # --- the agent skill transport document (docs/AgentSkill.md section 4)
+    # It rides the release beside the rails: staged under the release at
+    # the path the manifest names, re-hashed like an artifact, and a change
+    # to it alone is a shippable release (the bump guard lets it through).
+    import hashlib
+    repo2 = make_repo({'Alpha': '1.0.0'}, 'v1.0.0')
+    r = stage(repo2)
+    check('a manifest with no agent_skill block stages and reports none staged',
+          r.get('ok') is True and r.get('agent_skill') is False, r)
+
+    def write_skill(repo, version, text):
+        path = os.path.join(repo, 'packaging', 'dist', 'agent-skill.json')
+        doc = {'schema': 1, 'version': version, 'bundle': 'fnstools',
+               'files': {'SKILL.md': text, 'VERSION': version + '\n'}}
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(doc, f, indent=1, sort_keys=True)
+        return hashlib.sha256(open(path, 'rb').read()).hexdigest(), os.path.getsize(path)
+
+    def manifest_with_skill(repo, release, sha, size):
+        mp = os.path.join(repo, 'packaging', 'manifest.json')
+        with open(mp, encoding='utf-8') as f:
+            doc = json.load(f)
+        doc['release'] = release
+        for e in doc['packages']:
+            e['artifact']['url'] = f'https://example.invalid/fnstools/{release}/{e["name"]}.tox'
+        doc['agent_skill'] = {'version': release, 'path': 'packaging/dist/agent-skill.json',
+                              'bytes': size, 'sha256': sha, 'files': 2,
+                              'url': f'https://example.invalid/fnstools/{release}/agent-skill.json'}
+        with open(mp, 'w', encoding='utf-8') as f:
+            json.dump(doc, f)
+
+    sha, size = write_skill(repo2, 'v1.0.1', '# FNSTools\n')
+    manifest_with_skill(repo2, 'v1.0.1', sha, size)
+    r = stage(repo2)
+    check('a release that changes only the agent skill is allowed (no bump, no rail)',
+          r.get('ok') is True and r.get('agent_skill') is True, r)
+    staged = os.path.join(repo2, 'packaging', 'publish', 'v1.0.1', 'agent-skill.json')
+    check('  the document is staged under the release',
+          os.path.exists(staged) and hashlib.sha256(open(staged, 'rb').read()).hexdigest() == sha)
+    with open(os.path.join(repo2, 'packaging', 'publish', 'manifest.json'), encoding='utf-8') as f:
+        rolling = json.load(f)
+    check('  the rolling manifest carries the agent_skill block with its hash',
+          (rolling.get('agent_skill') or {}).get('sha256') == sha)
+    manifest_with_skill(repo2, 'v1.0.2', sha, size)      # same skill, no bump
+    r = stage(repo2)
+    check('a new release with the same skill and no bump is still refused as a no-change release',
+          'error' in r and 'no package version' in r['error'], r)
+    manifest_with_skill(repo2, 'v1.0.3', 'f' * 64, size)  # a hash the document on disk is not
+    r = stage(repo2)
+    check('a document that disagrees with the manifest hash is reported and the stage is not ok',
+          r.get('ok') is False and r.get('hash_mismatch') == ['agent-skill.json'], r)
+    shutil.rmtree(repo2, ignore_errors=True)
+
     # --- the bump guard (pre-existing behaviour must survive) -----------
     r = restage(repo, {'Alpha': '1.0.0', 'Beta': '1.0.0'}, 'v1.0.1')
     check('release bumping nothing is refused',

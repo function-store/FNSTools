@@ -41,6 +41,7 @@ class SwapOpsExt:
 		FNSCommand.announce(self.ownerComp)
 
 	def OnSwap(self):
+		"""Swap the positions and the wiring of the selected operators, pairwise from the outside in; called by the hotkey."""
 		selected = ui.panes.current.owner.selectedChildren
 		selected = sorted(selected, key=lambda x: x.nodeCenterX)
 		num_selected = len(selected)

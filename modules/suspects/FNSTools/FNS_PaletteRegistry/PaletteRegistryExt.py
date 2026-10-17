@@ -399,6 +399,7 @@ class PaletteRegistryExt(RegistryBase):
 		return {'ok': True, 'name': canonical}
 
 	def UnregisterTab(self, canonical):
+		"""Remove a contributed palette tab, giving its panel its size back, and resync the strip (forwarded to the /sys global)."""
 		if not self._is_sys_global():
 			api = self._registryApi()
 			if api is not self:
@@ -495,6 +496,7 @@ class PaletteRegistryExt(RegistryBase):
 		return self._showTab(str(canonical or self.STOCK_TAB), pal)
 
 	def CurrentTab(self):
+		"""The canonical name of the tab the palette shows now, the stock tab by default."""
 		api = self._registryApi()
 		if api is not self:
 			return api.CurrentTab()
@@ -520,6 +522,7 @@ class PaletteRegistryExt(RegistryBase):
 		return int(lst.height) if lst is not None and lst.height else 1024
 
 	def Resync(self):
+		"""Rebuild the palette strip and the mirrors from the registered tabs."""
 		api = self._registryApi()
 		if api is not self:
 			return api.Resync()

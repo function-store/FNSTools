@@ -527,9 +527,15 @@ class HubExt:
 		return [t for t in self._orderedTabs(include_hidden=True) if not t['displayed']]
 
 	def ShowTab(self, name, displayed=True):
+		"""Show or hide a Hub tab by canonical name; the choice roams with the layout."""
 		reg = self._registry()
 		if reg is None:
 			return {'ok': False, 'why': 'no hub registry'}
+		# a user action: the tab's shown state roams on the next project save
+		# (RegistryBase markLayoutChanged)
+		ext = getattr(reg.ext, 'HubRegistryExt', None)
+		if ext is not None and hasattr(ext, 'markLayoutChanged'):
+			ext.markLayoutChanged()
 		return reg.SetTabDisplayed(name, displayed)
 
 	# --- opening ----------------------------------------------------------
@@ -553,6 +559,7 @@ class HubExt:
 		return {'ok': True, 'tab': self.ownerComp.par.Activetab.eval()}
 
 	def Close(self):
+		"""Close the Hub window and un-expose every tab."""
 		w = self._window()
 		if w is not None:
 			w.par.winclose.pulse()
@@ -659,6 +666,7 @@ class HubExt:
 	# --- drop-to-register -------------------------------------------------
 
 	def AcceptsDrop(self, items):
+		"""Whether any of the dragged items is a panel COMP the Hub can show as a tab."""
 		try:
 			return any(self._isDroppable(i) for i in items)
 		except Exception:
@@ -765,12 +773,14 @@ class HubExt:
 	# --- par callbacks (parexec on the Hub page) --------------------------
 
 	def OnPulse(self, name):
+		"""Called by the parameter execute for the Open and Refreshtabs pulses."""
 		if name == 'Open':
 			self.Open()
 		elif name == 'Refreshtabs':
 			self.RefreshTabs()
 
 	def OnParChange(self, name, value):
+		"""Called by the parameter execute when Activetab or Tabbar changes."""
 		if name == 'Activetab':
 			self.OnActivetabChanged(str(value))
 		elif name == 'Tabbar':

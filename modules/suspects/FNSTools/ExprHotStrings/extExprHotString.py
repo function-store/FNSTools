@@ -182,6 +182,7 @@ class extExprHotString:
 
 
 	def HotstringCheck(self, OP, PAR, EXPR, BINDEXPR, _depth=0):
+		"""Expand a hotstring abbreviation found in a parameter's expression, or bind expression, into its full text; called when an expression changes."""
 		if OP == 'None':
 			return
 		if _depth > 8:

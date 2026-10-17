@@ -230,7 +230,7 @@
    {
     "id": "style",
     "prompt": "How do you like to work?",
-    "multi": false,
+    "multi": true,
     "options": [
      {
       "id": "speed",
@@ -310,13 +310,21 @@
    {
     "id": "build",
     "prompt": "Do you build reusable components or extensions?",
-    "multi": false,
+    "multi": true,
     "options": [
      {
-      "id": "yes",
-      "label": "Yes, with Python and custom parameters",
+      "id": "python",
+      "label": "Python: extensions, scripts and modules",
       "tags": [
        "dev"
+      ]
+     },
+     {
+      "id": "custompars",
+      "label": "Custom parameters on my components",
+      "tags": [
+       "params",
+       "custompars"
       ]
      },
      {
@@ -465,6 +473,7 @@
    "description": "Promote parameters to a parent with binds or expressions, customize name/label/range on drop, plus extension creation, parent shortcuts, parameter clearing and IOP promotion. Also carries the pane-bar drag-drop hijack and path-cell injection, and four stock-TouchDesigner shortcuts for opening parameters and the COMP editor.",
    "recommended": true,
    "fits": [
+    "custompars",
     "params",
     "dev",
     "speed"

@@ -1024,6 +1024,102 @@ def RemoveTools(plan):
     return {'removed': removed, 'notes': notes}
 
 
+# --- Patreon-licensed copies (the root's Remove Patreon Tools) ---------------
+# A project file handed on carries every package embedded in it, and the
+# Patreon licence does not let those be redistributed (license_notices.py,
+# GATED_BODY). A copy is licensed when the licence note stamped into it at
+# release says so, or when the store manifest gives its package (or the
+# variant build it is) an access other than 'free'. The note is the offline
+# answer and the manifest covers copies released before notes were stamped.
+# Keep both constants in step with packaging/license_notices.py.
+PATREON_LICENCE_TITLE = 'FNSTools - Patreon licence, not MIT'
+LICENCE_NOTE_PREFIX = 'fns_license'
+# Never searched for placed copies: TD's own trees, and /local.
+LICENSED_SCAN_SKIP = ('/sys', '/ui', '/local')
+
+
+def _declared(comp, parname):
+    """A package identity par (Pkgname, Pkgvariant, Pkgversion): FNS_About's
+    first, then the comp's own; '' when neither declares it."""
+    for host in (comp.op('FNS_About'), comp):
+        if host is None:
+            continue
+        p = getattr(host.par, parname, None)
+        if p is not None and str(p.eval()).strip():
+            return str(p.eval()).strip()
+    return ''
+
+
+def _isPackageCopy(comp):
+    """Is this COMP a copy of a released package (a boundary the licensed
+    scan reports and never descends into)?"""
+    return comp.op('FNS_About') is not None or bool(
+        _declared(comp, 'Pkgname') or _declared(comp, 'Pkgversion'))
+
+
+def _carriesPatreonLicence(comp):
+    notes = comp.findChildren(name=LICENCE_NOTE_PREFIX + '*', maxDepth=1,
+                              includeUtility=True)
+    for n in notes:
+        t = getattr(n.par, 'Titletext', None)
+        if t is not None and str(t.eval()) == PATREON_LICENCE_TITLE:
+            return True
+    return False
+
+
+def LicensedAccess(comp, index, by_name=False):
+    """{'package', 'access'} when `comp` is a Patreon-licensed package copy,
+    else None. `index` is the store manifest's rows by name ({} offline).
+    `by_name` lets the COMP name stand in for a missing Pkgname: true for
+    the toolkit's own children, never for a COMP in the user's networks,
+    which may simply share a name."""
+    name = _declared(comp, 'Pkgname') or (comp.name if by_name else '')
+    pkg = index.get(name) if name else None
+    if pkg is not None and pkg.get('foreign'):
+        return None                 # not ours to licence
+    if _carriesPatreonLicence(comp):
+        return {'package': name or comp.name, 'access': 'patreon licence note'}
+    if pkg is None:
+        return None
+    access = pkg.get('access', 'free')
+    vid = (_declared(comp, 'Pkgvariant') or 'base').lower()
+    if vid != 'base':
+        access = (((pkg.get('variants') or {}).get(vid) or {}).get('access')
+                  or access)
+    access = str(access or 'free')
+    return None if access == 'free' else {'package': name, 'access': access}
+
+
+def FindLicensedCopies(root, index, top):
+    """Every Patreon-licensed package copy in the project, as two lists of
+    (comp, LicensedAccess): the toolkit root's own children, and copies
+    placed anywhere else under `top` (op menu alternatives, family members,
+    pane spawns, standalone drops). A package copy is never descended into:
+    whatever it embeds ships under that package's own licence."""
+    toolkit = []
+    for c in root.children:
+        if c.family != 'COMP':
+            continue
+        hit = LicensedAccess(c, index, by_name=True)
+        if hit:
+            toolkit.append((c, hit))
+    elsewhere = []
+    stack = list(reversed(top.children))
+    while stack:
+        c = stack.pop()
+        if c.family != 'COMP' or c.path == root.path:
+            continue
+        if any(c.path == s or c.path.startswith(s + '/') for s in LICENSED_SCAN_SKIP):
+            continue
+        if _isPackageCopy(c):
+            hit = LicensedAccess(c, index)
+            if hit:
+                elsewhere.append((c, hit))
+            continue
+        stack.extend(reversed(c.children))
+    return toolkit, elsewhere
+
+
 def ExposeConsoleHosts(comp):
     """Flip Expose on for every FNS_Console host the landed package carries.
 
@@ -1727,6 +1823,107 @@ class InstallerExt:
         self._status('removed the FNS operator family: %s' % ', '.join(rm['removed']))
         self.SyncFamilyToggle()
         return {'ok': True, 'removed': rm['removed'], 'notes': rm['notes']}
+
+    def RemovePatreon(self, confirm=False):
+        """Take every Patreon-licensed FNS package out of this project, so
+        the .toe can be published or handed on without them: the root's
+        Remove Patreon Tools pulse calls this. Installed tools leave the
+        toolkit the way Pick Tools removes them (their settings stay in the
+        roaming config); copies placed in your networks are deleted too, and
+        the install record forgets every Patreon package. Free tools stay.
+        Copies Embody authors in this project are listed, never touched.
+
+        `confirm=False` only answers what would happen. Never raises;
+        returns {'ok', 'removed' | 'would_remove', 'forgotten', 'kept',
+        'notes', 'why'?}."""
+        try:
+            tgt = self._par('Target') or DefaultTarget(self.ownerComp)
+            root = op(tgt.path if isinstance(tgt, OP) else tgt)
+            if root is None:
+                return {'ok': False, 'why': 'no toolkit root'}
+            locked = SourceLock(root.path)
+            if locked:
+                return {'ok': False, 'why': locked}
+            index, notes = {}, []
+            full = self._manifestPath()
+            if full is not None:
+                try:
+                    index = {p['name']: p for p in LoadJson(full, 'manifest')['packages']}
+                except Exception as e:
+                    notes.append('store manifest unreadable (%s)' % str(e)[:80])
+            if not index:
+                notes.append('no store manifest: only copies carrying the Patreon '
+                             'licence note are found; open Pick Tools once and '
+                             'run this again to be sure')
+            toolkit, elsewhere = FindLicensedCopies(root, index, op('/'))
+            kept = [c.path for c, _ in elsewhere if _embodyRows(c.path)]
+            elsewhere = [(c, h) for c, h in elsewhere if c.path not in kept]
+            gated = {n for n, p in index.items()
+                     if str(p.get('access', 'free') or 'free') != 'free'
+                     and not p.get('foreign')}
+            rec_t = root.op(INSTALLED_DAT)
+            recorded = ([rec_t[i, 0].val for i in range(1, rec_t.numRows)]
+                        if rec_t is not None else [])
+            in_toolkit = {c.name for c, _ in toolkit}
+            forget = sorted({n for n in recorded if n in gated and n not in in_toolkit})
+            if not confirm:
+                return {'ok': True,
+                        'would_remove': [c.path for c, _ in toolkit + elsewhere],
+                        'packages': sorted({h['package'] for _, h in toolkit + elsewhere}),
+                        'forgotten': forget, 'kept': kept, 'notes': notes}
+            steps = []
+            for c, h in toolkit:
+                pkg = index.get(h['package']) or {}
+                vid = (_declared(c, 'Pkgvariant') or 'base').lower()
+                stem = h['package'] if vid == 'base' else '%s.%s' % (h['package'], vid)
+                steps.append({'name': c.name,
+                              'path': '%s/%s.tox' % (StoreFolder(), stem),
+                              'sha256': (_artifactFor(pkg, vid) or {}).get('sha256', '')})
+            rm = RemoveTools({'target': root.path, 'steps': steps,
+                              'to_remove': [c.name for c, _ in toolkit]})
+            removed = ['%s/%s' % (root.path, n) for n in rm['removed']]
+            notes += rm['notes']
+            for c, _ in elsewhere:
+                if not c.valid:
+                    continue        # went with a copy removed before it
+                path = c.path
+                _releaseFamilies(c)
+                c.destroy()
+                removed.append(path)
+            rec_t = root.op(INSTALLED_DAT)
+            if rec_t is not None:
+                for i in range(rec_t.numRows - 1, 0, -1):
+                    if rec_t[i, 0].val in forget:
+                        rec_t.deleteRow(i)
+            self._status('removed %d Patreon cop%s%s'
+                         % (len(removed), 'y' if len(removed) == 1 else 'ies',
+                            '; kept (authored here): ' + ', '.join(kept) if kept else ''))
+            self.rebuildInstallCommands()
+            self.SyncFamilyToggle()
+            return {'ok': True, 'removed': removed, 'forgotten': forget,
+                    'kept': kept, 'notes': notes}
+        except Exception as e:
+            return {'ok': False, 'why': 'Remove Patreon Tools failed: %s' % str(e)[:200]}
+
+    def reportPatreonRemoval(self):
+        """Wiring for the root's Remove Patreon Tools pulse, on its second
+        press: remove, then say what went in the Textport."""
+        res = self.RemovePatreon(confirm=True)
+        if not res.get('ok'):
+            print('FNSTools: Remove Patreon Tools stopped -- %s' % res.get('why'))
+            return res
+        for path in res.get('removed') or []:
+            print('  removed ' + path)
+        if res.get('forgotten'):
+            print('  forgot the install record of ' + ', '.join(res['forgotten']))
+        for line in res.get('notes') or []:
+            print('  ' + line)
+        for path in res.get('kept') or []:
+            print('  left alone (Embody authors it here): ' + path)
+        print('FNSTools: %d Patreon cop%s removed. Save the project to keep it '
+              'that way.' % (len(res.get('removed') or []),
+                             'y' if len(res.get('removed') or []) == 1 else 'ies'))
+        return res
 
     def _keepStoreWanted(self):
         upd = self._updaterComp()

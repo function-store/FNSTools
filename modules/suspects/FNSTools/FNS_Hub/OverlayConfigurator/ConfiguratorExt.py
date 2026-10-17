@@ -40,6 +40,16 @@ class _OverlayApi:
 		self._reg = reg
 		self.stored = {'PaneRegistry': {}}   # nothing virtual lives here
 
+	def markLayoutChanged(self):
+		"""Forward the user-edit mark to the overlay registry, so the Hub
+		writes this tab's table on the next project save
+		(ConfiguratorBase._markChanged; RegistryBase markLayoutChanged)."""
+		# _reg is the registry COMP; a lowercase method is not promoted onto it
+		ext = getattr(self._reg.ext, 'OverlayRegistryExt', None)
+		fn = getattr(ext, 'markLayoutChanged', None) if ext is not None else None
+		if fn is not None:
+			fn()
+
 	# --- reading -------------------------------------------------------------
 
 	def _layers(self):
@@ -309,6 +319,7 @@ class ConfiguratorExt(ConfiguratorBase):
 		info = api.Widgets.get(name) if api is not None else None
 		if info is None:
 			return
+		self._markChanged()
 		api.SetWidgetDisplay(name, info.get('display', '1') == '0')
 		self._refreshSoon()
 
@@ -324,6 +335,7 @@ class ConfiguratorExt(ConfiguratorBase):
 		par = api._toolPar(info, 'corner')
 		cur = str(par.eval()) if par is not None else info.get('anchor', 'topleft')
 		nxt = ring[(ring.index(cur) + 1) % len(ring)] if cur in ring else 'topleft'
+		self._markChanged()
 		api.SetWidgetCorner(name, nxt)
 		self._refreshSoon()
 
@@ -354,6 +366,7 @@ class ConfiguratorExt(ConfiguratorBase):
 		except (TypeError, ValueError):
 			self._log(f'invalid margin {txt!r}')
 			return
+		self._markChanged()
 		api.SetWidgetMargin(name, value)
 		self._refreshSoon()
 

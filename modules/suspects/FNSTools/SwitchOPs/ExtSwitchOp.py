@@ -38,6 +38,7 @@ class ExtSwitchOp:
 		FNSCommand.announce(self.ownerComp)
 
 	def OnSelectOP(self, _op):
+		"""Remember a newly selected operator in the recent list; called when the selection changes."""
 		# The selection table changes AFTER a selected op is destroyed too, so
 		# the caller can hand over None (or an op already invalid) in that
 		# frame; nothing to remember then.
@@ -47,6 +48,7 @@ class ExtSwitchOp:
 			self.fifo.appendRow(_op.path)
 
 	def OnSwitch(self):
+		"""Make the most recently selected other operator current; called by the hotkey."""
 		_current = ui.panes.current.owner.currentChild
 		_cur_path = _current.path if _current else None
 		_swop = next((row[0] for row in self.fifo.rows(val=True) if row[0] != _cur_path and op(row[0])), None)

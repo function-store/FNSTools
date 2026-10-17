@@ -35,6 +35,7 @@ class ExtOpenExt:
 		FNSCommand.announce(self.ownerComp)
 
 	def OnOpen(self):
+		"""Open the current COMP's promoted extension source in the editor; called by the hotkey."""
 		_op = ui.panes.current.owner.currentChild
 		if not _op.isCOMP:
 			return

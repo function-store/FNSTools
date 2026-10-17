@@ -1466,6 +1466,7 @@ class OpMenuRegistryExt(RegistryBase):
 				self.ownerComp, delayFrames=10, delayRef=op.TDResources)
 
 	def UnregisterContributor(self, canonical_name):
+		"""Remove a contributor's menu items, search words and alternatives and resync the dialog (forwarded to the /sys global)."""
 		self._altCache = None   # a contributor changed: the per-frame Alternatives merge is stale
 		if not self._is_sys_global():
 			api = self._registryApi()
@@ -1482,6 +1483,7 @@ class OpMenuRegistryExt(RegistryBase):
 
 	# RegistryBase healing calls self.UnregisterPanel(name); alias it.
 	def UnregisterPanel(self, canonical_name):
+		"""RegistryBase's teardown name for UnregisterContributor."""
 		return self.UnregisterContributor(canonical_name)
 
 	def SetContributorOrder(self, canonical_name, order):

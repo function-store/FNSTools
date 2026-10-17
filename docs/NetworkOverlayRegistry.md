@@ -2,7 +2,7 @@
 status: in-force
 summary: FNS_OverlayRegistry, the twelfth registry -- every tool hands over one layer TOP, the registry composites them, shows the result above the nodes through one utility annotation, and tells each layer where it draws; tools can also pin small interactive panels (widgets) to a corner. CookBar is the first client of both.
 since: 2026-10-11
-verified: 2026-10-11, pilot layers and CookBar live: composite, stacking by Menuorder, teardown on Displayed off and on deletion, pre-save removal, clone-master skip, bar positions equal NetworkToPixel; the viewed network's display flags, annotation alphas and children unchanged. Widgets: cold boot, corner stacking measured (margin 30, gap 20: second widget 30 + 170 + 20 points down), margin change and package save, Top List rows, tabs and click framing. Not verified: a Non-Commercial licence, macOS.
+verified: 2026-10-11, pilot layers and CookBar live: composite, stacking by Menuorder, teardown on Displayed off and on deletion, pre-save removal, clone-master skip, bar positions equal NetworkToPixel; the viewed network's display flags, annotation alphas and children unchanged. Widgets: cold boot, corner stacking measured (margin 30, gap 20: second widget 30 + 170 + 20 points down), margin change and package save, Top List rows, tabs and click framing. Non-Commercial (2026-10-15, under app.addNonCommercialLimit): View pars equal the drawn size, 1280x602. Not verified: macOS.
 skill: fns-registry
 ---
 
@@ -35,7 +35,7 @@ bound to it recooks only then:
 | Par | Means |
 |---|---|
 | `Viewx0 Viewy0 Viewx1 Viewy1` | the rectangle the overlay covers, network units |
-| `Resolutionw Resolutionh` | the resolution to render at, pixels (monitor DPI, capped at 4096, 1280 under a Non-Commercial licence) |
+| `Resolutionw Resolutionh` | the resolution to render at, pixels (monitor DPI, capped at 4096; longest side 1280 under a Non-Commercial licence, so this is also the size TD draws) |
 | `Unitsperpixel` | network units per layer pixel |
 | `Pixelsperpoint` | layer pixels per screen point (keeps a line one width on screen at any zoom) |
 | `Zoom` | the network editor's zoom |
@@ -273,3 +273,88 @@ shipped in the tox, and the list would have shown them on a fresh install.
 - A shared marks layer: partner_overlay's shader (rounded outlines,
   cursors, name tags) as a component any tool feeds with rectangles.
 - TDCollab as a client when the toolkit is present (its own project).
+  Done: TDXCollab registers one layer and two widgets (see below).
+
+## Never rebuild the global by accident (2026-10-12)
+
+Toolbar buttons that switch a layer (CookBar, POPOverlay) needed a re-hover
+before the next click. Every toggle rebuilt the `/sys` extension: TD builds
+it by evaluating `ext0object`, and every operator read during that
+evaluation becomes a dependency of the expression. `_ensureOverlayOps` and
+`_syncSurface` read `execute_frame` (its text and Active) during
+construction, and creating a layer Select TOP inside the global
+re-evaluated the lookup too. A toggle flipped `execute_frame`, the next
+access (QuickMarks' frame callback, every frame) rebuilt the extension, and
+the new instance swept and redrew the overlay and widgets in the viewed
+network in the middle of the click, on a frame of up to 244 ms.
+
+The rules that keep it from coming back:
+
+- **No operator reads during construction.** `postInit` only schedules
+  `_globalSetup` a frame later; `_syncSurface` returns while `_inInit` is set.
+- **No children created on a toggle.** Layers go through a fixed pool,
+  `layer_0` .. `layer_5`, made by `_ensureOverlayOps` and re-pointed by
+  `_syncSurface`.
+- **No annotation created or destroyed on a toggle.** A widget whose tool
+  switches off is parked (viewer off, not clickable, no size) and reused on
+  its next show; widgets are destroyed only when nothing is shown at all,
+  the network changes, or the project saves.
+
+Measured after: no rebuild on any toggle; the click frame went from 244 ms
+to 29 ms (POPOverlay on) and from 174 ms to 38 ms (CookBar off). The other
+`/sys` registries cooked their extension DAT once in the same session.
+
+## Shared with TDXCollab (0.2.x, 2026-10-15)
+
+TDXCollab embeds a host of this registry and ships the registry unchanged:
+one version, built from this master, serves both toolkits. Whichever loads
+first is the global and the other's copy ties and stays out. TDXCollab
+never edits or re-versions it, so its findings land here and both take the
+next release. It draws one layer (partner cursors, view rectangles,
+selection boxes from one GLSL TOP reading the View pars) and two widgets
+through `RegisterPanelWidget`.
+
+What 0.2.0 settled, from their reports:
+
+- **Non-Commercial is 1280 on the longest side, aspect kept.** Measured
+  here under `app.addNonCommercialLimit(password=...)`: 2000x1000 drew
+  1280x640, 1280x1000 and 1000x1280 were untouched, 2000x2000 drew
+  1280x1280, 4000x2 was untouched. Detection reads
+  `licenses.isNonCommercial`; `licenses.type` says
+  `TouchDesigner Non-Commercial` (and `TouchDesigner Educational` on the
+  dev machine), so the old `== 'Non-Commercial'` never matched. TD then drew
+  the composite smaller than the View pars said, and TDXCollab's cursors
+  landed outside the image on a Non-Commercial Mac.
+- **Widgets survive a takeover.** Layers ride the base's entry table;
+  widgets live in their own `widgets` storage, which the takeover did not
+  merge, so a newer global started without them until each tool registered
+  again. `_merge_pane_registry_from` now carries them, and
+  `_dropParallelTable` clears the master's copy afterwards.
+- **A host that comes up before the global retries** (every 30 frames, 20
+  times) instead of reporting Registered while its registration was
+  ignored.
+- **The annotations enclose no operators** (`encloseops = False`).
+- **0.2.1: no self-dependency on reinit.** The master's widget cleanup ran
+  in `postInit` with `fetch('widgets')`, and a fetch during construction
+  made the COMP depend on its own storage: a cook dependency loop warning
+  naming only the COMP after every reinit (TDXCollab saw it on their host).
+  It reads `storage.get` now; reinit leaves no warning on master or host.
+
+What a client can rely on, and must keep:
+
+- **Layer Active stays an expression.** Every registration re-asserts the
+  default expression over a constant (`_ensureLayerActive`), so a tool that
+  wants its own condition writes it as an expression (TDXCollab reads COMP
+  storage, QuickMarks `Active and Showpins`).
+- **The tags are stable**: `fns_network_overlay` on the layer annotation,
+  `fns_network_overlay_widget` on each widget annotation. Both are utility
+  operators that `COMP.saveByteArray` carries, so a tool that serialises a
+  network strips them by tag.
+- **Pane following**: the current network editor, else the one followed
+  last while another pane type is current. A change to this rule is a
+  change to the contract.
+- **The covered rectangle includes the pane's path bar.** `bottomLeft` and
+  `topRight` include the roughly 24 point bar, while `pane.x`/`pane.y` is
+  the centre of the network below it. Network-space positions (the View
+  pars, `NetworkToPixel`) are self-consistent; anything placed in screen
+  points from the pane centre is off by about 12 points.

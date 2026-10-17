@@ -38,6 +38,7 @@ class ExtOpToClipboard:
 		FNSCommand.announce(self.ownerComp)
 
 	def OnCopy(self):
+		"""Copy a reference to the hovered parameter, or to the current operator, to the clipboard; called by the hotkey."""
 		# A parameter under the mouse is what is being copied; otherwise the
 		# network's current operator, as before.
 		hovered = self.hoveredParReference(ui.rolloverPar, getattr(ui, 'rolloverParGroup', None))
@@ -70,6 +71,7 @@ class ExtOpToClipboard:
 		return None
 
 	def OnRolloverPar(self, _op_str, _par_str, _expr):
+		"""Called when a parameter is hovered: a pasted reference to the copied operator in its expression is rewritten as a relative path."""
 		_op = op(_op_str)
 		if not _op:
 			return

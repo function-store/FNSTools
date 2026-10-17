@@ -248,22 +248,22 @@ class ClipboardImageEXT(DotChatUtil):
                             help_text='Height of last pasted image')
     
     def Pasteimage(self):
+        """Paste the clipboard image into the current network as a Movie File In TOP."""
         if self.ownerComp.par.Bypass.eval():
             return
-        """Paste image from clipboard as TOP"""
         fnsLog("[ClipboardImageEXT] Starting Pasteimage", level='INFO')
         self.paste_image('top')
         
     def Pastescriptop(self):
+        """Paste the clipboard image as a Script TOP."""
         if self.ownerComp.par.Bypass.eval():
             return
-        """Paste image from clipboard as a scriptTOP"""
         self.paste_image('scriptop')
         
     def Pasteannotate(self):
+        """Paste the clipboard image as an annotate COMP."""
         if self.ownerComp.par.Bypass.eval():
             return
-        """Paste image from clipboard as an annotate component"""
         self.paste_image('annotate')
         
     def paste_image(self, save_type):
@@ -1097,6 +1097,7 @@ class ClipboardImageEXT(DotChatUtil):
         return has_image
         
     def OnShortcut(self, shortcutName=None):
+        """Called by the hotkey: when the clipboard holds an image, open the menu that picks the paste form."""
         if self.ownerComp.par.Bypass.eval():
             return
         if not self.check_clipboard():
@@ -1106,6 +1107,7 @@ class ClipboardImageEXT(DotChatUtil):
         self.popMenu.Open(callback=self.OnPopMenuCallback)
 
     def OnPopMenuShortcut(self, keyInfo):
+        """Called by the menu's key watcher; a pressed shortcut picks its menu item."""
         if keyInfo.state == True:
             key = keyInfo.key
 
@@ -1115,6 +1117,7 @@ class ClipboardImageEXT(DotChatUtil):
                     self.OnPopMenuCallback(item)
 
     def OnPopMenuCallback(self, infoDict):
+        """Called when a menu item is chosen (File In, ScriptTOP or Annotate); pastes in that form and closes the menu."""
         if isinstance(infoDict, str):
             choice = infoDict
         else:

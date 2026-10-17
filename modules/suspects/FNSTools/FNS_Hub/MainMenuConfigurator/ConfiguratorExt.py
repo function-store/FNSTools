@@ -94,10 +94,14 @@ class ConfiguratorExt(ConfiguratorBase):
 				unordered.append(o.name)
 		if unordered:
 			# first adoption: seed the left sequence from the snapshot, so
-			# the bar keeps exactly the order the user was looking at
+			# the bar keeps exactly the order the user was looking at. A
+			# boot pass: placed, no tool's host written (_placeSequence),
+			# then persisted here as PushSequence would
 			rest = [n for n in api.WidgetSequence
 					if n not in {n2 for _, n2 in left_x}]
-			self.PushSequence([n for _, n in left_x] + rest)
+			self._placeSequence(api, [n for _, n in left_x] + rest)
+			self._persistOwnedOrders(api)
+			self.Refresh()
 			for name, info in api.Widgets.items():
 				if info.get('anchor') and info['anchor'] in {o.name for o in fresh}:
 					api.SetWidgetAnchor(name, None)

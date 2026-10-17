@@ -28,39 +28,39 @@
   "when": "2026-09-08 07:34:30"
  },
  "ChopBank": {
-  "build": 9,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "1.0.2",
-  "when": "2026-10-12 04:52:31"
+  "build": 12,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:15",
+  "version": "1.0.4",
+  "when": "2026-10-17 04:17:11"
  },
  "ChopProcess": {
-  "build": 13,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "1.0.2",
-  "when": "2026-10-12 04:52:31"
+  "build": 16,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:15",
+  "version": "1.0.4",
+  "when": "2026-10-17 04:17:11"
  },
  "CircularDistortionTOP": {
-  "build": 9,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "1.0.2",
-  "when": "2026-10-12 04:52:31"
+  "build": 12,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:15",
+  "version": "1.0.4",
+  "when": "2026-10-17 04:17:11"
  },
  "ColorGen": {
-  "build": 8,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "1.0.1",
-  "when": "2026-10-12 04:52:31"
+  "build": 11,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:15",
+  "version": "1.0.3",
+  "when": "2026-10-17 04:17:11"
  },
  "ColorGenPro": {
-  "build": 8,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "1.0.1",
-  "when": "2026-10-12 04:52:31"
+  "build": 11,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:15",
+  "version": "1.0.3",
+  "when": "2026-10-17 04:17:11"
  },
  "ColorUI": {
   "build": 48,
@@ -70,32 +70,32 @@
   "when": "2026-09-08 07:34:30"
  },
  "ComplexMix": {
-  "build": 9,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "1.0.1",
-  "when": "2026-10-12 04:52:31"
+  "build": 12,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:15",
+  "version": "1.0.3",
+  "when": "2026-10-17 04:17:11"
  },
  "ComplexOp": {
-  "build": 11,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "1.0.1",
-  "when": "2026-10-12 04:52:31"
+  "build": 14,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "1.0.3",
+  "when": "2026-10-17 04:17:11"
  },
  "ConstantCHOP": {
-  "build": 9,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "1.0.2",
-  "when": "2026-10-12 04:52:31"
+  "build": 13,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "1.0.4",
+  "when": "2026-10-17 04:17:11"
  },
  "CookBar": {
-  "build": 41,
-  "release": "v3.2.69",
-  "saved": "12.10.2026 06:00",
-  "version": "1.0.2",
-  "when": "2026-10-12 06:00:46"
+  "build": 54,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "1.0.4",
+  "when": "2026-10-17 04:17:11"
  },
  "CustomParTools": {
   "build": 146,
@@ -105,11 +105,11 @@
   "when": "2026-09-08 07:34:30"
  },
  "EaseInterpolator": {
-  "build": 7,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "1.0.2",
-  "when": "2026-10-12 04:52:31"
+  "build": 10,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "1.0.4",
+  "when": "2026-10-17 04:17:11"
  },
  "ExprHotStrings": {
   "build": 87,
@@ -119,193 +119,193 @@
   "when": "2026-09-08 07:34:30"
  },
  "ExpressionPOP": {
-  "build": 13,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "1.0.3",
-  "when": "2026-10-12 04:52:31"
+  "build": 16,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "1.0.5",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_AltSelect": {
-  "build": 86,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.6",
-  "when": "2026-10-12 04:52:31"
+  "build": 88,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.7",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_AutoCombine": {
-  "build": 84,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.7",
-  "when": "2026-10-12 04:52:31"
+  "build": 86,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.8",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_AutoRes": {
-  "build": 91,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.7",
-  "when": "2026-10-12 04:52:31"
+  "build": 93,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.8",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_Autosave": {
-  "build": 29,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.6",
-  "when": "2026-10-12 04:52:31"
+  "build": 30,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.8",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_BackupCleaner": {
-  "build": 48,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.7",
-  "when": "2026-10-12 04:52:31"
+  "build": 50,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.8",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_BeatMod": {
-  "build": 90,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.9",
-  "when": "2026-10-12 04:52:31"
+  "build": 92,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.10",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_BorderlessTD": {
-  "build": 126,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.8",
-  "when": "2026-10-12 04:52:31"
+  "build": 130,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.10",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_CamSequencer": {
-  "build": 38,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.0.11",
-  "when": "2026-10-12 04:52:31"
+  "build": 44,
+  "release": "v3.2.72",
+  "saved": "17.10.2026 07:40",
+  "version": "3.0.14",
+  "when": "2026-10-17 07:40:36"
  },
  "FNS_Collect": {
-  "build": 37,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.5",
-  "when": "2026-10-12 04:52:31"
+  "build": 39,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.6",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_ColorUI": {
-  "build": 87,
-  "release": "v3.2.69",
-  "saved": "12.10.2026 06:00",
-  "version": "3.2.8",
-  "when": "2026-10-12 06:00:46"
+  "build": 90,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.10",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_CommandKit": {
-  "build": 30,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.4",
-  "when": "2026-10-12 04:52:31"
+  "build": 31,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.5",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_CommandPalette": {
-  "build": 79,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.13",
-  "when": "2026-10-12 04:52:31"
+  "build": 82,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.15",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_CommandRegistry": {
-  "build": 34,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.7",
-  "when": "2026-10-12 04:52:31"
+  "build": 35,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.8",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_ConfigHost": {
-  "build": 53,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.6",
-  "when": "2026-10-12 04:52:31"
+  "build": 54,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.7",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_ConfigRegistry": {
-  "build": 52,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.8",
-  "when": "2026-10-12 04:52:31"
+  "build": 54,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.9",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_Console": {
-  "build": 77,
-  "release": "v3.2.69",
-  "saved": "12.10.2026 06:00",
-  "version": "3.2.17",
-  "when": "2026-10-12 06:00:46"
+  "build": 79,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.18",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_CustomParTools": {
-  "build": 205,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.10",
-  "when": "2026-10-12 04:52:31"
+  "build": 209,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.12",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_ExprHotStrings": {
-  "build": 114,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.7",
-  "when": "2026-10-12 04:52:31"
+  "build": 116,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.8",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_GeoPilot": {
-  "build": 7,
-  "release": "v3.2.68",
-  "saved": "09.10.2026 01:15",
-  "version": "1.8.0",
-  "when": "2026-10-12 04:52:31"
+  "build": 11,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "1.8.2",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_GlobalOutSelect": {
-  "build": 85,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.5",
-  "when": "2026-10-12 04:52:31"
+  "build": 88,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.7",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_GlobalVolControl": {
-  "build": 93,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.7",
-  "when": "2026-10-12 04:52:31"
+  "build": 97,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.9",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_HotkeyManager": {
-  "build": 109,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.7",
-  "when": "2026-10-12 04:52:31"
+  "build": 115,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.9",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_Hub": {
-  "build": 114,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.11",
-  "when": "2026-10-12 04:52:31"
+  "build": 121,
+  "release": "v3.2.72",
+  "saved": "17.10.2026 07:40",
+  "version": "3.2.14",
+  "when": "2026-10-17 07:40:36"
  },
  "FNS_HubRegistry": {
-  "build": 50,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.5",
-  "when": "2026-10-12 04:52:31"
+  "build": 51,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.6",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_HydroHomie": {
-  "build": 91,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.7",
-  "when": "2026-10-12 04:52:31"
+  "build": 95,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.9",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_MainMenuRegistry": {
-  "build": 34,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.5",
-  "when": "2026-10-12 04:52:31"
+  "build": 38,
+  "release": "v3.2.72",
+  "saved": "17.10.2026 07:40",
+  "version": "3.2.7",
+  "when": "2026-10-17 07:40:36"
  },
  "FNS_Media": {
   "build": 5,
@@ -315,25 +315,25 @@
   "when": "2026-08-31 16:29:55"
  },
  "FNS_MediaBrowser": {
-  "build": 36,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.5",
-  "when": "2026-10-12 04:52:31"
+  "build": 37,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.6",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_Misc": {
-  "build": 94,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.8",
-  "when": "2026-10-12 04:52:31"
+  "build": 98,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.10",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_MixSequencer": {
-  "build": 20,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "1.0.8",
-  "when": "2026-10-12 04:52:31"
+  "build": 22,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "1.0.10",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_Navbar": {
   "build": 161,
@@ -343,18 +343,18 @@
   "when": "2026-09-08 07:34:30"
  },
  "FNS_NavbarRegistry": {
-  "build": 36,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.5",
-  "when": "2026-10-12 04:52:31"
+  "build": 40,
+  "release": "v3.2.72",
+  "saved": "17.10.2026 07:40",
+  "version": "3.2.7",
+  "when": "2026-10-17 07:40:36"
  },
  "FNS_OpFamily": {
-  "build": 194,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "0.1.8",
-  "when": "2026-10-12 04:52:31"
+  "build": 196,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "0.1.10",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_OpMenu": {
   "build": 98,
@@ -364,228 +364,228 @@
   "when": "2026-09-08 07:34:30"
  },
  "FNS_OpMenuMods": {
-  "build": 141,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.8",
-  "when": "2026-10-12 04:52:31"
+  "build": 144,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.10",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_OpMenuRegistry": {
-  "build": 48,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.6",
-  "when": "2026-10-12 04:52:31"
+  "build": 49,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.7",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_OpSequencer": {
-  "build": 23,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "1.16.8",
-  "when": "2026-10-12 04:52:31"
+  "build": 28,
+  "release": "v3.2.72",
+  "saved": "17.10.2026 07:40",
+  "version": "1.16.11",
+  "when": "2026-10-17 07:40:36"
  },
  "FNS_OpTemplates": {
-  "build": 315,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.9",
-  "when": "2026-10-12 04:52:31"
+  "build": 319,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.11",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_OpToClipboard": {
-  "build": 77,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.7",
-  "when": "2026-10-12 04:52:31"
+  "build": 79,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.8",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_OpenExt": {
-  "build": 72,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.6",
-  "when": "2026-10-12 04:52:31"
+  "build": 74,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.7",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_Output": {
-  "build": 85,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.7",
-  "when": "2026-10-12 04:52:31"
+  "build": 89,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.9",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_OverlayRegistry": {
-  "build": 17,
-  "release": "v3.2.69",
-  "saved": "12.10.2026 06:00",
-  "version": "0.1.1",
-  "when": "2026-10-12 06:00:46"
+  "build": 25,
+  "release": "v3.2.71",
+  "saved": "15.10.2026 06:20",
+  "version": "0.2.1",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_POPOverlay": {
-  "build": 15,
-  "release": "v3.2.69",
-  "saved": "12.10.2026 06:00",
-  "version": "0.1.1",
-  "when": "2026-10-12 06:00:46"
+  "build": 30,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "0.1.3",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_PaletteRegistry": {
-  "build": 47,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.5",
-  "when": "2026-10-12 04:52:31"
+  "build": 48,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.6",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_PaneSearchRegistry": {
-  "build": 11,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "0.1.3",
-  "when": "2026-10-12 04:52:31"
+  "build": 13,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "0.1.5",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_PaneTypeRegistry": {
-  "build": 49,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.6",
-  "when": "2026-10-12 04:52:31"
+  "build": 50,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.7",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_ParOPDrop": {
-  "build": 102,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.8",
-  "when": "2026-10-12 04:52:31"
+  "build": 107,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.10",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_ParRandomizer": {
-  "build": 106,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.7",
-  "when": "2026-10-12 04:52:31"
+  "build": 110,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.9",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_ParentHierarchy": {
-  "build": 45,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.5",
-  "when": "2026-10-12 04:52:31"
+  "build": 46,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.7",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_PreviewPanel": {
-  "build": 36,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:51",
-  "version": "3.2.6",
-  "when": "2026-10-12 04:52:31"
+  "build": 40,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.8",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_ProSceneChanger": {
-  "build": 27,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "1.0.7",
-  "when": "2026-10-12 04:52:31"
+  "build": 30,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "1.0.8",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_QuickCollapse": {
-  "build": 83,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "3.2.6",
-  "when": "2026-10-12 04:52:31"
+  "build": 85,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.7",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_QuickPane": {
-  "build": 85,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "3.2.6",
-  "when": "2026-10-12 04:52:31"
+  "build": 89,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.8",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_QuickTime": {
-  "build": 89,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "3.2.7",
-  "when": "2026-10-12 04:52:31"
+  "build": 93,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.9",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_RandomCHOP": {
-  "build": 26,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "1.0.7",
-  "when": "2026-10-12 04:52:31"
+  "build": 30,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:36",
+  "version": "1.0.9",
+  "when": "2026-10-17 04:42:36"
  },
  "FNS_Remote": {
-  "build": 77,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "3.2.12",
-  "when": "2026-10-12 04:52:31"
+  "build": 80,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.13",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_ResetPLS": {
-  "build": 110,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "3.2.8",
-  "when": "2026-10-12 04:52:31"
+  "build": 115,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.10",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_SearchFix": {
-  "build": 24,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "0.2.5",
-  "when": "2026-10-12 04:52:31"
+  "build": 27,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "0.2.7",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_SearchPalette": {
-  "build": 64,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "3.2.7",
-  "when": "2026-10-12 04:52:31"
+  "build": 67,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:39",
+  "version": "3.2.9",
+  "when": "2026-10-17 04:42:36"
  },
  "FNS_SetSmoothness": {
-  "build": 86,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "3.2.7",
-  "when": "2026-10-12 04:52:31"
+  "build": 90,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.9",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_SimpleSceneChanger": {
-  "build": 29,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "1.0.8",
-  "when": "2026-10-12 04:52:31"
+  "build": 32,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "1.0.9",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_SwapOps": {
-  "build": 84,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "3.2.7",
-  "when": "2026-10-12 04:52:31"
+  "build": 88,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.9",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_SwitchOPs": {
-  "build": 74,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "3.2.6",
-  "when": "2026-10-12 04:52:31"
+  "build": 76,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.7",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_SwitchTools": {
-  "build": 17,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "1.1.6",
-  "when": "2026-10-12 04:52:31"
+  "build": 21,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "1.1.8",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_TimelineRegistry": {
-  "build": 63,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "3.2.5",
-  "when": "2026-10-12 04:52:31"
+  "build": 67,
+  "release": "v3.2.72",
+  "saved": "17.10.2026 07:40",
+  "version": "3.2.7",
+  "when": "2026-10-17 07:40:36"
  },
  "FNS_TimelineTools": {
-  "build": 166,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "3.2.10",
-  "when": "2026-10-12 04:52:31"
+  "build": 178,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.12",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_Toolbar": {
   "build": 157,
@@ -595,46 +595,46 @@
   "when": "2026-09-08 07:34:30"
  },
  "FNS_ToolbarRegistry": {
-  "build": 37,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "3.2.6",
-  "when": "2026-10-12 04:52:31"
+  "build": 41,
+  "release": "v3.2.72",
+  "saved": "17.10.2026 07:40",
+  "version": "3.2.8",
+  "when": "2026-10-17 07:40:36"
  },
  "FNS_Updater": {
-  "build": 162,
-  "release": "v3.2.69",
-  "saved": "12.10.2026 06:00",
-  "version": "3.2.26",
-  "when": "2026-10-12 06:00:46"
+  "build": 169,
+  "release": "v3.2.72",
+  "saved": "17.10.2026 07:40",
+  "version": "3.2.28",
+  "when": "2026-10-17 07:40:36"
  },
  "FNS_VSCodeTools": {
-  "build": 146,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "3.2.7",
-  "when": "2026-10-12 04:52:31"
+  "build": 150,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.9",
+  "when": "2026-10-17 04:17:11"
  },
  "FNS_iopBrowser": {
-  "build": 61,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "3.2.5",
-  "when": "2026-10-12 04:52:31"
+  "build": 62,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "3.2.7",
+  "when": "2026-10-17 04:17:11"
  },
  "FeedbackDisplace": {
-  "build": 13,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "1.0.4",
-  "when": "2026-10-12 04:52:31"
+  "build": 16,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "1.0.6",
+  "when": "2026-10-17 04:17:11"
  },
  "FloatDataRecorder": {
-  "build": 8,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "1.0.2",
-  "when": "2026-10-12 04:52:31"
+  "build": 11,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "1.0.4",
+  "when": "2026-10-17 04:17:11"
  },
  "GlobalOutSelect": {
   "build": 61,
@@ -658,39 +658,39 @@
   "when": "2026-09-08 07:34:30"
  },
  "InfinityCHOP": {
-  "build": 5,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "1.0.1",
-  "when": "2026-10-12 04:52:31"
+  "build": 8,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "1.0.3",
+  "when": "2026-10-17 04:17:11"
  },
  "InstanceTrailer": {
-  "build": 7,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "1.0.1",
-  "when": "2026-10-12 04:52:31"
+  "build": 10,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "1.0.3",
+  "when": "2026-10-17 04:17:11"
  },
  "KinectSinglePlayer": {
-  "build": 9,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "1.0.1",
-  "when": "2026-10-12 04:52:31"
+  "build": 12,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "1.0.3",
+  "when": "2026-10-17 04:17:11"
  },
  "LayerSep3D": {
-  "build": 10,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "1.0.1",
-  "when": "2026-10-12 04:52:31"
+  "build": 13,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "1.0.3",
+  "when": "2026-10-17 04:17:11"
  },
  "LinkOPs": {
-  "build": 8,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "1.0.1",
-  "when": "2026-10-12 04:52:31"
+  "build": 11,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:16",
+  "version": "1.0.3",
+  "when": "2026-10-17 04:17:11"
  },
  "MISC": {
   "build": 54,
@@ -700,18 +700,18 @@
   "when": "2026-09-08 07:34:30"
  },
  "MaskDraw": {
-  "build": 12,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "1.0.2",
-  "when": "2026-10-12 04:52:31"
+  "build": 15,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:17",
+  "version": "1.0.4",
+  "when": "2026-10-17 04:17:11"
  },
  "MoveDetectDir": {
-  "build": 6,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "1.0.2",
-  "when": "2026-10-12 04:52:31"
+  "build": 9,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:17",
+  "version": "1.0.4",
+  "when": "2026-10-17 04:17:11"
  },
  "OUTPUT": {
   "build": 52,
@@ -742,11 +742,11 @@
   "when": "2026-09-08 07:34:30"
  },
  "OpenOp": {
-  "build": 8,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "1.0.1",
-  "when": "2026-10-12 04:52:31"
+  "build": 11,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:17",
+  "version": "1.0.3",
+  "when": "2026-10-17 04:17:11"
  },
  "ParOPDrop": {
   "build": 66,
@@ -763,32 +763,32 @@
   "when": "2026-09-08 07:34:30"
  },
  "Particles2D_POP": {
-  "build": 7,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "1.0.2",
-  "when": "2026-10-12 04:52:31"
+  "build": 10,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:17",
+  "version": "1.0.4",
+  "when": "2026-10-17 04:17:11"
  },
  "ParticlesGpuUltimate": {
-  "build": 6,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "2.0.0",
-  "when": "2026-10-12 04:52:31"
+  "build": 9,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:17",
+  "version": "2.0.2",
+  "when": "2026-10-17 04:17:11"
  },
  "PasteFromClipboard": {
-  "build": 86,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "3.2.7",
-  "when": "2026-10-12 04:52:31"
+  "build": 89,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:17",
+  "version": "3.2.9",
+  "when": "2026-10-17 04:17:11"
  },
  "PrismTOP": {
-  "build": 15,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "1.0.3",
-  "when": "2026-10-12 04:52:31"
+  "build": 18,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:17",
+  "version": "1.0.5",
+  "when": "2026-10-17 04:17:11"
  },
  "QuickCollapse": {
   "build": 58,
@@ -798,11 +798,11 @@
   "when": "2026-09-08 07:34:30"
  },
  "QuickMarks": {
-  "build": 85,
-  "release": "v3.2.69",
-  "saved": "12.10.2026 06:00",
-  "version": "3.2.7",
-  "when": "2026-10-12 06:00:46"
+  "build": 97,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:17",
+  "version": "3.2.9",
+  "when": "2026-10-17 04:17:11"
  },
  "QuickPane": {
   "build": 61,
@@ -819,11 +819,11 @@
   "when": "2026-09-08 07:34:30"
  },
  "RealRamp": {
-  "build": 14,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "1.0.2",
-  "when": "2026-10-12 04:52:31"
+  "build": 17,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:17",
+  "version": "1.0.4",
+  "when": "2026-10-17 04:17:11"
  },
  "ResetPLS1": {
   "build": 73,
@@ -833,11 +833,11 @@
   "when": "2026-09-08 07:34:30"
  },
  "SeqMod": {
-  "build": 10,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "1.0.1",
-  "when": "2026-10-12 04:52:31"
+  "build": 13,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:17",
+  "version": "1.0.3",
+  "when": "2026-10-17 04:17:11"
  },
  "SetSmoothness": {
   "build": 53,
@@ -847,11 +847,11 @@
   "when": "2026-09-08 07:34:30"
  },
  "SlideShow": {
-  "build": 10,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "1.0.3",
-  "when": "2026-10-12 04:52:31"
+  "build": 13,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:17",
+  "version": "1.0.5",
+  "when": "2026-10-17 04:17:11"
  },
  "SwapOps": {
   "build": 52,
@@ -875,18 +875,18 @@
   "when": "2026-09-08 07:34:30"
  },
  "ThresholdColor": {
-  "build": 19,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "1.0.3",
-  "when": "2026-10-12 04:52:31"
+  "build": 22,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:17",
+  "version": "1.0.5",
+  "when": "2026-10-17 04:17:11"
  },
  "TopToMidi": {
-  "build": 16,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "1.0.2",
-  "when": "2026-10-12 04:52:31"
+  "build": 21,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:17",
+  "version": "1.0.4",
+  "when": "2026-10-17 04:17:11"
  },
  "VSCodeTools": {
   "build": 112,
@@ -896,18 +896,18 @@
   "when": "2026-09-08 07:34:30"
  },
  "midiMapper": {
-  "build": 87,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "3.2.7",
-  "when": "2026-10-12 04:52:31"
+  "build": 91,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:17",
+  "version": "3.2.9",
+  "when": "2026-10-17 04:17:11"
  },
  "oscMapper": {
-  "build": 67,
-  "release": "v3.2.68",
-  "saved": "12.10.2026 04:52",
-  "version": "3.2.5",
-  "when": "2026-10-12 04:52:31"
+  "build": 69,
+  "release": "v3.2.71",
+  "saved": "17.10.2026 04:17",
+  "version": "3.2.7",
+  "when": "2026-10-17 04:17:11"
  },
  "paste_from_clipboard": {
   "build": 59,

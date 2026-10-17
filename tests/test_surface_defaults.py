@@ -102,8 +102,8 @@ check('Apply needs no td module', 'import td' not in read('packaging', 'surface_
 
 
 class Par:
-    def __init__(self, val, mode=CONSTANT):
-        self.val, self.mode = val, mode
+    def __init__(self, val, mode=CONSTANT, default=-1):
+        self.val, self.mode, self.default = val, mode, default
 
 
 class Pars(dict):
@@ -119,7 +119,9 @@ class Cell:
 class Table:
     path = '/sys/quiet/x/FNS_Hub/ToolbarConfigurator/state'
 
-    def __init__(self, rows):
+    nodeX = nodeY = 0
+
+    def __init__(self, rows=()):
         self._rows = [list(r) for r in rows]
 
     def rows(self):
@@ -137,9 +139,14 @@ class Comp:
         self.name, self.path = name, path
         self.par = Pars(pars or {})
         self.kids = kids or {}
+        self.tags = set()
 
     def op(self, rel):
         return self.kids.get(rel)
+
+    def create(self, cls, name):
+        self.kids[name] = cls()
+        return self.kids[name]
 
 
 tool = Comp('FNS_Fake', '/q/FNS_Fake', {'Tbmenuorder': Par(99), 'Tbdisplayed': Par(0, EXPRESSION)})
@@ -151,6 +158,9 @@ check('an expression becomes the authored constant',
       tool.par['Tbdisplayed'].mode is CONSTANT and tool.par['Tbdisplayed'].val is True)
 check('Apply reports what it changed', len(changed) == 2, changed)
 check('a second Apply changes nothing', sd.Apply(tool, fake) == [])
+check('the shipped place is stamped as the default too (roams only as a change)',
+      tool.par['Tbmenuorder'].default == 3 and tool.par['Tbdisplayed'].default is True)
+check('...and the owner is tagged as stamped', sd.LAYOUT_TAG in tool.tags)
 missing = {'packages': {'FNS_Fake': {'.': {'Nope': 1}}}, 'configurators': {}}
 try:
     sd.Apply(tool, missing)
@@ -166,6 +176,9 @@ hub = Comp('FNS_Hub', '/q/FNS_Hub', kids={'ToolbarConfigurator': Comp(
 want = [['kind', 'name'], ['builtin', 'perform'], ['divider', 'D1']]
 sd.Apply(hub, {'packages': {}, 'configurators': {'ToolbarConfigurator': want}})
 check('a configurator table is replaced whole', state._rows == want, state._rows)
+shipped = hub.op('ToolbarConfigurator').op(sd.STATE_DEFAULT)
+check('...and a copy of it ships as state_default',
+      shipped is not None and shipped._rows == want)
 
 print('shipped_values: dev values that must not ship')
 sv = data.get('shipped_values') or {}
@@ -178,6 +191,8 @@ vs = Comp('FNS_VSCodeTools', '/q/FNS_VSCodeTools',
 sd.Apply(vs, {'packages': {}, 'configurators': {}, 'shipped_values': sv})
 check('Apply writes a shipped value onto the staged copy', vs.par['Workspace'].val == '')
 check('...and leaves a par the file does not name', vs.par['Folder'].val == 'scripts')
+check('a shipped value is not a layout default: no stamp, no tag',
+      vs.par['Workspace'].default == -1 and sd.LAYOUT_TAG not in vs.tags)
 src_sd = read('packaging', 'surface_defaults.py')
 check('a snapshot keeps the hand-written shipped_values',
       "data['shipped_values'] = kept" in src_sd)

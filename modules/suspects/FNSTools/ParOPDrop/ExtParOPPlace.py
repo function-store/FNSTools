@@ -45,18 +45,21 @@ class ExtParOPPlace:
 		FNSCommand.announce(self.ownerComp)
 
 	def OnChopPre(self, value: bool):
+		"""Called when the CHOP pre-place toggle changes; clears the pending parameter CHOP when off."""
 		# Set CHOP pre-enabled state and reset parameter CHOP if disabled
 		self.chopPreEnabled = value
 		if not value:
 			self.parameterChop = None
 
 	def OnDatPre(self, value: bool):
+		"""Called when the DAT pre-place toggle changes; clears the pending parameter DAT when off."""
 		# Set DAT pre-enabled state and reset parameter DAT if disabled
 		self.datPreEnabled = value
 		if not value:
 			self.parameterDat = None
 			
 	def OnDatExecPre(self, value: bool):
+		"""Called when the DAT Execute pre-place toggle changes; clears the pending parameter execute DAT when off."""
 		# Set DAT pre-enabled state and reset parameter DAT if disabled
 		self.datExecPreEnabled = value
 		if not value:
@@ -115,6 +118,7 @@ class ExtParOPPlace:
 		return mods.module.heldOr(modifier, raw)
 
 	def OnPlaceParOp(self, _par = None):
+		"""Place the parameter operator the mode names (CHOP, DAT or DAT Execute) for the hovered or given parameter beside the current operator; called by the hotkey."""
 		mode = self._placeMode()
 		if mode is None:
 			return

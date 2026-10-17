@@ -63,6 +63,11 @@ class _RegistryToolPageMixin:
 		if page is None:
 			page = tool.appendCustomPage(self.TOOL_PAGE_NAME)
 		self._orderToolRegistryPage(tool)
+		# A Page is an index: after the sort the object above names whatever
+		# page now sits at its old slot (About, on a tool that had one), and
+		# every append below landed there (TDCollab, 2026-10-13). Look it up
+		# by name again.
+		page = next((pg for pg in tool.customPages if pg.name == self.TOOL_PAGE_NAME), page)
 		head_name = self.TOOL_PAGE_PREFIX + 'section'
 		hpar = getattr(tool.par, head_name, None)
 		if hpar is None:
@@ -1670,11 +1675,45 @@ class _RegistryGroupsMixin:
 		self.stored['GroupVisibility'][group_id] = '1' if visible else '0'
 		self._syncSurface()
 
+	# --- the user changed this surface's layout (2026-10-14) ---
+	#
+	# FNS_ConfigRegistry writes a surface's layout (positions, shown/hidden,
+	# widths, the Hub configurator's table) on a project save ONLY when this
+	# session's user changed it: a project that merely loaded with some other
+	# layout (its own .toe, a load that did not land) must not spread it to
+	# every other project through the shared file. Only the user's own actions
+	# set it -- the Hub configurators' edits, the bar's group eye -- never a
+	# boot, a restore or a heal. Kept on the /sys global (per process: /sys is
+	# never saved), cleared by ConfigRegistry after it has written the file.
+	_LAYOUT_CHANGED_KEY = 'fns_layout_changed'
+
+	def markLayoutChanged(self):
+		"""A user action changed this surface's layout this session."""
+		api = self._registryApi()
+		if api is not self:
+			return api.markLayoutChanged()
+		if self._is_sys_global():
+			self.ownerComp.store(self._LAYOUT_CHANGED_KEY, True)
+
+	def layoutChanged(self):
+		api = self._registryApi()
+		if api is not self:
+			return api.layoutChanged()
+		return bool(self.ownerComp.fetch(self._LAYOUT_CHANGED_KEY, False, search=False))
+
+	def clearLayoutChanged(self):
+		api = self._registryApi()
+		if api is not self:
+			return api.clearLayoutChanged()
+		if self._is_sys_global():
+			self.ownerComp.store(self._LAYOUT_CHANGED_KEY, False)
+
 	def ToggleGroup(self, group_id):
 		"""Manager API: flip a group; returns the new state."""
 		api = self._registryApi()
 		if api is not self:
 			return api.ToggleGroup(group_id)
+		self.markLayoutChanged()      # the bar's group eye: a user action
 		visible = not self.GroupVisible(group_id)
 		self.SetGroupVisible(group_id, visible)
 		return visible
@@ -1946,8 +1985,40 @@ class RegistryBase(_RegistryToolPageMixin,
 		except Exception:
 			pass
 
+	def _ensureCloneSane(self):
+		"""Enable Cloning on with an empty Clone par crashes TD natively on
+		the next custom-par write (seven crashes bisected 2026-10-11; the
+		overlay master guards itself the same way). A HOST reaches that state
+		wherever op.FNS is absent, because StampHost wires its clone as the
+		guarded expression that reads None without a toolkit root: a registry
+		tox dropped alone (docs/DeveloperKit.md), a standalone copy of a tool,
+		a developer project with no root. So, before any par of this COMP is
+		touched: cloning off while the clone reads None, and back on once the
+		clone resolves again through the registry's own expression (the real
+		toolkit arrived). Written only when wrong; the master and the /sys
+		global clone nothing and are left alone."""
+		c = self.ownerComp
+		try:
+			enabled = bool(c.par.enablecloning.eval())
+			target = c.par.clone.eval()
+			ours = bool(self.CLONE_EXPR) and c.par.clone.mode == ParMode.EXPRESSION \
+				and c.par.clone.expr == self.CLONE_EXPR
+			if enabled and target is None:
+				c.par.enablecloning = False
+				self.fnsLog(f'{self.REGISTRY_NAME}: Enable Cloning switched off on '
+							f'{c.path}: nothing to clone from (no toolkit root)')
+			elif not enabled and ours and target is not None:
+				c.par.enablecloning = True
+				self.fnsLog(f'{self.REGISTRY_NAME}: Enable Cloning switched back on '
+							f'on {c.path}: {target.path} is there to clone from')
+		except Exception as e:
+			debug(f'{self.REGISTRY_NAME}: clone guard on {c.path}: {e}')
+
 	def __init__(self, ownerComp):
 		self.ownerComp = ownerComp
+		# FIRST, before anything writes a par: cloning on with nothing to
+		# clone from is a native crash on the next custom-par write
+		self._ensureCloneSane()
 		# BEFORE CustomParHelper touches the pars: a dangling BIND (tool
 		# Registry page gone) raises on any access and would kill init
 		self._repairDanglingHostBinds()

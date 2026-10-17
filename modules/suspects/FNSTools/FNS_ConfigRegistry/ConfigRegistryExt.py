@@ -593,11 +593,16 @@ class ConfigRegistryExt(RegistryBase):
 		every settings file in the field for a change that breaks no reader."""
 		out = {}
 		hk = self._hotkeysOwnedElsewhere(tool)
+		layout = self._layoutParNames(tool)
 		for p in tool.customPars:
 			try:
 				if not self._roams(p, info, hk):
 					continue
 				rec = {'mode': p.mode.name, 'val': self._jsonSafe(p.val)}
+				if p.name in layout and self._LAYOUT_TAG in tool.tags:
+					# see _layoutDiffers: a layout value roams only as a change
+					# from what the tool shipped with
+					rec['default'] = self._jsonSafe(p.default)
 				try:
 					rec['eval'] = self._jsonSafe(p.eval())
 				except Exception:
@@ -614,6 +619,128 @@ class ConfigRegistryExt(RegistryBase):
 			except Exception as e:
 				debug(f'{self.REGISTRY_NAME}: snapshot {tool.path}.{p.name}: {e}')
 		return out
+
+	# --- layout: only what the user changed roams (2026-10-14) ---
+	#
+	# A tool's place on a surface (toolbar order, shown or hidden, width,
+	# ...) used to roam like any par. A file therefore carried the layout of
+	# whatever release last saved it, and replayed it over every later
+	# release's defaults: v3.2.70 installed new tools at its numbers while
+	# the file put the old ones back, and the two numberings interleaved on
+	# the owner's bar (one project's save then spread that to every other).
+	# Releases now stamp each layout par's shipped value as its default
+	# (surface_defaults.Apply), the file stores the default beside the value,
+	# and a value is applied only when it differs from that default: a
+	# position the user chose. A value with no default beside it was written
+	# before this rule and cannot be told from a default, so it is skipped
+	# (one time: the next save writes the new form).
+	#
+	# A default counts only where a release STAMPED it: Apply tags each owner
+	# it stamps with _LAYOUT_TAG. An owner without the tag (a tool still from
+	# an earlier release, the dev masters) has factory defaults, which would
+	# make every shipped number look like a user's change and roam forever;
+	# its layout values are saved with no default, so they never apply.
+	_LAYOUT_TAG = 'fns_layoutdefaults'
+
+	def _layoutParNames(self, tool):
+		"""{tool par: host name} for the tool's own pars its surface hosts
+		bind their layout pars to."""
+		names = {}
+		for host_name in self.SURFACE_HOSTS:
+			for host in tool.findChildren(name=host_name, maxDepth=1):
+				for hp in self.SURFACE_HOST_PARS:
+					p = getattr(host.par, hp, None)
+					if p is None or p.mode != ParMode.BIND:
+						continue
+					expr = str(p.bindExpr or '')
+					if expr.startswith('parent().par.'):
+						name = expr[len('parent().par.'):].strip()
+						if name.isidentifier():
+							names[name] = host_name
+		return names
+
+	@staticmethod
+	def _layoutDiffers(rec):
+		"""Did the user move/hide this, judging by the default saved beside it?"""
+		if not isinstance(rec, dict) or 'default' not in rec:
+			return False
+		return rec.get('val') != rec.get('default')
+
+	# --- ...and only when this session's user changed it (2026-10-14) ---
+	#
+	# The rule above decides whether a written value APPLIES. This decides
+	# whether it is WRITTEN: a project save writes a surface's layout only
+	# when the user changed that surface this session (RegistryBase
+	# markLayoutChanged, set by the Hub configurators' edits and the bar's
+	# group eye, never by a boot or restore). Otherwise the file's previous
+	# records for those pars are carried over unchanged, so a project that
+	# loaded with some other layout -- its own .toe, a load that did not
+	# land -- keeps it to itself. Non-layout settings save as before.
+
+	def _surfaceChanged(self, host_name):
+		home = self._sys_comp(create=False)
+		glob = home.op(host_name) if home is not None else None
+		if glob is None:
+			return False
+		return bool(glob.fetch(self._LAYOUT_CHANGED_KEY, False, search=False))
+
+	def _clearSurfaceChanges(self):
+		home = self._sys_comp(create=False)
+		for host_name in self.SURFACE_HOSTS:
+			glob = home.op(host_name) if home is not None else None
+			if glob is not None:
+				glob.store(self._LAYOUT_CHANGED_KEY, False)
+
+	def _surfaceNameHosts(self, tool):
+		"""{(relative path, tool par): host name} for the widgets inside the
+		tool, the same walk as _surfaceOwners."""
+		out = {}
+		for host_name in self.SURFACE_HOSTS:
+			for host in tool.findChildren(name=host_name):
+				owner = host.parent()
+				if owner == tool:
+					continue
+				rel = owner.path[len(tool.path) + 1:]
+				for hp in self.SURFACE_HOST_PARS:
+					p = getattr(host.par, hp, None)
+					if p is None or p.mode != ParMode.BIND:
+						continue
+					expr = str(p.bindExpr or '')
+					if expr.startswith('parent().par.'):
+						out[(rel, expr[len('parent().par.'):].strip())] = host_name
+		return out
+
+	def _carryUnchangedLayout(self, tool, section, prev):
+		"""Put the file's previous layout records back for every surface the
+		user did not change this session (dropping a record the file never
+		had, so nothing new is written for it)."""
+		prev = prev or {}
+		pars = section.get('pars')
+		if pars is not None:
+			prev_pars = prev.get('pars') or {}
+			for name, host_name in self._layoutParNames(tool).items():
+				if name not in pars or self._surfaceChanged(host_name):
+					continue
+				if name in prev_pars:
+					pars[name] = prev_pars[name]
+				else:
+					del pars[name]
+		surfaces = section.get('surfaces')
+		if surfaces is not None:
+			prev_surf = prev.get('surfaces') or {}
+			for (rel, name), host_name in self._surfaceNameHosts(tool).items():
+				if name not in surfaces.get(rel, {}) or self._surfaceChanged(host_name):
+					continue
+				old = (prev_surf.get(rel) or {}).get(name)
+				if old is not None:
+					surfaces[rel][name] = old
+				else:
+					del surfaces[rel][name]
+			for rel in [r for r, v in surfaces.items() if not v]:
+				del surfaces[rel]
+			if not surfaces:
+				del section['surfaces']
+		return section
 
 	def _surfaceOwners(self, tool):
 		"""(relative path, owner, [tool pars]) for every surface host inside
@@ -663,7 +790,10 @@ class ConfigRegistryExt(RegistryBase):
 				p = owner.par[name]
 				if p.mode != ParMode.CONSTANT:
 					continue
-				out.setdefault(rel, {})[name] = self._jsonSafe(p.val)
+				rec = {'val': self._jsonSafe(p.val)}
+				if self._LAYOUT_TAG in owner.tags:
+					rec['default'] = self._jsonSafe(p.default)
+				out.setdefault(rel, {})[name] = rec
 		return out
 
 	def _applySurfaces(self, tool, surfaces, canonical):
@@ -678,10 +808,14 @@ class ConfigRegistryExt(RegistryBase):
 			owner = tool.op(rel) if allowed else None
 			if owner is None:
 				continue
-			for name, val in (pars or {}).items():
+			for name, rec in (pars or {}).items():
 				p = owner.par[name]
 				if p is None or name not in allowed or p.mode != ParMode.CONSTANT:
 					continue
+				# a bare value is the old form (no default to compare): skipped
+				if not self._layoutDiffers(rec):
+					continue
+				val = rec.get('val')
 				try:
 					if p.val != val:
 						p.val = val
@@ -701,6 +835,7 @@ class ConfigRegistryExt(RegistryBase):
 		errors = []
 		info = self.stored['PaneRegistry'].get(canonical) or {}
 		hk = self._hotkeysOwnedElsewhere(tool)
+		layout = self._layoutParNames(tool)
 		for name, rec in (pars_section or {}).items():
 			p = getattr(tool.par, name, None)
 			if p is None or not p.isCustom:
@@ -708,6 +843,8 @@ class ConfigRegistryExt(RegistryBase):
 				continue
 			if not self._roams(p, info, hk):
 				continue
+			if name in layout and not self._layoutDiffers(rec):
+				continue      # the shipped default stands (see _layoutDiffers)
 			try:
 				mode = rec.get('mode', 'CONSTANT')
 				if mode == 'EXPRESSION':
@@ -768,7 +905,7 @@ class ConfigRegistryExt(RegistryBase):
 				pass
 		return ''
 
-	def _snapshotTool(self, canonical, info):
+	def _snapshotTool(self, canonical, info, carry=None):
 		"""One tool's file section, or None when the tool is unreachable."""
 		tool = self._resolvePanelOp(info)
 		if tool is None:
@@ -779,6 +916,9 @@ class ConfigRegistryExt(RegistryBase):
 			surfaces = self._snapshotSurfaces(tool)
 			if surfaces:
 				section['surfaces'] = surfaces
+			if carry is not None:
+				# a save to the file: untouched surfaces keep what it had
+				self._carryUnchangedLayout(tool, section, carry)
 		module = self._callbackModule(info)
 		fn = getattr(module, 'onConfigSave', None) if module is not None else None
 		if callable(fn):
@@ -837,7 +977,8 @@ class ConfigRegistryExt(RegistryBase):
 		saved = 0
 		for canonical, info in self.stored['PaneRegistry'].items():
 			try:
-				section = self._snapshotTool(canonical, dict(info))
+				section = self._snapshotTool(canonical, dict(info),
+											 carry=tools.get(canonical) or {})
 			except Exception as e:
 				debug(f'{self.REGISTRY_NAME}: snapshot {canonical!r}: {e}')
 				continue
@@ -850,6 +991,8 @@ class ConfigRegistryExt(RegistryBase):
 		data['saved_by'] = {'project': project.name}
 		ok = self._writeFile(data)
 		if ok:
+			# written: the next save carries this layout over unless changed again
+			self._clearSurfaceChanges()
 			debug(f'{self.REGISTRY_NAME}: saved {saved} tool section(s) -> {self.ConfigPath}')
 			self.fnsLog(f'{self.REGISTRY_NAME}: SaveAll wrote {saved} tool section(s) -> {self.ConfigPath}')
 		return ok
@@ -865,15 +1008,17 @@ class ConfigRegistryExt(RegistryBase):
 		if not info:
 			debug(f'{self.REGISTRY_NAME}: SaveTool: {canonical_name!r} not registered')
 			return False
-		section = self._snapshotTool(canonical_name, dict(info))
-		if section is None:
-			return False
 		if self._scopeIsProject():
-			return True  # snapshot ran for its side effects; file untouched
+			# snapshot for its side effects; the file is untouched
+			return self._snapshotTool(canonical_name, dict(info)) is not None
 		data = self._readFile()
 		if data.get('schema') != self.SCHEMA:
 			self._retireFile('.schema%s.bak' % data.get('schema'))
 			data = self._freshData()
+		section = self._snapshotTool(canonical_name, dict(info),
+									 carry=data.get('tools', {}).get(canonical_name) or {})
+		if section is None:
+			return False
 		data.setdefault('tools', {})[canonical_name] = section
 		data['schema'] = self.SCHEMA
 		data['saved'] = time.strftime('%Y-%m-%dT%H:%M:%S')
@@ -1283,6 +1428,7 @@ class ConfigRegistryExt(RegistryBase):
 		return con.Open(tab=tab, panel=panel)
 
 	def CloseSettingsUI(self):
+		"""Close the console, the settings UI, when it is up."""
 		con = getattr(op, 'FNS_CONSOLE', None)
 		return con.Close() if (con is not None and con.valid) else {'ok': True}
 
@@ -1372,6 +1518,7 @@ class ConfigRegistryExt(RegistryBase):
 			self._queueApply(canonical_name)
 
 	def UnregisterTool(self, canonical_name):
+		"""Remove a tool's registration from the settings registry (forwarded to the /sys global)."""
 		if not self._is_sys_global():
 			api = self._registryApi()
 			if api is not self:
@@ -1383,6 +1530,7 @@ class ConfigRegistryExt(RegistryBase):
 
 	# RegistryBase healing calls self.UnregisterPanel(name); alias it.
 	def UnregisterPanel(self, canonical_name):
+		"""RegistryBase's teardown name for UnregisterTool."""
 		return self.UnregisterTool(canonical_name)
 
 	@property

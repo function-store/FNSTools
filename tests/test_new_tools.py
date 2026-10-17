@@ -138,8 +138,11 @@ check('Compare reports a stale family member as an update',
 check('stale = missing, or not the manifest bytes', "def _storeCopyStale(self, pkg, vid='base'):" in upd
       and 'return _sha256(path) != want' in upd)
 check('the apply refreshes the store copy, never replaces anything',
-      re.search(r"def _replacePackage.*?if step\.get\('placement'\) == 'none' or step\.get\('store_only'\):.*?"
+      re.search(r"def _replacePackage.*?if \(step\.get\('placement'\) == 'none' or step\.get\('store_only'\)\) and placed is None:.*?"
                 r"self\.RecordInstalled\(name, digest", upd, re.S) is not None)
+check('a member still installed as a toolkit child (before it became none) is replaced in place',
+      re.search(r"def _replacePackage.*?placed = root\.op\(name\) or next\(.*?_pkgName\(c\) == name\), None\)"
+                r".*?and placed is None:", upd, re.S) is not None)
 check('the pass still ends with the family sync', upd.count('self.SyncFamilyFolder()') >= 3)
 
 # 2026-10-12 (owner: "just the store, not the placed operators")
@@ -169,27 +172,31 @@ check('served, the installer decides; elsewhere the browser keeps the record',
       'return (window.FNS_UNSEEN || []).filter(' in page and "var SEEN_KEY = 'fns.seen';" in page)
 check('a first visit or a frame records everything and shows nothing',
       "if (!stored('fns.visited', null) || FNS_EMBEDDED) { writeSeenLocal(names); return []; }" in page)
-check('never on a first run or a first visit, never over a dialog',
+# 2026-10-17 (wizard phase 1): a banner on the set screen, not a window
+# over the catalog -- the same guard decides whether it appears at all
+check('never on a first run or a first visit; a banner on the set, not a window',
       'if (!firstrun && !firstVisit && announceOn && unseenAtLoad.size && !(served && locked)) {' in page
-      and "if (!document.querySelector('dialog[open]')) showNewTools();" in page)
-check('every answer records them as shown', page.count('markSeen(names)') >= 2
-      and "d.addEventListener('cancel', function () { markSeen(names); });" in page)
+      and 'prepareNewTools();\n    renderNewBanner();' in page)
+check('every answer records them as shown',
+      "function seen() { markSeen(names); newNames = []; b.remove(); }" in page
+      and "later.addEventListener('click', seen);" in page and page.count('seen();') >= 2)
 check('unseen tools carry the New badge and the New filter', 'return unseenAtLoad.has(p.name) ||' in page)
 check('the window lists only what the viewer can get (no Patreon pestering)',
       '.filter(function (p) { return p && (!isPlus(p) || entitled(p)); }).sort(byTitle);' in page)
 check('and the console count follows the same rule',
       "and (access.get(n, 'free') == 'free' or n in owned))" in ins and 'def _ownedProducts(self):' in ins)
-check('the dialog exists', 'id="newtools"' in page and 'id="newadd"' in page and 'id="newlater"' in page)
-check('a new tool already in the selection is recorded and left out (no "already picked" dialog)',
+check('the banner exists, with See them and Not now',
+      "b.id = 'new-tools';" in page and "show.id = 'newshow';" in page and "later.id = 'newlater';" in page)
+check('a new tool already in the selection is recorded and left out (no "already picked" row)',
       'if (had.length) markSeen(had);' in page
       and 'list = list.filter(function (p) { return !picked.has(p.name); });' in page
       and page.index('list = list.filter(function (p) { return !picked.has(p.name); });')
-      < page.index("if (!d || !list.length) return;"))
+      < page.index("if (!box || !names.length) return;"))
 check('the console count leaves installed tools out too',
       'and n not in installed' in ins and 'installed |= {rec_t[i, 0].val' in ins)
 check('a preference: the window opens by itself only while it is on',
       'if (!firstrun && !firstVisit && announceOn && unseenAtLoad.size' in page
-      and 'id="newauto"' in page and "window.FNS_ANNOUNCE !== false" in page
+      and "auto.id = 'newauto';" in page and "window.FNS_ANNOUNCE !== false" in page
       and "'window.FNS_ANNOUNCE = %s;\\n'" in ins)
 check('and the New filter shows the way back', "'New-tools window: on' : 'New-tools window: off'" in page)
 con = read(CONSOLE)

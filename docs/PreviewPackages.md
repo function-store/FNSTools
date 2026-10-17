@@ -48,7 +48,11 @@ released later with one switch.
   new-tools record never includes them, so they are announced when they go
   public. The site build keeps their docs and catalog checks but builds no
   page or card for them, and strips them from the manifest it bakes into
-  /get/. The public mirror withholds their sources like a gated tool's.
+  /get/. The one local exception is /features/: a build run with
+  `FNS_SHOW_PREVIEWS=1` (the CMS's Build site sets it) lists their
+  `feature_list`, marked and noindexed; the public build never sets it
+  (website/README.md, "Features"). The public mirror withholds their sources
+  like a gated tool's.
 
 ## Limits
 

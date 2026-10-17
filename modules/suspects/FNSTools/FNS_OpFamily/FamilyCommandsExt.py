@@ -81,6 +81,7 @@ class FamilyCommandsExt:
 
 	@FNSCommand.fns_command(help='Turn every placed FNS operator into a light stub that keeps its wiring and retained parameters')
 	def StubFamilyOperators(self, only_current_network: bool = False) -> dict:
+		"""Turn every placed FNS operator into a light stub that keeps its wiring and retained parameters; returns the count."""
 		fam = self._family()
 		if fam is None or not getattr(fam, 'fam_registry', None):
 			return self._refused('the FNS family is not registered')
@@ -93,6 +94,7 @@ class FamilyCommandsExt:
 
 	@FNSCommand.fns_command(help='Bring every FNS stub back as the full operator from the family folder')
 	def ReplaceFamilyStubs(self, only_current_network: bool = False) -> dict:
+		"""Bring every FNS stub back as the full operator from the family folder; returns the count and names what the folder lacks."""
 		fam = self._family()
 		if fam is None or not getattr(fam, 'fam_registry', None):
 			return self._refused('the FNS family is not registered')
@@ -109,6 +111,7 @@ class FamilyCommandsExt:
 
 	@FNSCommand.fns_command(help='Upgrade placed FNS operators to the newest version in the family folder, keeping retained parameters and state')
 	def UpdateFamilyOperators(self, only_current_network: bool = False) -> dict:
+		"""Upgrade placed FNS operators to the family folder's newest version, keeping retained parameters and state."""
 		fam = self._family()
 		if fam is None or not getattr(fam, 'fam_registry', None):
 			return self._refused('the FNS family is not registered')
@@ -127,6 +130,7 @@ class FamilyCommandsExt:
 
 	@FNSCommand.fns_command(help='Take the FNS tab out of the OP Create dialog and keep it off; your FNS tools stay installed. Pick Tools turns it back on')
 	def RemoveOperatorFamily(self) -> dict:
+		"""Take the FNS tab out of the OP Create dialog, the tools staying installed; the installer removes it a frame later."""
 		inst = self._installer()
 		if inst is None:
 			return self._refused('no FNS installer beside the family; untick "Add FNS tab to OP Create" in Pick Tools instead')
@@ -139,6 +143,7 @@ class FamilyCommandsExt:
 
 	@FNSCommand.fns_command(help="Mirror the store's family members into the family folder now")
 	def SyncFamilyFromStore(self) -> dict:
+		"""Mirror the store's family members into the family folder now, through FNS_Updater."""
 		upd = getattr(op, 'FNS_UPDATER', None)
 		if upd is None or not hasattr(upd, 'SyncFamilyFolder'):
 			return self._refused('FNS_Updater is not in this project; the family folder is kept by the updater')

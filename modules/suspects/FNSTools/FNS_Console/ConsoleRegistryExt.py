@@ -334,6 +334,7 @@ class ConsoleRegistryExt(RegistryBase):
 		self.fnsLog(f'{self.REGISTRY_NAME}: registered tab "{canonical}" ({page.path})')
 
 	def UnregisterTab(self, canonical):
+		"""Remove a contributed console tab (forwarded to the /sys global)."""
 		if not self._is_sys_global():
 			api = self._registryApi()
 			if api is not self:
@@ -789,6 +790,7 @@ class ConsoleRegistryExt(RegistryBase):
 		return {'ok': True}
 
 	def Close(self):
+		"""Stop serving the console: its web server goes inactive."""
 		api = self._registryApi()
 		if api is not self:
 			return api.Close()
@@ -853,6 +855,7 @@ class ConsoleRegistryExt(RegistryBase):
 					self._navigate(browser, url)
 					res = hubreg.Open(tab='console')
 					if isinstance(res, dict) and res.get('ok'):
+						self._closeOwnViewer(browser)
 						return 'hub'
 				# Declare the serve. Since rails 3.2.26 the browser also
 				# counts a viewer opened on itself as a window showing it,
@@ -870,6 +873,17 @@ class ConsoleRegistryExt(RegistryBase):
 		import webbrowser
 		webbrowser.open(url)
 		return 'browser'
+
+	def _closeOwnViewer(self, browser):
+		"""The hub now shows the console, so a floating viewer opened on the
+		browser itself is the same page twice: the installer's picker opens
+		one, and after an install the Hub opened beside it (2026-10-15).
+		`panel.winopen` tracks exactly that window (measured 2026-09-17)."""
+		try:
+			if browser.panel.winopen:
+				browser.closeViewer()
+		except Exception as e:
+			debug(f'{self.REGISTRY_NAME}: could not close the browser viewer ({e})')
 
 	def _touchServer(self):
 		self._ui_last_request = absTime.seconds
