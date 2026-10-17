@@ -423,7 +423,6 @@ dialog::backdrop { background: rgba(0,0,0,0.7); }
   font-size: 12.5px; color: var(--text-dim); line-height: 1.45;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
-.qres-why { font-size: 12px; color: var(--text-faint); }
 /* the Plus reminder on the result: the rail's look, inside the dialog */
 .quiz-plus {
   display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
@@ -756,12 +755,13 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
   .grp-gap { height: 0; margin: 22px 0 6px; border-top: 1px solid var(--border); }
   .nav-gap { display: block; height: 10px; }
   @media (max-width: 999px) { .nav-gap { display: inline-block; width: 10px; height: auto; } }
-  /* the deck is two rows now: the rail and the jump targets clear it */
-  html { scroll-padding-top: calc(var(--stick) + 140px); }
+  /* the deck is one row (the filters live in the View menu): the rail and
+     the jump targets clear it */
+  html { scroll-padding-top: calc(var(--stick) + 84px); }
   @media (min-width: 1000px) {
     .layout > .catnav {
-      top: calc(var(--stick) + 136px);
-      max-height: calc(100vh - var(--stick) - 160px);
+      top: calc(var(--stick) + 80px);
+      max-height: calc(100vh - var(--stick) - 104px);
     }
   }
 
@@ -802,25 +802,43 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
   .dochit { margin-top: 5px; font-size: 12px; color: var(--text-faint); }
   .dochit b { font-weight: 600; color: var(--text-dim); }
 
-  /* ── compact view (the Compact toggle): title-only tiles. The state
-     that matters stays (installed / will install / will be removed, the
-     Patreon chip, New, a placed tool's undo); the description is the
-     tile's hover, from the card's data-tip. ── */
-  #list.dense .grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
-  #list.dense .card { padding: 8px 11px; gap: 9px; align-items: center; }
+  /* ── compact view (the Compact toggle): one-line list rows. The name in
+     a column, the description clamped to one line beside it (the full text
+     still rides the card's data-tip), the state chips at the row's end
+     (installed / will install / will be removed, the Patreon chip, New, a
+     placed tool's undo), the docs link on hover. Title-only tiles came
+     first (owner, 2026-10-03) and said nothing to a newcomer (owner,
+     2026-10-16); the row keeps their density and says what each tool is. ── */
+  /* minmax(0, 1fr), not 1fr: a bare 1fr is minmax(auto, 1fr), and the
+     one-line description's min-content width is the WHOLE sentence, so
+     the column blew out to 2700px (measured) before it clamped anything */
+  #list.dense .grid { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  #list.dense .card, #list.dense .card.minor { padding: 6px 11px; gap: 10px; align-items: center; }
   #list.dense .card input { margin-top: 0; }
   #list.dense .body, #list.dense .body.has-foot {
     display: flex; flex-direction: row; flex-wrap: wrap; align-items: center;
-    gap: 4px 8px; align-self: center;
+    gap: 2px 12px; align-self: center; min-width: 0;
   }
-  #list.dense .name { font-size: 13.5px; }
-  #list.dense .name .tt { overflow-wrap: anywhere; }
-  #list.dense .chips { margin-top: 0; }
-  #list.dense .dochit { flex-basis: 100%; margin-top: 0; }
-  #list.dense .desc, #list.dense .name a.help, #list.dense .chip.where,
+  /* the name's children become cells of the row: the title, then the
+     description, then the chips, then the badges and the docs link */
+  #list.dense .name { display: contents; }
+  #list.dense .name .tt {
+    order: 1; flex: 0 0 180px; min-width: 0; font-size: 13.5px; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; overflow-wrap: normal;
+  }
+  #list.dense .desc:not(.byline) {
+    order: 2; flex: 1 1 200px; min-width: 0; margin: 0; display: block; font-size: 12.5px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #list.dense .chips { order: 3; margin: 0; flex-wrap: nowrap; }
+  #list.dense .name .badge, #list.dense .name .cattag { order: 4; }
+  #list.dense .name a.help { order: 5; margin-left: 0; opacity: 0; transition: opacity .12s ease; }
+  #list.dense .card:hover .name a.help, #list.dense .card:focus-within .name a.help { opacity: 1; }
+  #list.dense .dochit { order: 6; flex-basis: 100%; margin-top: 0; }
+  #list.dense .card-foot { order: 7; flex-basis: 100%; margin: 0; padding: 0; }
+  #list.dense .desc.byline, #list.dense .chip.where,
   #list.dense .chip.hint, #list.dense .chip.variant,
   #list.dense .card:not(.placed) .card-foot { display: none; }
-  #list.dense .card-foot { margin: 0; padding: 0; }
 
   /* ── the footer count opens the selection tray ── */
   .sum-count {
@@ -887,6 +905,194 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
   html[data-embedded] .wrap { padding: 0 16px; }
   html[data-embedded] .cfg-bar { padding-top: 10px; }
 
+  /* ── presentation pass (2026-10-16, docs/InstallSurfaceDesign.md): one
+     toolbar row, one hero line when served, one Patreon line ── */
+  .cfg-meta:empty { display: none; }
+  .viewwrap { position: relative; }
+  .viewbtn .k { font-size: 11.5px; opacity: .8; font-variant-numeric: tabular-nums; }
+  .viewbtn .caret { font-size: 11px; color: var(--text-faint); margin-left: 2px; }
+  .viewbtn.on { border-color: var(--accent); color: var(--accent); }
+  .viewwrap .bar-filters {
+    display: none; position: absolute; top: calc(100% + 6px); right: 0; z-index: 9;
+    flex-direction: column; align-items: stretch; gap: 4px; min-width: 250px; padding: 8px;
+    background: var(--bg-1); border: 1px solid var(--border-strong); border-radius: 10px;
+    box-shadow: 0 18px 50px rgba(0,0,0,.45);
+  }
+  .viewwrap.open .bar-filters { display: flex; }
+  .viewwrap .bar-filters .seg { display: flex; }
+  .viewwrap .bar-filters .seg button { flex: 1 1 auto; justify-content: center; }
+  .viewwrap .bar-filters .tog { justify-content: space-between; border-radius: 7px; padding: 7px 10px; }
+  .viewwrap .bar-filters .fold-all.in-filters {
+    margin: 4px 0 0; padding-top: 6px; border-top: 1px solid var(--border); justify-content: stretch;
+  }
+  .viewwrap .bar-filters .fold-all.in-filters .btn { flex: 1 1 auto; justify-content: center; }
+  /* section actions step back until the row is hovered or focused */
+  .cat-head .cat-act, .cat-head .cat-docs { opacity: 0; transition: opacity .12s ease; }
+  .cat-head:hover .cat-act, .cat-head:hover .cat-docs,
+  .cat-head:focus-within .cat-act, .cat-head:focus-within .cat-docs { opacity: 1; }
+  /* the Plus rail is one sentence, set as prose: as a flex row the long
+     text node became its own item and the diamond sat alone on line one */
+  .plusrail { display: block; padding: 8px 14px; font-size: 12.5px; line-height: 1.6; }
+  .plusrail .mark { margin-right: 6px; }
+  /* served by the installer into the bootstrap's 1040x720 window: the hero
+     is one headline and one sentence, the rest of the page takes the
+     manager's density (body.app), and the category pitch stays because the
+     window has the width for it */
+  html[data-served] .cfg-hero { padding: 18px 0 8px; }
+  html[data-served] .cfg-hero .eyebrow { display: none; }
+  html[data-served] h1 { font-size: 22px; margin: 0 0 4px; }
+  html[data-served] .cfg-sub { font-size: 14px; max-width: none; }
+  html[data-served] .cfg-meta { margin-top: 8px; }
+  html[data-served] .cat-head .cat-pitch { display: block; }
+
+  /* ── the screens (docs/InstallerWizardFlow.md, phase 1): the set is the
+     home screen, the catalog a sub-screen entered to add tools. Screen
+     styles live here, in the page's own block, never in the UIBASE block
+     above. ── */
+  .screen[hidden] { display: none !important; }
+  /* served into the bootstrap's window or framed in the console the set
+     fills the window, so its footer sits at the bottom even when the list
+     is short */
+  html[data-served] #screen-set, html[data-embedded] #screen-set {
+    display: flex; flex-direction: column; min-height: 100vh;
+  }
+  html[data-served] #screen-set .set-foot, html[data-embedded] #screen-set .set-foot { margin-top: auto; }
+  .set-head { display: flex; align-items: flex-start; gap: 10px; padding: 36px 0 16px; }
+  html[data-served] .set-head, html[data-embedded] .set-head { padding: 16px 0 10px; }
+  .set-title { min-width: 0; }
+  .set-head h2 { margin: 0 0 4px; font-size: 28px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
+  html[data-served] .set-head h2, html[data-embedded] .set-head h2 { font-size: 20px; }
+  .set-sub { margin: 0; font-size: 14px; color: var(--text-dim); }
+  body.app .set-sub { font-size: 13px; }
+  .set-head .btn { white-space: nowrap; }
+  .acctwrap { position: relative; }
+  .acctchip {
+    background: var(--bg-1); border: 1px solid var(--border); border-radius: 999px;
+    padding: 5px 12px; font: inherit; font-size: 12.5px; color: var(--text-dim); cursor: pointer; white-space: nowrap;
+  }
+  .acctchip:hover { border-color: var(--border-strong); color: var(--text); }
+  .acctchip.in { color: var(--accent); border-color: rgba(251,191,36,0.35); }
+  .acctmenu {
+    display: none; position: absolute; right: 0; top: calc(100% + 6px); z-index: 9;
+    min-width: 260px; padding: 10px; flex-direction: column; align-items: stretch; gap: 6px;
+    background: var(--bg-1); border: 1px solid var(--border-strong); border-radius: 10px;
+    box-shadow: 0 18px 50px rgba(0,0,0,.45); font-size: 13px;
+  }
+  .acctwrap.open .acctmenu { display: flex; }
+  .acctmenu .acct { font-size: 12.5px; color: var(--text-dim); padding: 0 2px 4px; }
+  .acctmenu .btn { justify-content: center; }
+  .acctmenu .redeemrow { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .acctmenu .redeemrow input[type=text] { flex: 1 1 120px; min-width: 0; }
+  .banners { display: flex; flex-direction: column; gap: 8px; margin: 0 0 12px; }
+  .banners:empty { display: none; }
+  html[data-screen="catalog"] #catbanners .banners { margin: 10px 0 0; }
+  .banner {
+    display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap; padding: 10px 14px;
+    border: 1px solid rgba(251,191,36,0.3); background: var(--accent-dim); border-radius: 10px;
+    font-size: 13px; color: var(--text-dim); line-height: 1.5;
+  }
+  .banner b { color: var(--text); }
+  .banner .linkbtn { font-size: 12.5px; }
+  .plusline {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 0 0 12px;
+    padding: 9px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-1);
+    font-size: 13px; color: var(--text-dim); line-height: 1.5;
+  }
+  .plusline[hidden] { display: none; }
+  .plusline .mark { color: var(--accent); }
+  .plusline .btn { padding: 4px 10px; font-size: 12.5px; }
+  .setopts { margin: 0 0 12px; display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; }
+  .setopts[hidden] { display: none; }
+  .setlist { margin-bottom: 24px; }
+  .set-grp {
+    display: flex; align-items: baseline; gap: 8px; margin: 16px 0 4px;
+    font-size: 11.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-faint);
+  }
+  .set-grp .g { color: var(--accent); font-size: 13px; }
+  .set-grp:first-child { margin-top: 0; }
+  .set-row {
+    display: flex; align-items: center; gap: 10px; padding: 7px 4px 7px 8px;
+    border-bottom: 1px solid var(--border); min-width: 0;
+  }
+  body.app .set-row { padding: 5px 2px 5px 6px; }
+  .set-row .nm { font-weight: 600; font-size: 13.5px; white-space: nowrap; }
+  .set-row .chips { margin: 0; flex-wrap: nowrap; }
+  .set-row .ds {
+    flex: 1 1 auto; min-width: 0; font-size: 12.5px; color: var(--text-faint);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .set-row a.help { font-size: 12px; font-weight: 500; color: var(--text-faint); white-space: nowrap; opacity: 0; transition: opacity .12s ease; }
+  .set-row:hover a.help, .set-row:focus-within a.help { opacity: 1; }
+  .set-row a.help:hover { color: var(--accent); }
+  .set-row .rm {
+    background: none; border: 0; color: var(--text-faint); cursor: pointer;
+    font: inherit; font-size: 16px; line-height: 1; padding: 2px 8px; border-radius: 6px;
+  }
+  .set-row .rm:hover { color: var(--err); background: var(--bg-2); }
+  .set-row.removing .nm, .set-row.removing .ds { text-decoration: line-through; color: var(--text-faint); }
+  .set-row .undo {
+    background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--text-dim);
+    cursor: pointer; font: inherit; font-size: 12px; padding: 2px 8px; white-space: nowrap;
+  }
+  .set-row .undo:hover { border-color: var(--green); color: var(--green); }
+  .set-empty { padding: 40px 20px; margin-bottom: 24px; text-align: center; color: var(--text-faint); border: 1px dashed var(--border); border-radius: 12px; }
+  .set-empty p { margin: 0 0 14px; }
+  .set-foot .linkbtn { font-size: 13px; }
+  .set-foot .sum-count { flex-wrap: wrap; }
+  .backset { white-space: nowrap; }
+  .cat-foot { justify-content: flex-end; }
+  body.app .bar-act #catdone { white-space: nowrap; }
+
+  /* ── phases 2 to 4: the step strip, S0 Start, S1 Find my set, S4
+     Install (docs/InstallerWizardFlow.md) ── */
+  .wizhead { display: flex; align-items: center; gap: 10px; padding: 16px 0 0; }
+  html[data-served] .wizhead, html[data-embedded] .wizhead { padding-top: 10px; }
+  .wizhead .steps { margin: 0; }
+  .wizhead .btn { white-space: nowrap; }
+  .steps li { cursor: pointer; border-radius: 6px; padding: 2px 4px; margin: -2px 0; }
+  .steps li:hover { color: var(--text); }
+  .steps li:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .steps li[aria-disabled="true"] { cursor: default; opacity: 0.55; }
+  .start { max-width: 880px; padding: 30px 0 24px; }
+  html[data-served] .start, html[data-embedded] .start { padding-top: 14px; }
+  .start h1 { margin: 0 0 6px; font-size: 30px; }
+  html[data-served] .start h1, html[data-embedded] .start h1 { font-size: 26px; }
+  .start-lead { margin: 0 0 20px; font-size: 15px; color: var(--text-dim); }
+  body.app .start-lead { font-size: 14px; }
+  .start .presets { margin: 0; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+  .start .preset { min-height: 124px; }
+  .start .preset .pick { margin-top: auto; padding-top: 6px; }
+  .start-note { margin: 10px 0 0; }
+  .start-note .empty { padding: 28px 0; text-align: left; }
+  .welcome-counts { margin: 22px 0 0; font-size: 13.5px; color: var(--text-dim); }
+  .welcome-counts b { color: var(--text); }
+  .welcome-auth { margin: 4px 0 0; font-size: 12.5px; color: var(--text-faint); }
+  .start-meta { margin: 26px 0 0; font-size: 12px; color: var(--text-faint); }
+  .start-meta a { color: var(--text-dim); }
+  .start-meta a:hover { color: var(--accent); }
+  #screen-quiz .quiz { max-width: 720px; padding: 22px 0 16px; }
+  #screen-quiz .quiz-prompt { font-size: 22px; }
+  body.app #screen-quiz .quiz-prompt { font-size: 19px; }
+  #screen-quiz .quiz-result { max-height: none; overflow: visible; }
+  #screen-quiz .quiz-options { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+  #screen-quiz .qopt { border-radius: 999px; }
+  .quiz-foot { justify-content: flex-end; }
+  .inst { max-width: 760px; padding: 22px 0 16px; }
+  .inst h2 { margin: 0 0 6px; font-size: 22px; font-weight: 700; letter-spacing: -0.015em; }
+  body.app .inst h2 { font-size: 19px; }
+  .inst-hint { margin: 0 0 14px; font-size: 13.5px; color: var(--text-dim); line-height: 1.6; }
+  .inst pre.out { max-height: none; }
+  .inst-report { margin-top: 4px; }
+  .inst-foot { justify-content: flex-end; }
+  .inst-foot .bar-docs { margin-right: auto; }
+  html[data-served] #screen-start, html[data-embedded] #screen-start,
+  html[data-served] #screen-quiz, html[data-embedded] #screen-quiz,
+  html[data-served] #screen-install, html[data-embedded] #screen-install {
+    display: flex; flex-direction: column; min-height: 100vh;
+  }
+  html[data-served] .quiz-foot, html[data-embedded] .quiz-foot,
+  html[data-served] .inst-foot, html[data-embedded] .inst-foot { margin-top: auto; }
+
   @media (max-width: 640px) {
     .cfg-hero { padding: 32px 0 20px; }
     .grid { grid-template-columns: 1fr; }
@@ -905,6 +1111,8 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
     .sum-count { flex: 1 1 100%; }
     .sum .spacer { display: none; }
     .sum .btn { flex: 1 1 auto; justify-content: center; padding: 9px 12px; }
+    .set-head { flex-wrap: wrap; }
+    .set-row .ds { display: none; }
   }
 </style>
 </head>
@@ -912,48 +1120,145 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
 <!-- FNS:HEADER -->
 <main class="wrap">
 
+  <!-- The header every screen carries (docs/InstallerWizardFlow.md): the
+       three steps, the account chip and Start over. setScreen moves it to
+       the top of whichever screen is up. -->
+  <div class="wizhead" id="wizhead">
+    <ol class="steps" id="steps">
+      <li data-n="1" data-step="start" tabindex="0">Start</li>
+      <li data-n="2" data-step="set" tabindex="0">Your set</li>
+      <li data-n="3" data-step="install" tabindex="0">Install</li>
+    </ol>
+    <span class="spacer"></span>
+    <span class="acctwrap" id="acctwrap" hidden>
+      <button type="button" class="acctchip" id="acctchip" aria-haspopup="true" aria-expanded="false" data-tip="Your Patreon sign-in"></button>
+      <div class="acctmenu" id="acctmenu"></div>
+    </span>
+    <button type="button" class="btn btn-quiet" id="wizard">Start over</button>
+  </div>
+
+  <!-- S0 "Start": the welcome, as a screen. One line, the starting
+       points, one sentence of counts, a footer of facts. Every card
+       lands on the set except Pick my own, which lands on the catalog. -->
+  <section class="screen" id="screen-start" hidden>
+    <div class="start">
+      <h1 id="welcometitle">Welcome to FNSTools.</h1>
+      <p class="start-lead" id="startlead">Pick a starting point. Nothing installs until you review the plan.</p>
+      <div class="presets" id="presets">
+        <button class="preset primary" id="pre-last" hidden><b>Set up like last time</b><span id="pre-last-desc"></span><span class="pick">Install now ›</span></button>
+        <button class="preset" id="pre-quiz" hidden><b>Answer a few questions</b><span>A few quick questions, then a set picked for how you work.</span><span class="pick">Find my set ›</span></button>
+        <button class="preset" id="pre-starter"><b>Recommended</b><span id="pre-starter-desc"></span><span class="pick">Start here ›</span></button>
+        <button class="preset" id="pre-all"><b>Everything</b><span id="pre-all-desc"></span><span class="pick">Select all ›</span></button>
+        <button class="preset" id="pre-none"><b>Pick my own</b><span>Start from an empty list and browse the catalog.</span><span class="pick">Browse ›</span></button>
+      </div>
+      <div class="start-note" id="startnote" hidden></div>
+      <p class="welcome-counts" id="welcomecounts" hidden></p>
+      <p class="welcome-auth" id="welcomeauth" hidden></p>
+      <p class="start-meta" id="startmeta"></p>
+    </div>
+  </section>
+
+  <!-- S1 "Find my set": the questionnaire, as a screen. One question per
+       view, Back and Next, the result with the ticked set; Use this
+       selection lands on the set. -->
+  <section class="screen" id="screen-quiz" hidden>
+    <div class="quiz" id="quiz">
+      <div class="quiz-progress" id="quiz-progress"></div>
+      <h2 class="quiz-prompt" id="quiz-prompt"></h2>
+      <p class="quiz-hint" id="quiz-hint"></p>
+      <div class="quiz-options" id="quiz-options"></div>
+      <div class="quiz-result" id="quiz-result" hidden></div>
+    </div>
+    <div class="sum quiz-foot">
+      <button type="button" class="btn btn-quiet" id="quiz-back">Back</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn btn-secondary" id="quiz-next">Next</button>
+      <button type="button" class="btn btn-primary" id="quiz-use" hidden>Use this selection</button>
+    </div>
+  </section>
+
+  <!-- S2 "Your set": the home screen (docs/InstallerWizardFlow.md, phase
+       1). The selection as rows grouped by category, the one primary
+       action in its footer; the catalog below is the sub-screen entered
+       to add tools. -->
+  <section class="screen" id="screen-set" hidden>
+    <div class="set-head">
+      <div class="set-title">
+        <h2 id="settitle">Your set</h2>
+        <p class="set-sub" id="setsub"></p>
+      </div>
+    </div>
+    <div class="banners-slot" id="setbanners"><div class="banners" id="banners"></div></div>
+    <div class="plusline" id="plusline" hidden></div>
+    <div class="setopts" id="setopts" hidden>
+      <label class="famopt" id="famopt" hidden data-tip="The FNS family operators you tick also appear on an FNS tab in the OP Create dialog, placed as one node each. Untick to keep them in the palette only; turn it off later the same way.">
+        <input type="checkbox" id="famchk"> Add FNS tab to OP Create</label>
+    </div>
+    <div class="setlist" id="setlist"></div>
+    <div class="set-empty" id="setempty" hidden>
+      <p>Nothing in your set yet.</p>
+      <button type="button" class="btn btn-secondary" id="setadd">Add tools</button>
+    </div>
+    <div class="sum set-foot" id="setfoot">
+      <div class="sum-left">
+        <span class="sum-count"><span class="n" id="cnt">0</span> <span class="muted" id="cntlabel">tools</span><span class="muted" id="cntmore"></span></span>
+        <span class="muted" id="deps"></span>
+      </div>
+      <span class="acct" id="acct" hidden></span>
+      <a class="btn btn-quiet" id="support" target="_blank" rel="noopener" hidden>Join on Patreon ↗</a>
+      <button class="btn btn-quiet" id="recheck" hidden>Check again</button>
+      <button class="btn btn-quiet" id="signin" hidden>Sign in with Patreon</button>
+      <button class="btn btn-quiet" id="redeem" hidden>Redeem Gumroad key</button>
+      <span class="spacer"></span>
+      <button type="button" class="linkbtn" id="setclear">Clear</button>
+      <button type="button" class="btn btn-secondary" id="addtools">Add tools</button>
+      <button class="btn btn-secondary" id="script">Copy install script</button>
+      <button class="btn btn-primary" id="save">Download selection.json</button>
+    </div>
+  </section>
+
+  <!-- S3 "Add tools": the catalog, entered from the set. Every section
+       open when served, the rail to jump, one-line rows by default in
+       TouchDesigner; Done returns to the set. No install from here. -->
+  <section class="screen" id="screen-catalog">
   <section class="cfg-hero">
     <span class="eyebrow">CONFIGURATOR</span>
     <h1>Build your install.</h1>
     <p class="cfg-sub">
-      Open a category, tick the tools you want, and copy one line for the
-      TouchDesigner Textport. Nothing else is downloaded.
+      Tick the tools you want, then Done. Your set holds the one line for the TouchDesigner Textport.
     </p>
-    <p class="cfg-meta" id="sub">loading…</p>
-    <ol class="steps" id="steps" hidden>
-      <li data-n="1">Choose a starting point</li>
-      <li data-n="2">Adjust the list</li>
-      <li data-n="3">Review &amp; install</li>
-    </ol>
+    <p class="cfg-meta" id="sub"></p>
   </section>
 
   <div class="cfg-bar">
    <div class="bar-row bar-find">
+    <button type="button" class="btn btn-quiet backset" id="backset" data-tip="Back to your set">‹ Your set</button>
     <div class="qwrap">
       <input type="search" id="q" placeholder="Search tools, their docs, categories…" autocomplete="off" aria-label="Search tools">
       <kbd class="qkey" aria-hidden="true">/</kbd>
     </div>
-    <button class="btn btn-secondary" id="wizard">Guided setup</button>
-    <button class="btn btn-quiet" id="theme" data-tip="Toggle theme" aria-label="Toggle theme">◐</button>
-    <a class="bar-docs" id="alldocs" target="_blank" rel="noopener">Docs ↗</a>
-   </div>
+    <div class="viewwrap" id="viewwrap">
+     <button type="button" class="btn btn-secondary viewbtn" id="viewbtn" aria-haspopup="true" aria-expanded="false" data-tip="Filters and the compact view">View <span class="k" id="viewk" hidden></span><span class="caret" aria-hidden="true">▾</span></button>
    <div class="bar-row bar-filters">
     <div class="seg" id="access" role="group" aria-label="Show tools by access" hidden>
       <button type="button" data-access="all" aria-pressed="true">All <span class="k"></span></button>
       <button type="button" data-access="free" aria-pressed="false" data-tip="Tools anyone can install">Free <span class="k"></span></button>
       <button type="button" data-access="plus" aria-pressed="false" data-tip="Tools that unlock with a Patreon tier"><span class="dia" aria-hidden="true">◆</span> Patreon <span class="k"></span></button>
     </div>
-    <button type="button" class="tog" id="selonly" aria-pressed="false" data-tip="Show only what you have ticked or placed">Selected <span class="k"></span></button>
     <button type="button" class="tog" id="placeonly" aria-pressed="false" hidden data-tip="Tools you drop into a network as nodes, like the FNS family operators">Placeable <span class="k"></span></button>
     <button type="button" class="tog" id="newonly" aria-pressed="false" hidden data-tip="Packages that are new in the current release line">New <span class="k"></span></button>
-    <button type="button" class="tog" id="compact" aria-pressed="false" data-tip="Title-only tiles. Hover a tile for its description">Compact</button>
+    <button type="button" class="tog" id="compact" aria-pressed="false" data-tip="One-line rows. Off, the cards show the full descriptions">Compact</button>
+   </div>
+    </div>
+    <button class="btn btn-quiet" id="theme" data-tip="Toggle theme" aria-label="Toggle theme">◐</button>
+    <a class="bar-docs" id="alldocs" target="_blank" rel="noopener">Docs ↗</a>
    </div>
   </div>
+  <div class="banners-slot" id="catbanners"></div>
 
   <div class="layout">
     <nav class="catnav" id="catnav" aria-label="Categories"></nav>
     <div class="content">
-      <div class="note" id="corenote" hidden></div>
       <div class="plusrail" id="plusrail"></div>
       <div class="resline" id="resline">
         <span class="res-text" id="restext" aria-live="polite"></span>
@@ -970,47 +1275,46 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
     </div>
   </div>
 
-  <div class="sum">
-    <div class="tray" id="tray" hidden>
-      <div class="tray-head"><b>Your selection</b><span class="spacer"></span>
-        <button type="button" class="linkbtn" id="trayclose">Close</button></div>
-      <div class="tray-body" id="traybody"></div>
-    </div>
-    <div class="sum-left">
-    <button type="button" class="sum-count" id="traybtn" aria-expanded="false" aria-controls="tray" data-tip="See and edit everything you picked"><span class="n" id="cnt">0</span> <span class="muted">tools selected</span> <span class="caret" aria-hidden="true">▴</span></button>
-    <span class="muted" id="deps"></span>
-    <label class="famopt" id="famopt" hidden data-tip="The FNS family operators you tick also appear on an FNS tab in the OP Create dialog, placed as one node each. Untick to keep them in the palette only; turn it off later the same way.">
-      <input type="checkbox" id="famchk"> Add FNS tab to OP Create</label>
-    </div>
-    <span class="acct" id="acct"></span>
-    <a class="btn btn-quiet" id="support" target="_blank" rel="noopener" hidden>Join on Patreon ↗</a>
-    <button class="btn btn-quiet" id="recheck" hidden>Check again</button>
-    <button class="btn btn-quiet" id="signin" hidden>Sign in with Patreon</button>
-    <button class="btn btn-quiet" id="redeem" hidden>Redeem Gumroad key</button>
+  <div class="sum cat-foot" id="catfoot">
     <span class="spacer"></span>
-    <button class="btn btn-secondary" id="script">Copy install script</button>
-    <button class="btn btn-primary" id="save">Download selection.json</button>
+    <button type="button" class="btn btn-primary" id="catdone">Done</button>
   </div>
+  </section>
+
+  <!-- S4 "Install": the plan, the progress narration and the done report
+       as three states of one screen; off-machine it holds the paste
+       script (and the selection.json download on the double-clicked
+       file). -->
+  <section class="screen" id="screen-install" hidden>
+    <div class="inst">
+      <h2 id="insttitle">Install plan</h2>
+      <p class="inst-hint" id="insthint"></p>
+      <pre class="out" id="instout"></pre>
+      <div class="dlg-report inst-report" id="instreport" hidden></div>
+    </div>
+    <div class="sum inst-foot">
+      <a class="bar-docs" id="instdocs" target="_blank" rel="noopener">Installation notes ↗</a>
+      <span class="spacer"></span>
+      <button type="button" class="btn btn-quiet" id="instback">‹ Your set</button>
+      <button type="button" class="btn btn-quiet" id="instclose" hidden>Close</button>
+      <button type="button" class="btn btn-secondary" id="instsave" hidden>Download selection.json</button>
+      <button type="button" class="btn btn-primary" id="instcopy" hidden>Copy</button>
+      <button type="button" class="btn btn-primary" id="instinstall" hidden>Install</button>
+      <button type="button" class="btn btn-primary" id="instopen" hidden>Open Settings</button>
+    </div>
+  </section>
 
 </main>
 <!-- FNS:FOOTER -->
 
 <dialog id="dlg"><div class="dlg">
-  <h3 id="dlgtitle">Your selection</h3>
-  <p class="dlg-hint" id="dlghint">
-    Save this as <code>selection.json</code> next to the installer COMP, or paste the
-    list into the toolkit's installer.
-  </p>
+  <h3 id="dlgtitle">FNSTools</h3>
+  <p class="dlg-hint" id="dlghint" hidden></p>
   <pre id="out"></pre>
-  <div class="dlg-report" id="report" hidden></div>
   <div class="dlg-actions">
-    <a class="bar-docs" id="dlgdocs" target="_blank" rel="noopener">Installation notes ↗</a>
     <span class="spacer"></span>
     <button class="btn btn-secondary" id="dlgreload" hidden>Reload picker</button>
     <button class="btn btn-quiet" id="close">Close</button>
-    <button class="btn btn-primary" id="docopy" hidden>Copy</button>
-    <button class="btn btn-primary" id="doinstall" hidden>Install</button>
-    <button class="btn btn-primary" id="doopen" hidden>Open Settings</button>
   </div>
 </div></dialog>
 
@@ -1043,51 +1347,6 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
     <button class="btn btn-quiet" id="dlwarncancel">Cancel</button>
     <span class="spacer"></span>
     <button class="btn btn-primary" id="dlwarnok">Understood</button>
-  </div>
-</div></dialog>
-
-<dialog id="newtools"><div class="dlg">
-  <span class="eyebrow">NEW TOOLS</span>
-  <h3 id="newtitle">New since you last looked</h3>
-  <p class="dlg-hint">Tick the ones you want and they join your selection. Nothing installs until you review it.</p>
-  <div class="newlist" id="newlist"></div>
-  <label class="newauto"><input type="checkbox" id="newauto" checked> Show this window when tools are added</label>
-  <div class="dlg-actions">
-    <button class="btn btn-quiet" id="newlater">Not now</button>
-    <span class="spacer"></span>
-    <button class="btn btn-secondary" id="newshow">Show them in the list</button>
-    <button class="btn btn-primary" id="newadd" disabled>Add the ticked ones</button>
-  </div>
-</div></dialog>
-
-<dialog id="welcome"><div class="dlg">
-  <span class="eyebrow">GUIDED SETUP</span>
-  <h3 id="welcometitle">Welcome to FNSTools</h3>
-  <p class="welcome-counts" id="welcomecounts" hidden></p>
-  <p class="dlg-hint welcome-auth" id="welcomeauth" hidden></p>
-  <p class="dlg-hint">
-    You adjust the list next; nothing is downloaded or installed until
-    you confirm the plan.
-  </p>
-  <div class="presets" id="presets">
-    <button class="preset primary" id="pre-last" hidden><b>Set up like last time</b><span id="pre-last-desc"></span><span class="pick">Install now ›</span></button>
-    <button class="preset" id="pre-quiz" hidden><b>Answer a few questions</b><span>A few quick questions, then a set picked for how you work.</span><span class="pick">Find my set ›</span></button>
-    <button class="preset" id="pre-starter"><b>Recommended</b><span id="pre-starter-desc"></span><span class="pick">Start here ›</span></button>
-    <button class="preset" id="pre-all"><b>Everything</b><span id="pre-all-desc"></span><span class="pick">Select all ›</span></button>
-    <button class="preset" id="pre-none"><b>Pick my own</b><span>Start from an empty list and browse the catalog.</span><span class="pick">Browse ›</span></button>
-  </div>
-  <div class="quiz" id="quiz" hidden>
-    <div class="quiz-progress" id="quiz-progress"></div>
-    <h4 class="quiz-prompt" id="quiz-prompt"></h4>
-    <p class="quiz-hint" id="quiz-hint"></p>
-    <div class="quiz-options" id="quiz-options"></div>
-    <div class="quiz-result" id="quiz-result" hidden></div>
-    <div class="dlg-actions">
-      <button class="btn btn-quiet" id="quiz-back">Back</button>
-      <span class="spacer"></span>
-      <button class="btn btn-secondary" id="quiz-next">Next</button>
-      <button class="btn btn-primary" id="quiz-use" hidden>Use this selection</button>
-    </div>
   </div>
 </div></dialog>
 
@@ -1406,16 +1665,13 @@ if (FNS_EMBEDDED) {
   document.body.classList.add('app');
 }
 
-// A freshly dropped bootstrap (served mode, target holds nothing yet) runs
-// the guided first run: the hero speaks to someone who has never seen the
-// toolkit, and the welcome dialog offers a starting point.
-function heroFirstRun() {
-  document.querySelector('.cfg-hero .eyebrow').textContent = 'FIRST RUN';
-  document.querySelector('.cfg-hero h1').textContent = 'Welcome to FNSTools.';
+// Served (Pick Tools on a root that holds tools, or a first run that chose
+// a starting point): the catalog is the sub-screen where the set grows, so
+// the hero says so; the site's Textport sentence would be wrong here.
+function heroServed() {
+  document.querySelector('.cfg-hero h1').textContent = 'Add tools.';
   document.querySelector('.cfg-sub').textContent =
-    'This container is now your toolkit root. Pick what goes in it, review ' +
-    'the plan, install. Every download is verified, and you can change the ' +
-    'selection any time from the root’s Pick Tools.';
+    'Tick to add a tool to your setup, untick to remove one. Done returns to your setup.';
 }
 
 /* FNS:SEARCH:START -- the picker's search (docs/PickerSearch.md). Pure
@@ -1716,17 +1972,20 @@ var FNSSearch = (function (F) {
 function fnsBoot() {
   var M = window.FNS_MANIFEST;
   var listEl = document.getElementById('list');
+  // Served by the installer into the bootstrap's 1040x720 window (not
+  // framed in the console, which sets its own attribute): one hero line
+  // and the manager's density, from the first paint, refresh state included.
+  if ((window.FNS_SERVED || window.FNS_REFRESHING) && !FNS_EMBEDDED) {
+    document.documentElement.setAttribute('data-served', '');
+    document.body.classList.add('app');
+  }
   var firstrun = !!window.FNS_SERVED && !!window.FNS_FIRSTRUN;
-  // The guided setup is the first run's flow, offered on demand in every
-  // flavor: the Guided setup button re-opens the same welcome and lights
-  // the same step strip.
-  var wizardOn = false;
-  var firstVisit = false;   // the site's once-per-browser welcome
+  var firstVisit = false;   // the site's once-per-browser Start screen
   // Served by the bootstrap's Web Server DAT and the store is still being
-  // fetched: say so and poll. /manifest.js flips to the real catalog (and
-  // FNS_SERVED) once the refresh lands.
+  // fetched: say so on the Start screen (where a first run lands) and
+  // poll. /manifest.js flips to the real catalog (and FNS_SERVED) once the
+  // refresh lands.
   if (window.FNS_REFRESHING) {
-    if (window.FNS_FIRSTRUN) heroFirstRun();
     // The refresh can REFUSE to start. Promising that the page refreshes
     // itself is then a lie the reader cannot get past, and the reason used
     // to ship as a JS comment nobody sees (field report 2026-09-18).
@@ -1741,13 +2000,29 @@ function fnsBoot() {
                                             : 'Downloading the package catalog ') +
         'from the bucket…<br>this page refreshes itself.';
     }
-    listEl.appendChild(note);
+    var startNote = document.getElementById('startnote');
+    startNote.appendChild(note);
+    startNote.hidden = false;
+    document.getElementById('presets').hidden = true;
+    document.getElementById('startlead').textContent = refuse
+      ? 'The starting points appear once the catalog is here.'
+      : 'The starting points appear in a moment.';
+    var startScreen = document.getElementById('screen-start');
+    document.getElementById('screen-catalog').hidden = true;
+    startScreen.hidden = false;
+    document.documentElement.setAttribute('data-screen', 'start');
+    // the header as setScreen would place it: Start lit, nothing to start
+    // over from, no account yet
+    var head = document.getElementById('wizhead');
+    startScreen.insertBefore(head, startScreen.firstChild);
+    document.querySelector('#steps li[data-step=start]').classList.add('now');
+    document.getElementById('wizard').hidden = true;
     document.getElementById('sub').textContent =
       refuse ? 'store refresh refused' : 'refreshing store…';
     return;
   }
   var served = !!window.FNS_SERVED;
-  if (firstrun) heroFirstRun();
+  if (served) heroServed();
   // Served from a target the installer refuses to touch (the toolkit's own
   // source root): say why, and never offer Apply -- see SourceLock.
   var locked = String(window.FNS_LOCKED || '');
@@ -1868,6 +2143,11 @@ function fnsBoot() {
     return pickable(byName[n]);
   }) : [];
   var placing = new Set(placedNow);
+  // A re-entry (Pick Tools on a root that holds tools): the set starts as
+  // what the project has, and the rows carry the difference Apply makes
+  // (installed, will install, will be removed). On a first run every row
+  // would say the same thing, so the state chips stay off.
+  var reentry = served && (installedNow.length > 0 || placedNow.length > 0);
   // The Place button: a package the catalog flags `placeonce`, and every
   // FNS family member by default (owner decision 2026-09-24: a family op
   // is dropped into networks as often as you like, so it should never have
@@ -1896,28 +2176,17 @@ function fnsBoot() {
     return Array.from(picked).some(function (n) { return byName[n] && byName[n].family; });
   }
 
-  var meta = [
-    tools.length + ' tools',
-    'sha256-verified',
-  ];
+  // Release, TD build and the verification promise were a meta line under
+  // the headline; they are said where the download question is actually
+  // asked (the Install plan hint, the script hint). The hero's meta element
+  // stays for the store-refresh status only, and hides when empty.
+  var meta = [];
   if (M.release) meta.push(M.release);
-  if (M.toolkit && M.toolkit.td_build) meta.push('TD ' + M.toolkit.td_build);
+  if (M.toolkit && M.toolkit.td_build) meta.push('for TD ' + M.toolkit.td_build);
+  var metaSentence = (meta.length ? meta.join(' ') + '; every' : 'Every')
+    + ' download is sha256-verified.';
   var sub = document.getElementById('sub');
   sub.textContent = '';
-  var dot = document.createElement('span');
-  dot.className = 'dot';
-  dot.setAttribute('aria-hidden', 'true');
-  sub.appendChild(dot);
-  sub.appendChild(document.createTextNode(meta.join(' · ')));
-
-  var note = document.getElementById('corenote');
-  note.textContent = '';
-  note.appendChild(document.createTextNode(
-    'The plumbing every tool plugs into: registries, settings persistence and ' +
-    'the shared surfaces. It installs with any selection and needs no choice. ' +
-    'Your saved tool settings re-apply over installs and updates. '));
-  note.appendChild(docsLink(FNS_DOCS + '/docs/fns-configregistry/',
-                            'How settings persistence works ↗'));
 
   // who lights up when this package is present (reverse integrations)
   var enhances = {};
@@ -2026,18 +2295,17 @@ function fnsBoot() {
       + 'everything else installs right away.';
   }
   // --- the view: what the list shows ------------------------------------
-  // Three filters beside the search, remembered per browser like the fold
-  // state: access (all / free / plus), only what is selected, only what is
-  // new. Any of them narrows the list the way a search does, so the same
-  // rules apply: every section with a hit opens, and the core footnote and
-  // the other creators' links step aside.
+  // The filters under the View button, remembered per browser like the
+  // fold state: access (all / free / plus), only what is new, only what
+  // can be placed. Any of them narrows the list the way a search does, so
+  // the same rules apply: every section with a hit opens, and the other
+  // creators' links step aside. (The Selected filter went with the 2026-10
+  // wizard pass: the set screen IS the selection.)
   var VIEW_KEY = 'fns.view';
-  var view = {access: 'all', sel: false, fresh: false, once: false};
+  var view = {access: 'all', fresh: false, once: false};
   try {
     var rawView = JSON.parse(stored(VIEW_KEY, 'null') || 'null');
     if (rawView && ['all', 'free', 'plus'].indexOf(rawView.access) >= 0) view.access = rawView.access;
-    // "selected only" is a review mode, not a place to land in: a reload
-    // that opened on an empty-looking list would read as a lost selection
   } catch (e) { /* defaults */ }
   // A link can open the picker already filtered, and it wins over the
   // remembered filter: /get/#patreon, /get/#free, /get/#all (owner,
@@ -2051,13 +2319,17 @@ function fnsBoot() {
     try { localStorage.setItem(VIEW_KEY, JSON.stringify({access: view.access})); } catch (e) { /* nicety */ }
     render();
   }
-  function narrowed() { return view.access !== 'all' || view.sel || view.fresh || view.once; }
+  function narrowed() { return view.access !== 'all' || view.fresh || view.once; }
   // Compact: title-only tiles (owner, 2026-10-03: "there are just so many
   // tools and features"). A view, not a filter: every card stays, only
   // its description, byline, hints and where-it-lands chips go, and the
-  // description is still the tile's hover. Per viewer, off by default.
+  // description is still the tile's hover. Per viewer: off by default on
+  // the site and the standalone, ON by default when the installer serves
+  // the page (2026-10-16: the TD window is 1040x720, and title-only tiles
+  // are what puts tools on its first screen). A stored choice wins.
   var COMPACT_KEY = 'fns.compact';
-  var compactOn = stored(COMPACT_KEY, null) === '1';
+  var compactOn = stored(COMPACT_KEY, null) === '1'
+    || (served && stored(COMPACT_KEY, null) === null);
   function applyCompact() {
     listEl.classList.toggle('dense', compactOn);
     var b = document.getElementById('compact');
@@ -2148,102 +2420,65 @@ function fnsBoot() {
       writeSeenLocal(names);
     }
   }
-  /** The dismissable "New since you last looked" dialog. Either answer
-   *  records the tools as shown, so it opens once per release. */
-  function showNewTools() {
-    var d = document.getElementById('newtools');
-    // Only what this viewer can actually get: a Patreon tool they are not
-    // entitled to (signed out, or a tier they do not hold) is never a
-    // reason to interrupt them. It stays unannounced rather than being
-    // marked shown, so it is offered once they sign in and it is theirs;
-    // its card keeps the New badge meanwhile.
+  /** "N new tools since you last looked", as a banner on the set (the home
+   *  screen) rather than a window over the catalog. See them opens the
+   *  catalog filtered to them; either answer records them as shown, so it
+   *  shows once per release. Only what this viewer can actually get: a
+   *  Patreon tool they are not entitled to is never a reason to interrupt
+   *  them. It stays unannounced rather than being marked shown, so it is
+   *  offered once they sign in and it is theirs; its row keeps the New
+   *  badge meanwhile. A tool already in the selection asks nothing: it is
+   *  recorded as shown and left out (owner, 2026-10-07: "a non-state"). */
+  var newNames = [];
+  function prepareNewTools() {
     var list = Array.from(unseenAtLoad).map(function (n) { return byName[n]; })
       .filter(function (p) { return p && (!isPlus(p) || entitled(p)); }).sort(byTitle);
-    // A tool already in the selection asks nothing: it could only sit in
-    // the list ticked and greyed out as "already picked". It is recorded as
-    // shown and left out, so a look where every new tool is already picked
-    // opens no dialog at all (owner, 2026-10-07: "a non-state").
     var had = list.filter(function (p) { return picked.has(p.name); })
       .map(function (p) { return p.name; });
     if (had.length) markSeen(had);
     list = list.filter(function (p) { return !picked.has(p.name); });
-    if (!d || !list.length) return;
-    var names = list.map(function (p) { return p.name; });
-    document.getElementById('newtitle').textContent = list.length === 1
-      ? 'A new tool since you last looked'
-      : list.length + ' new tools since you last looked';
-    var box = document.getElementById('newlist');
-    box.textContent = '';
-    var chosen = {};
-    var add = document.getElementById('newadd');
-    function sync() {
-      var n = Object.keys(chosen).filter(function (k) { return chosen[k]; }).length;
-      add.disabled = !n;
-      add.textContent = n ? 'Add ' + n + ' to my selection' : 'Add the ticked ones';
-    }
-    list.forEach(function (p) {
-      var row = document.createElement('label');
-      row.className = 'newrow' + (isPlus(p) ? ' plus' : '');
-      var cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.checked = picked.has(p.name);
-      cb.disabled = picked.has(p.name);
-      cb.addEventListener('change', function () { chosen[p.name] = cb.checked; sync(); });
-      row.appendChild(cb);
-      var body = document.createElement('div');
-      body.className = 'newbody';
-      var top = document.createElement('div');
-      top.className = 'newtop';
-      var b = document.createElement('b');
-      b.textContent = titleOf(p);
-      top.appendChild(b);
-      var meta = document.createElement('span');
-      meta.className = 'newmeta';
-      var tier = isPlus(p) ? (tierLabel(p.access) ? 'Patreon:' + tierLabel(p.access) : 'Patreon') : 'free';
-      meta.textContent = (p.category || '') + ' · ' + tier + (picked.has(p.name) ? ' · already picked' : '');
-      top.appendChild(meta);
-      body.appendChild(top);
-      if (p.description) {
-        var ds = document.createElement('div');
-        ds.className = 'newdesc';
-        ds.textContent = p.description;
-        body.appendChild(ds);
-      }
-      row.appendChild(body);
-      box.appendChild(row);
-    });
-    sync();
-    var auto = document.getElementById('newauto');
-    auto.checked = announceOn;
-    auto.onchange = function () { setAnnounce(auto.checked); };
-    function done() {
-      markSeen(names);
-      try { d.close(); } catch (e) { /* already closed */ }
-    }
-    // Built for the embedded Chromium inside TouchDesigner: every button
-    // acts directly rather than waiting for a close event (see askPatreon).
-    document.getElementById('newlater').onclick = done;
-    document.getElementById('newshow').onclick = function () {
-      done();
-      document.getElementById('q').value = '';
-      setView({access: 'all', sel: false, fresh: true, once: false});
-    };
-    add.onclick = function () {
-      var take = Object.keys(chosen).filter(function (k) { return chosen[k]; });
-      done();
-      take.forEach(function (n) { picked.add(n); placing.delete(n); });
-      save(); render();
-      var locked = lockedPatreon(take);
-      if (locked.length) {
-        askPatreon(locked, function () {
-          locked.forEach(function (n) { picked.delete(n); }); save(); render();
-        });
-      }
-    };
-    d.addEventListener('cancel', function () { markSeen(names); });
-    try { d.showModal(); } catch (e) { d.setAttribute('open', ''); }
+    newNames = list.map(function (p) { return p.name; });
   }
-  function chosenHere(p) { return picked.has(p.name) || placing.has(p.name); }
+  function renderNewBanner() {
+    var box = document.getElementById('banners');
+    var old = document.getElementById('new-tools');
+    if (old) old.remove();
+    var names = newNames.filter(function (n) { return !picked.has(n); });
+    if (!box || !names.length) return;
+    var b = mk('div', 'banner');
+    b.id = 'new-tools';
+    b.hidden = curScreen !== 'set';
+    var s = mk('span');
+    var lead = mk('b', '', names.length === 1
+      ? 'A new tool since you last looked: '
+      : names.length + ' new tools since you last looked: ');
+    s.appendChild(lead);
+    s.appendChild(document.createTextNode(names.map(titleOfName).join(', ') + '.'));
+    b.appendChild(s);
+    b.appendChild(mk('span', 'spacer'));
+    function seen() { markSeen(names); newNames = []; b.remove(); }
+    var show = mk('button', 'btn btn-quiet', 'See them');
+    show.type = 'button'; show.id = 'newshow';
+    show.addEventListener('click', function () {
+      seen();
+      document.getElementById('q').value = '';
+      setView({access: 'all', fresh: true, once: false});
+      setScreen('catalog');
+    });
+    b.appendChild(show);
+    var later = mk('button', 'linkbtn', 'Not now');
+    later.type = 'button'; later.id = 'newlater';
+    later.addEventListener('click', seen);
+    b.appendChild(later);
+    // the preference, in the banner's own words; the New filter's line
+    // shows the way back once it is off
+    var auto = mk('button', 'linkbtn', 'Stop announcing');
+    auto.type = 'button'; auto.id = 'newauto';
+    auto.setAttribute('data-tip', 'Stop listing new tools here by themselves. The New filter in the catalog still finds them.');
+    auto.addEventListener('click', function () { setAnnounce(false); seen(); });
+    b.appendChild(auto);
+    box.appendChild(b);
+  }
   function accessOk(p, access) {
     if (access === 'free') return !isPlus(p);
     if (access === 'plus') return isPlus(p);
@@ -2289,6 +2524,34 @@ function fnsBoot() {
     };
     document.getElementById('dlwarncancel').onclick = function () { d.close(); };
     try { d.showModal(); } catch (e) { d.setAttribute('open', ''); }
+  }
+
+  /** The Patreon chip a card and a set row carry. Without an account it
+   *  says only what the package IS, which is all the public page can
+   *  honestly claim; it names the ROUTE, not just the state: "Patreon:Base"
+   *  is the lowest tier that unlocks it (the ladder grants upward), and
+   *  the tooltip adds the key when a Gumroad row exists. */
+  function plusChip(p) {
+    var own = entitled(p);
+    var tierName = tierLabel(p.access);
+    var mark = tierName ? 'Patreon:' + tierName : 'Patreon';
+    var label = !account ? mark
+      : (own ? mark + ' · unlocked' : mark + ' · locked');
+    var extra = !account ? '' : (own ? ' own' : ' locked');
+    var pl = docsLink(FNS_DOCS + '/patreon/', label, 'chip plus' + extra);
+    if (tierName && !own) {
+      pl.setAttribute('data-tip', 'unlocks with the Patreon ' + tierName + ' tier or higher'
+        + (p.key_available ? ', or with a Gumroad licence key' : ''));
+    }
+    pl.addEventListener('click', function (e) { e.stopPropagation(); });
+    return pl;
+  }
+  /** A small element. */
+  function mk(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text) e.textContent = text;
+    return e;
   }
 
   function card(p, hit) {
@@ -2389,10 +2652,11 @@ function fnsBoot() {
 
     var chips = document.createElement('div');
     chips.className = 'chips';
-    // Served, the card says what Apply will do to THIS project: keep it,
-    // add it, or take it out. A pick the account cannot install yet says
-    // nothing here -- its Patreon chip already says locked.
-    if (served) {
+    // On a re-entry the card says what Apply will do to THIS project: keep
+    // it, add it, or take it out. A pick the account cannot install yet says
+    // nothing here -- its Patreon chip already says locked. A first run
+    // shows no state chips: every card would say "will install".
+    if (reentry) {
       var here = installedNow.indexOf(p.name) >= 0 || placedNow.indexOf(p.name) >= 0;
       var wants = on || placed;
       if (here && wants) chips.appendChild(chip('installed', 'ok'));
@@ -2409,26 +2673,7 @@ function fnsBoot() {
     if (p.updates === 'self') {
       chips.appendChild(chip('updates itself', 'hint'));
     }
-    if (isPlus(p)) {
-      // Without an account the chip says only what the package IS, which is
-      // all the public page can honestly claim.
-      var own = entitled(p);
-      // the ROUTE, not just the state: "Patreon:Base" names the lowest
-      // tier that unlocks it (the ladder grants upward); the tooltip adds
-      // the key when a Gumroad row exists
-      var tierName = tierLabel(p.access);
-      var mark = tierName ? 'Patreon:' + tierName : 'Patreon';
-      var label = !account ? mark
-        : (own ? mark + ' · unlocked' : mark + ' · locked');
-      var extra = !account ? '' : (own ? ' own' : ' locked');
-      var pl = docsLink(FNS_DOCS + '/patreon/', label, 'chip plus' + extra);
-      if (tierName && !own) {
-        pl.setAttribute('data-tip', 'unlocks with the Patreon ' + tierName + ' tier or higher'
-          + (p.key_available ? ', or with a Gumroad licence key' : ''));
-      }
-      pl.addEventListener('click', function (e) { e.stopPropagation(); });
-      chips.appendChild(pl);
-    }
+    if (isPlus(p)) chips.appendChild(plusChip(p));
     // A tier variant (docs/TierVariants.md): one row, one card, and the
     // build above the entry tier shown on it -- an upgrade for the tier
     // below, 'yours' for an account that holds it. The installer lands the
@@ -2616,29 +2861,6 @@ function fnsBoot() {
         .catch(function () { /* offline, or no list published yet */ });
     }
     ask();
-  }
-
-  function coreCard(p) {
-    var el = document.createElement('div');
-    el.className = 'card core';
-    var body = document.createElement('div');
-    body.className = 'body';
-    var n = document.createElement('div');
-    n.className = 'name';
-    n.appendChild(document.createTextNode(titleOf(p)));
-    if (p.help_url) n.appendChild(docsLink(p.help_url, 'docs ↗', 'help'));
-    body.appendChild(n);
-    if (p.description) {
-      var d = document.createElement('div');
-      d.className = 'desc'; d.textContent = p.description;
-      body.appendChild(d);
-    }
-    var chips = document.createElement('div');
-    chips.className = 'chips';
-    chips.appendChild(chip('always installed', 'core'));
-    body.appendChild(chips);
-    el.appendChild(body);
-    return el;
   }
 
   /** A category section: a header row (glyph, name, pitch, count, docs,
@@ -2829,7 +3051,6 @@ function fnsBoot() {
   }
 
   var shownTools = [];
-  var coreNoteEl = document.getElementById('corenote');
   // What a package answers to (FNSSearch.prepare): names, CMS tags, the
   // operator types it stands in for, category, the surfaces it adds
   // ("toolbar" is how someone asks for the tools that put a button
@@ -2855,7 +3076,7 @@ function fnsBoot() {
   function render() {
     var q = queryText();
     function match(p) {
-      return accessOk(p, view.access) && (!view.sel || chosenHere(p))
+      return accessOk(p, view.access)
         && (!view.fresh || isNew(p)) && (!view.once || isPlaceable(p)) && matchText(p, q);
     }
     listEl.textContent = '';
@@ -2913,27 +3134,13 @@ function fnsBoot() {
     var recs = narrowed() || filtering ? [] : (window.FNS_RECOMMENDS || []);
     if (recs.length) listEl.appendChild(communityPointer(recs.length));
 
-    // Core, last and quiet: plumbing that installs with any selection.
-    // Nobody picks it, so it is a folded footnote, not a section a
-    // reader has to get past.
-    if (!filtering) {
-      var coreNote = coreNoteEl;
-      var coreNodes = [];
-      if (coreNote) { coreNote.hidden = false; coreNodes.push(coreNote); }
-      var g0 = document.createElement('div');
-      g0.className = 'grid compact';
-      core.slice().sort(byTitle).forEach(function (p) { g0.appendChild(coreCard(p)); });
-      coreNodes.push(g0);
-      listEl.appendChild(section('Core', core.length + ' packages, installed with any selection', coreNodes));
-    }
+    // Core is not shown: plumbing that installs with any selection and
+    // needs no choice. The install plan names its count.
     updateNav();
 
     document.getElementById('empty').hidden = shown > 0 || !filtering;
     document.getElementById('cnt').textContent = picked.size;
-    var need = new Set();
-    picked.forEach(function (n) {
-      (byName[n].requires || []).forEach(function (r) { need.add(r); });
-    });
+    document.getElementById('cntlabel').textContent = picked.size === 1 ? 'tool' : 'tools';
     var removals = served ? installedNow.filter(function (n) {
       return !picked.has(n);
     }).length : 0;
@@ -2945,40 +3152,37 @@ function fnsBoot() {
       return !picked.has(n) && !placing.has(n);
     }).length;
     removals += unplaced;
-    var plusSel = Array.from(picked).filter(function (n) {
-      return byName[n] && isPlus(byName[n]);
-    });
-    // The sentence must match the chips: an entitled pick is READY, and
-    // telling its owner it "installs once unlocked" reads as a refusal.
-    var plusLocked = plusSel.filter(function (n) {
-      return !installable(n);
-    }).length;
-    var plusReady = plusSel.length - plusLocked;
     var paneSel = Array.from(picked).filter(function (n) {
       return byName[n] && byName[n].placement === 'pane';
     }).length;
-    // One short line: core is implied, an unlocked Plus tool is just a
-    // tool, and only what changes the outcome gets a word -- removals, a
-    // Plus pick that waits for an upgrade, a component that lands in the
-    // user's own network.
+    // The count line says what Apply will do: the adds and the removals on
+    // a re-entry, and the download. Core is implied (the plan names it),
+    // an unlocked Plus tool is just a tool, and a Plus pick that waits is
+    // the set's own line (renderPlusLine), said once per screen. The notes
+    // beside the count keep only what the rows do not show.
+    var more = [];
+    var adds = reentry ? Array.from(picked).filter(function (n) {
+      return installedNow.indexOf(n) < 0 && installable(n);
+    }).length : 0;
+    if (adds) more.push(adds + ' to add');
+    if (removals) more.push(removals + ' to remove');
+    var dl = downloadSize();
+    if (dl) more.push(dl + ' to download');
+    document.getElementById('cntmore').textContent = more.length ? ' · ' + more.join(' · ') : '';
     var notes = [];
-    // core rides the count's tooltip: it installs with anything and
-    // needs no decision, so it does not earn words on the bar
-    document.getElementById('traybtn').setAttribute('data-tip', 'See and edit everything you picked'
-      + (need.size ? ' (plus ' + need.size + ' core, installed with any selection)' : ''));
-    if (removals) notes.push(removals + ' to remove');
-    // Said here rather than by refusing the tick: entitlement is the
-    // server's answer, and this page has not asked it.
-    if (plusLocked) notes.push(plusLocked + ' need Patreon');
     if (paneSel) notes.push(paneSel + (paneSel === 1 ? ' spawns' : ' spawn') + ' into your network');
     if (toPlace) notes.push(toPlace + ' placed in this project only');
     var famMember = companions.length > 0 && memberPicked();
     document.getElementById('famopt').hidden = !famMember;
+    // the options row on the set: only while an option applies
+    document.getElementById('setopts').hidden = !famMember;
     document.getElementById('famchk').checked = familyOn;
     // the family leaves with the switch off or the last member unticked
     var famGoes = served && familyHere && !(famMember && familyOn);
     if (famGoes) notes.push('FNS tab removed');
     document.getElementById('deps').textContent = notes.join(' · ');
+    document.getElementById('setclear').hidden = picked.size === 0;
+    document.getElementById('catdone').textContent = 'Done · ' + picked.size + ' selected';
     var save = document.getElementById('save');
     if (served && locked) {
       save.textContent = 'Locked (source checkout)';
@@ -2992,7 +3196,7 @@ function fnsBoot() {
       save.disabled = picked.size === 0;
     }
     renderControls(q);
-    renderTray();
+    renderSet();
   }
 
   /** The filter deck and the results line follow every render: counts on
@@ -3001,7 +3205,6 @@ function fnsBoot() {
    *  Select/Clear that act on exactly what is shown. */
   function renderControls(q) {
     function rest(p) {
-      if (view.sel && !chosenHere(p)) return false;
       if (view.fresh && !isNew(p)) return false;
       if (view.once && !isPlaceable(p)) return false;
       return matchText(p, q);
@@ -3018,12 +3221,6 @@ function fnsBoot() {
         }).length;
       });
     }
-    var so = document.getElementById('selonly');
-    var chosen = tools.filter(chosenHere).length;
-    so.setAttribute('aria-pressed', view.sel ? 'true' : 'false');
-    so.classList.toggle('on', view.sel);
-    so.querySelector('.k').textContent = chosen;
-    so.disabled = !chosen && !view.sel;
     var no = document.getElementById('newonly');
     var fresh = tools.filter(isNew).length;
     no.hidden = !fresh;
@@ -3045,7 +3242,7 @@ function fnsBoot() {
     // anything, owner 2026-09-26); a search or a filter says what it kept.
     var text = (!q && !narrowed())
       ? ''
-      : n + ' ' + what + (view.sel ? ' you picked' : '') + (q ? ' matching \u201c' + q + '\u201d' : '');
+      : n + ' ' + what + (q ? ' matching \u201c' + q + '\u201d' : '');
     document.getElementById('restext').textContent = text;
 
     var fl = document.getElementById('resfilters');
@@ -3066,9 +3263,17 @@ function fnsBoot() {
     if (q) pill('\u201c' + q + '\u201d', function () { document.getElementById('q').value = ''; render(); });
     if (view.access === 'free') pill('Free', function () { setView({access: 'all'}); });
     if (view.access === 'plus') pill('Patreon', function () { setView({access: 'all'}); });
-    if (view.sel) pill('Selected', function () { setView({sel: false}); });
     if (view.fresh) pill('New', function () { setView({fresh: false}); });
     if (view.once) pill('Placeable', function () { setView({once: false}); });
+    var viewK = document.getElementById('viewk');
+    var viewBtn = document.getElementById('viewbtn');
+    if (viewK && viewBtn) {
+      var narrowing = (view.access !== 'all' ? 1 : 0)
+        + (view.fresh ? 1 : 0) + (view.once ? 1 : 0);
+      viewK.textContent = narrowing ? String(narrowing) : '';
+      viewK.hidden = !narrowing;
+      viewBtn.classList.toggle('on', !!narrowing);
+    }
     // with the New filter on, the window's preference sits beside it, so
     // someone who turned the window off can find the way back
     if (view.fresh) {
@@ -3099,62 +3304,6 @@ function fnsBoot() {
     noneBtn.textContent = scoped ? 'Clear shown' : 'Clear';
     allBtn.disabled = !shownTools.filter(bulkPickable).some(function (p) { return !picked.has(p.name); });
     noneBtn.disabled = !(scoped ? shownTools : tools).some(function (p) { return picked.has(p.name); });
-  }
-
-  /** The selection tray above the footer: every pick as a chip, grouped
-   *  by what Apply will do with it; pressing a chip undoes that pick. */
-  function renderTray() {
-    var tray = document.getElementById('tray');
-    var body = document.getElementById('traybody');
-    if (!tray || !body) return;
-    var btn = document.getElementById('traybtn');
-    if (btn) btn.setAttribute('aria-expanded', tray.hidden ? 'false' : 'true');
-    if (tray.hidden) return;
-    body.textContent = '';
-    function group(label, names, cls, undo, tip, mark) {
-      if (!names.length) return;
-      var h = document.createElement('div');
-      h.className = 'tray-sub';
-      h.textContent = label + ' \u00b7 ' + names.length;
-      body.appendChild(h);
-      var row = document.createElement('div');
-      row.className = 'tray-row';
-      names.slice().sort(function (a, b) {
-        return titleOfName(a).localeCompare(titleOfName(b), 'en', {sensitivity: 'base'});
-      }).forEach(function (nm) {
-        var c = document.createElement('button');
-        c.type = 'button';
-        c.className = 'tchip' + (cls ? ' ' + cls : '')
-          + (byName[nm] && isPlus(byName[nm]) ? ' plus' : '');
-        c.appendChild(document.createTextNode(titleOfName(nm) + ' '));
-        var x = document.createElement('span');
-        x.className = 'x';
-        x.setAttribute('aria-hidden', 'true');
-        x.textContent = mark;
-        c.appendChild(x);
-        c.setAttribute('aria-label', tip + ': ' + titleOfName(nm));
-        c.addEventListener('click', function () { undo(nm); save(); render(); });
-        row.appendChild(c);
-      });
-      body.appendChild(row);
-    }
-    var pickedList = Array.from(picked).filter(function (n) { return byName[n]; });
-    var placedList = Array.from(placing).filter(function (n) { return !picked.has(n) && byName[n]; });
-    var leaving = served ? installedNow.concat(placedNow).filter(function (n) {
-      return !picked.has(n) && !placing.has(n) && byName[n];
-    }) : [];
-    group('Ticked', pickedList, '', function (n) { picked.delete(n); }, 'Untick', '\u00d7');
-    group('In this project only', placedList, 'placed', function (n) { placing.delete(n); },
-          'Undo place', '\u00d7');
-    group('Will be removed', leaving, 'gone', function (n) {
-      if (placedNow.indexOf(n) >= 0) placing.add(n); else picked.add(n);
-    }, 'Keep', '\u21ba');
-    if (!body.children.length) {
-      var e = document.createElement('p');
-      e.className = 'tray-empty';
-      e.textContent = 'Nothing picked yet. Tick a card, or start from Guided setup.';
-      body.appendChild(e);
-    }
   }
 
   function save() {
@@ -3413,7 +3562,7 @@ function fnsBoot() {
     location.reload();
   });
   document.getElementById('alldocs').href = FNS_DOCS + '/docs/';
-  document.getElementById('dlgdocs').href = FNS_DOCS + '/#get';
+  document.getElementById('instdocs').href = FNS_DOCS + '/#get';
   document.getElementById('q').addEventListener('input', render);
   // Select all / Clear act on what is SHOWN: with the list narrowed to
   // the free tools, "Select shown" ticks those and nothing hidden. The
@@ -3436,32 +3585,41 @@ function fnsBoot() {
   Array.prototype.forEach.call(document.querySelectorAll('#access button[data-access]'), function (b) {
     b.addEventListener('click', function () { setView({access: b.getAttribute('data-access')}); });
   });
-  document.getElementById('selonly').addEventListener('click', function () { setView({sel: !view.sel}); });
   document.getElementById('newonly').addEventListener('click', function () { setView({fresh: !view.fresh}); });
   document.getElementById('placeonly').addEventListener('click', function () { setView({once: !view.once}); });
+  // The View menu (2026-10-16): the access filter, the three narrowing
+  // toggles and Compact live under one button, so the toolbar is one row.
+  // The results line keeps showing active filters as pills, and the
+  // button carries a count while any filter narrows the list.
+  (function () {
+    var wrap = document.getElementById('viewwrap');
+    var btn = document.getElementById('viewbtn');
+    if (!wrap || !btn) return;
+    function openMenu(on) {
+      wrap.classList.toggle('open', on);
+      btn.setAttribute('aria-expanded', on ? 'true' : 'false');
+    }
+    btn.addEventListener('click', function () { openMenu(!wrap.classList.contains('open')); });
+    document.addEventListener('click', function (ev) {
+      if (wrap.classList.contains('open') && !wrap.contains(ev.target)) openMenu(false);
+    });
+    document.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Escape' && wrap.classList.contains('open')) openMenu(false);
+    });
+  })();
   document.getElementById('compact').addEventListener('click', function () { setCompact(!compactOn); });
   document.getElementById('resetview').addEventListener('click', function () {
     document.getElementById('q').value = '';
-    setView({access: 'all', sel: false, fresh: false, once: false});
+    setView({access: 'all', fresh: false, once: false});
   });
-  // the tray: the footer's count opens it, Close and Escape shut it
-  function setTray(on) {
-    var tray = document.getElementById('tray');
-    if (!tray) return;
-    tray.hidden = !on;
-    renderTray();
-  }
-  document.getElementById('traybtn').addEventListener('click', function () {
-    setTray(document.getElementById('tray').hidden);
-  });
-  document.getElementById('trayclose').addEventListener('click', function () { setTray(false); });
-  // "/" jumps to the search from anywhere but a text field; Escape in
-  // the search clears it, and elsewhere closes the tray; Enter in the
-  // search ticks the top hit (never unticks: a second Enter is harmless)
+  // "/" jumps to the search from anywhere but a text field while the
+  // catalog is up; Escape in the search clears it, and elsewhere closes
+  // the account menu; Enter in the search ticks the top hit (never
+  // unticks: a second Enter is harmless)
   document.addEventListener('keydown', function (e) {
     var t = e.target;
     var typing = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
-    if (e.key === '/' && !typing && !document.querySelector('dialog[open]')) {
+    if (e.key === '/' && !typing && curScreen === 'catalog' && !document.querySelector('dialog[open]')) {
       e.preventDefault();
       document.getElementById('q').focus();
     } else if (e.key === 'Enter' && t && t.id === 'q' && queryText()) {
@@ -3472,7 +3630,7 @@ function fnsBoot() {
     } else if (e.key === 'Escape' && t && t.id === 'q' && t.value) {
       t.value = ''; render();
     } else if (e.key === 'Escape' && !document.querySelector('dialog[open]')) {
-      setTray(false);
+      setAcctMenu(false);
     }
   });
   document.getElementById('famchk').addEventListener('change', function (e) {
@@ -3482,11 +3640,11 @@ function fnsBoot() {
   });
   // Dark is the default in every flavor -- it matches both the site and
   // TouchDesigner. The toggle is a light escape hatch, and it is hidden on
-  // the site (whose header and footer are dark-only) and in the console
-  // frame (TouchDesigner is dark, and the frame around this page would not
-  // follow).
+  // the site (whose header and footer are dark-only), in the console
+  // frame and when served inside TouchDesigner (TD is dark, and the window
+  // around this page would not follow).
   var themeBtn = document.getElementById('theme');
-  if (window.FNS_SITE || FNS_EMBEDDED) {
+  if (window.FNS_SITE || FNS_EMBEDDED || served) {
     themeBtn.hidden = true;
   } else {
     var savedTheme = stored('fns.theme', null);
@@ -3504,13 +3662,14 @@ function fnsBoot() {
   // already inside TD with a one-click install in front of them.
   var HINTS = {
     selection: served
-      ? 'This goes straight to the installer in your project.'
+      ? 'This goes straight to the installer in your project. ' + metaSentence
       : 'Save this as selection.json next to the installer COMP, or paste ' +
         'the list into the toolkit’s installer.',
     script: 'Paste into a TouchDesigner Textport (Dialogs ▸ Textport ' +
       'and DATs), macOS or Windows. TD pauses briefly while it ' +
       'downloads; everything is sha256-verified against the release ' +
-      'manifest before anything is installed.',
+      'manifest before anything is installed.'
+      + (meta.length ? ' (' + meta.join(' ') + ')' : ''),
     done: 'Your tools are live in the project. Settings, install & remove ' +
       'and updates all live in the FNS console. Open it here, or any time ' +
       'from the toolkit root’s parameters (Open Settings / Pick Tools). ' +
@@ -3522,7 +3681,7 @@ function fnsBoot() {
   }
   document.getElementById('dlghint').textContent = HINTS.selection;
 
-  // --- the guided setup: welcome presets, step strip, done step ----------
+  // --- the guided setup: welcome presets, done step ----------------------
   // The first run opens with it; the Guided setup button re-enters it on
   // demand in every flavor.
   // sessionStorage, not localStorage: the welcome belongs to this visit
@@ -3533,19 +3692,6 @@ function fnsBoot() {
       if (set) sessionStorage.setItem(key, '1');
       return sessionStorage.getItem(key);
     } catch (e) { return null; }
-  }
-  var stepsEl = document.getElementById('steps');
-  // The strip's last step names what "done" IS in this flavor: an install
-  // where this page can install, the paste line where it cannot.
-  if (!served) {
-    stepsEl.children[2].textContent = 'Copy the install script';
-  }
-  function setStep(n) {
-    if (!firstrun && !wizardOn) return;
-    stepsEl.hidden = false;
-    Array.prototype.forEach.call(stepsEl.children, function (li, i) {
-      li.className = i + 1 < n ? 'done' : (i + 1 === n ? 'now' : '');
-    });
   }
   var starter = (M.starter || []).filter(function (n) {
     return bulkPickable(byName[n]);
@@ -3567,8 +3713,9 @@ function fnsBoot() {
   // curated in the catalog); each tool's `fits` names the tags it
   // answers. Scoring is a count: how many chosen tags a tool fits, with
   // a tag chosen by two answers counting twice. Everything with a score
-  // is recommended, best first, and the reasons are the answers' own
-  // labels. Pure and lifted by tests/test_wizard_quiz.py.
+  // is recommended, best first. Each pick keeps its reasons (the
+  // answers' labels); the result no longer shows them. Pure and lifted
+  // by tests/test_wizard_quiz.py.
   function quizScore(answers, quiz, tools) {
     var weight = {};
     var why = {};
@@ -3613,20 +3760,13 @@ function fnsBoot() {
   var quiz = (M.quiz && M.quiz.questions && M.quiz.questions.length) ? M.quiz : null;
   var quizAnswers = {};
   var quizStep = 0;
+  // The questionnaire is its own screen (S1); off it, the Start screen
+  // returns with its counts line (the result carries its own Patreon box,
+  // counted on THIS set: one Patreon message per screen).
   function quizShow(on) {
-    document.getElementById('presets').hidden = on;
-    // The result carries its own Patreon box, counted on THIS set, so the
-    // welcome's catalog-wide lines step aside while the questionnaire is
-    // open (one Patreon message per screen) and return with the cards.
-    if (on) {
-      document.getElementById('welcomecounts').hidden = true;
-      document.getElementById('welcomeauth').hidden = true;
-    } else {
-      renderWelcomeAccess();
-    }
-    document.getElementById('quiz').hidden = !on;
-    document.getElementById('welcometitle').textContent = on
-      ? 'Find my set' : ((firstrun || firstVisit) ? 'Welcome to FNSTools' : 'Choose a starting point');
+    if (on) { setScreen('quiz'); return; }
+    renderWelcomeAccess();
+    setScreen('start');
   }
   function quizRender(onUse) {
     var n = quiz.questions.length;
@@ -3737,10 +3877,6 @@ function fnsBoot() {
         ds.textContent = p.description;
         body.appendChild(ds);
       }
-      var w = document.createElement('span');
-      w.className = 'qres-why';
-      w.textContent = 'because: ' + r.why.join(', ');
-      body.appendChild(w);
       row.appendChild(body);
       return row;
     }
@@ -3830,12 +3966,16 @@ function fnsBoot() {
     });
     save(); render();
   }
-  function showWelcome() {
-    var w = document.getElementById('welcome');
+  /** S0, the Start screen: the starting points as cards, filled from the
+   *  manifest and this machine's record on every show (a reload can
+   *  change what the manifest offers), the counts line, the facts line. */
+  var startMetaDone = false;
+  function showStart() {
     var pre = document.getElementById('pre-starter');
     var preLast = document.getElementById('pre-last');
     var preQuiz = document.getElementById('pre-quiz');
-    quizShow(false);   // a reopened dialog starts on the cards, not mid-quiz
+    var presets = document.getElementById('presets');
+    presets.hidden = false;
     // a manifest with no questionnaire hides the card, like the starter
     preQuiz.hidden = !quiz;
     preLast.hidden = !last;
@@ -3862,46 +4002,45 @@ function fnsBoot() {
       allReady.length < bulkTools.length
         ? 'All ' + allReady.length + ' tools you can install now. Remove any later from Pick Tools.'
         : 'All ' + bulkTools.length + ' tools. Remove any later from Pick Tools.';
-    // Esc counts as "pick my own": the page behind is the empty list
-    // already, and a welcome that cannot be dismissed is a wall, not a
-    // guide. Idempotent and called from every exit on purpose: the
-    // embedded Chromium that renders this inside TouchDesigner was
-    // observed never delivering the dialog's close event, so the
-    // choice handlers do not wait for it.
-    var dismissed = false;
-    function dismiss() {
-      if (dismissed) return;
-      dismissed = true;
-      sessionFlag('fns.welcomed', true);
-      setStep(2);
-      window.scrollTo(0, 0);
+    document.getElementById('welcometitle').textContent =
+      (firstrun || firstVisit) ? 'Welcome to FNSTools.' : 'Choose a starting point.';
+    // the facts that were the hero's meta line: release, TD build, the
+    // verification promise, the docs
+    if (!startMetaDone) {
+      startMetaDone = true;
+      var sm = document.getElementById('startmeta');
+      sm.textContent = '';
+      var facts = meta.slice();
+      facts.push('every download sha256-verified');
+      sm.appendChild(document.createTextNode(facts.join(' \u00b7 ') + ' \u00b7 '));
+      sm.appendChild(docsLink(FNS_DOCS + '/docs/', 'Docs \u2197'));
     }
-    w.addEventListener('cancel', dismiss);
-    w.addEventListener('close', dismiss);
     // Every starting point the page picks for the reader leaves out what
     // this account cannot install yet (owner, 2026-09-16). `explicit` is a
     // list whose ticks the reader made, the questionnaire's result, and
-    // passes through as it is.
+    // passes through as it is. A choice marks this visit as welcomed (the
+    // auto-resume flow waits for it) and lands on the set; Pick my own
+    // lands on the catalog, since an empty set answers nothing.
     function choose(names, bind, explicit, own) {
       wantBind = bind || null;
-      applyPreset(explicit ? names : autoPick(names, own)); w.close(); dismiss();
+      sessionFlag('fns.welcomed', true);
+      applyPreset(explicit ? names : autoPick(names, own));
+      setScreen(picked.size ? 'set' : 'catalog', {focus: true});
     }
     // "Like last time" is the one card that IS the confirmation: the list
     // is the user's own, from a project they saved, so the click plans
-    // and installs in one go instead of parking them on a review dialog.
+    // and installs in one go instead of parking them on the plan.
     // Served only; the site has no server and never shows this card.
     function installNow(names, bind) {
       choose(names, bind, false, true);
       if (!served || locked) return;
-      setStep(3);
       installPolls = 0; installCancelled = false;
       installEpilogue = '';
-      document.getElementById('dlgtitle').textContent = 'Setting up like last time';
-      showDialog('Planning the install…', false);
+      showInstall('plan', 'Planning the install…', undefined, {title: 'Setting up like last time'});
       post('/selection', JSON.stringify(selection(), null, 1) + '\n',
         function (res) {
-          if (!res.ok) { showDialog(res.text, false); return; }
-          showDialog(res.text + '\n\nInstalling…', false);
+          if (!res.ok) { showInstall('failed', res.text); return; }
+          showInstall('progress', res.text + '\n\nInstalling…');
           post('/install', '{}', installOrPoll);
         });
     }
@@ -3915,10 +4054,10 @@ function fnsBoot() {
       choose(bulkTools.map(function (p) { return p.name; }));
     };
     document.getElementById('pre-none').onclick = function () { choose([]); };
-    // curated bundles render fresh on every open -- the dialog is reused,
-    // and a reload can change what the manifest offers
+    // curated bundles render fresh on every show: a reload can change
+    // what the manifest offers
     Array.prototype.forEach.call(
-      w.querySelectorAll('.preset.dyn'),
+      presets.querySelectorAll('.preset.dyn'),
       function (el) { el.remove(); });
     var preAll = document.getElementById('pre-all');
     bundles.forEach(function (bnd) {
@@ -3941,14 +4080,12 @@ function fnsBoot() {
       btn.addEventListener('click', function () { choose(bnd.packages); });
       preAll.parentNode.insertBefore(btn, preAll);
     });
-    setStep(1);
-    w.showModal();
+    setScreen('start');
   }
   document.getElementById('wizard').addEventListener('click', function () {
-    // Repeatable on purpose: it only changes the selection, and nothing
-    // is downloaded or installed without the review dialog.
-    wizardOn = true;
-    showWelcome();
+    // Start over, repeatable on purpose: it only changes the selection,
+    // and nothing is downloaded or installed without the plan.
+    showStart();
   });
   // Appended to the install report by the auto-resume flow: its pass
   // installs ONLY the deferred Plus picks, so the report alone reads as
@@ -3962,10 +4099,9 @@ function fnsBoot() {
   // as a chip by its title, removals and failures marked -- and keeps
   // the raw text underneath the chips only when a line does not parse.
   function finished(text) {
-    document.getElementById('dlgtitle').textContent = 'Installed';
-    showDialog(text + installEpilogue, false, HINTS.done);
-    var report = document.getElementById('report');
-    var out = document.getElementById('out');
+    showInstall('done', text + installEpilogue, HINTS.done);
+    var report = document.getElementById('instreport');
+    var out = document.getElementById('instout');
     report.innerHTML = '';
     var lines = String(text || '').split('\n');
     var m = /^installed (\d+), removed (\d+), failed (\d+)/.exec(lines[0] || '');
@@ -4026,12 +4162,9 @@ function fnsBoot() {
       report.hidden = false;
       out.hidden = true;
     }
-    document.querySelector('#dlg .dlg').classList.add('done');
-    document.getElementById('doopen').hidden = false;
-    setStep(4);   // every step done
   }
-  document.getElementById('doopen').addEventListener('click', function () {
-    var btn = document.getElementById('doopen');
+  document.getElementById('instopen').addEventListener('click', function () {
+    var btn = document.getElementById('instopen');
     btn.disabled = true;
     // the console takes this panel over on success; in the system browser
     // it opens beside this tab instead, and this page simply stays
@@ -4043,24 +4176,27 @@ function fnsBoot() {
       }
     });
   });
-  // On the website the paste line is the one way in: no selection.json
-  // download there (owner, 2026-09-27). The double-clicked local file
-  // keeps it, and the served picker in TD never showed it.
-  if (window.FNS_SITE && !served) {
+  // Off-machine the set's primary opens the install screen, which holds
+  // the paste script. On the website the paste line is the one way in: no
+  // selection.json download there (owner, 2026-09-27); the double-clicked
+  // local file keeps the download beside the script, and the served
+  // picker in TD never showed it.
+  if (!served) {
     var script = document.getElementById('script');
-    var saveBtn = document.getElementById('save');
     script.className = 'btn btn-primary';
-    saveBtn.hidden = true;
+    script.textContent = 'Install script';
+    document.getElementById('save').hidden = true;
   }
-  // The installer's plan is lines of "name kind state". The review
-  // dialog renders it as what will HAPPEN -- installs, removals,
+  // The installer's plan is lines of "name kind state". The install
+  // screen renders it as what will HAPPEN -- installs, removals,
   // problems -- with what is already there folded into one line, and
-  // keeps the raw text only when nothing in it parses.
+  // keeps the raw text only when nothing in it parses. A refusal keeps
+  // its sentence and its next step, and no Install button.
   function showPlan(res) {
-    showDialog(res.text, !!res.ok);
+    showInstall('plan', res.text, undefined, {installable: !!res.ok});
     if (!res.ok) return;
-    var report = document.getElementById('report');
-    var out = document.getElementById('out');
+    var report = document.getElementById('instreport');
+    var out = document.getElementById('instout');
     report.innerHTML = '';
     var installs = [], removes = [], problems = [];
     var keptTools = [], keptCore = 0, installCore = 0, download = '', target = '';
@@ -4133,23 +4269,63 @@ function fnsBoot() {
     out.hidden = true;
   }
 
-  // The panel this page runs in inside TouchDesigner has no browser
-  // chrome, so a page that asks to be reloaded asks for something the
-  // reader cannot do (field report 2026-09-17). Every auth wait carries
-  // this button; nothing else shows it.
+  // The transient dialog: a sign-in wait, a recheck or redeem answer, a
+  // refusal, a server that is gone. The install itself is a screen now
+  // (showInstall). The panel this page runs in inside TouchDesigner has no
+  // browser chrome, so a page that asks to be reloaded asks for something
+  // the reader cannot do (field report 2026-09-17). Every auth wait
+  // carries the reload button; nothing else shows it.
   function showDialog(text, installable, hint, reloadable) {
     var dlg = document.getElementById('dlg');
     document.getElementById('out').textContent = text;
-    document.getElementById('out').hidden = false;
-    document.getElementById('report').hidden = true;
-    dlg.querySelector('.dlg').classList.remove('done');
-    document.getElementById('doinstall').hidden = !installable;
-    document.getElementById('docopy').hidden = true;
-    document.getElementById('doopen').hidden = true;
     document.getElementById('dlgreload').hidden = !reloadable;
-    document.getElementById('dlghint').textContent = hint || HINTS.selection;
+    var h = document.getElementById('dlghint');
+    h.textContent = hint || '';
+    h.hidden = !hint;
     if (!dlg.open) dlg.showModal();
   }
+
+  // --- S4, the install screen (docs/InstallerWizardFlow.md, phase 3) ---
+  // One screen, the states: plan (the installer's plan, the Install
+  // button), progress (the updater's narration; Close stops the poll),
+  // done (the report, Open Settings and Close), failed (what stopped and
+  // Install to retry) and, off-machine, script (the paste script with
+  // Copy, and the selection.json download on the double-clicked file).
+  // The texts are the installer's own, parsed by showPlan and finished.
+  var INSTALL_TITLES = {
+    plan: 'Install plan', progress: 'Installing', done: 'Installed', failed: 'Install stopped',
+    script: window.FNS_SITE ? 'Paste this into the Textport' : 'Your selection'
+  };
+  function showInstall(state, text, hint, opts) {
+    opts = opts || {};
+    document.getElementById('insttitle').textContent = opts.title || INSTALL_TITLES[state] || 'Install';
+    var h = document.getElementById('insthint');
+    var fallback = state === 'done' ? HINTS.done : (state === 'script' ? HINTS.script : HINTS.selection);
+    h.textContent = hint || fallback;
+    var out = document.getElementById('instout');
+    out.textContent = text || '';
+    out.hidden = !text;
+    var rep = document.getElementById('instreport');
+    rep.innerHTML = '';
+    rep.hidden = true;
+    document.getElementById('instinstall').hidden = !((state === 'plan' && opts.installable) || state === 'failed');
+    document.getElementById('instinstall').textContent = state === 'failed' ? 'Install again' : 'Install';
+    document.getElementById('instcopy').hidden = state !== 'script';
+    document.getElementById('instsave').hidden = !(state === 'script' && !served && !window.FNS_SITE);
+    document.getElementById('instopen').hidden = state !== 'done';
+    document.getElementById('instopen').disabled = false;
+    document.getElementById('instclose').hidden = !(state === 'progress' || state === 'done');
+    document.getElementById('instback').hidden = !(state === 'plan' || state === 'script' || state === 'failed');
+    document.getElementById('instdocs').hidden = state === 'progress';
+    setScreen('install');
+  }
+  document.getElementById('instback').addEventListener('click', function () { setScreen('set'); });
+  // Close stops the poll, as the dialog's Close did (field report
+  // 2026-09-16), and returns to the set
+  document.getElementById('instclose').addEventListener('click', function () {
+    installCancelled = true;
+    setScreen('set');
+  });
 
   // The paste rail: one Textport line that reproduces this selection in a
   // bare project. It embeds ONLY the picked tool names -- release, URLs
@@ -4258,21 +4434,17 @@ function fnsBoot() {
     var plusN = Array.from(picked).filter(function (n) {
       return byName[n] && isPlus(byName[n]);
     }).length;
-    setStep(3);
-    showDialog(text, false, HINTS.script + (plusN
+    showInstall('script', text, HINTS.script + (plusN
       ? ' ' + plusN + ' Patreon pick' + (plusN === 1 ? '' : 's')
         + ' in this selection: the script installs the free tools now and '
         + 'opens the picker inside TouchDesigner for the Patreon '
         + (plusN === 1 ? 'one' : 'ones') + ', where you sign in as a supporter.'
       : ''));
-    document.getElementById('dlgtitle').textContent = 'Paste this into the Textport';
-    var docopy = document.getElementById('docopy');
-    docopy.hidden = false;
-    toClipboard(text, docopy);
+    toClipboard(text, document.getElementById('instcopy'));
   });
-  document.getElementById('docopy').addEventListener('click', function () {
-    toClipboard(document.getElementById('out').textContent,
-                document.getElementById('docopy'));
+  document.getElementById('instcopy').addEventListener('click', function () {
+    toClipboard(document.getElementById('instout').textContent,
+                document.getElementById('instcopy'));
   });
   // The account line, once: it changes only across a sign-in, which ends in
   // a page reload anyway.
@@ -4303,7 +4475,7 @@ function fnsBoot() {
         // built in DOM on first use -- no prompt(): the embedded web
         // render is not guaranteed to show native JS dialogs at all
         redeemRow = document.createElement('div');
-        redeemRow.className = 'sum';
+        redeemRow.className = 'redeemrow';
         var sel = document.createElement('select');
         keyable.forEach(function (p) {
           var o = document.createElement('option');
@@ -4335,8 +4507,7 @@ function fnsBoot() {
         redeemRow.appendChild(sel);
         redeemRow.appendChild(inp);
         redeemRow.appendChild(go);
-        var host = redeemBtn.closest('.sum');
-        host.parentNode.insertBefore(redeemRow, host.nextSibling);
+        redeemBtn.parentNode.insertBefore(redeemRow, redeemBtn.nextSibling);
       });
     }
     // Where to actually become one. From the manifest when it says, so a
@@ -4516,13 +4687,14 @@ function fnsBoot() {
   }
   document.getElementById('save').addEventListener('click', function () {
     if (served) {
-      setStep(3);
-      document.getElementById('dlgtitle').textContent = 'Install plan';
-      showDialog('Planning…', false);
+      showInstall('plan', 'Planning…');
       post('/selection', JSON.stringify(selection(), null, 1) + '\n', showPlan);
       return;
     }
-    setStep(3);
+    downloadSelection();
+  });
+  /** The double-clicked file's selection.json, beside the paste script. */
+  function downloadSelection() {
     var blob = new Blob([JSON.stringify(selection(), null, 1) + '\n'],
                         {type: 'application/json'});
     var a = document.createElement('a');
@@ -4530,25 +4702,26 @@ function fnsBoot() {
     a.download = 'selection.json';
     a.click();
     URL.revokeObjectURL(a.href);
-  });
+  }
+  document.getElementById('instsave').addEventListener('click', downloadSelection);
   // Install may answer "fetching": the server downloads exactly the
   // selected packages, we show progress, and re-post once they're here.
   var installPolls = 0;
-  // Set when the reader closes the dialog: the poll stops there. Without
-  // it every tick re-showed the dialog, so Close never closed anything
-  // while an install waited (field report 2026-09-16).
+  // Set when the reader closes the install screen: the poll stops there.
+  // Without it every tick re-showed the progress, so Close never closed
+  // anything while an install waited (field report 2026-09-16).
   var installCancelled = false;
   function installOrPoll(res) {
     if (installCancelled) return;
     if (!res.fetching) {
       // ok without fetching is the installer's own "installed N" report;
       // a refusal or a failure comes back ok:false with its reason
-      if (res.ok) finished(res.text); else showDialog(res.text, false);
+      if (res.ok) finished(res.text); else showInstall('failed', res.text);
       return;
     }
-    if (res.text) showDialog(res.text, false);
+    if (res.text) showInstall('progress', res.text);
     if (++installPolls > 400) {
-      showDialog('Download did not finish. Check the UPDATER status in TouchDesigner.', false);
+      showInstall('failed', 'Download did not finish. Check the UPDATER status in TouchDesigner.');
       return;
     }
     setTimeout(function () {
@@ -4565,27 +4738,26 @@ function fnsBoot() {
           // fetching, verifying) -- the bare counter said "Downloading"
           // even while the pass was authorising, which is how a wedge
           // looked like a slow download instead of naming itself
-          showDialog((st.detail || 'Downloading…')
-            + '\n' + st.fetched + ' done, ' + st.togo + ' to go', false);
+          showInstall('progress', (st.detail || 'Downloading…')
+            + '\n' + st.fetched + ' done, ' + st.togo + ' to go');
           installOrPoll({fetching: true, text: ''});
         } else if (st.ready) {
-          showDialog('Installing…' + gatedNote, false);
+          showInstall('progress', 'Installing…' + gatedNote);
           post('/install', '{}', installOrPoll);
         } else if (gatedNote && !(st.failed && st.failed.length)) {
-          showDialog('Not downloaded:' + gatedNote, false);
+          showInstall('failed', 'Not downloaded:' + gatedNote);
         } else {
-          showDialog('Download failed: ' +
+          showInstall('failed', 'Download failed: ' +
             ((st.failed && st.failed.join('; ')) || 'unknown; see UPDATER status') +
-            gatedNote +
-            '\nClose and try Install again to retry.', false);
+            gatedNote);
         }
-      }).catch(function (e) { showDialog('Status check failed: ' + e, false); });
+      }).catch(function (e) { showInstall('failed', 'Status check failed: ' + e); });
     }, 1200);
   }
-  document.getElementById('doinstall').addEventListener('click', function () {
+  document.getElementById('instinstall').addEventListener('click', function () {
     installPolls = 0; installCancelled = false;
     installEpilogue = '';
-    showDialog('Installing…', false);
+    showInstall('progress', 'Installing…');
     post('/install', '{}', installOrPoll);
   });
 
@@ -4608,10 +4780,8 @@ function fnsBoot() {
     if (firstrun && !sessionFlag('fns.welcomed')) return;
     var waits = 0;
     function armed() {
-      setStep(3);
-      document.getElementById('dlgtitle').textContent = 'Install plan';
-      showDialog('Your Patreon pick' + (wantedStill.length === 1 ? ' is' : 's are')
-        + ' unlocked. Planning the install…', false);
+      showInstall('plan', 'Your Patreon pick' + (wantedStill.length === 1 ? ' is' : 's are')
+        + ' unlocked. Planning the install…');
       post('/selection', JSON.stringify(selection(), null, 1) + '\n',
         function (res) {
           if (!res.ok) { showDialog(res.text, false); return; }
@@ -4626,7 +4796,7 @@ function fnsBoot() {
               + installedNow.join(', ')
               + '\n\nYour whole selection is live.';
           }
-          showDialog(res.text + '\n\nInstalling your checked picks…', false);
+          showInstall('progress', res.text + '\n\nInstalling your checked picks…');
           post('/install', '{}', installOrPoll);
         });
     }
@@ -4644,7 +4814,6 @@ function fnsBoot() {
     setTimeout(whenIdle, 800);
   })();
   document.getElementById('close').addEventListener('click', function () {
-    installCancelled = true;
     document.getElementById('dlg').close();
   });
   // Served in TouchDesigner, the page lives only while the installer's
@@ -4757,103 +4926,416 @@ function fnsBoot() {
     if (!rail) return;
     var plus = tools.filter(isPlus);
     if (!plus.length) { rail.hidden = true; view.access = 'all'; return; }
-    var mark = document.createElement('span');
-    mark.className = 'mark';
-    mark.setAttribute('aria-hidden', 'true');
-    mark.textContent = '◆';
-    rail.appendChild(mark);
-    var pb = document.createElement('b');
-    pb.textContent = 'Patreon:';
-    rail.appendChild(pb);
-    var sentence = 'the free tools are the full toolkit; '
-      + plus.length + ' extra' + (plus.length === 1 ? '' : 's') + ' below '
-      + (plus.length === 1 ? 'is' : 'are') + ' a thank-you for supporters, and '
-      + plusReality();
-    if (FNS_EMBEDDED) {
-      // inside the manager the strip is one quiet line; the full sentence
-      // rides as a tooltip, and the toolbar's access filter narrows the list
-      rail.setAttribute('data-tip', sentence);
-      rail.appendChild(document.createTextNode(
-        plus.length + ' supporter extra' + (plus.length === 1 ? '' : 's')
-        + ', listed last in each section. '));
-    } else {
-      rail.appendChild(document.createTextNode(sentence
-        + ' They are listed last in each section. '));
-    }
-    rail.appendChild(docsLink(FNS_DOCS + '/patreon/', 'How unlocking works ↗'));
     // the access filter only means something when both kinds exist
     var seg = document.getElementById('access');
     if (seg && plus.length < tools.length) seg.hidden = false;
-  })();
-
-  /** Inside the console the Patreon line is one line, and only when
-   *  something needs doing: signed out, the link lost, or an account that
-   *  unlocks none of these. It says which, offers the one action that
-   *  fixes it, and links the explanation. An account that unlocks what it
-   *  should shows nothing (owner, 2026-09-26). */
-  function compactPatreonLine(rail) {
-    var plus = tools.filter(isPlus);
-    var n = account ? (account.products || []).filter(function (x) { return byName[x]; }).length : 0;
-    var state = !plus.length || !hasAuthRail ? 'none-here'
-      : !account ? 'out' : account.connected === false ? 'lost' : !n ? 'empty' : 'ok';
-    if (state === 'none-here' || state === 'ok') { rail.hidden = true; return; }
-    rail.textContent = '';
-    rail.removeAttribute('data-tip');
+    // Served (inside TouchDesigner or framed in the console) the catalog
+    // says Patreon on the tiles only: the account is the chip in the set's
+    // header and the route is the set's own line (renderPlusLine), said
+    // once per screen. Site and standalone: one sentence naming the count
+    // and what happens to a Plus pick off-machine (plusReality) -- the
+    // preamble about the free tools being the toolkit went with the
+    // 2026-10-16 pass.
+    if (served) { rail.hidden = true; return; }
     var mark = document.createElement('span');
     mark.className = 'mark';
     mark.setAttribute('aria-hidden', 'true');
     mark.textContent = '◆';
     rail.appendChild(mark);
-    var b = document.createElement('b');
-    b.textContent = 'Patreon:';
-    rail.appendChild(b);
-    rail.appendChild(document.createTextNode(' ' + (
-      state === 'out' ? plus.length + ' tools unlock with a membership; you are not signed in'
-      : state === 'lost' ? 'the link to your account was lost'
-      : 'your account unlocks none of the ' + plus.length + ' Patreon tools')));
-    var keep = state === 'empty' ? ['recheck', 'support', 'redeem'] : ['signin', 'redeem'];
-    keep.forEach(function (id) {
-      var el = document.getElementById(id);
-      if (!el || el.hidden) return;
-      var wrap = document.createElement('span');
-      wrap.className = 'rail-acc';
-      wrap.appendChild(document.createTextNode(' · '));
-      wrap.appendChild(el);
-      rail.appendChild(wrap);
-    });
-    rail.appendChild(document.createTextNode(' · '));
+    rail.appendChild(document.createTextNode(
+      plus.length + ' Patreon tool' + (plus.length === 1 ? '' : 's')
+      + ', listed last in each section; ' + plusReality() + ' '));
     rail.appendChild(docsLink(FNS_DOCS + '/patreon/', 'How unlocking works ↗'));
-  }
+  })();
 
   if (FNS_EMBEDDED) {
-    // Inside the manager the action goes where the eye starts: the count
-    // and the install button move into the toolbar's right end, the spot
-    // the docs link had (every card carries its own docs link), the
-    // account status and its buttons fold into the Plus line, and the
-    // sticky footer goes -- it sat in the pixels a mis-laid tab area cut
-    // off, and the paste script it carried has no use inside TouchDesigner.
+    // Inside the manager the catalog's action goes where the eye starts:
+    // Done moves into the toolbar's right end, the spot the docs link had
+    // (every card carries its own docs link), and the catalog's sticky
+    // footer goes. The set keeps its footer: it is the home screen there.
     var bar = document.querySelector('.cfg-bar');
-    var sum = document.querySelector('.sum');
-    var rail = document.getElementById('plusrail');
-    if (bar && sum) {
+    var catFoot = document.getElementById('catfoot');
+    if (bar && catFoot) {
       var docsEl = document.getElementById('alldocs');
       if (docsEl) docsEl.remove();
       var act = document.createElement('div');
       act.className = 'bar-act';
-      act.appendChild(sum.querySelector('.sum-count'));
-      // the tray drops down from the count instead of rising from the
-      // footer, which goes
-      var trayEl = document.getElementById('tray');
-      if (trayEl) { trayEl.classList.add('drop'); act.appendChild(trayEl); }
-      act.appendChild(document.getElementById('deps'));
-      act.appendChild(document.getElementById('famopt'));
-      act.appendChild(document.getElementById('save'));
+      act.appendChild(document.getElementById('catdone'));
       (bar.querySelector('.bar-find') || bar).appendChild(act);
-      if (rail) compactPatreonLine(rail);
-      sum.remove();
+      catFoot.remove();
     }
   }
+
+  // --- the screens (docs/InstallerWizardFlow.md, phase 1) --------------
+  // The set is the home screen; the catalog is a sub-screen entered to add
+  // tools. `screen` is navigation state, carried in the hash (#set,
+  // #catalog) so a reload and the console frame land where the reader
+  // was; the rail's #cat-<slug> jumps and the access deep links (#patreon,
+  // #free, #all) mean the catalog. One selection, as before: every screen
+  // derives from `picked`, `placing`, `familyOn` and `wantBind`.
+  var SCREENS = {start: document.getElementById('screen-start'),
+                 quiz: document.getElementById('screen-quiz'),
+                 set: document.getElementById('screen-set'),
+                 catalog: document.getElementById('screen-catalog'),
+                 install: document.getElementById('screen-install')};
+  var curScreen = null;
+  // A reload mid-questionnaire lands on Start (the answers are gone), a
+  // reload mid-install on the set (the install narrates in its own page
+  // life); the hash still names every screen so the console frame and a
+  // reload keep the rest.
+  function screenOfHash(h) {
+    h = String(h || '').toLowerCase();
+    if (h === '#set' || h === '#install') return 'set';
+    if (h === '#start' || h === '#quiz') return 'start';
+    if (h === '#catalog' || h.indexOf('#cat-') === 0 || HASH_ACCESS[h]) return 'catalog';
+    return null;
+  }
+  // the step each screen belongs to: the catalog is a sub-screen of the
+  // set, the questionnaire of Start
+  var STEP_OF = {start: 'start', quiz: 'start', set: 'set', catalog: 'set', install: 'install'};
+  var STEP_ORDER = ['start', 'set', 'install'];
+  // the last step names the flavor's real finish: an install where the
+  // page can install, the paste script where it cannot
+  document.querySelector('#steps li[data-step=install]').textContent = served ? 'Install' : 'Install script';
+  function setScreen(name, opts) {
+    opts = opts || {};
+    if (!SCREENS[name]) name = 'catalog';
+    var changed = curScreen !== name;
+    curScreen = name;
+    Object.keys(SCREENS).forEach(function (k) { SCREENS[k].hidden = k !== name; });
+    document.documentElement.setAttribute('data-screen', name);
+    // the header follows the reader: the steps light the one this screen
+    // belongs to; Start over and the account chip step aside on Start
+    // and in the questionnaire, where the choice is the whole screen
+    var head = document.getElementById('wizhead');
+    if (head && head.parentNode !== SCREENS[name]) SCREENS[name].insertBefore(head, SCREENS[name].firstChild);
+    var at = STEP_ORDER.indexOf(STEP_OF[name]);
+    Array.prototype.forEach.call(document.querySelectorAll('#steps li'), function (li) {
+      var i = STEP_ORDER.indexOf(li.getAttribute('data-step'));
+      li.classList.toggle('now', i === at);
+      li.classList.toggle('done', i < at);
+      // the install step opens only through the set's primary
+      var dead = i === 2 && primaryDisabled();
+      li.setAttribute('aria-disabled', dead ? 'true' : 'false');
+    });
+    var onStart = STEP_OF[name] === 'start';
+    document.getElementById('wizard').hidden = onStart;
+    var aw = document.getElementById('acctwrap');
+    if (aw) aw.hidden = onStart || !hasAuthRail;
+    // the banners follow the reader: a catalog reload offer must be seen
+    // on either screen; the new-tools banner belongs to the set
+    var banners = document.getElementById('banners');
+    var slot = document.getElementById(name === 'set' ? 'setbanners' : 'catbanners');
+    if (banners && slot && banners.parentNode !== slot) slot.appendChild(banners);
+    var fresh = document.getElementById('new-tools');
+    if (fresh) fresh.hidden = name !== 'set';
+    setAcctMenu(false);
+    if (!opts.fromHash) {
+      // replaceState, not location.hash: no history entry per screen and
+      // no scroll jump; a sandboxed context (data: URL) may refuse, and
+      // the screen still switches
+      try { history.replaceState(null, '', '#' + name); } catch (e) { /* nicety */ }
+    }
+    if (changed) {
+      window.scrollTo(0, 0);
+      if (opts.focus && name === 'catalog') {
+        var q = document.getElementById('q');
+        if (q) q.focus({preventScroll: true});
+      }
+    }
+  }
+  window.addEventListener('hashchange', function () {
+    var s = screenOfHash(location.hash);
+    if (s && s !== curScreen) setScreen(s, {fromHash: true});
+  });
+  ['backset', 'catdone'].forEach(function (id) {
+    document.getElementById(id).addEventListener('click', function () { setScreen('set'); });
+  });
+  /** The set's primary (Review install, Apply changes, the paste script)
+   *  is disabled while nothing would happen; the Install step follows it. */
+  function primaryDisabled() {
+    var b = served ? document.getElementById('save') : document.getElementById('script');
+    return !b || b.disabled || picked.size === 0 && !served;
+  }
+  // the steps are navigation: Start reopens the starting points, Your set
+  // the home screen, Install the set's own primary action
+  Array.prototype.forEach.call(document.querySelectorAll('#steps li'), function (li) {
+    function go() {
+      var step = li.getAttribute('data-step');
+      if (li.getAttribute('aria-disabled') === 'true') return;
+      if (step === 'start') showStart();
+      else if (step === 'set') setScreen('set');
+      else (served ? document.getElementById('save') : document.getElementById('script')).click();
+    }
+    li.addEventListener('click', go);
+    li.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+  });
+  ['addtools', 'setadd'].forEach(function (id) {
+    document.getElementById(id).addEventListener('click', function () { setScreen('catalog', {focus: true}); });
+  });
+  document.getElementById('setclear').addEventListener('click', function () {
+    picked.clear(); save(); render();
+  });
+
+  /** "14 MB": what the plan will download, from the manifest's per-artifact
+   *  sizes; '' when the manifest carries none or nothing is picked. Core
+   *  rides along on a first install (served with nothing installed yet;
+   *  the site and the file always, since their script fetches it). */
+  function downloadSize() {
+    if (!picked.size && !placing.size) return '';
+    var names = Array.from(picked).filter(function (n) {
+      return installedNow.indexOf(n) < 0 && installable(n);
+    }).concat(Array.from(placing).filter(function (n) {
+      return !picked.has(n) && placedNow.indexOf(n) < 0 && installable(n);
+    }));
+    if (!served || !installedNow.length) {
+      names = names.concat(core.map(function (p) { return p.name; }));
+    }
+    var bytes = 0, known = false;
+    names.forEach(function (n) {
+      var b = byName[n] && byName[n].artifact && byName[n].artifact.bytes;
+      if (typeof b === 'number') { bytes += b; known = true; }
+    });
+    if (!known || !bytes) return '';
+    if (bytes < 1e6) return Math.max(1, Math.round(bytes / 1e3)) + ' KB';
+    var mb = bytes / 1e6;
+    return (mb < 10 ? mb.toFixed(1) : String(Math.round(mb))) + ' MB';
+  }
+
+  /** S2, the home screen: the selection as compact rows grouped by
+   *  category (title, chips, a one-line description, a remove control;
+   *  a row the project loses stays visible, struck, with undo), the
+   *  placed-only tools in their own group. Built from `picked`, `placing`
+   *  and what the project holds, on every render. */
+  function renderSet() {
+    var host = document.getElementById('setlist');
+    if (!host) return;
+    document.getElementById('settitle').textContent = reentry ? 'Your setup' : 'Your set';
+    document.getElementById('setsub').textContent = served
+      ? (reentry
+         ? 'What this project has. Remove any, add tools to grow it, then apply the changes.'
+         : 'What will land in this project. Add tools, remove any, then review the install.')
+      : (window.FNS_SITE
+         ? 'What the install script sets up. Add tools, remove any, then copy the script.'
+         : 'What the selection holds. Add tools, remove any, then download it.');
+    host.textContent = '';
+    var pickedList = Array.from(picked).filter(function (n) { return byName[n]; });
+    // what the project has that the set no longer does
+    var leaving = served ? installedNow.filter(function (n) {
+      return !picked.has(n) && !placing.has(n) && byName[n];
+    }) : [];
+    var placedList = Array.from(placing).filter(function (n) { return !picked.has(n) && byName[n]; });
+    var unplaced = served ? placedNow.filter(function (n) {
+      return !picked.has(n) && !placing.has(n) && byName[n];
+    }) : [];
+    var names = pickedList.concat(leaving);
+    var empty = !names.length && !placedList.length && !unplaced.length;
+    document.getElementById('setempty').hidden = !empty;
+    host.hidden = empty;
+    function sortNames(list) {
+      return list.slice().sort(function (a, b) {
+        return titleOfName(a).localeCompare(titleOfName(b), 'en', {sensitivity: 'base'});
+      });
+    }
+    function group(glyph, label) {
+      var h = mk('div', 'set-grp');
+      if (glyph) {
+        var g = mk('span', 'g', glyph);
+        g.setAttribute('aria-hidden', 'true');
+        h.appendChild(g);
+      }
+      h.appendChild(document.createTextNode(label));
+      host.appendChild(h);
+    }
+    // state: picked (in the set), leaving (the project has it, the set
+    // does not), placed (in this project only), unplaced (placed, undone)
+    function row(n, state) {
+      var p = byName[n];
+      var r = mk('div', 'set-row' + ((state === 'leaving' || state === 'unplaced') ? ' removing' : ''));
+      r.setAttribute('data-name', n);
+      r.setAttribute('data-tip', (p.description || '')
+        + (p.whatsnew ? '\n\nLatest (' + (p.version || '') + '): ' + p.whatsnew : ''));
+      r.appendChild(mk('span', 'nm', titleOf(p)));
+      var chips = mk('div', 'chips');
+      if (reentry) {
+        var here = installedNow.indexOf(n) >= 0 || placedNow.indexOf(n) >= 0;
+        if (state === 'picked' && here) chips.appendChild(chip('installed', 'ok'));
+        else if (state === 'picked' && installable(n)) chips.appendChild(chip('will install', 'up'));
+        else if (state === 'placed' && here) chips.appendChild(chip('placed here', 'hint'));
+        else if (state === 'placed' && installable(n)) chips.appendChild(chip('will be placed', 'up'));
+        else if (state === 'leaving' || state === 'unplaced') chips.appendChild(chip('will be removed', 'err'));
+      } else if (state === 'placed') {
+        chips.appendChild(chip('in this project only', 'hint'));
+      }
+      if (isPlus(p)) chips.appendChild(plusChip(p));
+      if (p.updates === 'self') chips.appendChild(chip('updates itself', 'hint'));
+      var pr = pricingOf(p);
+      if (pr) chips.appendChild(chip(pr.summary, 'trial'));
+      if (isNew(p)) chips.appendChild(mk('span', 'badge new', 'New'));
+      if (chips.children.length) r.appendChild(chips);
+      r.appendChild(mk('span', 'ds', p.description || ''));
+      if (p.help_url) r.appendChild(docsLink(p.help_url, 'docs \u2197', 'help'));
+      var act;
+      if (state === 'leaving' || state === 'unplaced') {
+        act = mk('button', 'undo', 'undo');
+        act.setAttribute('aria-label', 'Keep ' + titleOf(p));
+        act.addEventListener('click', function () {
+          if (state === 'unplaced') placing.add(n); else picked.add(n);
+          save(); render();
+        });
+      } else {
+        act = mk('button', 'rm', '\u00d7');
+        act.setAttribute('aria-label', (state === 'placed' ? 'Undo placing ' : 'Remove ') + titleOf(p));
+        act.addEventListener('click', function () {
+          if (state === 'placed') placing.delete(n); else picked.delete(n);
+          save(); render();
+        });
+      }
+      act.type = 'button';
+      r.appendChild(act);
+      host.appendChild(r);
+    }
+    allCats().forEach(function (cat) {
+      if (quiet(cat)) return;
+      var rows = sortNames(names.filter(function (n) { return byName[n].category === cat; }));
+      if (!rows.length) return;
+      group(metaOf(cat).glyph || '', cat);
+      rows.forEach(function (n) { row(n, leaving.indexOf(n) >= 0 ? 'leaving' : 'picked'); });
+    });
+    if (placedList.length || unplaced.length) {
+      group('', 'In this project only');
+      sortNames(placedList).forEach(function (n) { row(n, 'placed'); });
+      sortNames(unplaced).forEach(function (n) { row(n, 'unplaced'); });
+    }
+    renderPlusLine();
+    renderNewBanner();
+  }
+
+  /** The one Patreon surface on the set: a line above the list, only while
+   *  a pick in the set is locked, counted on this set, with the one action
+   *  that fixes it (sign in, check again, or upgrade). Above the list
+   *  because a long set scrolls and the route has to be seen before
+   *  Review. */
+  function renderPlusLine() {
+    var line = document.getElementById('plusline');
+    if (!line) return;
+    var names = Array.from(picked).concat(Array.from(placing).filter(function (n) { return !picked.has(n); }));
+    var lockedHere = lockedPatreon(names);
+    line.hidden = !lockedHere.length;
+    if (!lockedHere.length) return;
+    line.textContent = '';
+    var n = lockedHere.length, one = n === 1;
+    var mark = mk('span', 'mark', '\u25c6');
+    mark.setAttribute('aria-hidden', 'true');
+    line.appendChild(mark);
+    var text, acts = [];
+    function act(label, run) {
+      var b = mk('button', 'btn btn-quiet', label);
+      b.type = 'button';
+      b.addEventListener('click', run);
+      acts.push(b);
+    }
+    var join = authActions.join || (FNS_DOCS + '/patreon/');
+    if (hasAuthRail && account && account.connected === false) {
+      text = 'This install\'s Patreon link is gone; ' + n + ' of these wait' + (one ? 's' : '')
+        + ' for a sign-in.';
+      if (authActions.signIn) act(signInLabel(), authActions.signIn);
+    } else if (hasAuthRail && account && !signInWanted()) {
+      text = 'Your Patreon tier does not include ' + (one ? 'one of these' : n + ' of these')
+        + ' yet; ' + (one ? 'it stays' : 'they stay') + ' ticked and install' + (one ? 's' : '')
+        + ' once it does.';
+      acts.push(docsLink(join, 'Upgrade your tier \u2197', 'btn btn-quiet'));
+      if (authActions.recheck) act('I just pledged', authActions.recheck);
+    } else if (hasAuthRail && account) {
+      text = n + ' of these ' + (one ? 'needs' : 'need') + ' Patreon; this install is signed in to '
+        + 'an account that includes ' + (one ? 'no packages' : 'none of them') + '.';
+      if (authActions.signIn) act(signInLabel(), authActions.signIn);
+      if (authActions.recheck) act('I just pledged', authActions.recheck);
+      acts.push(docsLink(join, (account.tier ? 'Upgrade your tier' : 'Become a supporter') + ' \u2197', 'btn btn-quiet'));
+    } else if (hasAuthRail) {
+      text = n + ' of these ' + (one ? 'needs' : 'need') + ' a Patreon sign-in; '
+        + (one ? 'it installs' : 'they install') + ' once your account includes ' + (one ? 'it' : 'them') + '.';
+      if (authActions.signIn) act(signInLabel(), authActions.signIn);
+    } else {
+      text = n + ' of these ' + (one ? 'comes' : 'come') + ' with Patreon; ' + plusReality();
+    }
+    line.appendChild(document.createTextNode(text));
+    acts.forEach(function (a) { line.appendChild(a); });
+    line.appendChild(docsLink(FNS_DOCS + '/patreon/', 'How unlocking works \u2197'));
+  }
+
+  // --- the account: one chip in the set's header, the controls behind it --
+  // Served (in TouchDesigner or framed in the console) the account is one
+  // small chip on the home screen; the status line and the sign-in,
+  // recheck, join and redeem controls the account block filled above sit
+  // in a menu behind it. The site and the file have no account and show
+  // no chip.
+  function setAcctMenu(on) {
+    var wrap = document.getElementById('acctwrap');
+    var chip = document.getElementById('acctchip');
+    if (!wrap || !chip) return;
+    wrap.classList.toggle('open', !!on);
+    chip.setAttribute('aria-expanded', on ? 'true' : 'false');
+  }
+  (function () {
+    var wrap = document.getElementById('acctwrap');
+    var chip = document.getElementById('acctchip');
+    var menu = document.getElementById('acctmenu');
+    if (!wrap || !chip || !menu || !hasAuthRail) return;
+    ['acct', 'signin', 'recheck', 'support', 'redeem'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) menu.appendChild(el);
+    });
+    var acctEl = document.getElementById('acct');
+    if (acctEl) acctEl.hidden = false;
+    var n = account ? (account.products || []).filter(function (x) { return byName[x]; }).length : 0;
+    chip.textContent = !account ? 'Not signed in'
+      : account.connected === false ? '\u25c6 Patreon link lost'
+      : '\u25c6 ' + (account.label || 'Signed in') + (n ? ' \u00b7 ' + n + ' unlocked' : '');
+    chip.classList.toggle('in', !!account && n > 0);
+    wrap.hidden = false;
+    chip.addEventListener('click', function () { setAcctMenu(!wrap.classList.contains('open')); });
+    document.addEventListener('click', function (ev) {
+      if (wrap.classList.contains('open') && !wrap.contains(ev.target)) setAcctMenu(false);
+    });
+  })();
+
   render();
+  // Served from a target the installer refuses to touch (the toolkit's own
+  // source root): the set says why, once, and never offers Apply (the
+  // primary already reads locked); the catalog stays browsable.
+  if (served && locked) {
+    var lk = mk('div', 'banner');
+    lk.id = 'lock-note';
+    var lb = mk('b', '', 'Nothing installs here. ');
+    lk.appendChild(lb);
+    lk.appendChild(document.createTextNode(locked));
+    document.getElementById('banners').appendChild(lk);
+  }
+  // Where the page lands (docs/InstallerWizardFlow.md, "Entry points per
+  // flavor"): the hash wins (a reload, the console frame); else the
+  // console frame lands on the set; served, a first run lands on Start
+  // and a re-entry on the set; the site and the file land on Start once
+  // per browser and on the catalog after, since a visitor comes to
+  // browse, with the set one click away on the count.
+  var fromHash = screenOfHash(location.hash);
+  var landing;
+  if (fromHash) landing = fromHash;
+  else if (FNS_EMBEDDED) landing = 'set';
+  else if (served) landing = (firstrun && !sessionFlag('fns.welcomed')) ? 'start' : 'set';
+  else landing = stored('fns.visited', null) ? 'catalog' : 'start';
+  if (landing === 'start') {
+    if (!served) {
+      // once per browser; the Start screen is for someone who has never
+      // seen the toolkit, and eight category rows answer less than "what
+      // should I start with"
+      try { localStorage.setItem('fns.visited', '1'); } catch (e) { /* nicety */ }
+      firstVisit = true;
+    }
+    showStart();
+  } else {
+    setScreen(landing, {fromHash: true});
+  }
   loadRecommends();
   // A store manifest was served and the installer is checking the bucket
   // for a newer release (InstallerExt._checkManifest). When the release
@@ -4865,14 +5347,16 @@ function fnsBoot() {
     var tries = 0;
     function busy() {
       if (Array.from(picked).sort().join(',') !== picksAtLoad) return true;
+      if (curScreen === 'install' || curScreen === 'quiz') return true;
       return !!document.querySelector('dialog[open]:not(#welcome)');
     }
+    // a banner on whichever screen is up (setScreen carries the banners
+    // along), not a note under the hero
     function offer(release) {
       if (document.getElementById('catalog-new')) return;
       var box = document.createElement('div');
-      box.className = 'note';
+      box.className = 'banner';
       box.id = 'catalog-new';
-      box.style.margin = '10px 0';
       box.appendChild(document.createTextNode(
         'A newer release (' + release + ') is out. This list still shows the one this machine had. '));
       var btn = document.createElement('button');
@@ -4881,8 +5365,7 @@ function fnsBoot() {
       btn.textContent = 'Reload the list';
       btn.addEventListener('click', function () { location.reload(); });
       box.appendChild(btn);
-      var sub = document.getElementById('sub');
-      sub.parentNode.insertBefore(box, sub.nextSibling);
+      document.getElementById('banners').appendChild(box);
     }
     function poll() {
       tries++;
@@ -4897,27 +5380,13 @@ function fnsBoot() {
     }
     setTimeout(poll, 1500);
   }
-  if (firstrun) {
-    if (sessionFlag('fns.welcomed')) setStep(2); else showWelcome();
-  } else if (!served && !FNS_EMBEDDED && !stored('fns.visited', null)) {
-    // A first visit to the site or the standalone opens the guided setup
-    // once: the page is for someone who has never seen the toolkit, and
-    // eight category rows answer less than "what should I start with".
-    // Per browser; dismissible (Esc is "pick my own"); never in a frame,
-    // and never on the served rail, which has its own first run.
-    try { localStorage.setItem('fns.visited', '1'); } catch (e) { /* nicety */ }
-    firstVisit = true;
-    wizardOn = true;
-    showWelcome();
-  }
-  // Tools this machine has not been shown, once per release: never on a
-  // first run or a first visit (the guided setup is their introduction,
-  // and unseenNow recorded everything as shown), never over another
-  // dialog, never where Apply is refused anyway.
+  // Tools this machine has not been shown, once per release, as a banner
+  // on the set: never on a first run or a first visit (the guided setup is
+  // their introduction, and unseenNow recorded everything as shown), never
+  // where Apply is refused anyway.
   if (!firstrun && !firstVisit && announceOn && unseenAtLoad.size && !(served && locked)) {
-    setTimeout(function () {
-      if (!document.querySelector('dialog[open]')) showNewTools();
-    }, 400);
+    prepareNewTools();
+    renderNewBanner();
   }
 }
 

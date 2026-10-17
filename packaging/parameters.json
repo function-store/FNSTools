@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "release": "v3.2.70",
+ "release": "v3.2.71",
  "td_build": "2025.33070",
  "packages": {
   "ChopBank": [
@@ -3169,6 +3169,22 @@
     "style": "Toggle",
     "help": "Skip scheduled saves while the project is in Perform Mode. Save Now still works.",
     "default": true,
+    "page": "Autosave"
+   },
+   {
+    "name": "Waitidle",
+    "label": "Wait For Mouse Rest",
+    "style": "Toggle",
+    "help": "Hold a due save until the mouse has rested for Mouse Rest seconds, so the save never interrupts a drag. Nothing runs for this between saves.",
+    "default": false,
+    "page": "Autosave"
+   },
+   {
+    "name": "Idleseconds",
+    "label": "Mouse Rest (sec)",
+    "style": "Float",
+    "help": "Seconds the mouse must stay still (no movement, button or wheel) before a waiting save goes ahead.",
+    "default": 5.0,
     "page": "Autosave"
    },
    {
@@ -7908,6 +7924,28 @@
     "style": "Toggle",
     "help": "Freeze expressions on collected file references. Off by default: an expression that happens to evaluate to a path is live wiring, and resolving it would detach that rather than bake a value.",
     "default": false,
+    "page": "Collect"
+   },
+   {
+    "name": "Collectlayout",
+    "label": "Folder Layout",
+    "style": "Menu",
+    "help": "Where collected files go. collected Folder: collected/video, audio, image, geometry, other. TouchDesigner Folders: Movie, Audio, Image, Geo and Chan at the project root, the folders the New Project dialog makes; other files still go to collected/other. Auto picks TouchDesigner Folders when the project folder already has at least two of them.",
+    "default": "auto",
+    "menu": [
+     {
+      "name": "auto",
+      "label": "Auto"
+     },
+     {
+      "name": "collected",
+      "label": "collected Folder"
+     },
+     {
+      "name": "touchdesigner",
+      "label": "TouchDesigner Folders"
+     }
+    ],
     "page": "Collect"
    },
    {
@@ -17245,6 +17283,14 @@
     "page": "Cooking"
    },
    {
+    "name": "Cookediting",
+    "label": "Cook While Editing",
+    "style": "Toggle",
+    "help": "With Control Cook on, a scene a network editor is inside keeps cooking even off air, so you can work on it with live viewers. Leaving it hands it back to Control Cook.",
+    "default": true,
+    "page": "Cooking"
+   },
+   {
     "name": "Preroll",
     "label": "Pre-Roll (start cooking before switch)",
     "style": "Float",
@@ -19541,6 +19587,14 @@
     "page": "Cooking"
    },
    {
+    "name": "Cookediting",
+    "label": "Cook While Editing",
+    "style": "Toggle",
+    "help": "With Control Cook on, a scene a network editor is inside keeps cooking even off air, so you can work on it with live viewers. Leaving it hands it back to Control Cook.",
+    "default": true,
+    "page": "Cooking"
+   },
+   {
     "name": "Preroll",
     "label": "Pre-Roll (start cooking before switch)",
     "style": "Float",
@@ -20329,6 +20383,82 @@
     "page": "Timeline"
    },
    {
+    "name": "Playaudio",
+    "label": "Play Audio",
+    "style": "Toggle",
+    "help": "Play the timeline audio (your file, the movie's track, or an adopted reader) through an Audio Device Out in the project's media host (FNS_MEDIA). Pick the output device on that operator; Global Vol Control's Mute and Volume apply. Off removes it.",
+    "default": true,
+    "page": "Timeline"
+   },
+   {
+    "name": "Audiodriver",
+    "label": "Audio Driver",
+    "style": "Menu",
+    "help": "Driver for Play Audio: the system default (DirectSound/CoreAudio) or ASIO. The list is the Audio Device Out's own.",
+    "default": "default",
+    "menu": [
+     {
+      "name": "default",
+      "label": "default (DirectSound/CoreAudio)"
+     },
+     {
+      "name": "asio",
+      "label": "ASIO"
+     }
+    ],
+    "page": "Timeline"
+   },
+   {
+    "name": "Audiodevice",
+    "label": "Audio Device",
+    "style": "Menu",
+    "help": "Output device for Play Audio, from this machine's list for the chosen driver. A device this machine does not have plays on the default device.",
+    "default": "default",
+    "menu": [
+     {
+      "name": "default",
+      "label": "default"
+     },
+     {
+      "name": "{0.0.0.00000000}.{c841de8b-3933-4f45-91a5-0c999e44046a}||VoiceMeeter_Input_(VB-Audio_VoiceMeeter_VAIO)||1",
+      "label": "VoiceMeeter Input (VB-Audio VoiceMeeter VAIO)"
+     },
+     {
+      "name": "{0.0.0.00000000}.{10711ef0-d144-4df4-af6b-06156ecf3a97}||Wimaxit_FHD_(NVIDIA_High_Definition_Audio)||2",
+      "label": "Wimaxit FHD (NVIDIA High Definition Audio)"
+     },
+     {
+      "name": "{0.0.0.00000000}.{2b2188cf-0071-47dc-bf68-9220ec0f8d6c}||Speakers_(Steam_Streaming_Speakers)||3",
+      "label": "Speakers (Steam Streaming Speakers)"
+     },
+     {
+      "name": "{0.0.0.00000000}.{6489cdff-e24a-4a77-83ae-1adaea80617f}||Headphones_(Oculus_Virtual_Audio_Device)||4",
+      "label": "Headphones (Oculus Virtual Audio Device)"
+     },
+     {
+      "name": "{0.0.0.00000000}.{73fbce98-5118-4680-ad75-f02caca4f40b}||CABLE_Input_(VB-Audio_Virtual_Cable)||5",
+      "label": "CABLE Input (VB-Audio Virtual Cable)"
+     },
+     {
+      "name": "{0.0.0.00000000}.{a77edfcf-bddb-4ab6-967b-9443816ade2f}||DELL_S3422DWG_(NVIDIA_High_Definition_Audio)||6",
+      "label": "DELL S3422DWG (NVIDIA High Definition Audio)"
+     },
+     {
+      "name": "{0.0.0.00000000}.{bcb07c3b-15af-4159-bba3-b26796b6824c}||VoiceMeeter_Aux_Input_(VB-Audio_VoiceMeeter_AUX_VAIO)||7",
+      "label": "VoiceMeeter Aux Input (VB-Audio VoiceMeeter AUX VAIO)"
+     },
+     {
+      "name": "{0.0.0.00000000}.{dd6d0839-d444-4f10-953a-7f8d21953d19}||Speakers_(Steam_Streaming_Microphone)||8",
+      "label": "Speakers (Steam Streaming Microphone)"
+     },
+     {
+      "name": "{0.0.0.00000000}.{f7d9ce51-5afe-4ac9-af6a-7145e81e85c4}||Speakers_(Focusrite_USB_Audio)||9",
+      "label": "Speakers (Focusrite USB Audio)"
+     }
+    ],
+    "page": "Timeline"
+   },
+   {
     "name": "Loadmedia",
     "label": "Load Media",
     "style": "Pulse",
@@ -20582,6 +20712,22 @@
     "page": "Background"
    },
    {
+    "name": "Tlshowanalysis",
+    "label": "Show Analysis",
+    "style": "Toggle",
+    "help": "Show the audio analysis layer (curve and heatmap) in the timeline strip.",
+    "default": false,
+    "page": "Background"
+   },
+   {
+    "name": "Tlanalysisopacity",
+    "label": "Analysis Opacity",
+    "style": "Float",
+    "help": "Opacity of the audio analysis layer in the timeline strip.",
+    "default": 0.8,
+    "page": "Background"
+   },
+   {
     "name": "Anshowfilm",
     "label": "Animation: Filmstrip",
     "style": "Toggle",
@@ -20660,6 +20806,22 @@
     "style": "Float",
     "help": "How strongly the marker lines read in the Animation editor.",
     "default": 1.0,
+    "page": "Background"
+   },
+   {
+    "name": "Anshowanalysis",
+    "label": "Show Analysis",
+    "style": "Toggle",
+    "help": "Show the audio analysis layer (curve and heatmap) in the Animation editor.",
+    "default": false,
+    "page": "Background"
+   },
+   {
+    "name": "Ananalysisopacity",
+    "label": "Analysis Opacity",
+    "style": "Float",
+    "help": "Opacity of the audio analysis layer in the Animation editor.",
+    "default": 0.8,
     "page": "Background"
    },
    {
@@ -21190,6 +21352,259 @@
     "default": "",
     "readonly": true,
     "page": "Keyframer"
+   },
+   {
+    "name": "Analyze",
+    "label": "Analyze",
+    "style": "Pulse",
+    "help": "Analyze the timeline audio now with EssentiaTD (batch mode).",
+    "page": "Analysis"
+   },
+   {
+    "name": "Analysisstatus",
+    "label": "Status",
+    "style": "Str",
+    "help": "What the analysis is doing.",
+    "default": "",
+    "readonly": true,
+    "page": "Analysis"
+   },
+   {
+    "name": "Showbeats",
+    "label": "Show Beats",
+    "style": "Toggle",
+    "help": "Draw the beats EssentiaTD found as lines on the timeline.",
+    "default": true,
+    "section": true,
+    "page": "Analysis"
+   },
+   {
+    "name": "Beatcolor",
+    "label": "Beat Color",
+    "style": "RGBA",
+    "help": "Colour of the beat lines.",
+    "size": 3,
+    "default": 1.0,
+    "page": "Analysis"
+   },
+   {
+    "name": "Beatevery",
+    "label": "Beat Every",
+    "style": "Int",
+    "help": "Draw every Nth beat: 1 = all, 4 = every 4th (a bar in 4/4), 8, 16 ...",
+    "default": 1,
+    "page": "Analysis"
+   },
+   {
+    "name": "Beatoffset",
+    "label": "Beat Offset",
+    "style": "Int",
+    "help": "Which beat each group starts on, 0-based: with Beat Every 4, 0 draws beats 1, 5, 9 and 1 draws 2, 6, 10.",
+    "default": 0,
+    "page": "Analysis"
+   },
+   {
+    "name": "Showonsets",
+    "label": "Show Onsets",
+    "style": "Toggle",
+    "help": "Draw every onset (each new sound) as a line.",
+    "default": false,
+    "page": "Analysis"
+   },
+   {
+    "name": "Onsetcolor",
+    "label": "Onset Color",
+    "style": "RGBA",
+    "help": "Colour of the onset lines.",
+    "size": 3,
+    "default": 0.35,
+    "page": "Analysis"
+   },
+   {
+    "name": "Curve",
+    "label": "Curve",
+    "style": "Menu",
+    "help": "One analysis value drawn as a line across the timeline.",
+    "default": "none",
+    "section": true,
+    "menu": [
+     {
+      "name": "none",
+      "label": "None"
+     },
+     {
+      "name": "onset_strength",
+      "label": "Onset Strength"
+     },
+     {
+      "name": "rms",
+      "label": "RMS"
+     },
+     {
+      "name": "loudness_shortterm",
+      "label": "Loudness (short-term)"
+     },
+     {
+      "name": "spectral_centroid",
+      "label": "Brightness (Spectral Centroid)"
+     },
+     {
+      "name": "dissonance",
+      "label": "Dissonance"
+     },
+     {
+      "name": "pitch",
+      "label": "Pitch"
+     }
+    ],
+    "page": "Analysis"
+   },
+   {
+    "name": "Curvecolor",
+    "label": "Curve Color",
+    "style": "RGBA",
+    "help": "Colour of the curve.",
+    "size": 3,
+    "default": 0.35,
+    "page": "Analysis"
+   },
+   {
+    "name": "Curveheight",
+    "label": "Curve Height",
+    "style": "Float",
+    "help": "How much of the surface height the curve uses, from the bottom.",
+    "default": 0.6,
+    "page": "Analysis"
+   },
+   {
+    "name": "Heatmap",
+    "label": "Heatmap",
+    "style": "Menu",
+    "help": "A heatmap behind the timeline: time across, frequency bands or notes up.",
+    "default": "none",
+    "section": true,
+    "menu": [
+     {
+      "name": "none",
+      "label": "None"
+     },
+     {
+      "name": "mel",
+      "label": "Spectrogram (40 mel bands)"
+     },
+     {
+      "name": "chroma",
+      "label": "Chroma (12 notes)"
+     },
+     {
+      "name": "mfcc",
+      "label": "MFCC (timbre)"
+     }
+    ],
+    "page": "Analysis"
+   },
+   {
+    "name": "Heatheight",
+    "label": "Heatmap Height",
+    "style": "Float",
+    "help": "How much of the surface height the heatmap uses, from the bottom.",
+    "default": 1.0,
+    "page": "Analysis"
+   },
+   {
+    "name": "Keyreadout",
+    "label": "Detect Key",
+    "style": "Toggle",
+    "help": "Also run the tonal analysis to show the key below.",
+    "default": false,
+    "section": true,
+    "page": "Analysis"
+   },
+   {
+    "name": "Onsetmethod",
+    "label": "Onset Method",
+    "style": "Menu",
+    "help": "EssentiaTD Rhythm's onset detector.",
+    "default": "complex",
+    "menu": [
+     {
+      "name": "hfc",
+      "label": "HFC"
+     },
+     {
+      "name": "complex",
+      "label": "Complex"
+     },
+     {
+      "name": "flux",
+      "label": "Flux"
+     },
+     {
+      "name": "melflux",
+      "label": "Mel Flux"
+     },
+     {
+      "name": "rms",
+      "label": "RMS"
+     },
+     {
+      "name": "superflux",
+      "label": "SuperFlux"
+     }
+    ],
+    "page": "Analysis"
+   },
+   {
+    "name": "Onsetsensitivity",
+    "label": "Onset Sensitivity",
+    "style": "Float",
+    "help": "Higher finds more onsets.",
+    "default": 0.5,
+    "page": "Analysis"
+   },
+   {
+    "name": "Bpmmin",
+    "label": "BPM Min",
+    "style": "Int",
+    "help": "Lowest tempo the beat tracker considers.",
+    "default": 60,
+    "page": "Analysis"
+   },
+   {
+    "name": "Bpmmax",
+    "label": "BPM Max",
+    "style": "Int",
+    "help": "Highest tempo the beat tracker considers.",
+    "default": 180,
+    "page": "Analysis"
+   },
+   {
+    "name": "Lockresults",
+    "label": "Lock Results",
+    "style": "Toggle",
+    "help": "Keep the analysis in the project as locked CHOPs and remove the EssentiaTD operators, so it opens and draws without the plugin. Adds roughly 15 MB per hour of spectrogram to the project file.",
+    "default": false,
+    "section": true,
+    "page": "Analysis"
+   },
+   {
+    "name": "Bpm",
+    "label": "BPM",
+    "style": "Str",
+    "help": "Tempo EssentiaTD found.",
+    "default": "",
+    "readonly": true,
+    "section": true,
+    "page": "Analysis"
+   },
+   {
+    "name": "Key",
+    "label": "Key",
+    "style": "Str",
+    "help": "Key EssentiaTD found (with Detect Key on).",
+    "default": "",
+    "readonly": true,
+    "page": "Analysis"
    }
   ],
   "FNS_ToolbarRegistry": [
@@ -22721,6 +23136,10 @@
      {
       "name": "192.168.42.66",
       "label": "192.168.42.66"
+     },
+     {
+      "name": "100.120.110.27",
+      "label": "100.120.110.27"
      }
     ],
     "page": "Custom"
@@ -22752,6 +23171,10 @@
      {
       "name": "192.168.42.66",
       "label": "192.168.42.66"
+     },
+     {
+      "name": "100.120.110.27",
+      "label": "100.120.110.27"
      }
     ],
     "page": "Custom"
@@ -27739,7 +28162,7 @@
     "icon": {
      "op": "text",
      "font": "Material Design Icons",
-     "codepoint": "U+F057E",
+     "codepoint": "U+F0581",
      "file": "FNS_GlobalVolControl-toolbar.png"
     }
    },
@@ -28247,7 +28670,7 @@
    "label": "Package Version",
    "style": "Str",
    "help": "The package version the FNS updater compares against the release manifest.",
-   "default": "1.0.3"
+   "default": "1.0.4"
   },
   {
    "name": "Author",

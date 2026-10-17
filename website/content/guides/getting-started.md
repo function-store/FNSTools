@@ -16,6 +16,10 @@ You need TouchDesigner 2025 or newer, on Windows or macOS.
 
 You can also use [the online picker](/get/) and paste its install command into the Textport, or install into a running session from the FNSTools tab of TDX Launcher Ultra.
 
+## Building a tool against FNSTools
+
+A tool publishes into the toolkit's registries: a button on the toolbar, an entry in a pane bar or the main menu, a tab in the palette, a settings page. To build one without installing the toolkit, download the developer kit, [`FNSTools-DevKit.zip`](https://storage.functionstore.tools/fnstools/latest/FNSTools-DevKit.zip): the eleven registries, each as its own `.tox`, with a README. Drag the ones your tool publishes into at the root of a development project; one is enough, and they work together. No picker, no updater, so take the kit of the release you target. Each registry's page in the [docs](/docs/) carries its contract; stamp a host into your component from the registry and register from your component's init.
+
 ## Add or remove tools later
 
 Select the toolkit container and pulse **Pick Tools** on its `FNSTools` page. The picker opens inside TouchDesigner with your installed tools pre-checked. Tick to add, untick to remove; removed tools retain their settings for reinstallation.
@@ -35,6 +39,8 @@ MIDI and OSC maps are the exception: they save into the project folder, so they 
 ## Patreon tools
 
 A few tools are marked Patreon. They appear in the picker like everything else and install once your membership covers them: each one names the lowest Patreon tier that unlocks it (Base, Pro or Coaching). Press **Sign in with Patreon** in the picker to connect your membership, and where a tool offers a Gumroad licence key, redeem it in the same place. [How unlocking works](/patreon/) has the details, and everything else stays free.
+
+Patreon tools are licensed to you. Handing a client or venue a project so they can run it is fine, but a project file you publish, sell or share must not carry them. Before you do, pulse **Remove Patreon Tools** on the toolkit container's `FNSTools` page. The first press lists every Patreon tool in the project in the Textport: the ones installed in the toolkit and the copies placed in your networks. Press again within 10 seconds to remove them all. The removal cannot be undone, so save a copy of the project first.
 
 ## Getting help
 

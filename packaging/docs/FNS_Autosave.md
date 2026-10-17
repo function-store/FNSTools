@@ -24,6 +24,9 @@ feature_list:
   - name: Skip while performing
     anchor: staying-out-of-the-way
     does: Skip while performing suppresses saves in Perform Mode.
+  - name: Wait for mouse rest
+    anchor: staying-out-of-the-way
+    does: 'Wait For Mouse Rest holds a due save until the mouse has been still for a few seconds, so the save never interrupts a drag.'
   - name: Save status
     anchor: staying-out-of-the-way
     does: A status line shows when the last save happened and when the next one is due.
@@ -52,6 +55,13 @@ Two modes, because people mean different things by "save":
 project is not rewritten every few minutes. **Skip while performing**
 suppresses saves in Perform Mode, because the middle of a show is the
 worst possible moment for a disk write.
+
+A save stalls TouchDesigner for as long as the file takes to write, which
+is easy to feel in the middle of a drag. **Wait For Mouse Rest** holds a
+save that is due until the mouse has not moved, clicked or scrolled for
+**Mouse Rest** seconds (5 by default), then saves. While it waits the
+status line says so. Between saves it costs nothing: the mouse is only
+watched while a save is waiting, a few times a second.
 
 Nothing is saved until you turn it on: it arrives inactive, and the
 status line tells you when the last save happened and when the next one
