@@ -39,8 +39,8 @@ def _memText(b):
 
 
 def _writeValues(rows, ppp, edgeRel, frame):
-	"""rows: (id, x, y, width, height, border, cookMs, memBytes, cooking)
-	in layer pixels."""
+	"""rows: (id, x, y, width, height, border, cookMs, memBytes, cooking,
+	parked) in layer pixels; a parked COMP's cook label reads 'cooking off'."""
 	t = op('table_values')
 	if t is None:
 		return
@@ -48,12 +48,12 @@ def _writeValues(rows, ppp, edgeRel, frame):
 	gap = 2 * ppp
 	fresh = frame % 6 == 0
 	lines = ['x\ty\ttext\tfontalpha']
-	for oid, x, y, w, h, border, ms, mem, cooking in rows:
+	for oid, x, y, w, h, border, ms, mem, cooking, parked in rows:
 		if w < font * 4:
 			continue			# too small on screen to carry a label
 		hit = _labels.get(oid)
 		if hit is None or fresh:
-			hit = (_msText(ms), _memText(mem) if mem > 0 else '')
+			hit = ('cooking off' if parked else _msText(ms), _memText(mem) if mem > 0 else '')
 			_labels[oid] = hit
 		alpha = '1' if cooking else '0.6'
 		lines.append('%.1f\t%.1f\t%s\t%s' % (x, y + h + border + edgeRel + gap, hit[0], alpha))
@@ -141,6 +141,10 @@ def frameStart(frame):
 		name = child.name
 		isCOMP = int(child.family == 'COMP')
 		isTOP = int(child.family == 'TOP')
+		# a COMP whose cooking is switched off (by hand, a scene changer's
+		# Control Cook, an example's gate) rides isCOMP as 2: the shader draws
+		# it parked, and Values says so, so a frozen network explains itself
+		parked = bool(isCOMP and not child.allowCooking)
 
 		cooking = int(child.cookedThisFrame or child.cookedPreviousFrame)
 		cookTime = _cookTimeOf(child)
@@ -184,7 +188,7 @@ def frameStart(frame):
 		gpuMemory = child.gpuMemory if isTOP else 0
 		childrenGpuMemory = child.childrenGPUMemory() if isCOMP else 0
 
-		tableRowVals =[name, x, y, width, height, border, isCOMP, cooking, cookTime, childrenCooking, childrenCookTime, gpuMemory, childrenGpuMemory]
+		tableRowVals =[name, x, y, width, height, border, 2 if parked else isCOMP, cooking, cookTime, childrenCooking, childrenCookTime, gpuMemory, childrenGpuMemory]
 		tableRow = [str(val) for val in tableRowVals]
 
 		opDistX = opX + opWidth / 2 - netX
@@ -196,7 +200,8 @@ def frameStart(frame):
 			'value': (child.id, x, y, width, height, border,
 					  cookTime + (childrenCookTime if isCOMP else 0),
 					  childrenGpuMemory if isCOMP else gpuMemory,
-					  childrenCooking if isCOMP else cooking),
+					  childrenCooking if isCOMP else cooking,
+					  parked),
 		}
 
 		added = False

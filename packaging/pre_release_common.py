@@ -29,6 +29,75 @@ for _bot in _c0.findChildren(name='envoy_bot*', includeUtility=True):
     except Exception:
         pass
 
+# --- in-network loggers ship empty ----------------------------------------
+# ColorUI, HotkeyManager and PasteFromClipboard carry a Logger COMP that
+# keeps its lines in a `logs` table inside the tool: v3.2.69's artifacts
+# shipped 20, 100 and 8 lines from the author's machine (2026-10-12). Only
+# the header row stays.
+for _lg in _c0.findChildren(name='Logger', type=COMP, includeUtility=True):
+    try:
+        if _lg.par['ext0name'] is None or str(_lg.par.ext0name.val) != 'Logger':
+            continue
+        _t = _lg.op('logs')
+        if _t is not None and _t.isTable and _t.numRows > 1:
+            _head = [_c.val for _c in _t.row(0)]
+            _t.clear()
+            _t.appendRow(_head)
+    except Exception:
+        pass
+
+# --- the network notes stay in the dev tree -------------------------------
+# Annotations are the author's notes on the network (222 across 42
+# packages, 2026-10-12): none drew anything a user needs, and a few landed
+# in releases with errors. A release carries only the licence notes, which
+# license_notices.Stamp adds to the exported copy AFTER this hook, and any
+# annotation an operator points at through a parameter (PaneTypeRegistry's
+# md viewer renders its annotate1 through Annotateop). `.val` only, matched
+# as a path from the parameter's owner: nothing is evaluated on the staged
+# copy, and op() would not do, since it never finds a utility operator and
+# these notes are utility operators.
+_notes = _c0.findChildren(type=annotateCOMP, includeUtility=True)
+if _notes:
+    _refs = []
+    for _o in [_c0] + _c0.findChildren(includeUtility=True):
+        for _p in getattr(_o, 'customPars', ()):
+            try:
+                if _p.style in ('OP', 'COMP') and str(_p.val or '').strip():
+                    _refs.append((_o, str(_p.val).strip()))
+            except Exception:
+                pass
+
+    # Lenient on purpose: a COMP's OP parameter resolves a bare name as its
+    # sibling (md's 'annotate1'), so a note is kept when its name is the
+    # reference's last segment and it sits in, beside or just above the
+    # parameter's owner. Keeping a note too many costs nothing.
+    def _isReferenced(_a):
+        for _o, _ref in _refs:
+            if not _o.valid:
+                continue    # an operator inside a note already deleted
+            if _ref == _a.path:
+                return True
+            if _ref.rstrip('/').split('/')[-1] != _a.name:
+                continue
+            try:
+                _near = [_o, _o.parent(), _o.parent(2)]
+            except Exception:
+                _near = [_o]
+            if any(_n is not None and _a.parent() == _n for _n in _near):
+                return True
+        return False
+
+    for _a in _notes:
+        # deleting one note deletes any note inside it, still in the list
+        if not _a.valid:
+            continue
+        if _a.name.startswith('fns_license') or _isReferenced(_a):
+            continue
+        try:
+            _a.destroy()
+        except Exception:
+            pass
+
 # --- retire root-panel bindings from the artifact ------------------------
 # Authored tools bind pars to hand-made control pars on the toolkit ROOT
 # (parent.FNS.par.*). No install target has those pars, so shipped binds

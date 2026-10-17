@@ -60,6 +60,7 @@ class customParPromoterExt:
 
 	@property
 	def Reference(self):
+		"""The operator whose parameters are promoted (settable by OP or path)."""
 		return self._reference
 	
 	@Reference.setter
@@ -70,6 +71,7 @@ class customParPromoterExt:
 		
 	@property
 	def Target(self):
+		"""The COMP the promoted parameters are created on (settable by COMP or path; a non-COMP clears it)."""
 		return self._target
 
 	@Target.setter
@@ -89,6 +91,7 @@ class customParPromoterExt:
 #VVVVVVVVVVVVVVVVVVVVVVVVVVVV MAIN VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
 	def DoPromoteAll(self, exceptions=None):
+		"""Promote every parameter of the reference operator's current page onto the target."""
 		#for _page in self.Reference.customPages:
 		if self.Reference:
 			_page = self.Reference.currentPage
@@ -132,6 +135,7 @@ class customParPromoterExt:
 	# unfortunately params that are for example XYZ, Float2/3 etc are not handled well by appendPar
 	# as it creates duplicates (Par[xyz] becomes Par[xyz][xyz])... therefore the below
 	def PromoteParGroup(self, _parGroup, page_name, target = None, refBind = None, parName = None, parLabel = None):
+		"""Promote one parameter group (a vector or a color) onto the target as a custom parameter group bound back to the reference."""
 		ui.undo.startBlock('Promote param')
 		if not target:
 			target = self.Target
@@ -193,6 +197,7 @@ class customParPromoterExt:
 
 
 	def PromotePar(self, _par, page_name, target = None, refBind = None, parName = None, parLabel = None, parMin = None, parMax = None, clamp = None, parDefault = None):
+		"""Promote one parameter onto the target as a custom parameter bound, or referenced, back to the original."""
 		ui.undo.startBlock('Promote param')
 		if not target:
 			target = self.Target
@@ -489,6 +494,7 @@ class customParPromoterExt:
 		return name
 
 	def IsParGroup(self,par):
+		"""Whether a parameter belongs to a multi-component group, so the whole group is promoted."""
 		par_name = par.name[:-1]
 		try:
 			pg = par.owner.parGroup[par_name]
@@ -597,6 +603,7 @@ class customParPromoterExt:
 			
 
 	def OnEditText(self, field, text):
+		"""Called by the customize dialog on text entry; remembers the typed parameter name."""
 		if field == 'paramname':
 			# we could purge here but that's not how custom par editor works either
 			#self.purgeParName(text, replace=True)
@@ -631,6 +638,7 @@ class customParPromoterExt:
 			self.purgeParName(self.__saveParamNameBeforePurge, replace=True)
 
 	def OnCustomizeParameterDropped(self, dropParam):
+		"""Open the customize dialog for a parameter or group dropped on the tool; called by the drop handler."""
 		details = {}
 		details['refBind'] = self.refBind
 		if type(dropParam) == ParGroup:
@@ -675,6 +683,7 @@ class customParPromoterExt:
 		self.popDialog.Open(details=details, textEntries=textEntries)
 
 	def OnCustomizeCallback(self, info):
+		"""Called when the customize dialog closes; promotes the parameter with the entered name, label and range when OK was pressed."""
 		if info['buttonNum'] != 1:
 			return
 
@@ -716,6 +725,7 @@ class customParPromoterExt:
 
 
 	def SetTableMenu(self, _table, _target):
+		"""Create a menu custom parameter on the target from a table DAT's rows (name and label columns)."""
 		fnsLog(f'CustomParPromoter: creating table menu par from {_table.path} on {_target.path}')
 		_page = self._getTargetPage(None, _target, None)
 		_target.currentPage = _page

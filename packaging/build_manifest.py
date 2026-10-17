@@ -30,9 +30,11 @@ THE DEPENDENCY MODEL (ConfiguratorDistribution.md 2.1)
 """
 
 import hashlib
+import inspect
 import json
 import os
 import re
+import typing
 
 MANIFEST_SCHEMA = 1
 PKG_DIR = 'packaging'
@@ -982,6 +984,339 @@ def LauncherSurface(comp):
     return {'surfaces': sorted(surfaces), 'capabilities': sorted(caps)}
 
 
+# ---------------------------------------------------------------------------
+# The agent skill's reflected sections (docs/AgentSkill.md section 3b):
+# the promoted API and the quick-launch commands, read off the live
+# extension classes at build time and carried on the manifest row like
+# `search`, so packaging/agent_skill.py can render a package page from the
+# manifest alone. Nothing here is declared anywhere; a method renamed in
+# the class is renamed on the page at the next build.
+# ---------------------------------------------------------------------------
+
+def _promotedExtensions(comp):
+    """The extension objects TD promotes onto COMP, slot by slot. An empty
+    slot, a failed init (None) and an unpromoted extension are skipped, so
+    what comes back is exactly the set whose UpperCamelCase members an
+    agent can call on the COMP itself."""
+    out = []
+    try:
+        exts = list(comp.extensions)
+    except Exception:
+        return out
+    for i, ext in enumerate(exts):
+        if ext is None:
+            continue
+        try:
+            if not comp.seq.ext[i].par.promote.eval():
+                continue
+        except Exception:
+            pass
+        out.append(ext)
+    return out
+
+
+def _docHead(obj):
+    """The head of a docstring: its first sentence, read across the wrapped
+    lines of the first paragraph (this codebase wraps summaries at 72
+    columns, so the first LINE alone ends mid-sentence). '' when there is
+    no docstring. Capped at 240 characters."""
+    try:
+        doc = inspect.getdoc(obj) or ''
+    except Exception:
+        doc = ''
+    para = doc.strip().split('\n\n')[0]
+    text = ' '.join(line.strip() for line in para.split('\n') if line.strip())
+    m = re.match(r'(.+?[.!?])(?:\s|$)', text)
+    head = m.group(1) if m else text
+    return head[:240].strip()
+
+
+def _signatureText(fn):
+    """'(bpm: float = 120, sync: bool = False)': the call an agent writes,
+    self dropped. '(...)' when Python cannot read the signature."""
+    try:
+        sig = inspect.signature(fn)
+    except (TypeError, ValueError):
+        return '(...)'
+    params = list(sig.parameters.values())
+    if params and params[0].name in ('self', 'cls'):
+        params = params[1:]
+    return '(' + ', '.join(str(p) for p in params) + ')'
+
+
+def _isTdModule(module_name):
+    """Does a class or function come from one of TouchDesigner's own
+    modules? A DAT module's __module__ is the DAT's path, and TD's live
+    under /sys (/sys/TDModules/TDCallbacksExt, /sys/local/modules/
+    TDStoreTools, .../TDFunctions); a package's own sit under the toolkit.
+    The path prefix is the whole test: resolving the name with op() would
+    find ANY existing DAT, which is how a first version read every package
+    module as TD's and emptied the api (2026-10-17)."""
+    return str(module_name or '').startswith('/sys/')
+
+
+def _definingClass(cls, name):
+    """The class in cls's MRO whose own dict holds `name`, or None."""
+    for k in getattr(cls, '__mro__', ()):
+        if name in getattr(k, '__dict__', {}):
+            return k
+    return None
+
+
+def PromotedApi(comp):
+    """The package's promoted API, reflected: every UpperCamelCase member
+    of its promoted extensions, by name.
+
+    [{name, signature, doc}] for a method (the signature without self, the
+    docstring's first line); {name, kind: 'property', doc} for a property;
+    {name, kind: 'stored'} for a property TouchDesigner's own modules make
+    (a StorageManager stored item, a TDFunctions.createProperty dependable:
+    the getter is TD's, there is no docstring to write); {name, kind:
+    'attribute'} for a capitalised instance attribute (a dependable such as
+    the updater's IsUpdatable). A capitalised class CONSTANT is promoted
+    too, but it is a value, not a call, and is left out; so is a member a
+    TD module's base class contributes (CallbacksExt.PrintCallbacks), which
+    is TD's API, not the package's. Methods and properties with no
+    docstring are listed with the signature only; the renderer counts them
+    (docs/AgentSkill.md section 5).
+    """
+    out, seen = [], set()
+    for ext in _promotedExtensions(comp):
+        cls = type(ext)
+        try:
+            names = dir(ext)
+        except Exception:
+            names = dir(cls)
+        for name in names:
+            if not name[:1].isupper() or name in seen:
+                continue
+            on_class = hasattr(cls, name)
+            try:
+                attr = getattr(cls, name) if on_class else getattr(ext, name)
+            except Exception:
+                continue
+            if on_class:
+                defining = _definingClass(cls, name)
+                if defining is not None and _isTdModule(getattr(defining, '__module__', '')):
+                    continue    # TouchDesigner's own API, inherited
+            if on_class and isinstance(attr, property):
+                fget = getattr(attr, 'fget', None)
+                if fget is not None and _isTdModule(getattr(fget, '__module__', '')):
+                    row = {'name': name, 'kind': 'stored'}
+                else:
+                    row = {'name': name, 'kind': 'property', 'doc': _docHead(attr)}
+            elif on_class and callable(attr):
+                row = {'name': name, 'signature': _signatureText(attr),
+                       'doc': _docHead(attr)}
+            elif on_class:
+                continue        # a class constant: reachable, not callable
+            else:
+                row = {'name': name, 'kind': 'attribute'}
+            seen.add(name)
+            out.append(row)
+    return sorted(out, key=lambda r: r['name'])
+
+
+def GlobalShortcut(comp):
+    """The shortcut a REGISTRY master is reached by once the toolkit runs:
+    its extension's SHORTCUT (RegistryBase), which the promoted copy in
+    /sys/FNS_Registries carries as its opshortcut. The master itself has
+    none, so the manifest's `shortcut` is empty for every registry and a
+    reader would conclude it must be placed; this says how it is really
+    reached. '' for any package that is not a registry."""
+    for ext in _promotedExtensions(comp):
+        sc = getattr(type(ext), 'SHORTCUT', None)
+        if isinstance(sc, str) and sc.strip():
+            return sc.strip()
+    return ''
+
+
+def _labelFromName(name):
+    """'SetBpm' -> 'Set Bpm': the registry's own fallback."""
+    return re.sub(r'(?<!^)(?=[A-Z])', ' ', name)
+
+
+def _paramsFromSignature(fn):
+    """A command's params from its signature, the way the registry derives
+    them (FNSCommandRegistryExt._paramsFromSignature): style from the type
+    hint (typing.Literal -> menu), the default, required when there is
+    none. JSON-safe values, for the manifest."""
+    try:
+        sig = inspect.signature(fn)
+    except (TypeError, ValueError):
+        return []
+    try:
+        hints = typing.get_type_hints(fn)
+    except Exception:
+        hints = {}
+    by_name = {'int': int, 'float': float, 'bool': bool, 'str': str}
+    out = []
+    for pname, p in list(sig.parameters.items())[1:]:
+        if p.kind in (p.VAR_POSITIONAL, p.VAR_KEYWORD):
+            continue
+        spec = {'name': pname}
+        ann = hints.get(pname)
+        if ann is None:
+            ann = p.annotation if p.annotation is not inspect.Parameter.empty else None
+            if isinstance(ann, str):
+                ann = by_name.get(ann.strip())
+        origin = typing.get_origin(ann) if ann is not None else None
+        if origin is typing.Literal:
+            spec['style'] = 'menu'
+            spec['menu'] = [str(v) for v in typing.get_args(ann)]
+        elif ann is bool:
+            spec['style'] = 'toggle'
+        elif ann is int:
+            spec['style'] = 'int'
+        elif ann is float:
+            spec['style'] = 'float'
+        elif ann is str:
+            spec['style'] = 'str'
+        elif p.default is not inspect.Parameter.empty and p.default is not None:
+            spec['style'] = {bool: 'toggle', int: 'int', float: 'float'}.get(
+                type(p.default), 'str')
+        if p.default is inspect.Parameter.empty:
+            spec['required'] = True
+        elif p.default is not None:
+            spec['default'] = _plain(p.default)
+        out.append(spec)
+    return out
+
+
+def _cleanCommandParams(params):
+    """Declared params (the decorator's `params=`) as the manifest carries
+    them: dicts with JSON-safe values, anything else dropped."""
+    out = []
+    for p in params or []:
+        if not isinstance(p, dict) or not p.get('name'):
+            continue
+        row = {'name': str(p['name'])}
+        for k in ('style', 'label', 'help'):
+            if p.get(k):
+                row[k] = str(p[k])
+        if p.get('menu'):
+            row['menu'] = [str(m) for m in p['menu']]
+        if p.get('required'):
+            row['required'] = True
+        if 'default' in p and p['default'] is not None:
+            row['default'] = _plain(p['default'])
+        out.append(row)
+    return out
+
+
+def _commandOwners(comp):
+    """The COMPs under a package that declare quick-launch commands: the
+    package root itself, plus every descendant tagged `fnscommands` (the
+    tag FNSCommand.announce() leaves on an owner). The tag is the filter
+    on purpose: a stamped registry HOST inside a tool carries the
+    registry's own `_fns_command` marks, but only the /sys global ever
+    announces them, so an untagged host is not an owner and its commands
+    are not the tool's."""
+    out = [comp]
+    for c in comp.findChildren(type=COMP):
+        if 'fnscommands' in c.tags:
+            out.append(c)
+    return out
+
+
+def _ownerCommands(owner, comp, live):
+    """One owner's commands: the `_fns_command` marks on its promoted
+    methods, then a FnsCommands() spec list. See Commands()."""
+    out, seen = [], set()
+    rel = owner.path[len(comp.path) + 1:] if owner is not comp else ''
+    for ext in _promotedExtensions(owner):
+        cls = type(ext)
+        for name in dir(cls):
+            if not name[:1].isupper() or name in seen:
+                continue
+            fn = getattr(cls, name, None)
+            try:
+                meta = getattr(fn, '_fns_command', None)
+            except Exception:
+                meta = None
+            if not isinstance(meta, dict):
+                continue
+            seen.add(name)
+            cid = str(meta.get('id') or name.lower())
+            row = live.get('%s#%s' % (owner.path, cid), {})
+            spec = {'name': name, 'id': cid,
+                    'label': str(row.get('label') or meta.get('label')
+                                 or _labelFromName(name)),
+                    'help': str(row.get('help') or meta.get('help')
+                                or _docHead(fn))}
+            params = meta.get('params')
+            params = (_cleanCommandParams(params) if params is not None
+                      else _paramsFromSignature(fn))
+            if params:
+                spec['params'] = params
+            if meta.get('hidden'):
+                spec['hidden'] = True
+            if rel:
+                spec['owner'] = rel
+            out.append(spec)
+        specs = []
+        try:
+            fnc = getattr(ext, 'FnsCommands', None)
+            if callable(fnc):
+                specs = list(fnc() or [])
+        except Exception as e:
+            debug('packaging: %s FnsCommands() failed (%s)' % (owner.name, e))
+        for s in specs:
+            if not isinstance(s, dict):
+                continue
+            name = str(s.get('method') or s.get('id') or '')
+            if not name or name in seen:
+                continue
+            seen.add(name)
+            cid = str(s.get('id') or name.lower())
+            row = live.get('%s#%s' % (owner.path, cid), {})
+            spec = {'name': name, 'id': cid,
+                    'label': str(row.get('label') or s.get('label')
+                                 or _labelFromName(name)),
+                    'help': str(row.get('help') or s.get('help') or '')}
+            params = _cleanCommandParams(s.get('params'))
+            if params:
+                spec['params'] = params
+            if s.get('hidden'):
+                spec['hidden'] = True
+            if rel:
+                spec['owner'] = rel
+            out.append(spec)
+    return out
+
+
+def Commands(comp):
+    """The package's quick-launch commands, for the agent skill's pages.
+
+    Harvested from every command owner under the package (_commandOwners:
+    the root, and the descendants that announced themselves, such as the
+    built-in TD commands under FNS_CommandRegistry) in the two
+    registration shapes LauncherSurface reads: the `_fns_command` mark on
+    a promoted method, and a FnsCommands() spec list.
+    [{name, id, label, help, params, hidden, owner}] by owner then id;
+    `owner` is the declaring COMP's path under the package, absent for the
+    root. Label and help are what the live command registry shows for the
+    command when it is announced (its Commands() rows, matched by key), so
+    the page says what the launcher says; a command not announced yet
+    falls back to the registry's own derivation: the CamelCase name split,
+    the docstring's first line. Params come from the signature
+    (_paramsFromSignature) unless the mark declares them.
+    """
+    live = {}
+    reg = getattr(op, 'FNS_COMMANDREGISTRY', None)
+    if reg is not None:
+        try:
+            for row in reg.Commands():
+                if isinstance(row, dict) and row.get('key'):
+                    live[str(row['key'])] = row
+        except Exception as e:
+            debug('packaging: command registry Commands() failed (%s)' % e)
+    out = []
+    for owner in _commandOwners(comp):
+        out += _ownerCommands(owner, comp, live)
+    return sorted(out, key=lambda s: (s.get('owner', ''), s['id']))
+
+
 # What is not a shortcut on its own.
 #
 # Same vocabulary as FNS_HotkeyManager.ignored_keys, which the manager
@@ -1841,10 +2176,52 @@ def StripReleaseMarkers(comp):
     return changed
 
 
+# An Info Header block at the top of a DAT ('''Info Header Start ... Info
+# Header End''') names the author's machine and project. The stamping that
+# wrote them is retired, but DAT text still carries old ones: 16 released
+# packages shipped them, up to 70 DATs in one (docs/FamilyFixes.md).
+_INFO_HEADER = re.compile(
+    r"^(﻿?)\s*'''Info Header Start.*?Info Header End'''[ \t]*(?:\r?\n)?", re.S)
+
+
+def StripInfoHeaders(comp):
+    """Remove the Info Header block from the top of every DAT under `comp`
+    -- meant for a COPY (ScrubArtifact's loaded artifact), never a live
+    master. A DAT that still syncs to a file is left alone, since writing
+    its text would write the file. Returns (stripped paths, paths that
+    still carry a header)."""
+    stripped, left = [], []
+    try:
+        everything = comp.findChildren(includeUtility=True)
+    except TypeError:
+        everything = comp.findChildren()
+    for d in everything:
+        if not getattr(d, 'isDAT', False):
+            continue
+        try:
+            txt = d.text or ''
+        except Exception:
+            continue
+        m = _INFO_HEADER.match(txt)
+        if not m:
+            continue
+        sync = getattr(d.par, 'syncfile', None)
+        if sync is not None and sync.eval():
+            left.append(d.path)
+            continue
+        try:
+            d.text = m.group(1) + txt[m.end():]
+            stripped.append(d.path)
+        except Exception:
+            left.append(d.path)
+    return stripped, left
+
+
 def ScrubArtifact(path, notices=None, identity=None):
     """Load a saved artifact into a cooking-disabled holder in /sys/quiet
-    (the staging class Embody's own export uses), strip PI's markers from
-    that copy, stamp `notices` (license_notices.Notices) and `identity`
+    (the staging class Embody's own export uses), strip PI's markers and
+    every DAT's Info Header from that copy (a header that cannot be
+    stripped raises), stamp `notices` (license_notices.Notices) and `identity`
     ((name, is_global) for package_identity.Stamp) onto it, save it back
     over `path`, destroy the holder. Returns the number of operators
     whose markers changed; raises when the artifact cannot be loaded,
@@ -1859,6 +2236,11 @@ def ScrubArtifact(path, notices=None, identity=None):
     try:
         loaded = holder.loadTox(path)
         changed = StripReleaseMarkers(loaded)
+        headers, kept = StripInfoHeaders(loaded)
+        if kept:
+            raise RuntimeError('Info Header still in %d DAT(s): %s'
+                               % (len(kept), ', '.join(kept[:5])))
+        changed += headers
         if notices:
             _licenseNotices().Stamp(loaded, notices, annotateCOMP)
         if identity:
@@ -2221,6 +2603,17 @@ def _searchIndex():
     return mod
 
 
+def _agentSkill():
+    """packaging/agent_skill.py, loaded by path like the search index: the
+    renderer of the consumer agent skill bundle (docs/AgentSkill.md)."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        'fns_agent_skill', _repo(PKG_DIR, 'agent_skill.py'))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
 def Build(export=False, out_path=None, base_url=BASE_URL, release=None):
     """Write packaging/manifest.json. `export` may be False, True, or a
     list of package names to (re-)export artifacts for."""
@@ -2422,6 +2815,26 @@ def Build(export=False, out_path=None, base_url=BASE_URL, release=None):
         if meta.get('preview') is True:
             entry['preview'] = True
 
+        # The agent skill's reflected sections (docs/AgentSkill.md sections
+        # 3b and 4): the promoted API and the quick-launch commands, read
+        # off the live extension classes. Presence-style. Withheld from a
+        # preview row for the reason `search` is: the published manifest
+        # names a preview and describes it in one line, and a method list
+        # is more than that line promises (docs/PreviewPackages.md).
+        if not entry.get('preview'):
+            api = PromotedApi(comp)
+            if api:
+                entry['api'] = api
+            commands = Commands(comp)
+            if commands:
+                entry['commands'] = commands
+            # a registry master: reached by its /sys global, never placed
+            # (docs/RegistryHomeContract.md). Separate from `shortcut`,
+            # which the updater reads to recognise standalone copies.
+            gs = GlobalShortcut(comp)
+            if gs and not entry['shortcut']:
+                entry['global_shortcut'] = gs
+
         # What the guided setup's questionnaire can match this package on
         # (catalog `fits`, a list of tags). Presence-style; the tags
         # themselves are validated against the quiz in _quiz().
@@ -2603,6 +3016,33 @@ def Build(export=False, out_path=None, base_url=BASE_URL, release=None):
                 vart['url'] = '%s/%s/%s/%s.%s.tox' % (base_url.rstrip('/'), PLUS_PREFIX,
                                                      rel, entry['name'], vid)
 
+    # Same run, second file: the parameter reference is derived from the
+    # same live pass, so the two can never describe different projects.
+    # Written BEFORE the agent skill renders, which reads it back for the
+    # package pages' Parameters sections.
+    params_written = BuildParameters(release=rel)
+
+    # The consumer agent skill (docs/AgentSkill.md section 4): the bundle
+    # folder under packaging/dist/agent-skill/ (the install command's local
+    # source on this machine) and ONE transport document for the release,
+    # rendered from these very rows so no page can describe a build other
+    # than the one this manifest publishes. The manifest carries the
+    # document's hash and URL below, like a rail; the updater fetches it on
+    # a store refresh and unpacks it beside the family folder.
+    skill = _agentSkill()
+    try:
+        with open(params_written['path'], 'r', encoding='utf-8') as f:
+            params_doc = json.load(f)
+    except Exception as e:
+        debug('packaging: parameters reference unreadable for the agent skill (%s)' % e)
+        params_doc = None
+    skill_report = skill.Render(
+        {'release': rel, 'toolkit': {'tiers': tier_ladder}, 'packages': packages},
+        _repo(PKG_DIR, 'docs'), _repo(DIST_DIR, 'agent-skill'), parameters=params_doc)
+    skill_transport = skill.WriteTransport(skill_report['bundle'],
+                                           _repo(DIST_DIR, 'agent-skill.json'))
+    debug(skill.CoverageText(skill_report))
+
     doc = {
         'schema': MANIFEST_SCHEMA,
         'release': rel,
@@ -2668,6 +3108,17 @@ def Build(export=False, out_path=None, base_url=BASE_URL, release=None):
                     if p['kind'] == 'tool' and not p.get('nopick')
                     and not p.get('preview')
                     and curated.get(p['name'], {}).get('recommended')],
+        # The consumer agent skill's transport document (docs/AgentSkill.md
+        # section 4): pinned per release like an artifact, hashed so the
+        # updater verifies it like one. `files` is the page count.
+        'agent_skill': {
+            'version': rel,
+            'path': DIST_DIR + '/agent-skill.json',
+            'bytes': skill_transport['bytes'],
+            'sha256': skill_transport['sha256'],
+            'files': skill_transport['files'],
+            'url': '%s/%s/agent-skill.json' % (base_url.rstrip('/'), rel),
+        },
         'packages': packages,
     }
     # Curated bundles for the guided setup (catalog `presets`, validated
@@ -2684,9 +3135,8 @@ def Build(export=False, out_path=None, base_url=BASE_URL, release=None):
         json.dump(doc, f, indent=1, sort_keys=False)
         f.write('\n')
 
-    # Same run, second file: the parameter reference is derived from the
-    # same live pass, so the two can never describe different projects.
-    BuildParameters(release=rel)
+    # (packaging/parameters.json was written above, before the agent skill
+    # rendered from it.)
 
     # Same data as a <script>-loadable file so configurator/index.html works
     # when opened straight off disk -- fetch() of a sibling .json is blocked
@@ -2725,5 +3175,18 @@ def Build(export=False, out_path=None, base_url=BASE_URL, release=None):
             'search_bytes': _searchIndex().Sizes(
                 {p['name']: p['search'] for p in packages if 'search' in p}),
             'catalog_problems': catalog_problems,
+            # the agent skill's coverage (docs/AgentSkill.md section 5) and
+            # the reflected sections' share of the manifest (raw, gzipped)
+            'agent_skill': {
+                'packages': skill_report['packages'],
+                'methods': skill_report['methods'],
+                'commands': skill_report['commands'],
+                'methods_without_doc': len(skill_report['methods_without_doc']),
+                'packages_without_doc': skill_report['packages_without_doc'],
+                'transport': skill_transport,
+                'api_bytes': _searchIndex().Sizes(
+                    {p['name']: {'api': p.get('api'), 'commands': p.get('commands')}
+                     for p in packages if 'api' in p or 'commands' in p}),
+            },
             'uncategorized': [p['name'] for p in packages
                               if p['category'] == 'Uncategorized']}

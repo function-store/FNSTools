@@ -118,6 +118,16 @@ DECLARED_PRIVATE = (
     # same shape as the four above and withheld for the same reason; it is
     # listed separately only because it was written later.
     'docs/KeyframerContract.md',
+    # FNS_TimelineTools' Analysis page (EssentiaTD beats, curves, heatmaps):
+    # a design doc of a preview tool, the same call as the contracts above.
+    'docs/TimelineAudioAnalysis.md',
+    # FNS_PreviewPanel (preview): the test of its T3D stub exercises the
+    # tool's internals by name, so it is the tool for the sweep's purposes.
+    'tests/test_previewpanel_t3d_stub.py',
+    # FNS_TimelineTools (preview): this test pins source lines of the
+    # Analysis page, Markers and Background extensions through a helper
+    # rooted in the tool's folder, so the name sweep does not see it.
+    'tests/test_timeline_audio_analysis.py',
     # The design of a Base-gated tool: 750 lines of how FNS_BeatMod's
     # modulators are built. Naming the tool publicly is fine, handing over
     # its construction is not.
@@ -154,7 +164,20 @@ DECLARED_PRIVATE = (
     # package name the rule can match.
     'docs/OpSeqDevTestBench.md',
     'tests/test_pop_overlay.py',
+    # The family examples' build record and the fixes it led to: preview
+    # packages, internal bugs and how the examples were made (owner,
+    # 2026-10-15). The example toxes themselves are withheld by rule below.
+    'docs/FamilyExamples.md',
+    'docs/FamilyFixes.md',
 )
+
+# Example demos (`<Package>/<Name>_example.tox`) stay private whatever the
+# package's access (owner, 2026-10-15). They are built from released family
+# toxes, so they carry whatever those shipped (Info Headers naming the
+# author's machine, before the release scrub), and a free package's
+# example would otherwise publish with it. A suffix rule, so a new example
+# needs no listing.
+EXAMPLE_SUFFIX = '_example.tox'
 
 # Whole private subtrees. DECLARED_PRIVATE is exact paths on purpose (a
 # doc is one file); these are CONTAINERS whose future contents must stay
@@ -499,6 +522,8 @@ def Rule(path, gated):
     if any(path == p.rstrip('/') or path.startswith(p)
            for p in DECLARED_PRIVATE_PREFIXES):
         return 'declared'
+    if path.lower().endswith(EXAMPLE_SUFFIX):
+        return 'example'
     preview = _previewOwnFile(path)
     if preview:
         return 'preview:%s' % preview

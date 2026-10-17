@@ -70,6 +70,7 @@ class AutoResExt:
 		return mods.module.heldOr(modifier, raw)
 
 	def SetRes(self, _op):
+		"""Set a newly created generator TOP's resolution to the tool's choice while the modifier is held; called for each new operator."""
 		if self.modifierHeld() and _op.pars('outputresolution'):
 			if not _op.inputs:
 				if _op.par.outputresolution.enable and not _op.isFilter:

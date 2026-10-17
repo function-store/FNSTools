@@ -316,6 +316,19 @@ check('the Patreon delivery design and the preview test files are declared priva
       all(pp.Rule(x, real) == 'declared' for x in (
           'docs/PatreonWebDownloads.md', 'docs/OpSeqDevTestBench.md', 'tests/test_pop_overlay.py')))
 
+print('17. family examples stay private, free package or not')
+check('a free package\'s example tox is withheld',
+      pp.Rule('modules/suspects/FNSTools/ComplexMix/ComplexMix_example.tox', real) == 'example')
+check('a gated package\'s example tox is withheld (by the example rule, not just the gate)',
+      pp.Rule('modules/suspects/FNSTools/ChopBank/ChopBank_example.tox', real) == 'example')
+check('the free package itself still publishes',
+      pp.Rule('modules/suspects/FNSTools/ComplexMix.tox', real) is None)
+check('the examples\' build record and fix log are declared private',
+      all(pp.Rule(x, real) == 'declared' for x in ('docs/FamilyExamples.md', 'docs/FamilyFixes.md')))
+_head = pp.Plan()
+check('nothing named *_example.tox publishes from HEAD',
+      not [p for p in _head['published'] if p.lower().endswith('_example.tox')])
+
 shutil.rmtree(tmp, ignore_errors=True)
 print()
 if FAILS:

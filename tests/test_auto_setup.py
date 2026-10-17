@@ -143,7 +143,7 @@ check('EnsureRootEntryPoints creates it get-or-create, default off',
 # roaming ROOT_TOGGLES stay off it -- nothing acts on them at the moment
 # they change, they are read when a pass runs.
 check('the forwarder carries the entry points and the project toggles',
-      "pe.par.pars = ' '.join(n for n, _, _ in ROOT_ENTRY_POINTS + ROOT_PROJECT_TOGGLES)" in gsrc
+      "pe.par.pars = " + "' '.join(n for n, _, _ in ROOT_ENTRY_POINTS + ROOT_PROJECT_TOGGLES\n                           + ROOT_PROJECT_PULSES)" in gsrc
       and 'pe.par.valuechange = True' in gsrc)
 
 print('5. the welcome asks before it opens anything')

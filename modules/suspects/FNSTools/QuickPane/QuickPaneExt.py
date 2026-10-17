@@ -53,6 +53,7 @@ class QuickPaneExt:
 		return [pane.owner for pane in ui.panes]
 
 	def OnOpenDir(self, dir='left'):
+		"""Split the current pane on the given side (left, right, top or bottom) with a new pane showing the current COMP, sized by the ratio parameters."""
 		curr_comp = ui.panes.current.owner.currentChild
 		if not curr_comp:
 			return

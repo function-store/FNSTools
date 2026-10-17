@@ -34,6 +34,7 @@ class ExtQuickCollapse:
 		pass
 	
 	def OnCollapse(self, customize=False):
+		"""Collapse the selected operators into a base COMP, after a name dialog when customize is on; called by the hotkey."""
 		self.selected = ui.panes.current.owner.selectedChildren
 		if not self.selected:
 			return
@@ -71,6 +72,7 @@ class ExtQuickCollapse:
 
 
 	def OnCustomizeCallback(self, info):
+		"""Called when the name dialog closes; collapses with the entered name and shortcut when OK was pressed."""
 		if info['buttonNum'] == 1:
 			# we need to check if `OK` was pressed by enter key ### might be only for Mac???
 			# TODO: check if this is the case for Windows

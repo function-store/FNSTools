@@ -12,7 +12,8 @@
 # first would push through the broken bind and raise -- detach via mode,
 # then set. The dangling bind also evaluates to nothing useful, which is
 # why the default (not the staged "current value") is what ships.
-BOUND_SETTINGS = ('Active', 'Interval', 'Mode', 'Onlymodified', 'Skipperform')
+BOUND_SETTINGS = ('Active', 'Interval', 'Mode', 'Onlymodified', 'Skipperform',
+                  'Waitidle', 'Idleseconds')
 READOUTS = ('Status', 'Lastsave')
 
 
@@ -37,6 +38,12 @@ def _sanitize(comp):
 
 
 _sanitize(parent())
+
+# Wait For Mouse Rest: the Mouse In CHOP cooks every frame while Active is on,
+# so it ships off; the extension turns it on only while a save waits.
+_m = parent().op('mousein_idle')
+if _m is not None:
+    _m.par.active = 'off'
 
 # The generic FNS strip runs LAST, after this package's own scrub: root-panel
 # binds frozen, web servers pinned to loopback, vc_data / Version Ctrl pages

@@ -228,6 +228,58 @@ try:
     body = body[:body.index('\ndef ', 1)]
     check('ExportPackage never calls StripReleaseMarkers on the live comp',
           'StripReleaseMarkers' not in body)
+
+    # ------------------------------------------------------------ 4
+    print('4. Info Headers are stripped from every DAT of the copy')
+    bm = load_build_manifest(repo, quiet, embody)   # section 3 replaced ScrubArtifact
+    HEADER = ("'''Info Header Start\nName : x\nAuthor : Someone@MACHINE\n"
+              "Saveorigin : Dev.toe\nInfo Header End'''\n")
+
+    class FakeDat(FakeOp):
+        def __init__(self, name, parent, text, synced=False):
+            FakeOp.__init__(self, name, parent=parent, is_comp=False)
+            self.isDAT = True
+            self.text = text
+            self.par.syncfile = Par(synced)
+
+    def header_tree(synced=False):
+        root = FakeOp('FNS_Bar')
+        FakeDat('ext', root, HEADER + 'class BarExt:\n\tpass\n')
+        FakeDat('notes', root, 'mentions an Info Header Start in the middle\n')
+        FakeDat('bom', root, '﻿' + HEADER + 'x = 1\n')
+        FakeDat('synced', root, HEADER + 'y = 2\n', synced=synced)
+        return root
+
+    tree = header_tree()
+    stripped, left = bm.StripInfoHeaders(tree)
+    by = {c.name: c for c in tree.children}
+    check('a header at the top is removed and the code after it kept',
+          by['ext'].text == 'class BarExt:\n\tpass\n', repr(by['ext'].text))
+    check('a byte-order mark before the header survives, the header does not',
+          by['bom'].text == '﻿x = 1\n', repr(by['bom'].text))
+    check('a mention in the middle of a DAT is left alone',
+          by['notes'].text.startswith('mentions'))
+    check('it reports the three DATs it changed and nothing left',
+          len(stripped) == 3 and left == [], (stripped, left))
+
+    tree = header_tree(synced=True)
+    stripped, left = bm.StripInfoHeaders(tree)
+    by = {c.name: c for c in tree.children}
+    check('a DAT that still syncs to a file is not written (it would write the file)',
+          by['synced'].text.startswith("'''Info Header Start") and left == ['/FNS_Bar/synced'], left)
+
+    quiet.next_tree = header_tree()
+    n = bm.ScrubArtifact(art)
+    check('ScrubArtifact strips them and saves the copy back',
+          quiet.next_tree.saved_to == [art] and n == 3, n)
+    quiet.next_tree = header_tree(synced=True)
+    try:
+        bm.ScrubArtifact(art)
+        raised = False
+    except RuntimeError:
+        raised = True
+    check('a header it cannot strip fails the scrub, so the export fails',
+          raised and quiet.holders[-1].destroyed)
 finally:
     shutil.rmtree(repo, ignore_errors=True)
 

@@ -5,6 +5,125 @@ CustomParHelper: CustomParHelper = (next((d for d in me.docked if 'ExtUtils' in 
 
 RegistryBase = mod('RegistryBase').RegistryBase
 
+# --- sequence placement -----------------------------------------------------
+# Pure Python, carried as ONE text by FNS_ToolbarRegistry, FNS_NavbarRegistry,
+# FNS_MainMenuRegistry and FNS_TimelineRegistry (each registry ext is
+# file-bound into its hosts, so the functions live in every copy;
+# tests/test_toolbar_update_replay.py execs this block and holds the four
+# copies to it). Reasoning: docs/ShippedSurfaceDefaults.md, "Automatic
+# passes never renumber".
+
+ORDER_SUB_KEY = 'menu_sub'
+
+
+def orderOf(info):
+	"""An entry's stored order as an int; None means unordered (sorts last)."""
+	try:
+		order = int(info.get('menu_order'))
+	except (TypeError, ValueError):
+		return None
+	return order if order >= 0 else None
+
+
+def subOrderOf(info):
+	"""The secondary key placeSequence gives an entry it found no whole
+	number for: negative, so the entry sorts just before the published entry
+	whose number it borrows. 0 for everything else."""
+	try:
+		return int(info.get(ORDER_SUB_KEY) or 0)
+	except (TypeError, ValueError):
+		return 0
+
+
+def _longestRun(values):
+	"""Indexes of one longest strictly increasing run through `values`."""
+	n = len(values)
+	if not n:
+		return []
+	length = [1] * n
+	previous = [-1] * n
+	for i in range(n):
+		for j in range(i):
+			if values[j] < values[i] and length[j] + 1 > length[i]:
+				length[i] = length[j] + 1
+				previous[i] = j
+	i = max(range(n), key=lambda k: length[k])
+	out = []
+	while i >= 0:
+		out.append(i)
+		i = previous[i]
+	out.reverse()
+	return out
+
+
+def _fillGap(entries, pending, lo, hi):
+	"""Number the entries that sit between two kept neighbours. The whole
+	numbers from `lo` to `hi` (None: no upper bound) are handed out left to
+	right, each entry keeping its own number when that lies in the gap and
+	leaves room for the rest; the entries left over once the numbers run
+	out borrow the number of the neighbour above (hi + 1) with a negative
+	sub-order."""
+	prev = lo - 1
+	placed = 0
+	for i, name in enumerate(pending):
+		info = entries[name]
+		cur = orderOf(info) if not subOrderOf(info) else None
+		rest = len(pending) - i - 1
+		if cur is not None and cur > prev and (hi is None or cur + rest <= hi):
+			order = cur
+		else:
+			order = prev + 1
+			if hi is not None and order > hi:
+				break
+		info['menu_order'] = order
+		info.pop(ORDER_SUB_KEY, None)
+		prev = order
+		placed += 1
+	overflow = pending[placed:]
+	for k, name in enumerate(overflow):
+		entries[name]['menu_order'] = hi + 1
+		entries[name][ORDER_SUB_KEY] = k - len(overflow)
+
+
+def placeSequence(entries, names, current, published):
+	"""Arrange `entries` in the order `names` gives WITHOUT moving a
+	published entry: a tool's number is its host's and stays, and brackets,
+	dividers and adopted built-ins are given numbers that sort them where
+	the sequence puts them (_fillGap). Nothing here writes to a host.
+
+	entries: the registry's {name: info}, mutated in place. names: the wanted
+	sequence (unknown names ignored, repeats dropped). current: the sequence
+	as the registry resolves it now. published(info): does a host publish
+	this entry. Returns the published entries the sequence moved relative to
+	their peers: an automatic pass never should, so the caller logs them;
+	they are placed like the rest and their hosts left alone."""
+	wanted = []
+	for name in names:
+		if name in entries and name not in wanted:
+			wanted.append(name)
+	position = {}
+	for i, name in enumerate(current):
+		position[name] = i
+	anchored = [n for n in wanted if published(entries[n])
+				and orderOf(entries[n]) is not None and not subOrderOf(entries[n])]
+	kept = set()
+	for i in _longestRun([position.get(n, -1) for n in anchored]):
+		kept.add(anchored[i])
+	moved = [n for n in anchored if n not in kept]
+	lo = 1
+	pending = []
+	for name in wanted + [None]:
+		if name is not None and name not in kept:
+			pending.append(name)
+			continue
+		order = None if name is None else orderOf(entries[name])
+		_fillGap(entries, pending, lo, None if order is None else order - 1)
+		pending = []
+		if order is not None:
+			lo = max(lo, order + 1)
+	return moved
+# --- end sequence placement --------------------------------------------------
+
 
 class ToolbarRegistryExt(RegistryBase):
 	SHORTCUT = 'FNS_TOOLBARREGISTRY'
@@ -165,14 +284,17 @@ class ToolbarRegistryExt(RegistryBase):
 		return self.MIRROR_PREFIX + tdu.legalName(canonical)
 
 	def _registeredNamesInOrder(self):
+		"""Bar order: by menu_order, then the sub-order an automatic pass gave
+		an entry with no whole number of its own (placeSequence), then name;
+		unordered entries last."""
 		entries = self.stored['PaneRegistry']
 		ordered = []
 		unordered = []
 		for name, info in entries.items():
 			order = self._normalizeMenuOrder(info.get('menu_order'))
-			(ordered if order is not None else unordered).append((order, name))
-		ordered.sort(key=lambda t: (t[0], t[1].lower()))
-		return [n for _, n in ordered] + [n for _, n in unordered]
+			(ordered if order is not None else unordered).append((order, subOrderOf(info), name))
+		ordered.sort(key=lambda t: (t[0], t[1], t[2].lower()))
+		return [n for _, _, n in ordered] + [n for _, _, n in unordered]
 
 	# --- managed mirror lifecycle ---
 
@@ -532,6 +654,7 @@ class ToolbarRegistryExt(RegistryBase):
 		self._syncSurface()
 
 	def UnregisterWidget(self, canonical_name):
+		"""Remove a toolbar widget and its mirror from the bar (forwarded to the /sys global)."""
 		if not self._is_sys_global():
 			api = self._registryApi()
 			if api is not self:
@@ -550,6 +673,7 @@ class ToolbarRegistryExt(RegistryBase):
 
 	# RegistryBase healing calls self.UnregisterPanel(name); alias it.
 	def UnregisterPanel(self, canonical_name):
+		"""RegistryBase's teardown name for UnregisterWidget."""
 		return self.UnregisterWidget(canonical_name)
 
 	def SetWidgetOrder(self, canonical_name, order):
@@ -565,6 +689,7 @@ class ToolbarRegistryExt(RegistryBase):
 			info.pop('menu_order', None)
 		else:
 			info['menu_order'] = norm
+		info.pop(ORDER_SUB_KEY, None)
 		self._syncSurface()
 
 	def SetWidgetDisplay(self, canonical_name, visible):
@@ -618,11 +743,14 @@ class ToolbarRegistryExt(RegistryBase):
 			pass
 
 	def SetWidgetSequence(self, canonical_names):
-		"""Manager API: reassign order 1..N from the given full sequence.
+		"""Manager API for the USER's edit (the Hub's drag, group, divider and
+		restore actions): reassign order 1..N from the given full sequence
+		and write each number back to its host, which is the user's layout
+		from then on (FNS_ConfigRegistry roams it).
 
 		Names not in the sequence keep registration but drop to the end;
-		unknown names are ignored. One surface sync at the end -- this is
-		the batch primitive a drag-reorder UI calls."""
+		unknown names are ignored. One surface sync at the end. An automatic
+		pass (boot, restore, heal) calls PlaceWidgetSequence instead."""
 		api = self._registryApi()
 		if api is not self:
 			return api.SetWidgetSequence(canonical_names)
@@ -632,14 +760,54 @@ class ToolbarRegistryExt(RegistryBase):
 			info = entries.get(name)
 			if info is not None:
 				info['menu_order'] = order
+				info.pop(ORDER_SUB_KEY, None)
 				order += 1
 		for name in self._registeredNamesInOrder():
 			if name not in canonical_names:
 				entries[name]['menu_order'] = order
+				entries[name].pop(ORDER_SUB_KEY, None)
 				order += 1
 		for name, info in entries.items():
 			if 'menu_order' in info:
 				self._writeBackHostPar(info, 'Menuorder', info['menu_order'])
+		self._syncSurface()
+
+	def _isPublished(self, info):
+		"""Does a host publish this entry, so that its number is the host's?
+		Virtual entries (brackets, dividers) and adopted built-ins are the
+		registry's or the Hub's to place."""
+		return bool(info) and info.get('virtual') != '1' and info.get('adopted') != '1'
+
+	def PlaceWidgetSequence(self, canonical_names):
+		"""Manager API for the AUTOMATIC passes (FNS_Hub's boot adoption, its
+		stored-order apply and the group-bracket restore): arrange the bar in
+		the given order without moving a published tool or writing to any
+		host.
+
+		SetWidgetSequence is the user's edit and renumbers 1..N, writing every
+		number back. Run by a boot pass that only interleaved brackets and
+		built-ins, that wrote dense numbers over the shipped slot of every
+		tool after a missing one; FNS_ConfigRegistry then saved those as the
+		user's choices, and a package replaced later in an update came back
+		at its shipped slot among them (two tools tied at 40, 2026-10-17).
+		Here a published entry keeps its host's number, and brackets,
+		dividers and adopted built-ins take the whole numbers between the
+		tools, or a sub-order beside the tool that follows when there is none
+		(placeSequence). Bar positions come from the resolved sequence either
+		way (_barOrder), so nothing visible depends on dense numbers. A
+		published entry the sequence moves relative to its peers is placed
+		the same way, its host untouched, and logged: an automatic pass has
+		no business reordering tools."""
+		api = self._registryApi()
+		if api is not self:
+			return api.PlaceWidgetSequence(canonical_names)
+		entries = self.stored['PaneRegistry']
+		moved = placeSequence(entries, list(canonical_names),
+							  self._registeredNamesInOrder(), self._isPublished)
+		if moved:
+			self.fnsLog(f'{self.REGISTRY_NAME}: PlaceWidgetSequence moved published '
+						f'entries {moved} without writing their hosts; an automatic '
+						f'pass should not reorder tools', level='WARNING')
 		self._syncSurface()
 
 	DIVIDER_TAG = 'ToolbarRegistryDivider'
@@ -668,6 +836,7 @@ class ToolbarRegistryExt(RegistryBase):
 
 	# Back-compat alias (0.3.x): dividers now use the same entry override.
 	def SetDividerWidth(self, canonical_name, width):
+		"""Set a divider's width (the same as SetWidgetWidth)."""
 		return self.SetWidgetWidth(canonical_name, width)
 
 	def RegisterDivider(self, canonical_name, order=None, width=None, display=True):

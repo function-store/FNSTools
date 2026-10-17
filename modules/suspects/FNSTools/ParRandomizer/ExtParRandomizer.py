@@ -48,10 +48,12 @@ class ExtParRandomizer:
 	
 	# par callbacks
 	def Shortcutop(self, _par, _val, _prev):
+		"""Called when the Shortcutop parameter changes; checks for a RayTK shortcut conflict."""
 		self.checkShortcutRayTK()
 
 	# par callbacks#
 	def Shortcutpar(self, _par, _val, _prev):
+		"""Called when the Shortcutpar parameter changes; checks for a RayTK shortcut conflict."""
 		self.checkShortcutRayTK()
 	
 	def checkShortcutRayTK(self):
@@ -71,10 +73,12 @@ class ExtParRandomizer:
 		return conflict
 
 	def OnRayTKChange(self, info):
+		"""Called when RayTK's shortcut parameters change; checks for a conflict again."""
 		if info != '<error>':
 			self.checkShortcutRayTK()
 
 	def OnRandomizeOp(self, _op = None):
+		"""Randomize every enabled parameter on the current page of an operator, the current one by default."""
 		_op = _op or ui.panes.current.owner.currentChild
 		if not _op:
 			return
@@ -93,6 +97,7 @@ class ExtParRandomizer:
 		return
 
 	def RandomizePar(self, _par):
+		"""Give one parameter, or every member of a group, a random value within its range, menu or toggle."""
 		
 		if isinstance(_par, ParGroup):
 			for _subpar in _par:
@@ -123,6 +128,7 @@ class ExtParRandomizer:
 
 
 	def OnRandomizeRolloverPar(self):
+		"""Randomize the parameter under the mouse."""
 		_par = ui.rolloverPar if not hasattr(ui, 'rolloverParGroup') else ui.rolloverParGroup
 		if _par is None or _par.page.name in self.ignorePages:
 			return
@@ -143,6 +149,7 @@ class ExtParRandomizer:
 		ui.undo.endBlock()
 
 	def OnResetAllCustom(self, all = False):
+		"""Reset the current operator's custom parameters to their defaults: the current page, or every page with all."""
 		self.onResetAllCustom(all)
 
 	def onResetAllCustom(self, all = False):
@@ -157,6 +164,7 @@ class ExtParRandomizer:
 		ui.undo.endBlock()
 
 	def SaveAllCustomDefaults(self, _op = None):
+		"""Make every custom parameter's current value, mode and expression its default on an operator, the current one by default."""
 		if _op is None:
 			_op = ui.panes.current.owner.currentChild
 			if not _op:
@@ -172,6 +180,7 @@ class ExtParRandomizer:
 		
 
 	def OnShortcut(self, shortcutName):
+		"""Called by the hotkey watcher with the pressed combo; dispatches to randomize, randomize the hovered parameter, reset, or reset all."""
 		if shortcutName == self.ownerComp.par.Shortcutop.eval():
 			self.OnRandomizeOp()
 		if shortcutName == self.ownerComp.par.Shortcutpar.eval():

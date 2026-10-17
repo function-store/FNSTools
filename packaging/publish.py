@@ -16,6 +16,8 @@ LAYOUT
     <release>/<Package>.tox     immutable artifacts, hashes in the manifest
     <release>/FNSTools.tox      one-drop bootstrap; hash in manifest `rails`
     <release>/FNS_Installer.tox bare installer; hash in manifest `rails`
+    <release>/FNSTools-DevKit.zip the registry toxes and a README, for tool
+                                developers (docs/DeveloperKit.md); hash in `rails`
     manifest.json               ROLLING pointer: a copy of the newest release
 
 Releases are pinned: every artifact URL inside a manifest carries its
@@ -196,6 +198,14 @@ def Stage(clean=True):
     current = {p['name']: p.get('version', '') for p in manifest['packages']}
     bumped = sorted(n for n, v in current.items() if previous.get(n, v) != v)
     added = sorted(n for n in current if n not in previous)
+    # The agent skill's authored pages are a shippable change on their own
+    # (docs/AgentSkill.md section 4): the transport document's hash moves
+    # when they do, so a release that changes only the skill still reaches
+    # every install that refreshes its store.
+    prev_skill = ((prev.get('agent_skill') or {}).get('sha256', '')
+                  if prev_release is not None else None)
+    skill_changed = (prev_skill is not None and prev_skill
+                     != (manifest.get('agent_skill') or {}).get('sha256', ''))
     # New rail bytes ARE a shippable change with zero package bumps: the
     # bootstrap and installer reach users through /get pastes and the
     # native installers, which always fetch the CURRENT release's rails.
@@ -203,7 +213,7 @@ def Stage(clean=True):
         n: (r or {}).get('sha256', '')
         for n, r in (manifest.get('rails') or {}).items()}
     if (previous and prev_release != release
-            and not bumped and not added and not rails_changed):
+            and not bumped and not added and not rails_changed and not skill_changed):
         return {'error': 'release %s changes no package version and no rail '
                          '(previous: %s) -- nothing would reach any install. '
                          'Bump Pkgversion on what changed (or rebuild the '
@@ -308,7 +318,7 @@ def Stage(clean=True):
     except Exception:
         rail_versions = {}
     rails = {}
-    for rail in ('FNS_Installer.tox', 'FNSTools.tox'):
+    for rail in ('FNS_Installer.tox', 'FNSTools.tox', 'FNSTools-DevKit.zip'):
         src = _repo(DIST_DIR, rail)
         if os.path.exists(src):
             dst = os.path.join(rel_dir, rail)
@@ -325,6 +335,24 @@ def Stage(clean=True):
     # copy), not the repo's: build_manifest.py cannot know these hashes --
     # the rails are built afterwards by build_installer.py.
     manifest['rails'] = rails
+
+    # The consumer agent skill's transport document (docs/AgentSkill.md
+    # section 4): the bundle as one JSON file, pinned under the release
+    # beside the rails at the URL the manifest names, re-hashed like an
+    # artifact so a document that disagrees with the manifest never ships.
+    skill = manifest.get('agent_skill') or {}
+    skill_staged = False
+    if skill.get('path'):
+        src = _repo(skill['path'])
+        if not os.path.exists(src):
+            missing.append('agent-skill.json (transport document absent -- rebuild the manifest)')
+        else:
+            dst = os.path.join(rel_dir, 'agent-skill.json')
+            shutil.copy2(src, dst)
+            if _sha256(dst) != skill.get('sha256'):
+                mismatched.append('agent-skill.json')
+            else:
+                skill_staged = True
 
     with open(os.path.join(rel_dir, 'manifest.json'), 'w', encoding='utf-8') as f:
         json.dump(manifest, f, indent=1)
@@ -406,9 +434,11 @@ def Stage(clean=True):
             'removed': removed, 'stale_retired': stale_retired,
             'discovery': disco,
             'rails': sorted(rails),
-            'rails_missing': [r for r in ('FNS_Installer.tox', 'FNSTools.tox')
+            'rails_missing': [r for r in ('FNS_Installer.tox', 'FNSTools.tox',
+                                          'FNSTools-DevKit.zip')
                               if r not in rails],
             'missing': missing, 'hash_mismatch': mismatched,
+            'agent_skill': skill_staged,
             'signed': signed,
             'total_mb': round(total / 1048576.0, 2),
             'ok': not missing and not mismatched,

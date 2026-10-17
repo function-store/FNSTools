@@ -285,6 +285,7 @@ class PaneSearchRegistryExt(RegistryBase):
 		self._syncSurface()
 
 	def UnregisterWidget(self, canonical_name):
+		"""Remove a find-bar control and its instance from every pane (forwarded to the /sys global)."""
 		if not self._is_sys_global():
 			api = self._registryApi()
 			if api is not self:
@@ -298,6 +299,7 @@ class PaneSearchRegistryExt(RegistryBase):
 
 	# RegistryBase healing calls self.UnregisterPanel(name); alias it.
 	def UnregisterPanel(self, canonical_name):
+		"""RegistryBase's teardown name for UnregisterWidget."""
 		return self.UnregisterWidget(canonical_name)
 
 	def _validateWidget(self, widget_op):

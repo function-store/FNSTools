@@ -178,6 +178,16 @@ def Load(path=DEFAULTS_PATH):
 		return json.load(f)
 
 
+LAYOUT_TAG = 'fns_layoutdefaults'     # FNS_ConfigRegistry's _LAYOUT_TAG
+STATE_DEFAULT = 'state_default'        # FNS_Hub config_callbacks reads it
+
+
+def tableDAT_type(table):
+	"""The Table DAT class, from a live table: this file is exec'd into a
+	bare namespace with no TD globals."""
+	return type(table)
+
+
 def Apply(pkg, data):
 	"""Write the defaults onto a STAGED package copy. Returns what changed,
 	as (path, par, value) triples; raises on a par the file names that the
@@ -185,8 +195,9 @@ def Apply(pkg, data):
 	changed = []
 	owners = []
 	for key in ('packages', 'shipped_values'):
-		owners.extend((data.get(key, {}).get(pkg.name) or {}).items())
-	for rel, pars in owners:
+		owners.extend((key, rel, pars) for rel, pars in
+					  (data.get(key, {}).get(pkg.name) or {}).items())
+	for key, rel, pars in owners:
 		owner = pkg if rel == '.' else pkg.op(rel)
 		if owner is None:
 			raise LookupError(f'surface defaults: {pkg.name}/{rel} not found')
@@ -203,6 +214,16 @@ def Apply(pkg, data):
 			if p.val != value:
 				p.val = value
 				changed.append((owner.path, name, value))
+			if key == 'packages':
+				# The shipped place is also the par's DEFAULT, and the owner is
+				# tagged as stamped: FNS_ConfigRegistry roams a layout value only
+				# when it differs from a stamped default, so a user's own
+				# arrangement follows them and a release's new defaults still
+				# reach everyone else (docs/ShippedSurfaceDefaults.md).
+				if p.default != value:
+					p.default = value
+				if LAYOUT_TAG not in owner.tags:
+					owner.tags.add(LAYOUT_TAG)
 	for name, rows in (data.get('configurators') or {}).items():
 		cfg = pkg.op(name)
 		t = cfg.op('state') if cfg is not None else None
@@ -213,6 +234,13 @@ def Apply(pkg, data):
 			for r in rows:
 				t.appendRow([str(c) for c in r])
 			changed.append((t.path, 'rows', len(rows)))
+		# what the table shipped as: FNS_Hub's config callbacks roam a table
+		# only when it differs from this
+		d = cfg.op(STATE_DEFAULT) or cfg.create(tableDAT_type(t), STATE_DEFAULT)
+		d.clear()
+		for r in rows:
+			d.appendRow([str(c) for c in r])
+		d.nodeX, d.nodeY = t.nodeX, t.nodeY - 200
 	return changed
 
 

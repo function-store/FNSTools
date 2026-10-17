@@ -138,6 +138,7 @@ snapshots of those at build time. Preflight flags it; the wizard's step-2
 exec(open('packaging/build_installer.py').read())
 result = BuildInstaller()     # -> packaging/dist/FNS_Installer.tox
 result = BuildBootstrap()     # -> packaging/dist/FNSTools.tox
+result = BuildDevKit()        # -> packaging/dist/FNSTools-DevKit.zip, after Build()
 ```
 
 The rails are residents of the dev root (`FNSTools/FNS_Installer` +
@@ -154,6 +155,13 @@ result = EnsureDevRails()     # builds missing rails, re-embeds sources in place
 `BuildBootstrap()` performs the same refresh on its staged copy regardless,
 so a forgotten `EnsureDevRails()` only ever leaves the DEV installer stale,
 never a shipped one.
+
+The developer kit (`packaging/dist/FNSTools-DevKit.zip`, docs/DeveloperKit.md)
+is the third rail: the eleven registry toxes zipped with a README and the
+licence, built by `BuildDevKit()` from the registry artifacts in `dist/`, so
+it is built after `Build()` and Preflight reports it stale when a registry
+tox or `build_installer.py` is newer than it, not when the installer sources
+moved. It needs no TD staging: plain file work.
 
 **Rebuild them only when one of those four actually changed.** A rails
 rebuild is not byte-reproducible: rebuilding with no source change at all

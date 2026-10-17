@@ -67,6 +67,7 @@ on each heading is the *kind* of work, never its state.
 | 28 | A host loaded mid-session never autoregisters | bug | OPEN — see §28 |
 | 29 | ParentHierarchy draws a dead button beside iopBrowser's in every pane bar | bug | **DONE** 2026-09-11 — see §29 |
 | 30 | IOP promotion cannot target the root; the path-bar drop was dead since the split | bug | **DONE** 2026-09-11 — see §30 |
+| 35 | RegistryBase: promoted pars land on the tool's About page | bug | **DONE** 2026-10-13 — fixed with TD closed, see §35 |
 
 Nothing in this document is shipped: item 1's change lives in the hot-synced
 extension source, and re-exporting the PI suspect tox is a release step (see
@@ -2896,3 +2897,41 @@ its recursive snapshot is wasteful, never wrong; QuickExt's watches the
 Component Editor's config COMP through a tag filter and its injector
 refuses any DAT without QuickExt's own marker text. Port those two to the
 immediate-children observer when either is next touched.
+
+## 35 — RegistryBase: promoted pars land on the tool's About page, 2026-10-13
+
+**Symptom.** Stamping a registry host into a COMP that already has an About
+page puts the promoted pars (`Mm*`, `Tb*`, ...) on About and leaves an empty
+Registry page in front of it. Reported by the TDCollab session (RemoteTD
+2b11695): it happened with Promotepars off and on, and the binds themselves
+were fine.
+
+**Measured.** `_ensureToolRegistryPage` appends the Registry page (it lands
+last, after About), then `_orderToolRegistryPage` sorts Registry ahead of
+About. A TD `Page` is an index, so the `page` it still holds now names About,
+and every `page.append*` after the sort goes there. On a throwaway COMP in
+`/sys/quiet`: the reference read `Registry` before `sortCustomPages`, `About`
+after it, and `appendToggle` landed on About. The same goes wrong for an
+existing Registry page whenever the sort actually reorders.
+
+**Reach.** No FNSTools tool is affected: a scan of `/FNSTools` (depth 3) found
+no promoted par off its Registry page, because every tool got its Registry
+page before an About page existed. Users meet it through the Hub's
+drop-to-register on their own COMP that has an About page, which stamps from
+the registry packages' masters.
+
+**Fix.** Look the Registry page up by name again after
+`_orderToolRegistryPage` (`scripts/shared/RegistryBase.py`, the line after
+the sort). The per-par `_reclaimToolPar` already moves the header and each
+existing par back, so nothing else changes.
+
+**Done, 2026-10-13.** Fixed with TD closed (project saved, PI clean, then
+`project.quit`), one line in `_ensureToolRegistryPage`, guarded by
+`tests/test_registrybase_page_ref.py`. After relaunch all 132 RegistryBase
+copies under `/FNSTools` carried the fix, the 13 `/sys` globals came up, and
+`scriptErrors` was empty. Live check: a throwaway COMP with an About page,
+stamped from the MainMenuRegistry master, got all 11 `Mm*` pars on Registry
+and About kept only its own. PI reported no tool dirty after the restart
+(every host reloads the file on open), so no tox was saved for it. Users get
+it through the next release of the registry packages, whose masters
+StampHost copies from.

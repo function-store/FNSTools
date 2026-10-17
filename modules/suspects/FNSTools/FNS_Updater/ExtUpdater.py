@@ -45,9 +45,17 @@ import json
 import os
 import shutil
 import time
+from typing import Literal
 from urllib.parse import unquote, urlparse
 
 MANIFEST_NAME = 'manifest.json'
+# The consumer agent skill's transport document (docs/AgentSkill.md section
+# 4): the whole skill bundle as one JSON file, published under each release
+# beside the rails. Fetched into the store like an artifact, unpacked beside
+# the family folder by SyncAgentSkillFolder.
+AGENT_SKILL_NAME = 'agent-skill.json'
+AGENT_SKILL_DIR = 'agent-skill'
+AGENT_SKILL_SCHEMA = 1
 
 # ---------------------------------------------------------------------------
 # Discovery -- the one thing this component hardcodes.
@@ -660,6 +668,13 @@ class ExtUpdater:
 
 	def _announceCommands(self):
 		FNSCommand.announce(self.ownerComp)
+
+	def IsApplying(self):
+		"""Is a pass replacing packages right now? Each tool's host unregisters
+		and registers again then, so the Hub's group-bracket restore keeps
+		waiting while this is true (ConfiguratorBase._updateInProgress)."""
+		job = self._job
+		return bool(job) and job.get('stage') == 'apply'
 
 	# ------------------------------------------------------------------
 	# where things live
@@ -1738,6 +1753,7 @@ class ExtUpdater:
 			self._later('_pump')
 
 	def OnDownloadAborted(self, callbackInfo):
+		"""Downloader callback for a failed fetch: try the next discovery pin, classify a missing signature, or record the artifact failure."""
 		name = os.path.basename(str(callbackInfo.get('path') or '')) or 'download'
 		if getattr(self, '_place', None):
 			pending, self._place = self._place, None
@@ -1911,7 +1927,8 @@ class ExtUpdater:
 		if job['kind'] == 'check':
 			return self._report()
 		wanted = self._needed(man, job)
-		if not wanted:
+		skill = self._agentSkillNeeded(man, job)
+		if not wanted and skill is None:
 			return self._onArtifacts()
 		job['stage'] = 'artifacts'
 		# A stalled or aborted earlier pass can leave .part staging files
@@ -1926,12 +1943,21 @@ class ExtUpdater:
 		if job['local'] is not None:
 			for pkg in wanted:
 				self._copyLocal(pkg, man)
+			if skill is not None:
+				self._copyLocalAgentSkill(skill, man)
 			return self._onArtifacts()
 		job['queue'] = [{'file': pkg['name'] + '.tox',
 						 'url': '%s/%s' % (job['base'], self._artifactRel(pkg, man)),
 						 'sha': (pkg['artifact'] or {}).get('sha256', ''),
 						 'gated': self._isGated(pkg)}
 						for pkg in wanted]
+		if skill is not None:
+			# one small free document, verified by its manifest hash like
+			# any artifact (the .part staging and _verifyFetched apply)
+			job['queue'].append({'file': AGENT_SKILL_NAME,
+								 'url': '%s/%s' % (job['base'], self._agentSkillRel(skill, man)),
+								 'sha': str(skill.get('sha256', '') or ''),
+								 'gated': False})
 		# Gated artifacts sit behind a Worker on the SAME host (the `plus/`
 		# prefix), so the URL above is already right and only the header is
 		# missing. Fetch one short-lived token for the whole pass rather
@@ -1994,6 +2020,42 @@ class ExtUpdater:
 		os.makedirs(os.path.dirname(dst), exist_ok=True)
 		shutil.copyfile(src, dst)
 		self._verifyFetched(name + '.tox', (pkg.get('artifact') or {}).get('sha256', ''), dst)
+
+	def _agentSkillNeeded(self, man, job):
+		"""The manifest's `agent_skill` block when the store's copy of the
+		transport document is absent or not the bytes it describes, else
+		None. A manifest-only refresh (names == []) leaves it alone: that
+		pass exists to make the picker appear in seconds."""
+		block = man.get('agent_skill')
+		if not isinstance(block, dict) or not block.get('url') or not block.get('sha256'):
+			return None
+		if job.get('kind') == 'refresh' and job.get('names') == []:
+			return None
+		path = '%s/%s' % (self.StoreFolder(), AGENT_SKILL_NAME)
+		if os.path.exists(path) and _sha256(path) == block.get('sha256'):
+			return None
+		return block
+
+	def _agentSkillRel(self, block, manifest):
+		"""Where the transport document sits UNDER the base, derived from
+		its pinned URL like _artifactRel, with the layout publish.py writes
+		as the fallback."""
+		url = str(block.get('url', '') or '')
+		base = str(manifest.get('base_url', '')).rstrip('/')
+		if url and base and url.startswith(base + '/'):
+			return url[len(base) + 1:]
+		return '%s/%s' % (manifest.get('release', ''), AGENT_SKILL_NAME)
+
+	def _copyLocalAgentSkill(self, block, man):
+		job = self._job
+		src = '%s/%s' % (job['local'], self._agentSkillRel(block, man))
+		dst = '%s/%s' % (self.StoreFolder(), AGENT_SKILL_NAME)
+		if not os.path.exists(src):
+			job['failed'].append('%s: not at %s' % (AGENT_SKILL_NAME, src))
+			return
+		os.makedirs(os.path.dirname(dst), exist_ok=True)
+		shutil.copyfile(src, dst)
+		self._verifyFetched(AGENT_SKILL_NAME, str(block.get('sha256', '') or ''), dst)
 
 	def _needed(self, man, job):
 		"""Artifacts whose store copy is absent or has the wrong bytes.
@@ -2653,6 +2715,7 @@ class ExtUpdater:
 			return
 		if not queue:
 			self._settleStaleErrors(job)
+			self._republishSurfaces(job)
 			if job.get('results') and not job.get('failed'):
 				self._announceRelease()
 			job['stage'] = 'done'
@@ -2672,6 +2735,26 @@ class ExtUpdater:
 		self._status('updated %d of %d...' % (len(job['results']),
 											  len(job['results']) + len(queue)))
 		run('args[0]._drain()', self, delayFrames=3, delayRef=op.TDResources)
+
+	def _republishSurfaces(self, job):
+		"""The hosts this pass replaced registered at their shipped slots one
+		by one, and the Hub's group brackets were placed around whichever
+		members were present at the time. Re-place them once against the
+		settled bar (ConfiguratorBase.RepublishOwned on every configurator;
+		no tool's host is written). The Hub is the root's child: it has no
+		global shortcut."""
+		root = self._root(job.get('target'))
+		hub = root.op('FNS_Hub') if root is not None else None
+		if hub is None:
+			return
+		for c in hub.children:
+			fn = getattr(c, 'RepublishOwned', None) if c.isCOMP else None
+			if not callable(fn):
+				continue
+			try:
+				fn()
+			except Exception as e:
+				debug('UPDATER: %s RepublishOwned failed: %s' % (c.path, e))
 
 	def Drain(self):
 		"""Public entry so a stalled pass can be nudged from the textport."""
@@ -3033,7 +3116,17 @@ class ExtUpdater:
 
 	def _replacePackage(self, step, target=None):
 		name = step['name']
-		if step.get('placement') == 'none' or step.get('store_only'):
+		root = self._root(target)
+		# A 'none' package can still sit in the toolkit as a root child: an
+		# install from before its placement became 'none' (ThresholdColor,
+		# 2026-09-29). Compare reads that copy's Pkgversion, so refreshing
+		# only the store left the update offered forever (2026-10-16); the
+		# copy is replaced in place like any root child.
+		placed = None
+		if step.get('placement') == 'none' and not step.get('store_only') and root is not None:
+			placed = root.op(name) or next(
+				(c for c in root.children if c.family == 'COMP' and _pkgName(c) == name), None)
+		if (step.get('placement') == 'none' or step.get('store_only')) and placed is None:
 			# An FNS family member or a store alternative: nothing in the
 			# project to replace. The update IS the verified store copy; the
 			# family sync at the end of the pass mirrors it into the folder
@@ -3049,7 +3142,6 @@ class ExtUpdater:
 			if name in self.Installed(target):
 				self.RecordInstalled(name, digest, step.get('release', ''), target)
 			return {'package': name, 'ok': True, 'action': 'refreshed in the store'}
-		root = self._root(target)
 		dest = root.op(name)
 		if dest is None and step.get('placement') in ('pane', 'root'):
 			# the doorstep (see Compare): a pane spawn beside the toolkit
@@ -3183,6 +3275,7 @@ class ExtUpdater:
 				# a scoped fetch (a picker install) changed what the store
 				# holds without completing it: the family folder follows
 				self.SyncFamilyFolder()
+				self.SyncAgentSkillFolder()
 			self._status('store %s: %d verified, %d MB%s%s'
 						 % (st.get('release', '?'), st.get('verified', 0),
 							st.get('total_mb', 0),
@@ -3214,6 +3307,7 @@ class ExtUpdater:
 						'; FAILED: ' + ', '.join('%s (%s)' % (r['package'], r.get('why', ''))
 												 for r in bad) if bad else '',
 						'; ' + ' '.join(why_gated) if why_gated else ''))
+		self.SyncAgentSkillFolder()
 		self.SyncFamilyFolder()
 		self._keepStoreLater()
 		return {'ok': not bad and not job.get('failed'), 'updated': done,
@@ -3274,6 +3368,7 @@ class ExtUpdater:
 		debug('UPDATER: store complete for %s (%d verified)'
 			% (status.get('release', '?'), status.get('verified', 0)))
 		self.SyncFamilyFolder()
+		self.SyncAgentSkillFolder()
 
 	# ------------------------------------------------------------------
 	# the FNS operator family folder (docs/PaletteFolderContract.md,
@@ -3432,6 +3527,96 @@ class ExtUpdater:
 		if os.path.isdir(legacy):
 			shutil.rmtree(legacy, ignore_errors=True)
 
+	# ------------------------------------------------------------------
+	# the consumer agent skill folder (docs/AgentSkill.md section 4)
+	# ------------------------------------------------------------------
+	# The skill bundle a user's coding agent reads (SKILL.md, VERSION, one
+	# reference page per public package) lives beside the family folder,
+	# <user palette>/FNSTools/agent-skill/fnstools/, so InstallAgentSkill
+	# copies from a local source and works offline. Like the family folder
+	# it is DERIVED: laid out from the transport document the store holds
+	# (one JSON file the release publishes beside the rails), pruned of
+	# anything that document does not carry, never authored in place. The
+	# source checkout unpacks its own packaging/dist build instead, so the
+	# dev machine's copy is the one Build() just rendered.
+
+	def AgentSkillFolder(self):
+		"""Where the agent skill lives on this machine:
+		<user palette>/FNSTools/agent-skill, or '' when this install has no
+		user palette folder."""
+		root = _fnsPaletteRoot()
+		return '%s/%s' % (root, AGENT_SKILL_DIR) if root else ''
+
+	def _agentSkillSource(self):
+		"""The transport document to unpack: this checkout's own build when
+		the project is the toolkit source (packaging/dist/agent-skill.json
+		beside the .toe), else the store's copy; '' when neither exists."""
+		dev = '%s/packaging/dist/%s' % (str(project.folder).replace('\\', '/'), AGENT_SKILL_NAME)
+		if os.path.exists(dev):
+			return dev
+		store = '%s/%s' % (self.StoreFolder(), AGENT_SKILL_NAME)
+		return store if os.path.exists(store) else ''
+
+	def SyncAgentSkillFolder(self):
+		"""Lay the agent skill bundle out in the agent skill folder from the
+		transport document (the store's copy, or this source checkout's own
+		build): every file written where its text differs, anything else
+		under the bundle folder removed. Cheap when nothing changed. Runs
+		after every refresh and update pass; safe to call by hand."""
+		folder = self.AgentSkillFolder()
+		if not folder:
+			return {'ok': False, 'why': 'no user palette folder on this install'}
+		src = self._agentSkillSource()
+		if not src:
+			return {'ok': True, 'skipped': 'the store holds no agent skill document yet '
+					'(refresh the store)', 'folder': folder, 'written': [], 'removed': []}
+		try:
+			with open(src, 'r', encoding='utf-8') as f:
+				doc = json.load(f)
+		except Exception as e:
+			return {'ok': False, 'why': 'agent skill document unreadable (%s)' % e}
+		files = doc.get('files') if isinstance(doc, dict) else None
+		if doc.get('schema') != AGENT_SKILL_SCHEMA or not isinstance(files, dict):
+			return {'ok': False, 'why': 'not an agent skill document: %s' % src}
+		bundle = str(doc.get('bundle') or 'fnstools')
+		dest = '%s/%s' % (folder, bundle)
+		version = str(doc.get('version') or '')
+		written, removed = [], []
+		try:
+			for rel, text in sorted(files.items()):
+				path = '%s/%s' % (dest, rel)
+				cur = None
+				if os.path.isfile(path):
+					with open(path, 'r', encoding='utf-8') as f:
+						cur = f.read()
+				if cur != text:
+					os.makedirs(os.path.dirname(path), exist_ok=True)
+					with open(path, 'w', encoding='utf-8', newline='\n') as f:
+						f.write(text)
+					written.append(rel)
+			keep = set(r.lower() for r in files)
+			if os.path.isdir(dest):
+				for base, dirs, names in os.walk(dest, topdown=False):
+					for fn in names:
+						full = os.path.join(base, fn)
+						rel = os.path.relpath(full, dest).replace('\\', '/')
+						if rel.lower() not in keep:
+							os.remove(full)
+							removed.append(rel)
+					for d in dirs:
+						try:
+							os.rmdir(os.path.join(base, d))
+						except OSError:
+							pass
+		except Exception as e:
+			return {'ok': False, 'why': 'agent skill folder not writable (%s)' % e,
+					'folder': dest, 'written': written, 'removed': removed}
+		if written or removed:
+			fnsLog('UPDATER: agent skill %s: %d file(s) written, %d removed -> %s'
+				   % (version, len(written), len(removed), dest))
+		return {'ok': True, 'folder': dest, 'version': version, 'source': src,
+				'written': written, 'removed': removed}
+
 	# --- TD's Palette index -----------------------------------------------
 	# Copying files into the palette is NOT enough. TD does not scan the
 	# folder: it reads an INDEX, <userPalette>/paletteData.json, into the
@@ -3555,14 +3740,17 @@ class ExtUpdater:
 	# ------------------------------------------------------------------
 
 	def Check(self, _=None):
+		"""Pulse handler for the Check parameter: CheckUpdates() while Active."""
 		if self.ownerComp.par.Active.eval():
 			self.CheckUpdates()
 
 	def Update(self, _=None):
+		"""Pulse handler for the Update parameter: UpdateProject() while Active."""
 		if self.ownerComp.par.Active.eval():
 			self.UpdateProject()
 
 	def Refreshstore(self, _=None):
+		"""Pulse handler for the Refreshstore parameter: RefreshStore()."""
 		self.RefreshStore()
 
 	### FNS_CommandRegistry (quick-launch commands) ###
@@ -3578,3 +3766,112 @@ class ExtUpdater:
 		"""Download and install available tool updates."""
 		run('args[0].par.Update.pulse()', self.ownerComp, delayFrames=1)
 		return {'ok': True, 'started': True}
+
+	@FNSCommand.fns_command(label='Install agent skill',
+							help='Copy the FNSTools agent skill into this project or your user skills folder')
+	def InstallAgentSkill(self, where: Literal['project', 'user'] = 'project',
+						  agents_md: bool = False):
+		"""Copy the FNSTools agent skill into this project or your user skills folder.
+
+		`project` writes <project folder>/.claude/skills/fnstools/, `user`
+		writes ~/.claude/skills/fnstools/; both are what Claude Code reads
+		(docs/AgentSkill.md section 6). The source is the machine's copy,
+		<user palette>/FNSTools/agent-skill/fnstools/, brought up to date
+		first, so this works offline. Idempotent by VERSION: an older copy
+		is replaced, the same one is left and reported current (unless its
+		files differ, as on a machine that rebuilds the bundle between
+		releases: then it is refreshed), a newer one is kept and said so.
+		Nothing outside the fnstools/ folder it owns is
+		touched, except with `agents_md`, which appends a short pointer block
+		to <project folder>/AGENTS.md once (section 7; off by default, since
+		the command never edits a file it does not own unasked). The
+		destination is logged to the console."""
+		self.SyncAgentSkillFolder()
+		folder = self.AgentSkillFolder()
+		src = '%s/fnstools' % folder if folder else ''
+		if not src or not os.path.isfile('%s/SKILL.md' % src):
+			why = 'agent skill: nothing to install yet -- refresh the store first'
+			fnsLog('UPDATER: ' + why, level='WARNING')
+			return {'ok': False, 'why': why}
+		where = 'user' if str(where).strip().lower() == 'user' else 'project'
+		base = os.path.expanduser('~') if where == 'user' else str(project.folder)
+		dest = '%s/.claude/skills/fnstools' % base.replace('\\', '/')
+		want = self._agentSkillVersion(src)
+		have = self._agentSkillVersion(dest)
+		if have and have == want and self._sameFiles(src, dest):
+			state = 'current'
+		elif have and have != want and _isNewer(have.lstrip('v'), want.lstrip('v')):
+			state = 'kept newer'
+		else:
+			try:
+				if os.path.isdir(dest):
+					shutil.rmtree(dest)
+				os.makedirs(os.path.dirname(dest), exist_ok=True)
+				shutil.copytree(src, dest)
+			except Exception as e:
+				why = 'agent skill: could not write %s (%s)' % (dest, e)
+				fnsLog('UPDATER: ' + why, level='WARNING')
+				return {'ok': False, 'why': why, 'dest': dest}
+			if not have:
+				state = 'installed'
+			elif have == want:
+				state = 'refreshed'
+			else:
+				state = 'updated from %s' % have
+		pointer = None
+		if agents_md and where == 'project':
+			pointer = self._pointAgentsMd(base, 'ANT SKILL')
+		fnsLog('UPDATER: agent skill %s %s at %s%s'
+			   % (want, state, dest, ' (AGENTS.md: %s)' % pointer if pointer else ''))
+		return {'ok': True, 'where': where, 'dest': dest, 'version': want,
+				'previous': have, 'state': state, 'agents_md': pointer}
+
+	@staticmethod
+	def _sameFiles(a, b):
+		"""Do two folders hold the same files with the same text?"""
+		def snapshot(root):
+			out = {}
+			for base, dirs, files in os.walk(root):
+				for fn in files:
+					full = os.path.join(base, fn)
+					rel = os.path.relpath(full, root).replace('\\', '/').lower()
+					try:
+						with open(full, 'r', encoding='utf-8') as f:
+							out[rel] = f.read()
+					except Exception:
+						out[rel] = None
+			return out
+		return snapshot(a) == snapshot(b)
+
+	@staticmethod
+	def _agentSkillVersion(folder):
+		"""The VERSION a skill folder carries, '' when there is none."""
+		try:
+			with open('%s/VERSION' % folder, 'r', encoding='utf-8') as f:
+				return f.read().strip()
+		except Exception:
+			return ''
+
+	AGENTS_MD_MARK = '<!-- fnstools-agent-skill -->'
+
+	def _pointAgentsMd(self, base, _unused=None):
+		"""Append the pointer block to <base>/AGENTS.md unless it is there
+		already. Returns 'added', 'present' or 'failed: ...'."""
+		path = '%s/AGENTS.md' % str(base).replace('\\', '/')
+		block = ('\n%s\n## FNSTools\n\nThis TouchDesigner project uses the FNSTools toolkit. '
+				 'The agent skill describing it (packages, shortcuts, promoted methods, '
+				 'quick-launch commands, registries) is at `.claude/skills/fnstools/SKILL.md`; '
+				 'read it before driving an `FNS_` COMP or an `op.FNS_*` shortcut.\n'
+				 % self.AGENTS_MD_MARK)
+		try:
+			cur = ''
+			if os.path.isfile(path):
+				with open(path, 'r', encoding='utf-8') as f:
+					cur = f.read()
+			if self.AGENTS_MD_MARK in cur:
+				return 'present'
+			with open(path, 'a', encoding='utf-8', newline='\n') as f:
+				f.write(block)
+			return 'added'
+		except Exception as e:
+			return 'failed: %s' % e

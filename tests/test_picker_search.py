@@ -273,8 +273,13 @@ for path, src in zip(SHELLS, srcs):
           "var COMPACT_KEY = 'fns.compact';" in src
           and "try { localStorage.setItem(COMPACT_KEY, compactOn ? '1' : '0'); } catch (e)" in src
           and "stored(COMPACT_KEY, null) === '1'" in src)
-    check('%s: Compact hides the description, byline, hints and where-chips' % tag,
-          re.search(r'#list\.dense \.desc, #list\.dense \.name a\.help, #list\.dense \.chip\.where,\s*'
+    # 2026-10-16: Compact is a LIST, not title-only tiles -- the description
+    # stays, clamped to one line; the byline, hints and where-chips go
+    check('%s: Compact keeps the description on one line' % tag,
+          re.search(r'#list\.dense \.desc:not\(\.byline\) \{[^}]*white-space: nowrap;[^}]*text-overflow: ellipsis;',
+                    src) is not None)
+    check('%s: Compact hides the byline, hints and where-chips' % tag,
+          re.search(r'#list\.dense \.desc\.byline, #list\.dense \.chip\.where,\s*'
                     r'#list\.dense \.chip\.hint, #list\.dense \.chip\.variant,', src) is not None)
     check('%s: the description stays on the tile hover (data-tip)' % tag,
           "el.setAttribute('data-tip', (p.description || '')" in src)

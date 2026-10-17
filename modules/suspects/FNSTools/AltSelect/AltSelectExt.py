@@ -54,6 +54,7 @@ class AltSelectExt:
 
 
 	def OnSelectOP(self, _op):
+		"""Remember the newly selected operator's position, and its docked operators' positions, for the move check; called when the selection changes."""
 		if _op:
 			self.lastSelectedPos = {'op_pos': (_op.nodeX, _op.nodeY), 'docked_pos': {_dock: (_dock.nodeX, _dock.nodeY) for _dock in _op.docked}}
 
@@ -64,6 +65,7 @@ class AltSelectExt:
 
 
 	def OnUpdate(self, _op: OP):
+		"""Called when a watched operator changes: while the hotkey is held, a move since the selection is handed to onPosChange, which places the matching Select operator."""
 		if not self.hotkey:
 			return
 		

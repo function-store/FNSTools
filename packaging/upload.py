@@ -458,9 +458,9 @@ def prune(keep, base, dry=False):
             gated = '/plus/' in str((p.get('artifact') or {}).get('url', ''))
             keys.append(f'{PREFIX}/plus/{rel}/{p["name"]}.tox' if gated
                         else f'{PREFIX}/{rel}/{p["name"]}.tox')
-        for rail in ('FNS_Installer.tox', 'FNSTools.tox',
+        for rail in ('FNS_Installer.tox', 'FNSTools.tox', 'FNSTools-DevKit.zip',
                      'FunctionStore_tools_2025.tox', 'manifest.json',
-                     'fnstools.json'):
+                     'fnstools.json', 'agent-skill.json'):
             keys.append(f'{PREFIX}/{rel}/{rail}')
     print(f'prune: {len(doomed)} release(s), {len(keys)} object(s): {", ".join(doomed)}')
     if dry:

@@ -59,6 +59,7 @@ class ExtColorUI:
 
 	@property
 	def Overrides(self) -> dict:
+		"""The UI color overrides this tool stores on its COMP, element name to RGB."""
 		return self.ownerComp.fetch('colors', {}, search=False)
 
 	def _storeOverrides(self, d: dict):
@@ -101,6 +102,7 @@ class ExtColorUI:
 		self._Kick(4)
 
 	def ApplyOverrides(self):
+		"""Write every stored override into ui.colors."""
 		for el, rgb in self.Overrides.items():
 			if el in ui.colors:
 				ui.colors[el] = rgb
@@ -257,9 +259,11 @@ class ExtColorUI:
 		}
 
 	def SendState(self):
+		"""Push the current color state to the page in the in-TD browser."""
 		self._sendCall('setState', self._statePayload())
 
 	def Toast(self, text):
+		"""Show a short message on the page; a console request in flight collects it for its answer."""
 		# a console request in flight collects its toasts for the HTTP answer;
 		# the in-TD browser gets them regardless
 		sink = getattr(self, '_toast_sink', None)
@@ -274,6 +278,7 @@ class ExtColorUI:
 	# the in-TD panel (or TD itself) changes colors.
 
 	def ConsoleState(self):
+		"""The page state as the console tab's HTTP answer: {'ok', 'state'}."""
 		return {'ok': True, 'state': self._statePayload()}
 
 	def ConsoleCommand(self, msg):
@@ -376,6 +381,7 @@ class ExtColorUI:
 	# ----------------------------------------------------------------- actions
 
 	def ResetAll(self):
+		"""Reset every UI color to TouchDesigner's defaults and drop the stored overrides."""
 		fnsLog('ColorUI: resetting all UI colors to defaults')
 		ui.colors.resetToDefaults()
 		self._snapshotDefaults()
@@ -384,6 +390,7 @@ class ExtColorUI:
 		self.SendState()
 
 	def Randomize(self):
+		"""Give every UI color a random value (UndoRandom takes it back)."""
 		fnsLog('ColorUI: randomizing all UI colors')
 		for el in ui.colors:
 			ui.colors[el] = [random.uniform(0, 1) for _ in range(3)]
@@ -391,12 +398,14 @@ class ExtColorUI:
 		self.SendState()
 
 	def UndoRandom(self):
+		"""Undo Randomize: TouchDesigner's defaults with the stored overrides applied again."""
 		ui.colors.resetToDefaults()
 		self.ApplyOverrides()
 		self._randomized = False
 		self.SendState()
 
 	def DoImport(self, dialog=False):
+		"""Load UI colors from the JSON file the File parameter names, or one chosen in a dialog, and apply them."""
 		path = self.evalFile
 		if dialog or not path:
 			path = ui.chooseFile(load=True, start=path or None,
@@ -423,6 +432,7 @@ class ExtColorUI:
 		self.SendState()
 
 	def DoExport(self, dialog=False):
+		"""Save the stored overrides as JSON to the File parameter's path, or one chosen in a dialog."""
 		path = self.evalFile
 		if dialog or not path:
 			path = ui.chooseFile(load=False, start=path or None,

@@ -183,8 +183,11 @@ check('turning it off counts as a change to apply',
       "var famGoes = served && familyHere && !(famMember && familyOn);" in idx
       and "(removals || famGoes) ? 'Apply changes…' : 'Review install…'" in idx
       and "notes.push('FNS tab removed')" in idx)
-check('inside TouchDesigner the switch moves into the toolbar with the count',
-      "act.appendChild(document.getElementById('famopt'));" in idx)
+# 2026-10-17 (wizard phase 1): the switch is the set screen's options row,
+# shown only while a family operator is in the set
+check('the switch sits on the set screen, in its options row',
+      'id="setopts" hidden' in idx
+      and "document.getElementById('setopts').hidden = !famMember;" in idx)
 check('like last time applies the recorded choice',
       "if (last && typeof last.family === 'boolean') familyOn = last.family;" in idx)
 check('the paste script adds the family with a free family pick unless the switch is off',
@@ -200,7 +203,7 @@ check('it never roams: the root config host excludes it',
       and "ex.val = ' '.join(tokens + missing)" in bi)
 check('the forwarder hears value changes and hands them to SetFamily, deferred',
       "pe.par.valuechange = True" in bi
-      and "' '.join(n for n, _, _ in ROOT_ENTRY_POINTS + ROOT_PROJECT_TOGGLES)" in bi
+      and "' '.join(n for n, _, _ in ROOT_ENTRY_POINTS + ROOT_PROJECT_TOGGLES\n                           + ROOT_PROJECT_PULSES)" in bi
       and 'run("args[0].valid and args[0].SetFamily(args[1])", inst, bool(par.eval()),' in bi)
 check('the page is sorted by name list (par.order ties there)', 'pg.sort(*(ours + ' in bi)
 check('SetFamily: off is RemoveFamily; on refuses without a family operator and fetches when needed',

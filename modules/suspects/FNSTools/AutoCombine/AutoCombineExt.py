@@ -53,6 +53,7 @@ class AutoCombineExt:
 		FNSCommand.announce(self.ownerComp)
 
 	def SetCombine(self, _op):
+		"""Apply the tool's combine settings (operand, RGB and the rest) to a newly created operator that has inputs, while the tool is active; called for each new operator."""
 		if not _op.inputs:
 			return
 		if self.ownerComp.op('null_hk')['activate'].eval():

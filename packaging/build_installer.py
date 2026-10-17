@@ -43,7 +43,7 @@ UPDATER_TOX = 'packaging/dist/FNS_Updater.tox'
 # installer is a copy of the live dev comp, re-stamped so the two rails
 # can never ship different answers), which also makes the live dev comp's
 # own Pkgversion a mirror of this value, not a second source.
-INSTALLER_VERSION = '3.2.48'
+INSTALLER_VERSION = '3.2.72'
 # publish.Stage() runs on the shell with no TD, so the version each rail
 # was built at rides this sidecar from the build to the staged manifest's
 # `rails` block. Without it a rail is recallable only by hash, which no
@@ -458,6 +458,24 @@ ROOT_PROJECT_TOGGLES = (
      'one family operator installed. Follows Pick Tools, where the same '
      'choice is "Add FNS tab to OP Create". Not carried to other projects.'),
 )
+# The last section of the page: a pulse that acts on the project as a whole
+# and deletes things, so it sits apart from the entry points. It never acts
+# on one press: the first lists what would go in the Textport, a second
+# within REMOVE_PATREON_WINDOW seconds removes it (no blocking dialog,
+# td-python.md: ui.messageBox wedges TD when a script reaches it).
+ROOT_PROJECT_PULSES = (
+    ('Removepatreon', 'Remove Patreon Tools',
+     'Before you publish, sell or share this project file: removes every '
+     'Patreon tool from it, so the .toe carries free tools only. Installed '
+     'Patreon tools leave the toolkit (their settings stay for a later '
+     'reinstall), copies placed in your networks are deleted, and the '
+     'install record forgets them. The first press lists what would go in '
+     'the Textport; press again within 10 seconds to remove it. Save a '
+     'copy of the project first: the removal cannot be undone. Handing a '
+     'client a project so they can run it is allowed by the Patreon '
+     'licence and needs none of this.'),
+)
+REMOVE_PATREON_WINDOW = 10
 # Two pulses, two distinct roles, and the console is the hub for both: Pick Tools deep-links to its Install & remove tab (#tools) and Open
 # Settings to its Settings tab -- both in the in-TD webBrowser panel when
 # the root has one, so the whole flow stays inside TD (the panel handles
@@ -489,6 +507,44 @@ ROOT_PULSE_TEXT = (
     '\tif reg is not None:\n'
     '\t\treturn reg.OpenSettingsUI(tab=tab, panel=True)\n'
     '\treturn None\n\n'
+    '# Remove Patreon Tools: the first press lists, a second within the\n'
+    '# window removes. The arm lives in this module, so a recompile disarms.\n'
+    '_ARMED = {}\n'
+    'WINDOW = %d\n\n'
+    'def _removePatreon(inst):\n'
+    '\tif inst is None or not hasattr(inst, "RemovePatreon"):\n'
+    '\t\tdebug("FNSTools: no installer in this root to remove Patreon tools")\n'
+    '\t\treturn\n'
+    '\timport time\n'
+    '\tnow = time.time()\n'
+    '\tif now - _ARMED.pop("removepatreon", 0) <= WINDOW:\n'
+    '\t\tprint("FNSTools: removing the Patreon tools...")\n'
+    '\t\t# deferred: out of the pulse callback, and removal destroys COMPs\n'
+    '\t\trun("args[0].valid and args[0].ext.InstallerExt.reportPatreonRemoval()",\n'
+    '\t\t\tinst, delayFrames=1, delayRef=op.TDResources)\n'
+    '\t\treturn\n'
+    '\tres = inst.RemovePatreon(confirm=False)\n'
+    '\tif not res.get("ok"):\n'
+    '\t\tprint("FNSTools: Remove Patreon Tools refused --", res.get("why"))\n'
+    '\t\treturn\n'
+    '\tfound = res.get("would_remove") or []\n'
+    '\tforget = res.get("forgotten") or []\n'
+    '\tfor line in res.get("notes") or []:\n'
+    '\t\tprint("FNSTools: " + line)\n'
+    '\tfor path in res.get("kept") or []:\n'
+    '\t\tprint("FNSTools: left alone (Embody authors it here): " + path)\n'
+    '\tif not found and not forget:\n'
+    '\t\tprint("FNSTools: no Patreon tools in this project")\n'
+    '\t\treturn\n'
+    '\t_ARMED["removepatreon"] = now\n'
+    '\tprint("FNSTools: Remove Patreon Tools would delete:")\n'
+    '\tfor path in found:\n'
+    '\t\tprint("  " + path)\n'
+    '\tif forget:\n'
+    '\t\tprint("  and forget the install record of " + ", ".join(forget))\n'
+    '\tprint("FNSTools: press Remove Patreon Tools again within "\n'
+    '\t\t  + str(WINDOW) + " seconds to remove them. Save a copy first: "\n'
+    '\t\t  "this cannot be undone.")\n\n'
     'def onPulse(par):\n'
     '\tinst = parent().op(%r)\n'
     '\tif par.name == "Opensettings":\n'
@@ -497,6 +553,8 @@ ROOT_PULSE_TEXT = (
     '\t\t\tdebug("FNSTools: no FNS_Console installed yet -- Pick Tools installs core first")\n'
     '\t\telif isinstance(res, dict) and not res.get("ok"):\n'
     '\t\t\tdebug("FNSTools: console did not open --", res.get("why"))\n'
+    '\telif par.name == "Removepatreon":\n'
+    '\t\t_removePatreon(inst)\n'
     '\telif par.name == "Picktools":\n'
     '\t\t# Handled ONLY when the console says it opened. A refusal is not\n'
     '\t\t# an answer: the bootstrap ships a config host that promotes the\n'
@@ -521,7 +579,7 @@ ROOT_PULSE_TEXT = (
     '\t# deferred: out of the parameter callback, and removal destroys a COMP\n'
     '\trun("args[0].valid and args[0].SetFamily(args[1])", inst, bool(par.eval()),\n'
     '\t\tdelayFrames=1, delayRef=op.TDResources)\n'
-    % (COMP_NAME, COMP_NAME))
+    % (REMOVE_PATREON_WINDOW, COMP_NAME, COMP_NAME))
 
 
 # The first-run welcome: an Execute DAT whose onCreate fires whenever the
@@ -821,17 +879,27 @@ def EnsureRootEntryPoints(root):
         par.label = label
         par.help = help_text
         par.startSection = True
-    # Pulses, then the roaming toggles, then the project toggles; anything
-    # else on the page (Configscope, Packagefiles) keeps its place after.
-    # par.order ties on this page, so the page is sorted by name list.
-    ours = [n for n, _, _ in ROOT_ENTRY_POINTS + ROOT_TOGGLES + ROOT_PROJECT_TOGGLES]
+    for i, (name, label, help_text) in enumerate(ROOT_PROJECT_PULSES):
+        par = getattr(root.par, name, None)
+        if par is None:
+            par = pg.appendPulse(name, label=label)[0]
+        par.label = label
+        par.help = help_text
+        par.startSection = i == 0
+    # Pulses, then the roaming toggles, then the project toggles, then the
+    # project pulses; anything else on the page (Configscope, Packagefiles)
+    # keeps its place after. par.order ties on this page, so the page is
+    # sorted by name list.
+    ours = [n for n, _, _ in ROOT_ENTRY_POINTS + ROOT_TOGGLES
+            + ROOT_PROJECT_TOGGLES + ROOT_PROJECT_PULSES]
     pg.sort(*(ours + [p.name for p in pg.pars if p.name not in ours]))
     pe = root.op('parexec_root_pulses')
     if pe is None:
         pe = root.create(parameterexecuteDAT, 'parexec_root_pulses')
         pe.nodeX, pe.nodeY = -350, -250
     pe.par.op = root
-    pe.par.pars = ' '.join(n for n, _, _ in ROOT_ENTRY_POINTS + ROOT_PROJECT_TOGGLES)
+    pe.par.pars = ' '.join(n for n, _, _ in ROOT_ENTRY_POINTS + ROOT_PROJECT_TOGGLES
+                           + ROOT_PROJECT_PULSES)
     pe.par.custom = True
     pe.par.builtin = False
     pe.par.valuechange = True
@@ -881,7 +949,8 @@ def EnsureRootEntryPoints(root):
         if fam is not None:
             fam.val = root.op(FAMILY_PACKAGE) is not None
     return {'root': root.path, 'page': pg.name,
-            'pars': [n for n, _, _ in ROOT_ENTRY_POINTS + ROOT_PROJECT_TOGGLES],
+            'pars': [n for n, _, _ in ROOT_ENTRY_POINTS + ROOT_PROJECT_TOGGLES
+                     + ROOT_PROJECT_PULSES],
             'retired': retired,
             'forwarder': pe.path, 'welcome': we.path,
             'config_callbacks': cb.path, 'config_host': wired}
@@ -959,6 +1028,148 @@ def _severHost(host):
     if vc is not None:
         vc.destroy()
     return host
+
+
+# ---------------------------------------------------------------------------
+# The developer kit (docs/DeveloperKit.md): the eleven registries, each as
+# its own tox, zipped with a README and the licence, as a separate download
+# beside the bootstrap for developers who build tools against the FNS
+# surfaces without installing the toolkit. Registries only (owner,
+# 2026-10-17): no console, no hub, no updater. A zip of separate toxes
+# rather than one root (owner, the same day): a developer drops only the
+# registries a tool publishes into. RegistryBase guards a host that finds no
+# toolkit root, so the toxes work alone.
+DEVKIT_RAIL = 'FNSTools-DevKit.zip'
+OUT_DEVKIT = 'packaging/dist/%s' % DEVKIT_RAIL
+DEVKIT_PACKAGES = (
+    'FNS_ToolbarRegistry', 'FNS_NavbarRegistry', 'FNS_MainMenuRegistry',
+    'FNS_OpMenuRegistry', 'FNS_PaneTypeRegistry', 'FNS_PaletteRegistry',
+    'FNS_TimelineRegistry', 'FNS_PaneSearchRegistry', 'FNS_HubRegistry',
+    'FNS_ConfigRegistry', 'FNS_CommandRegistry')
+DEVKIT_SURFACES = (
+    ('FNS_ToolbarRegistry', "TouchDesigner's toolbar"),
+    ('FNS_NavbarRegistry', 'every pane bar'),
+    ('FNS_MainMenuRegistry', 'the main menu bar'),
+    ('FNS_OpMenuRegistry', 'the Insert Operator dialog'),
+    ('FNS_PaneTypeRegistry', 'the pane-type menu'),
+    ('FNS_PaletteRegistry', 'the Palette Browser'),
+    ('FNS_TimelineRegistry', 'the timeline dialog'),
+    ('FNS_PaneSearchRegistry', "each pane's find bar"),
+    ('FNS_HubRegistry', 'the tabs of the FNS Hub (the Hub itself is not in the kit)'),
+    ('FNS_ConfigRegistry', 'the settings file'),
+    ('FNS_CommandRegistry', 'the quick-launch command system'),
+)
+DEVKIT_README = """FNSTools developer kit, release {release}
+==========================================
+
+The eleven registries of FNSTools, each as its own .tox, for building a
+tool against the surfaces they manage without installing the toolkit.
+It is not the toolkit: there is no installer, no console, no Hub and no
+updater in it, so it never updates itself. Take the kit of the release
+you target.
+
+What is here
+------------
+{table}
+README.md     this file
+LICENSE.txt   MIT, the licence of every free FNSTools package
+
+How to use it
+-------------
+1. Drag the registries your tool publishes into at the root of a
+   development project; one is enough, and they work together. Each
+   promotes its global into /sys/FNS_Registries when it loads, reached as
+   op.FNS_TOOLBARREGISTRY, op.FNS_NAVBARREGISTRY and so on.
+2. Stamp a host into the component you are building, from the registry
+   you dropped (the one at the root, not the /sys global), for example
+       op('/FNS_ToolbarRegistry').StampHost(op('/my_tool'))
+3. Register from the component's init as the surface's contract says.
+   Each registry's page carries its contract:
+   https://functionstore.tools/docs/
+
+Without the toolkit root (op.FNS) a host keeps its own copy of the
+registry code instead of cloning it, and the config registry keeps
+settings with the project instead of the roaming file. Both are fine for
+development. When you install the real toolkit into the same project,
+delete the loose registries first: a same-version copy already promoted
+keeps the global.
+"""
+
+
+def _recordRailVersionAs(rail_filename, version):
+    """Merge one rail's version into the sidecar publish.Stage reads: the
+    installer rails record INSTALLER_VERSION, the kit the toolkit release."""
+    path = _repo(RAILS_VERSIONS)
+    try:
+        with open(path, encoding='utf-8') as f:
+            doc = json.load(f)
+    except Exception:
+        doc = {}
+    doc[rail_filename] = str(version)
+    with open(path, 'w', encoding='utf-8') as f:
+        json.dump(doc, f, indent=1)
+        f.write('\n')
+
+
+def _toolkitRelease():
+    """The release the dist toxes were built in, from packaging/manifest.json;
+    the installer version when there is no manifest yet."""
+    try:
+        with open(_repo('packaging', 'manifest.json'), encoding='utf-8') as f:
+            rel = json.load(f).get('release')
+        if rel:
+            return str(rel)
+    except Exception:
+        pass
+    return INSTALLER_VERSION
+
+
+def BuildDevKit(out_path=OUT_DEVKIT):
+    """The developer kit: a zip of the eleven registry toxes from dist (built
+    by Build()), a README naming each surface, and the MIT notice
+    (docs/DeveloperKit.md). Plain file work, no staging in TD; refuses when
+    a registry tox is missing rather than shipping a partial kit.
+    """
+    import zipfile
+    missing = [n for n in DEVKIT_PACKAGES
+               if not os.path.exists(_repo('packaging', 'dist', n + '.tox'))]
+    if missing:
+        return {'exported': False,
+                'error': 'dist toxes missing: %s -- run Build() first'
+                         % ', '.join(missing)}
+    release = _toolkitRelease()
+    # MIT, like the bootstrap and every free package; a failed notice fails
+    # the build (docs/LicenseNotices.md)
+    try:
+        ln = _licenseNotices()
+        notices = ln.Notices(ln.FREE, None, _repo())
+        # Notices() returns the records Stamp() annotates with ({title,
+        # body}); the zip wants them as text, one after the other
+        if not isinstance(notices, str):
+            parts = []
+            for n in notices:
+                if isinstance(n, dict):
+                    title = str(n.get('title') or n.get('name') or 'Notice')
+                    parts.append(title + '\n' + '=' * len(title) + '\n\n'
+                                 + str(n.get('body') or ''))
+                else:
+                    parts.append(str(n))
+            notices = '\n\n'.join(parts).rstrip() + '\n'
+    except Exception as e:
+        return {'exported': False, 'error': 'licence notice: %s' % e}
+    width = max(len(n) for n, _ in DEVKIT_SURFACES) + 4
+    table = '\n'.join('%s %s' % ((n + '.tox').ljust(width + 4), s)
+                      for n, s in DEVKIT_SURFACES)
+    dest = _repo(out_path)
+    os.makedirs(os.path.dirname(dest), exist_ok=True)
+    with zipfile.ZipFile(dest, 'w', zipfile.ZIP_DEFLATED) as z:
+        for name in DEVKIT_PACKAGES:
+            z.write(_repo('packaging', 'dist', name + '.tox'), name + '.tox')
+        z.writestr('README.md', DEVKIT_README.format(release=release, table=table))
+        z.writestr('LICENSE.txt', notices)
+    _recordRailVersionAs(os.path.basename(out_path), release)
+    return {'out': dest, 'exported': True, 'bytes': os.path.getsize(dest),
+            'packages': list(DEVKIT_PACKAGES), 'version': release}
 
 
 def _bootstrapRoot(stage):

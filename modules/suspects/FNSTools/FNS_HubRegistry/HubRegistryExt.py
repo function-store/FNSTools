@@ -373,6 +373,7 @@ class HubRegistryExt(RegistryBase):
 		self._scheduleSync()
 
 	def UnregisterTab(self, canonical):
+		"""Remove a contributed Hub tab and resync the tab bar (forwarded to the /sys global)."""
 		if not self._is_sys_global():
 			api = self._registryApi()
 			if api is not self:
