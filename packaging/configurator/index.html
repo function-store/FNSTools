@@ -1095,6 +1095,9 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
   .inst-hint { margin: 0 0 14px; font-size: 13.5px; color: var(--text-dim); line-height: 1.6; }
   .inst pre.out { max-height: none; }
   .inst-report { margin-top: 4px; }
+  .inst-wait { margin-top: 16px; }
+  .inst-wait .seclab { margin-bottom: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-faint); }
+  .inst-wait .plusline { margin: 0; }
   .inst-foot { justify-content: flex-end; }
   .inst-foot .bar-docs { margin-right: auto; }
   html[data-served] #screen-start, html[data-embedded] #screen-start,
@@ -1308,6 +1311,12 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
       <p class="inst-hint" id="insthint"></p>
       <pre class="out" id="instout"></pre>
       <div class="dlg-report inst-report" id="instreport" hidden></div>
+      <!-- the picks the account cannot install yet: not in the plan, still
+           shown at the last step with the route that unlocks them -->
+      <div class="inst-wait" id="instwait" hidden>
+        <div class="seclab">Waiting for Patreon</div>
+        <div class="plusline" id="instplus"></div>
+      </div>
     </div>
     <div class="sum inst-foot">
       <a class="bar-docs" id="instdocs" target="_blank" rel="noopener">Installation notes ↗</a>
@@ -4340,6 +4349,23 @@ function fnsBoot() {
     document.getElementById('instclose').hidden = !(state === 'progress' || state === 'done');
     document.getElementById('instback').hidden = !(state === 'plan' || state === 'script' || state === 'failed');
     document.getElementById('instdocs').hidden = state === 'progress';
+    // The picks the account cannot install yet are kept out of the plan
+    // (recorded as wanted, they install by themselves after a sign-in),
+    // which left them unmentioned at the last step. The plan now carries
+    // them under "Waiting for Patreon" with the actions that unlock them
+    // (the drawer's own line), and the done report keeps the one-line
+    // note without the actions (owner, 2026-10-17: give them a chance
+    // there). The script state already says it in its hint.
+    var wait = document.getElementById('instwait');
+    var waitLine = document.getElementById('instplus');
+    if (wait && waitLine) {
+      if (state === 'plan' || state === 'done') {
+        renderPlusLine(waitLine, state === 'done');
+        wait.hidden = waitLine.hidden;
+      } else {
+        wait.hidden = true;
+      }
+    }
     setScreen('install');
   }
   document.getElementById('instback').addEventListener('click', function () { setScreen('catalog'); });
@@ -5027,6 +5053,14 @@ function fnsBoot() {
     var t = document.getElementById('toast');
     if (!t) { t = mk('div', 'toast'); t.id = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
     t.textContent = msg;
+    // The base pins a toast to the bottom right, which is where the
+    // catalog footer's buttons sit: for its few seconds the line read as
+    // the buttons having gone (owner, 2026-10-17). Lift it above the
+    // footer wherever one is showing; in the console frame, where the
+    // footer moved into the toolbar, the corner is free.
+    var foot = document.getElementById('catfoot');
+    var lift = foot && foot.offsetParent ? foot.offsetHeight + 12 : 14;
+    t.style.bottom = lift + 'px';
     t.classList.add('show');
     clearTimeout(toast.timer);
     toast.timer = setTimeout(function () { t.classList.remove('show'); }, 3600);
@@ -5280,8 +5314,10 @@ function fnsBoot() {
    *  that fixes it (sign in, check again, or upgrade). Above the list
    *  because a long set scrolls and the route has to be seen before
    *  Review. */
-  function renderPlusLine() {
-    var line = document.getElementById('plusline');
+  function renderPlusLine(target, noteOnly) {
+    // the drawer's line by default; the install screen passes its own,
+    // and after an install asks for the sentence without the actions
+    var line = target || document.getElementById('plusline');
     if (!line) return;
     var names = Array.from(picked).concat(Array.from(placing).filter(function (n) { return !picked.has(n); }));
     var lockedHere = lockedPatreon(names);
@@ -5324,7 +5360,7 @@ function fnsBoot() {
       text = n + ' of these ' + (one ? 'comes' : 'come') + ' with Patreon; ' + plusReality();
     }
     line.appendChild(document.createTextNode(text));
-    acts.forEach(function (a) { line.appendChild(a); });
+    if (!noteOnly) acts.forEach(function (a) { line.appendChild(a); });
     line.appendChild(docsLink(FNS_DOCS + '/patreon/', 'How unlocking works \u2197'));
   }
 
