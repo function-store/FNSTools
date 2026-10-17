@@ -42,6 +42,11 @@
   --text: #f5f5f5;      --text-dim: #a3a3a3;  --text-faint: #737373;
   --accent: #fbbf24;    --accent-dim: #2a1f08; --accent-bright: #fcd34d;
   --accent-ink: #0a0a0a;
+  /* Patreon: its own hue, apart from the accent, so a chip that says
+     "this one comes with Patreon" never reads as "this one is ticked"
+     (owner, 2026-10-17) */
+  --plus: #ff8f7a;      --plus-dim: rgba(255,143,122,0.10);
+  --plus-line: rgba(255,143,122,0.42); --plus-faint: rgba(255,143,122,0.22);
   --green: #4ade80;     --warn: #fdba74;      --warn-dim: #2a1408;
   --err: #f87171;       --err-dim: #2a0f0f;
   --max-w: 1140px;      --radius: 10px;
@@ -58,6 +63,8 @@
   --text: #16171a;      --text-dim: #5c6069;  --text-faint: #83878f;
   --accent: #a16207;    --accent-dim: #fdf3d7; --accent-bright: #854d0e;
   --accent-ink: #ffffff;
+  --plus: #c2410c;      --plus-dim: #fdeee8;
+  --plus-line: rgba(194,65,12,0.38); --plus-faint: rgba(194,65,12,0.2);
   --green: #16a34a;     --warn: #b45309;      --warn-dim: #fff5e8;
   --err: #dc2626;       --err-dim: #fdecec;
 }
@@ -252,16 +259,16 @@ a.chip.trial:hover { border-color: var(--accent); color: var(--accent-bright); }
    tick here would be a client-side lock, which is exactly the thing that
    means nothing. */
 .chip.plus {
-  background: var(--accent-dim); border-color: rgba(251,191,36,0.28); color: var(--accent);
+  background: var(--plus-dim); border-color: var(--plus-line); color: var(--plus);
   font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; font-size: 10px;
 }
-a.chip.plus:hover { border-color: var(--accent); }
-.card.plus { border-color: rgba(251,191,36,0.22); }
+a.chip.plus:hover { border-color: var(--plus); }
+.card.plus { border-color: var(--plus-faint); }
 /* Entitlement, served flavor only. Unlocked reads as a firmer outline;
    locked stays dimmed (a state you could have). Neither fills: a filled
-   accent chip on every Plus card was one more thing shouting. The
-   published /get/ page never sets these classes. */
-.chip.plus.own { border-color: rgba(251,191,36,0.55); }
+   chip on every Plus card was one more thing shouting. The published
+   /get/ page never sets these classes. */
+.chip.plus.own { border-color: var(--plus); }
 .chip.plus.locked { opacity: 0.6; }
 .acct { color: var(--text-dim); font-size: 12.5px; }
 .acct b { color: var(--accent); font-weight: 600; }
@@ -435,7 +442,7 @@ dialog::backdrop { background: rgba(0,0,0,0.7); }
 .quiz-plus .mark { color: var(--accent); }
 .quiz-plus .btn { margin-left: auto; padding: 4px 10px; font-size: 12px; }
 .qres-sub { margin: 10px 0 2px; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); }
-.qres.plus { border-color: rgba(251,191,36,0.22); }
+.qres.plus { border-color: var(--plus-faint); }
 
 /* ── toast ── */
 .toast {
@@ -693,7 +700,7 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
   .seg button:hover, .tog:hover { color: var(--text); }
   .seg button.on { background: var(--bg-3); color: var(--text); border-color: var(--border-strong); }
   .seg button[data-access="plus"].on { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
-  .seg .dia { color: var(--accent); font-size: 10px; }
+  .seg .dia { color: var(--plus); font-size: 10px; }
   .seg .k, .tog .k {
     font-size: 11.5px; color: var(--text-faint); font-variant-numeric: tabular-nums;
   }
@@ -743,7 +750,7 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
   }
   .tier-div::after { content: ''; flex: 1 1 40px; border-top: 1px solid var(--border); }
   .tier-div .lbl {
-    color: var(--accent); font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--plus); font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
     font-size: 11px;
   }
   .tier-div .dia { font-size: 9px; }
@@ -765,13 +772,12 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
     }
   }
 
-  /* ── cards: selection you can see from across the room ── */
+  /* ── cards: a ticked one is marked quietly (the checkmark and a firmer
+     border); a full accent outline on sixteen rows read loud at 1040x720
+     (owner, 2026-10-17) ── */
   #list .card { position: relative; }
-  #list .card.on {
-    border-color: var(--accent);
-    background: linear-gradient(180deg, var(--accent-dim) 0%, var(--bg-2) 85%);
-  }
-  #list .card.on:hover { background: linear-gradient(180deg, var(--accent-dim) 0%, var(--bg-3) 85%); }
+  #list .card.on { border-color: var(--border-strong); background: var(--bg-2); }
+  #list .card.on:hover { background: var(--bg-3); }
   #list .card.placed { border-color: var(--accent); border-style: dashed; }
   #list .card.removing { border-color: var(--err); border-style: dashed; }
   #list .card.removing .tt { text-decoration: line-through; text-decoration-color: var(--err); }
@@ -779,7 +785,7 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
   #list .card.plus .body { padding-right: 12px; }
   #list .card.plus::after {
     content: '◆'; position: absolute; top: 9px; right: 11px;
-    font-size: 9px; color: var(--accent); opacity: .7;
+    font-size: 9px; color: var(--plus); opacity: .8;
   }
   #list .card.plus.own::after { opacity: 1; }
   .name .tt { min-width: 0; }
@@ -945,20 +951,27 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
   html[data-served] .cfg-meta { margin-top: 8px; }
   html[data-served] .cat-head .cat-pitch { display: block; }
 
-  /* ── the screens (docs/InstallerWizardFlow.md, phase 1): the set is the
-     home screen, the catalog a sub-screen entered to add tools. Screen
+  /* ── the screens (docs/InstallerWizardFlow.md): the catalog is the home
+     every flow lands on, the set a drawer over it (phase 5). Screen
      styles live here, in the page's own block, never in the UIBASE block
      above. ── */
   .screen[hidden] { display: none !important; }
-  /* served into the bootstrap's window or framed in the console the set
-     fills the window, so its footer sits at the bottom even when the list
-     is short */
-  html[data-served] #screen-set, html[data-embedded] #screen-set {
-    display: flex; flex-direction: column; min-height: 100vh;
+  /* the set drawer: fixed to the right edge over the catalog, scrolling on
+     its own, under a scrim that closes it; the catalog stays where the
+     reader left it */
+  .drawer-scrim { position: fixed; inset: 0; z-index: 40; background: rgba(0,0,0,0.42); }
+  .drawer-scrim[hidden] { display: none; }
+  #screen-set.drawer {
+    position: fixed; top: 0; right: 0; bottom: 0; z-index: 41;
+    width: 560px; max-width: 92vw; overflow: auto; overscroll-behavior: contain;
+    padding: 0 20px 20px 22px; background: var(--bg-1);
+    border-left: 1px solid var(--border-strong); box-shadow: -20px 0 50px rgba(0,0,0,0.5);
   }
-  html[data-served] #screen-set .set-foot, html[data-embedded] #screen-set .set-foot { margin-top: auto; }
-  .set-head { display: flex; align-items: flex-start; gap: 10px; padding: 36px 0 16px; }
-  html[data-served] .set-head, html[data-embedded] .set-head { padding: 16px 0 10px; }
+  .set-head { display: flex; align-items: center; gap: 10px; padding: 16px 0 12px; }
+  #screen-set.drawer .set-head {
+    position: sticky; top: 0; z-index: 1; background: var(--bg-1);
+    border-bottom: 1px solid var(--border); margin-bottom: 12px;
+  }
   .set-title { min-width: 0; }
   .set-head h2 { margin: 0 0 4px; font-size: 28px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
   html[data-served] .set-head h2, html[data-embedded] .set-head h2 { font-size: 20px; }
@@ -971,7 +984,7 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
     padding: 5px 12px; font: inherit; font-size: 12.5px; color: var(--text-dim); cursor: pointer; white-space: nowrap;
   }
   .acctchip:hover { border-color: var(--border-strong); color: var(--text); }
-  .acctchip.in { color: var(--accent); border-color: rgba(251,191,36,0.35); }
+  .acctchip.in { color: var(--plus); border-color: var(--plus-line); }
   .acctmenu {
     display: none; position: absolute; right: 0; top: calc(100% + 6px); z-index: 9;
     min-width: 260px; padding: 10px; flex-direction: column; align-items: stretch; gap: 6px;
@@ -1037,10 +1050,9 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
   .set-row .undo:hover { border-color: var(--green); color: var(--green); }
   .set-empty { padding: 40px 20px; margin-bottom: 24px; text-align: center; color: var(--text-faint); border: 1px dashed var(--border); border-radius: 12px; }
   .set-empty p { margin: 0 0 14px; }
-  .set-foot .linkbtn { font-size: 13px; }
-  .set-foot .sum-count { flex-wrap: wrap; }
-  .backset { white-space: nowrap; }
-  .cat-foot { justify-content: flex-end; }
+  .set-head .linkbtn { font-size: 13px; }
+  .cat-foot .sum-count { flex-wrap: wrap; }
+  .cat-foot .sum-left { min-width: 0; }
   body.app .bar-act #catdone { white-space: nowrap; }
 
   /* ── phases 2 to 4: the step strip, S0 Start, S1 Find my set, S4
@@ -1126,7 +1138,7 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
   <div class="wizhead" id="wizhead">
     <ol class="steps" id="steps">
       <li data-n="1" data-step="start" tabindex="0">Start</li>
-      <li data-n="2" data-step="set" tabindex="0">Your set</li>
+      <li data-n="2" data-step="set" tabindex="0">Pick tools</li>
       <li data-n="3" data-step="install" tabindex="0">Install</li>
     </ol>
     <span class="spacer"></span>
@@ -1139,7 +1151,7 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
 
   <!-- S0 "Start": the welcome, as a screen. One line, the starting
        points, one sentence of counts, a footer of facts. Every card
-       lands on the set except Pick my own, which lands on the catalog. -->
+       lands on the catalog with its picks ticked (phase 5). -->
   <section class="screen" id="screen-start" hidden>
     <div class="start">
       <h1 id="welcometitle">Welcome to FNSTools.</h1>
@@ -1177,18 +1189,24 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
     </div>
   </section>
 
-  <!-- S2 "Your set": the home screen (docs/InstallerWizardFlow.md, phase
-       1). The selection as rows grouped by category, the one primary
-       action in its footer; the catalog below is the sub-screen entered
-       to add tools. -->
-  <section class="screen" id="screen-set" hidden>
+  <!-- The set, as a drawer over the catalog (docs/InstallerWizardFlow.md,
+       phase 5): what will land in the project, grouped by category, with
+       remove and undo, the Patreon route and the options at its top.
+       Opened from the catalog footer's "Your set", closed by Close, Escape
+       or a click on the scrim. Never a screen of its own, so the catalog
+       stays where the reader left it (owner, 2026-10-17: the flow must
+       keep you exploring). It carries no install button. -->
+  <div class="drawer-scrim" id="drawerscrim" hidden></div>
+  <section class="screen drawer" id="screen-set" hidden aria-label="Your set">
     <div class="set-head">
       <div class="set-title">
         <h2 id="settitle">Your set</h2>
         <p class="set-sub" id="setsub"></p>
       </div>
+      <span class="spacer"></span>
+      <button type="button" class="linkbtn" id="setclear">Clear</button>
+      <button type="button" class="btn btn-quiet" id="setclose">Close</button>
     </div>
-    <div class="banners-slot" id="setbanners"><div class="banners" id="banners"></div></div>
     <div class="plusline" id="plusline" hidden></div>
     <div class="setopts" id="setopts" hidden>
       <label class="famopt" id="famopt" hidden data-tip="The FNS family operators you tick also appear on an FNS tab in the OP Create dialog, placed as one node each. Untick to keep them in the palette only; turn it off later the same way.">
@@ -1197,42 +1215,35 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
     <div class="setlist" id="setlist"></div>
     <div class="set-empty" id="setempty" hidden>
       <p>Nothing in your set yet.</p>
-      <button type="button" class="btn btn-secondary" id="setadd">Add tools</button>
+      <button type="button" class="btn btn-secondary" id="setadd">Back to the tools</button>
     </div>
-    <div class="sum set-foot" id="setfoot">
-      <div class="sum-left">
-        <span class="sum-count"><span class="n" id="cnt">0</span> <span class="muted" id="cntlabel">tools</span><span class="muted" id="cntmore"></span></span>
-        <span class="muted" id="deps"></span>
-      </div>
+    <!-- the account controls: served, the account menu adopts them at
+         boot; off-machine they stay here, hidden -->
+    <div class="set-foot" id="setfoot" hidden>
       <span class="acct" id="acct" hidden></span>
       <a class="btn btn-quiet" id="support" target="_blank" rel="noopener" hidden>Join on Patreon ↗</a>
       <button class="btn btn-quiet" id="recheck" hidden>Check again</button>
       <button class="btn btn-quiet" id="signin" hidden>Sign in with Patreon</button>
       <button class="btn btn-quiet" id="redeem" hidden>Redeem Gumroad key</button>
-      <span class="spacer"></span>
-      <button type="button" class="linkbtn" id="setclear">Clear</button>
-      <button type="button" class="btn btn-secondary" id="addtools">Add tools</button>
-      <button class="btn btn-secondary" id="script">Copy install script</button>
-      <button class="btn btn-primary" id="save">Download selection.json</button>
     </div>
   </section>
 
-  <!-- S3 "Add tools": the catalog, entered from the set. Every section
-       open when served, the rail to jump, one-line rows by default in
-       TouchDesigner; Done returns to the set. No install from here. -->
+  <!-- S2 "Pick your tools": the catalog, the home every flow lands on
+       (phase 5). Every section open when served, the rail to jump,
+       one-line rows by default in TouchDesigner; the footer carries the
+       count, the set drawer's button and the one primary action. -->
   <section class="screen" id="screen-catalog">
   <section class="cfg-hero">
     <span class="eyebrow">CONFIGURATOR</span>
     <h1>Build your install.</h1>
     <p class="cfg-sub">
-      Tick the tools you want, then Done. Your set holds the one line for the TouchDesigner Textport.
+      Tick the tools you want. Your set and the one line for the TouchDesigner Textport are in the footer.
     </p>
     <p class="cfg-meta" id="sub"></p>
   </section>
 
   <div class="cfg-bar">
    <div class="bar-row bar-find">
-    <button type="button" class="btn btn-quiet backset" id="backset" data-tip="Back to your set">‹ Your set</button>
     <div class="qwrap">
       <input type="search" id="q" placeholder="Search tools, their docs, categories…" autocomplete="off" aria-label="Search tools">
       <kbd class="qkey" aria-hidden="true">/</kbd>
@@ -1254,7 +1265,7 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
     <a class="bar-docs" id="alldocs" target="_blank" rel="noopener">Docs ↗</a>
    </div>
   </div>
-  <div class="banners-slot" id="catbanners"></div>
+  <div class="banners-slot" id="catbanners"><div class="banners" id="banners"></div></div>
 
   <div class="layout">
     <nav class="catnav" id="catnav" aria-label="Categories"></nav>
@@ -1276,8 +1287,14 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
   </div>
 
   <div class="sum cat-foot" id="catfoot">
+    <div class="sum-left">
+      <span class="sum-count"><span class="n" id="cnt">0</span> <span class="muted" id="cntlabel">tools</span><span class="muted" id="cntmore"></span></span>
+      <span class="muted" id="deps"></span>
+    </div>
     <span class="spacer"></span>
-    <button type="button" class="btn btn-primary" id="catdone">Done</button>
+    <button type="button" class="btn btn-secondary" id="catdone" data-tip="See and prune what you picked">Your set</button>
+    <button class="btn btn-secondary" id="script">Copy install script</button>
+    <button class="btn btn-primary" id="save">Download selection.json</button>
   </div>
   </section>
 
@@ -1295,12 +1312,13 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
     <div class="sum inst-foot">
       <a class="bar-docs" id="instdocs" target="_blank" rel="noopener">Installation notes ↗</a>
       <span class="spacer"></span>
-      <button type="button" class="btn btn-quiet" id="instback">‹ Your set</button>
+      <button type="button" class="btn btn-quiet" id="instback">‹ Back to the tools</button>
       <button type="button" class="btn btn-quiet" id="instclose" hidden>Close</button>
       <button type="button" class="btn btn-secondary" id="instsave" hidden>Download selection.json</button>
       <button type="button" class="btn btn-primary" id="instcopy" hidden>Copy</button>
       <button type="button" class="btn btn-primary" id="instinstall" hidden>Install</button>
-      <button type="button" class="btn btn-primary" id="instopen" hidden>Open Settings</button>
+      <button type="button" class="btn btn-secondary" id="instopen" hidden>Open Settings</button>
+      <button type="button" class="btn btn-primary" id="instbrowse" hidden>Browse more tools</button>
     </div>
   </section>
 
@@ -1665,13 +1683,15 @@ if (FNS_EMBEDDED) {
   document.body.classList.add('app');
 }
 
-// Served (Pick Tools on a root that holds tools, or a first run that chose
-// a starting point): the catalog is the sub-screen where the set grows, so
-// the hero says so; the site's Textport sentence would be wrong here.
+// Served: the catalog is the home (phase 5), so the hero names it as the
+// place to pick, or as the toolkit the project already has; the site's
+// Textport sentence would be wrong here.
 function heroServed() {
-  document.querySelector('.cfg-hero h1').textContent = 'Add tools.';
-  document.querySelector('.cfg-sub').textContent =
-    'Tick to add a tool to your setup, untick to remove one. Done returns to your setup.';
+  var again = (window.FNS_INSTALLED || []).length > 0 || (window.FNS_PLACED || []).length > 0;
+  document.querySelector('.cfg-hero h1').textContent = again ? 'Your toolkit.' : 'Pick your tools.';
+  document.querySelector('.cfg-sub').textContent = again
+    ? 'Ticked tools are in this project. Tick to add, untick to remove, then apply the changes.'
+    : 'Tick what you want; your set grows in the footer. Nothing installs until you review the plan.';
 }
 
 /* FNS:SEARCH:START -- the picker's search (docs/PickerSearch.md). Pure
@@ -2447,7 +2467,6 @@ function fnsBoot() {
     if (!box || !names.length) return;
     var b = mk('div', 'banner');
     b.id = 'new-tools';
-    b.hidden = curScreen !== 'set';
     var s = mk('span');
     var lead = mk('b', '', names.length === 1
       ? 'A new tool since you last looked: '
@@ -3182,7 +3201,9 @@ function fnsBoot() {
     if (famGoes) notes.push('FNS tab removed');
     document.getElementById('deps').textContent = notes.join(' · ');
     document.getElementById('setclear').hidden = picked.size === 0;
-    document.getElementById('catdone').textContent = 'Done · ' + picked.size + ' selected';
+    // the drawer's button carries the count, so the set is visible from
+    // the footer without opening it
+    document.getElementById('catdone').textContent = (reentry ? 'Your setup' : 'Your set') + ' · ' + picked.size;
     var save = document.getElementById('save');
     if (served && locked) {
       save.textContent = 'Locked (source checkout)';
@@ -4019,13 +4040,13 @@ function fnsBoot() {
     // this account cannot install yet (owner, 2026-09-16). `explicit` is a
     // list whose ticks the reader made, the questionnaire's result, and
     // passes through as it is. A choice marks this visit as welcomed (the
-    // auto-resume flow waits for it) and lands on the set; Pick my own
-    // lands on the catalog, since an empty set answers nothing.
+    // auto-resume flow waits for it) and lands on the catalog with its
+    // picks ticked (phase 5): the flow keeps the reader exploring.
     function choose(names, bind, explicit, own) {
       wantBind = bind || null;
       sessionFlag('fns.welcomed', true);
       applyPreset(explicit ? names : autoPick(names, own));
-      setScreen(picked.size ? 'set' : 'catalog', {focus: true});
+      landOnCatalog();
     }
     // "Like last time" is the one card that IS the confirmation: the list
     // is the user's own, from a project they saved, so the click plans
@@ -4314,17 +4335,20 @@ function fnsBoot() {
     document.getElementById('instsave').hidden = !(state === 'script' && !served && !window.FNS_SITE);
     document.getElementById('instopen').hidden = state !== 'done';
     document.getElementById('instopen').disabled = false;
+    // the end of an install is a door back to the tools, not an exit
+    document.getElementById('instbrowse').hidden = state !== 'done';
     document.getElementById('instclose').hidden = !(state === 'progress' || state === 'done');
     document.getElementById('instback').hidden = !(state === 'plan' || state === 'script' || state === 'failed');
     document.getElementById('instdocs').hidden = state === 'progress';
     setScreen('install');
   }
-  document.getElementById('instback').addEventListener('click', function () { setScreen('set'); });
+  document.getElementById('instback').addEventListener('click', function () { setScreen('catalog'); });
+  document.getElementById('instbrowse').addEventListener('click', function () { setScreen('catalog'); });
   // Close stops the poll, as the dialog's Close did (field report
-  // 2026-09-16), and returns to the set
+  // 2026-09-16), and returns to the catalog
   document.getElementById('instclose').addEventListener('click', function () {
     installCancelled = true;
-    setScreen('set');
+    setScreen('catalog');
   });
 
   // The paste rail: one Textport line that reproduces this selection in a
@@ -4949,10 +4973,10 @@ function fnsBoot() {
   })();
 
   if (FNS_EMBEDDED) {
-    // Inside the manager the catalog's action goes where the eye starts:
-    // Done moves into the toolbar's right end, the spot the docs link had
-    // (every card carries its own docs link), and the catalog's sticky
-    // footer goes. The set keeps its footer: it is the home screen there.
+    // Inside the manager the action goes where the eye starts: the count,
+    // the set drawer's button and the primary move into the toolbar's
+    // right end, the spot the docs link had (every card carries its own
+    // docs link), and the catalog's sticky footer goes.
     var bar = document.querySelector('.cfg-bar');
     var catFoot = document.getElementById('catfoot');
     if (bar && catFoot) {
@@ -4960,50 +4984,93 @@ function fnsBoot() {
       if (docsEl) docsEl.remove();
       var act = document.createElement('div');
       act.className = 'bar-act';
-      act.appendChild(document.getElementById('catdone'));
+      ['cnt', 'deps', 'catdone', 'script', 'save'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        act.appendChild(id === 'cnt' ? el.parentNode : el);
+      });
       (bar.querySelector('.bar-find') || bar).appendChild(act);
       catFoot.remove();
     }
   }
 
-  // --- the screens (docs/InstallerWizardFlow.md, phase 1) --------------
-  // The set is the home screen; the catalog is a sub-screen entered to add
-  // tools. `screen` is navigation state, carried in the hash (#set,
-  // #catalog) so a reload and the console frame land where the reader
-  // was; the rail's #cat-<slug> jumps and the access deep links (#patreon,
-  // #free, #all) mean the catalog. One selection, as before: every screen
+  // --- the screens (docs/InstallerWizardFlow.md, phase 5) --------------
+  // The catalog is the home every flow lands on; the set is a drawer over
+  // it, never a screen. `screen` is navigation state, carried in the hash
+  // (#catalog, #install, #start) so a reload and the console frame land
+  // where the reader was; the rail's #cat-<slug> jumps and the access deep
+  // links (#patreon, #free, #all) mean the catalog, and an old #set opens
+  // the catalog with the drawer. One selection, as before: every screen
   // derives from `picked`, `placing`, `familyOn` and `wantBind`.
   var SCREENS = {start: document.getElementById('screen-start'),
                  quiz: document.getElementById('screen-quiz'),
-                 set: document.getElementById('screen-set'),
                  catalog: document.getElementById('screen-catalog'),
                  install: document.getElementById('screen-install')};
   var curScreen = null;
+  // The set drawer: a transient view of the list, not in the hash.
+  var drawerEl = document.getElementById('screen-set');
+  var scrimEl = document.getElementById('drawerscrim');
+  function drawerOpen() { return !!(drawerEl && !drawerEl.hidden); }
+  function setDrawer(on) {
+    on = !!on;
+    if (!drawerEl) return;
+    drawerEl.hidden = !on;
+    if (scrimEl) scrimEl.hidden = !on;
+    if (on) document.documentElement.setAttribute('data-drawer', '');
+    else document.documentElement.removeAttribute('data-drawer');
+    if (on) drawerEl.scrollTop = 0;
+  }
+  // One line at the bottom right, gone after a few seconds: how a
+  // starting point says what it just ticked, now that it lands on the
+  // list instead of a summary of its own.
+  function toast(msg) {
+    var t = document.getElementById('toast');
+    if (!t) { t = mk('div', 'toast'); t.id = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(function () { t.classList.remove('show'); }, 3600);
+  }
+  // Where every starting point lands (phase 5): the catalog, the picks
+  // ticked, one line naming the count; with nothing picked the search
+  // takes focus instead, since browsing is the next thing to do.
+  function landOnCatalog() {
+    setScreen('catalog', {focus: picked.size === 0});
+    if (picked.size) {
+      toast(picked.size + (picked.size === 1 ? ' tool' : ' tools')
+        + ' ticked. Browse the rest; untick anything you do not want.');
+    }
+  }
   // A reload mid-questionnaire lands on Start (the answers are gone), a
-  // reload mid-install on the set (the install narrates in its own page
-  // life); the hash still names every screen so the console frame and a
-  // reload keep the rest.
+  // reload mid-install on the catalog (the install narrates in its own
+  // page life); the hash still names every screen so the console frame
+  // and a reload keep the rest.
   function screenOfHash(h) {
     h = String(h || '').toLowerCase();
-    if (h === '#set' || h === '#install') return 'set';
+    if (h === '#set') return 'set';
+    if (h === '#install') return 'catalog';
     if (h === '#start' || h === '#quiz') return 'start';
     if (h === '#catalog' || h.indexOf('#cat-') === 0 || HASH_ACCESS[h]) return 'catalog';
     return null;
   }
-  // the step each screen belongs to: the catalog is a sub-screen of the
-  // set, the questionnaire of Start
-  var STEP_OF = {start: 'start', quiz: 'start', set: 'set', catalog: 'set', install: 'install'};
+  // the step each screen belongs to: the catalog is step two, the
+  // questionnaire belongs to Start
+  var STEP_OF = {start: 'start', quiz: 'start', catalog: 'set', install: 'install'};
   var STEP_ORDER = ['start', 'set', 'install'];
   // the last step names the flavor's real finish: an install where the
   // page can install, the paste script where it cannot
   document.querySelector('#steps li[data-step=install]').textContent = served ? 'Install' : 'Install script';
   function setScreen(name, opts) {
     opts = opts || {};
+    // "set" is no longer a screen: it is the catalog with the drawer open
+    var withDrawer = name === 'set';
+    if (withDrawer) name = 'catalog';
     if (!SCREENS[name]) name = 'catalog';
     var changed = curScreen !== name;
     curScreen = name;
     Object.keys(SCREENS).forEach(function (k) { SCREENS[k].hidden = k !== name; });
     document.documentElement.setAttribute('data-screen', name);
+    setDrawer(withDrawer);
     // the header follows the reader: the steps light the one this screen
     // belongs to; Start over and the account chip step aside on Start
     // and in the questionnaire, where the choice is the whole screen
@@ -5022,13 +5089,6 @@ function fnsBoot() {
     document.getElementById('wizard').hidden = onStart;
     var aw = document.getElementById('acctwrap');
     if (aw) aw.hidden = onStart || !hasAuthRail;
-    // the banners follow the reader: a catalog reload offer must be seen
-    // on either screen; the new-tools banner belongs to the set
-    var banners = document.getElementById('banners');
-    var slot = document.getElementById(name === 'set' ? 'setbanners' : 'catbanners');
-    if (banners && slot && banners.parentNode !== slot) slot.appendChild(banners);
-    var fresh = document.getElementById('new-tools');
-    if (fresh) fresh.hidden = name !== 'set';
     setAcctMenu(false);
     if (!opts.fromHash) {
       // replaceState, not location.hash: no history entry per screen and
@@ -5048,8 +5108,15 @@ function fnsBoot() {
     var s = screenOfHash(location.hash);
     if (s && s !== curScreen) setScreen(s, {fromHash: true});
   });
-  ['backset', 'catdone'].forEach(function (id) {
-    document.getElementById(id).addEventListener('click', function () { setScreen('set'); });
+  // the drawer: opened from the footer's count button, closed by Close,
+  // the empty state's button, the scrim or Escape
+  document.getElementById('catdone').addEventListener('click', function () { setDrawer(!drawerOpen()); });
+  ['setclose', 'setadd'].forEach(function (id) {
+    document.getElementById(id).addEventListener('click', function () { setDrawer(false); });
+  });
+  if (scrimEl) scrimEl.addEventListener('click', function () { setDrawer(false); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && drawerOpen() && !document.querySelector('dialog[open]')) setDrawer(false);
   });
   /** The set's primary (Review install, Apply changes, the paste script)
    *  is disabled while nothing would happen; the Install step follows it. */
@@ -5057,21 +5124,18 @@ function fnsBoot() {
     var b = served ? document.getElementById('save') : document.getElementById('script');
     return !b || b.disabled || picked.size === 0 && !served;
   }
-  // the steps are navigation: Start reopens the starting points, Your set
-  // the home screen, Install the set's own primary action
+  // the steps are navigation: Start reopens the starting points, Pick
+  // tools the catalog, Install the footer's own primary action
   Array.prototype.forEach.call(document.querySelectorAll('#steps li'), function (li) {
     function go() {
       var step = li.getAttribute('data-step');
       if (li.getAttribute('aria-disabled') === 'true') return;
       if (step === 'start') showStart();
-      else if (step === 'set') setScreen('set');
+      else if (step === 'set') setScreen('catalog');
       else (served ? document.getElementById('save') : document.getElementById('script')).click();
     }
     li.addEventListener('click', go);
     li.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
-  });
-  ['addtools', 'setadd'].forEach(function (id) {
-    document.getElementById(id).addEventListener('click', function () { setScreen('catalog', {focus: true}); });
   });
   document.getElementById('setclear').addEventListener('click', function () {
     picked.clear(); save(); render();
@@ -5113,11 +5177,11 @@ function fnsBoot() {
     document.getElementById('settitle').textContent = reentry ? 'Your setup' : 'Your set';
     document.getElementById('setsub').textContent = served
       ? (reentry
-         ? 'What this project has. Remove any, add tools to grow it, then apply the changes.'
-         : 'What will land in this project. Add tools, remove any, then review the install.')
+         ? 'What this project has. Untick a row here to remove it; close to keep browsing.'
+         : 'What will land in this project. Remove anything here; close to keep browsing.')
       : (window.FNS_SITE
-         ? 'What the install script sets up. Add tools, remove any, then copy the script.'
-         : 'What the selection holds. Add tools, remove any, then download it.');
+         ? 'What the install script sets up. Remove anything here; close to keep browsing.'
+         : 'What the selection holds. Remove anything here; close to keep browsing.');
     host.textContent = '';
     var pickedList = Array.from(picked).filter(function (n) { return byName[n]; });
     // what the project has that the set no longer does
@@ -5321,8 +5385,8 @@ function fnsBoot() {
   var fromHash = screenOfHash(location.hash);
   var landing;
   if (fromHash) landing = fromHash;
-  else if (FNS_EMBEDDED) landing = 'set';
-  else if (served) landing = (firstrun && !sessionFlag('fns.welcomed')) ? 'start' : 'set';
+  else if (FNS_EMBEDDED) landing = 'catalog';
+  else if (served) landing = (firstrun && !sessionFlag('fns.welcomed')) ? 'start' : 'catalog';
   else landing = stored('fns.visited', null) ? 'catalog' : 'start';
   if (landing === 'start') {
     if (!served) {

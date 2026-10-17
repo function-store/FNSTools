@@ -24,6 +24,11 @@
   --text: #f5f5f5;      --text-dim: #a3a3a3;  --text-faint: #737373;
   --accent: #fbbf24;    --accent-dim: #2a1f08; --accent-bright: #fcd34d;
   --accent-ink: #0a0a0a;
+  /* Patreon: its own hue, apart from the accent, so a chip that says
+     "this one comes with Patreon" never reads as "this one is ticked"
+     (owner, 2026-10-17) */
+  --plus: #ff8f7a;      --plus-dim: rgba(255,143,122,0.10);
+  --plus-line: rgba(255,143,122,0.42); --plus-faint: rgba(255,143,122,0.22);
   --green: #4ade80;     --warn: #fdba74;      --warn-dim: #2a1408;
   --err: #f87171;       --err-dim: #2a0f0f;
   --max-w: 1140px;      --radius: 10px;
@@ -40,6 +45,8 @@
   --text: #16171a;      --text-dim: #5c6069;  --text-faint: #83878f;
   --accent: #a16207;    --accent-dim: #fdf3d7; --accent-bright: #854d0e;
   --accent-ink: #ffffff;
+  --plus: #c2410c;      --plus-dim: #fdeee8;
+  --plus-line: rgba(194,65,12,0.38); --plus-faint: rgba(194,65,12,0.2);
   --green: #16a34a;     --warn: #b45309;      --warn-dim: #fff5e8;
   --err: #dc2626;       --err-dim: #fdecec;
 }
@@ -234,16 +241,16 @@ a.chip.trial:hover { border-color: var(--accent); color: var(--accent-bright); }
    tick here would be a client-side lock, which is exactly the thing that
    means nothing. */
 .chip.plus {
-  background: var(--accent-dim); border-color: rgba(251,191,36,0.28); color: var(--accent);
+  background: var(--plus-dim); border-color: var(--plus-line); color: var(--plus);
   font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; font-size: 10px;
 }
-a.chip.plus:hover { border-color: var(--accent); }
-.card.plus { border-color: rgba(251,191,36,0.22); }
+a.chip.plus:hover { border-color: var(--plus); }
+.card.plus { border-color: var(--plus-faint); }
 /* Entitlement, served flavor only. Unlocked reads as a firmer outline;
    locked stays dimmed (a state you could have). Neither fills: a filled
-   accent chip on every Plus card was one more thing shouting. The
-   published /get/ page never sets these classes. */
-.chip.plus.own { border-color: rgba(251,191,36,0.55); }
+   chip on every Plus card was one more thing shouting. The published
+   /get/ page never sets these classes. */
+.chip.plus.own { border-color: var(--plus); }
 .chip.plus.locked { opacity: 0.6; }
 .acct { color: var(--text-dim); font-size: 12.5px; }
 .acct b { color: var(--accent); font-weight: 600; }
@@ -417,7 +424,7 @@ dialog::backdrop { background: rgba(0,0,0,0.7); }
 .quiz-plus .mark { color: var(--accent); }
 .quiz-plus .btn { margin-left: auto; padding: 4px 10px; font-size: 12px; }
 .qres-sub { margin: 10px 0 2px; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); }
-.qres.plus { border-color: rgba(251,191,36,0.22); }
+.qres.plus { border-color: var(--plus-faint); }
 
 /* ── toast ── */
 .toast {

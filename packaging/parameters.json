@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "release": "v3.2.71",
+ "release": "v3.2.72",
  "td_build": "2025.33070",
  "packages": {
   "ChopBank": [
@@ -7074,42 +7074,6 @@
     "page": "Control"
    },
    {
-    "name": "Flymode",
-    "label": "Fly Mode",
-    "style": "Menu",
-    "help": "How the sticks move the camera when the Orbit button is NOT held. Free-fly: Forward / Strafe move along the camera's own axes, Rise is world up, Yaw / Pitch turn the camera. Orbit: the tether the Orbit button gives you, held permanently: around the viewport's tumble pivot, the Look At target, or the point Orbit Distance ahead. A Look At target always locks the aim, and then Yaw takes you round the subject and Pitch reels you in either way; free-fly additionally leaves Forward / Strafe / Rise free to go anywhere, while Orbit pins them to the sphere and is the only place you can arc over the top at a fixed radius.",
-    "default": "free",
-    "section": true,
-    "menu": [
-     {
-      "name": "free",
-      "label": "Free-fly"
-     },
-     {
-      "name": "orbit",
-      "label": "Orbit"
-     }
-    ],
-    "page": "Control"
-   },
-   {
-    "name": "Flystatus",
-    "label": "Flying",
-    "style": "Str",
-    "help": "What the sticks are doing right now, and around what. Orbit needs something to orbit: the Orbit button picks one when you press it, and Fly Mode = Orbit uses a Look At target (or the viewport tumble pivot) if there is one. With neither, it says so and flies free rather than orbiting an invisible point ahead of you.",
-    "default": "",
-    "readonly": true,
-    "page": "Control"
-   },
-   {
-    "name": "Levelheading",
-    "label": "Level Heading",
-    "style": "Toggle",
-    "help": "With a Look At set, the camera flies along its nose, and its nose points at the target, so an object above or below you bakes a climb into \"forward\" that you never asked for (geo1 sits 0.7 up, which tilts forward by 8 degrees and lifts you 2 units in three seconds). This takes the heading level when it is first set, so setting a Look At never changes your flight elevation; climb deliberately with Rise, or by pitching the heading first. Off, forward points wherever the camera is looking. Inactive while this camera rides a GeoPilot: the pilot owns this.",
-    "default": true,
-    "page": "Control"
-   },
-   {
     "name": "Mouseinvertx",
     "label": "Invert Mouse X",
     "style": "Toggle",
@@ -7158,12 +7122,55 @@
     "page": "Control"
    },
    {
+    "name": "Flymode",
+    "label": "Fly Mode",
+    "style": "Menu",
+    "help": "How the sticks move the camera when the Orbit button is NOT held. Free-fly: Forward / Strafe move along the camera's own axes, Rise is world up, Yaw / Pitch turn the camera. Orbit: the tether the Orbit button gives you, held permanently: around the viewport's tumble pivot, the Look At target, or the point Orbit Distance ahead. A Look At target always locks the aim, and then Yaw takes you round the subject and Pitch reels you in either way; free-fly additionally leaves Forward / Strafe / Rise free to go anywhere, while Orbit pins them to the sphere and is the only place you can arc over the top at a fixed radius.",
+    "default": "free",
+    "section": true,
+    "menu": [
+     {
+      "name": "free",
+      "label": "Free-fly"
+     },
+     {
+      "name": "orbit",
+      "label": "Orbit"
+     }
+    ],
+    "page": "Control"
+   },
+   {
+    "name": "Flystatus",
+    "label": "Flying",
+    "style": "Str",
+    "help": "What the sticks are doing right now, and around what. Orbit needs something to orbit: the Orbit button picks one when you press it, and Fly Mode = Orbit uses a Look At target (or the viewport tumble pivot) if there is one. With neither, it says so and flies free rather than orbiting an invisible point ahead of you.",
+    "default": "",
+    "readonly": true,
+    "page": "Control"
+   },
+   {
+    "name": "Levelheading",
+    "label": "Level Heading",
+    "style": "Toggle",
+    "help": "With a Look At set, the camera flies along its nose, and its nose points at the target, so an object above or below you bakes a climb into \"forward\" that you never asked for (geo1 sits 0.7 up, which tilts forward by 8 degrees and lifts you 2 units in three seconds). This takes the heading level when it is first set, so setting a Look At never changes your flight elevation; climb deliberately with Rise, or by pitching the heading first. Off, forward points wherever the camera is looking. Inactive while this camera rides a GeoPilot: the pilot owns this.",
+    "default": true,
+    "page": "Control"
+   },
+   {
+    "name": "Invertpitch",
+    "label": "Invert Pitch",
+    "style": "Toggle",
+    "help": "Flip the Pitch axis (push forward to look down, flight-sim style).",
+    "default": false,
+    "page": "Control"
+   },
+   {
     "name": "Movespeed",
     "label": "Move Speed",
     "style": "Float",
     "help": "Units per second the camera travels at full deflection of Forward / Strafe / Rise, dollying, or closing on a subject with Pitch under a Look At. Inactive while this camera rides a GeoPilot: the pilot owns this.",
     "default": 2.0,
-    "section": true,
     "page": "Control"
    },
    {
@@ -7199,29 +7206,6 @@
     "page": "Control"
    },
    {
-    "name": "Orbitdistance",
-    "label": "Orbit Distance",
-    "style": "Float",
-    "help": "Orbiting with nothing picked (the Orbit button pressed at empty space, or Fly Mode Orbit without a Look At / viewport pivot): the camera orbits a point this far ahead of it. Dolly moves that point with the camera, so the value follows.",
-    "default": 5.0,
-    "page": "Control"
-   },
-   {
-    "name": "Invertpitch",
-    "label": "Invert Pitch",
-    "style": "Toggle",
-    "help": "Flip the Pitch axis (push forward to look down, flight-sim style).",
-    "default": false,
-    "page": "Control"
-   },
-   {
-    "name": "Resetpivot",
-    "label": "Reset Pivot",
-    "style": "Pulse",
-    "help": "Zero this camera's Pivot (Xform page px/py/pz) without moving the view (the translate takes over what the pivot contributed), so Yaw / Pitch turn the camera in place. A pivot left behind by an earlier edit or recalled from a preset makes a turn swing the camera around that point instead. In viewport mode this puts the tumble pivot at the camera, so tumbling becomes looking around.",
-    "page": "Control"
-   },
-   {
     "name": "Rendertop",
     "label": "Render TOP",
     "style": "TOP",
@@ -7231,11 +7215,26 @@
     "page": "Control"
    },
    {
+    "name": "Orbitdistance",
+    "label": "Orbit Distance",
+    "style": "Float",
+    "help": "Orbiting with nothing picked (the Orbit button pressed at empty space, or Fly Mode Orbit without a Look At / viewport pivot): the camera orbits a point this far ahead of it. Dolly moves that point with the camera, so the value follows.",
+    "default": 5.0,
+    "page": "Control"
+   },
+   {
     "name": "Orbithold",
     "label": "Orbit (hold)",
     "style": "Toggle",
     "help": "The Orbit button from here: on = pressed (pick the pivot and orbit), off = released.",
     "default": false,
+    "page": "Control"
+   },
+   {
+    "name": "Resetpivot",
+    "label": "Reset Pivot",
+    "style": "Pulse",
+    "help": "Zero this camera's Pivot (Xform page px/py/pz) without moving the view (the translate takes over what the pivot contributed), so Yaw / Pitch turn the camera in place. A pivot left behind by an earlier edit or recalled from a preset makes a turn swing the camera around that point instead. In viewport mode this puts the tumble pivot at the camera, so tumbling becomes looking around.",
     "page": "Control"
    },
    {
@@ -7301,6 +7300,39 @@
     "page": "Control"
    },
    {
+    "name": "Surfacecollide",
+    "label": "Surface Collision",
+    "style": "Toggle",
+    "help": "Stop flown motion at any surface in its way, floors included: the probe fires along the direction you are actually moving, so descending into terrain lands on this the same way flying into a wall does. Off by default: it costs a render and a pick per frame you are moving. Preset recalls are never constrained: collision applies to FLOWN motion only, so playback stays scene-independent. Inactive while this camera rides a GeoPilot: the pilot owns this.",
+    "default": false,
+    "section": true,
+    "page": "Control"
+   },
+   {
+    "name": "Surfacestandoff",
+    "label": "Stand-off",
+    "style": "Float",
+    "help": "How far from a surface you are stopped, measured PERPENDICULAR to it, in scene units. Keep it above the Near clip or the camera pokes through visually before it stops. Inactive while this camera rides a GeoPilot: the pilot owns this.",
+    "default": 0.4,
+    "page": "Control"
+   },
+   {
+    "name": "Surfaceslide",
+    "label": "Slide",
+    "style": "Float",
+    "help": "What happens when you meet a surface at an angle. 1 keeps the part of your movement that runs along it, so corridors and hillsides stay flyable; 0 stops you dead. Inactive while this camera rides a GeoPilot: the pilot owns this.",
+    "default": 1.0,
+    "page": "Control"
+   },
+   {
+    "name": "Surfacegeo",
+    "label": "Collision Geometry",
+    "style": "COMP",
+    "help": "What the collision probe can hit. Empty means whatever the Render TOP renders, so it follows the scene by itself. Inactive while this camera rides a GeoPilot: the pilot owns this.",
+    "default": "",
+    "page": "Control"
+   },
+   {
     "name": "Deadzone",
     "label": "Dead Zone",
     "style": "Float",
@@ -7315,7 +7347,6 @@
     "style": "Toggle",
     "help": "Ramp the sticks in and out instead of snapping, through a Lag CHOP on the source. The single biggest change to how flying feels. Buttons are read before the lag, so presses stay instant. Inactive while this camera rides a GeoPilot: the pilot owns this.",
     "default": true,
-    "section": true,
     "page": "Control"
    },
    {
@@ -7352,44 +7383,11 @@
     "page": "Control"
    },
    {
-    "name": "Surfacecollide",
-    "label": "Surface Collision",
-    "style": "Toggle",
-    "help": "Stop flown motion at any surface in its way, floors included: the probe fires along the direction you are actually moving, so descending into terrain lands on this the same way flying into a wall does. Off by default: it costs a render and a pick per frame you are moving. Preset recalls are never constrained: collision applies to FLOWN motion only, so playback stays scene-independent. Inactive while this camera rides a GeoPilot: the pilot owns this.",
-    "default": false,
-    "section": true,
-    "page": "Control"
-   },
-   {
     "name": "Turbspeed",
     "label": "Turbulence Speed",
     "style": "Float",
     "help": "How quickly the air moves around. 0.5 is a lazy drift, 3 is a rough day.",
     "default": 0.6,
-    "page": "Control"
-   },
-   {
-    "name": "Surfacestandoff",
-    "label": "Stand-off",
-    "style": "Float",
-    "help": "How far from a surface you are stopped, measured PERPENDICULAR to it, in scene units. Keep it above the Near clip or the camera pokes through visually before it stops. Inactive while this camera rides a GeoPilot: the pilot owns this.",
-    "default": 0.4,
-    "page": "Control"
-   },
-   {
-    "name": "Surfaceslide",
-    "label": "Slide",
-    "style": "Float",
-    "help": "What happens when you meet a surface at an angle. 1 keeps the part of your movement that runs along it, so corridors and hillsides stay flyable; 0 stops you dead. Inactive while this camera rides a GeoPilot: the pilot owns this.",
-    "default": 1.0,
-    "page": "Control"
-   },
-   {
-    "name": "Surfacegeo",
-    "label": "Collision Geometry",
-    "style": "COMP",
-    "help": "What the collision probe can hit. Empty means whatever the Render TOP renders, so it follows the scene by itself. Inactive while this camera rides a GeoPilot: the pilot owns this.",
-    "default": "",
     "page": "Control"
    },
    {
@@ -14070,6 +14068,13 @@
     "page": "Seq"
    },
    {
+    "name": "Addallpars",
+    "label": "Add All Parameters",
+    "style": "Pulse",
+    "help": "Replace the columns with every parameter of the OP operator, the same as dropping it on the panel with alt held. Wipes the presets table like Reset does; RestorePresets() brings it back in the same session.",
+    "page": "Seq"
+   },
+   {
     "name": "Bind",
     "label": "Bind",
     "style": "Toggle",
@@ -14397,20 +14402,52 @@
       "label": "-"
      },
      {
-      "name": "r",
-      "label": "r"
+      "name": "Setuplikelast",
+      "label": "Setuplikelast"
      },
      {
-      "name": "tx",
-      "label": "tx"
+      "name": "Opfamily",
+      "label": "Opfamily"
      },
      {
-      "name": "ty",
-      "label": "ty"
+      "name": "Configscope",
+      "label": "Configscope"
      },
      {
-      "name": "tz",
-      "label": "tz"
+      "name": "Packagefiles",
+      "label": "Packagefiles"
+     },
+     {
+      "name": "Vcname",
+      "label": "Vcname"
+     },
+     {
+      "name": "Vcauthor",
+      "label": "Vcauthor"
+     },
+     {
+      "name": "Vcversion",
+      "label": "Vcversion"
+     },
+     {
+      "name": "Vcbuild",
+      "label": "Vcbuild"
+     },
+     {
+      "name": "Vcsavetimestamp",
+      "label": "Vcsavetimestamp"
+     },
+     {
+      "name": "Vcsaveorigin",
+      "label": "Vcsaveorigin"
+     },
+     {
+      "name": "Vcsaveversion",
+      "label": "Vcsaveversion"
+     },
+     {
+      "name": "Vcoriginal",
+      "label": "Vcoriginal"
      }
     ],
     "page": "Easing"
@@ -28460,7 +28497,7 @@
     "icon": {
      "op": "text",
      "font": "Material Design Icons",
-     "codepoint": "U+F0122",
+     "codepoint": "U+F0815",
      "file": "FNS_Remote-toolbar.png"
     }
    }
