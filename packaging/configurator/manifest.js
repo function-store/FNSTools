@@ -2,7 +2,7 @@
 window.FNS_MANIFEST = {
  "schema": 1,
  "release": "v3.2.73",
- "notes": "The install picker's one-line note after a starting point (\"16 tools ticked...\") sits above the footer; it used to cover the footer's buttons for a few seconds.\nThe install picker's last step names the Patreon picks it cannot install yet: the plan carries a \"Waiting for Patreon\" line with the sign-in, recheck or join action, and the installed report keeps the one-line note; before, a locked pick was recorded as wanted and left unmentioned there.",
+ "notes": "The install picker keeps your place when a Patreon sign-in or \"I just pledged\" refreshes it: your ticks stay, an open install step re-plans with the tools the sign-in unlocked, and the newly unlocked tool is announced on your next visit instead of in the middle of the install (arrives with the next installer and bootstrap rebuild).",
  "channel": "stable",
  "base_url": "https://storage.functionstore.tools/fnstools",
  "toolkit": {
@@ -223,8 +223,8 @@ window.FNS_MANIFEST = {
  "agent_skill": {
   "version": "v3.2.73",
   "path": "packaging/dist/agent-skill.json",
-  "bytes": 516450,
-  "sha256": "7e6066dcf60832e3bd012cf837fb92212c57ade18391928cdbbc7b5c7b09b8ce",
+  "bytes": 516778,
+  "sha256": "a794593813df5d15b66c72c619418d720d5c7fbf0528445237fe0875ebf57b1c",
   "files": 91,
   "url": "https://storage.functionstore.tools/fnstools/v3.2.73/agent-skill.json"
  },
@@ -9182,8 +9182,8 @@ window.FNS_MANIFEST = {
     "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_Updater.tox"
    },
    "search": {
-    "head": "changed clicking feature help icon indicator notes packages release self selfupdate show update wiki",
-    "body": "actually alongside appears available border case chapter configs custom data download ensure externally fetch file following happen hash hub installed landed machine means opens outlined package plain popup prompt readable reload replace replaced retained roams save saved say setting shows silences skip small state stay stays store take time toolbar turn uninstalled usual verifying yellow"
+    "head": "agent changed clicking feature help icon indicator install notes packages release self selfupdate show skill update wiki",
+    "body": "actually adds agents alongside appears appends available beside block border build case chapter claude code coding command commands configs copies copy current custom data download ensure externally fetch file fnstools folder following generated happen hash hotkeys hub idempotent installed landed launch logs machine means methods newer older opens outlined outside owns package pages plain points popup promoted prompt quick quicklaunch reached read readable refresh registries reload replace replaced reported retained roams save saved say sees setting setup shipped ships short shows silences skip small state stay stays store take tells text time toolbar touches turn twice uninstalled usual verifying walks went writes yellow"
    }
   },
   {

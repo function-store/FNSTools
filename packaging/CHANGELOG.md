@@ -1,5 +1,12 @@
 # FNS tools changelog
 
+## v3.2.73 -- 2026-10-17
+
+- FNSTools.tox and FNS_Installer.tox 3.2.72 -> 3.2.73 -- the install picker's last step names the Patreon picks that wait for a sign-in, and its note after a starting point sits above the footer; the bootstrap carries updater 3.2.28
+
+The install picker's one-line note after a starting point ("16 tools ticked...") sits above the footer; it used to cover the footer's buttons for a few seconds.
+The install picker's last step names the Patreon picks it cannot install yet: the plan carries a "Waiting for Patreon" line with the sign-in, recheck or join action, and the installed report keeps the one-line note; before, a locked pick was recorded as wanted and left unmentioned there.
+
 ## v3.2.72 -- 2026-10-17
 
 - FNS_Hub 3.2.13 -> 3.2.14 -- group brackets survive an in-session update: the restore keeps looking while tools are still being replaced and spends its retries only on a settled bar, a group none of whose members is present yet is retried, and a new RepublishOwned re-places the brackets once an update has finished. A Reset toolbar pulse on the Toolbar tab (its parameters, page Toolbar) puts the bar back to the layout it shipped with after asking: every tool to its stamped slot, TD's own items, dividers and groups to the shipped table, and the settings file stops replaying the old positions. For a project whose bar came out of an update with tools tied at one number.

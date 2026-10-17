@@ -14,6 +14,7 @@
 ## Docs
 
 - [Working with FNSTools in your project](https://functionstore.tools/docs/guides/working-in-your-project/): what an update replaces, what is safe to change, and how to keep your own version of a tool
+- [Use FNSTools from a coding agent](https://functionstore.tools/docs/guides/agent-skill/): the agent skill, a reference to every installed package's methods, commands, hotkeys and parameters, and the command that installs it into a project
 - [Getting started](https://functionstore.tools/docs/guides/getting-started/): install, choose packages, update, settings
 - [Architecture](https://functionstore.tools/docs/guides/architecture/): packages, registries and how they fit together
 - [All tools](https://functionstore.tools/docs/): one page per tool, with its parameters

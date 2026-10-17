@@ -43,7 +43,7 @@ UPDATER_TOX = 'packaging/dist/FNS_Updater.tox'
 # installer is a copy of the live dev comp, re-stamped so the two rails
 # can never ship different answers), which also makes the live dev comp's
 # own Pkgversion a mirror of this value, not a second source.
-INSTALLER_VERSION = '3.2.72'
+INSTALLER_VERSION = '3.2.73'
 # publish.Stage() runs on the shell with no TD, so the version each rail
 # was built at rides this sidecar from the build to the staged manifest's
 # `rails` block. Without it a rail is recallable only by hash, which no

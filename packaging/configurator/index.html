@@ -2204,6 +2204,36 @@ function fnsBoot() {
   function memberPicked() {
     return Array.from(picked).some(function (n) { return byName[n] && byName[n].family; });
   }
+  // The picker reloads itself when a sign-in or "I just pledged" changes
+  // the account (watchAuth, refreshAccount). Served, a reload rebuilt the
+  // ticks from the install record and landed on the catalog, so someone
+  // who signed in at the install step lost what they had picked, met the
+  // tool they had just unlocked as "new since you last looked", and was
+  // back at Pick Tools (field report 2026-10-17). Those reloads carry the
+  // place across; any other load starts fresh.
+  var RESUME_KEY = 'fns.resume';
+  function reloadKeepingPlace() {
+    try {
+      sessionStorage.setItem(RESUME_KEY, JSON.stringify({
+        at: Date.now(), screen: curScreen,
+        drawer: document.documentElement.hasAttribute('data-drawer'),
+        picked: Array.from(picked), placing: Array.from(placing), family: familyOn}));
+    } catch (e) { /* sandboxed: the reload starts fresh, as before */ }
+    location.reload();
+  }
+  var resumed = null;
+  try {
+    resumed = JSON.parse(sessionStorage.getItem(RESUME_KEY) || 'null');
+    sessionStorage.removeItem(RESUME_KEY);
+  } catch (e) { resumed = null; }
+  if (resumed && !(Date.now() - (resumed.at || 0) < 15 * 60 * 1000)) resumed = null;
+  if (resumed) {
+    picked.clear();
+    (resumed.picked || []).forEach(function (n) { if (pickable(byName[n])) picked.add(n); });
+    placing.clear();
+    (resumed.placing || []).forEach(function (n) { if (pickable(byName[n])) placing.add(n); });
+    if (typeof resumed.family === 'boolean') familyOn = resumed.family;
+  }
 
   // Release, TD build and the verification promise were a meta line under
   // the headline; they are said where the download question is actually
@@ -3551,7 +3581,7 @@ function fnsBoot() {
     acctAskedAt = nowMs;
     fetch('/auth/status').then(function (r) { return r.json(); })
       .then(function (st) {
-        if (acctKey(st) !== acctKey(account)) location.reload();
+        if (acctKey(st) !== acctKey(account)) reloadKeepingPlace();
       })
       .catch(function () { /* no server answer: keep what the page has */ });
   }
@@ -4696,7 +4726,7 @@ function fnsBoot() {
             // that could never come.
             if (acctSig(st) !== before) {
               showDialog((st.status || 'Done.') + '\nRefreshing the picker…', false);
-              setTimeout(function () { location.reload(); }, 900);
+              setTimeout(reloadKeepingPlace, 900);
               return;
             }
             // keep watching through every TRANSITIONAL status -- the
@@ -5420,7 +5450,13 @@ function fnsBoot() {
   // browse, with the set one click away on the count.
   var fromHash = screenOfHash(location.hash);
   var landing;
-  if (fromHash) landing = fromHash;
+  // back where a sign-in reload left off (reloadKeepingPlace); the
+  // install step re-plans, so a tool the sign-in unlocked joins the plan
+  var resumeInstall = !!(resumed && served && resumed.screen === 'install' && !locked);
+  if (resumed && served && resumed.screen) {
+    landing = resumeInstall ? 'catalog'
+      : (resumed.screen === 'catalog' && resumed.drawer ? 'set' : resumed.screen);
+  } else if (fromHash) landing = fromHash;
   else if (FNS_EMBEDDED) landing = 'catalog';
   else if (served) landing = (firstrun && !sessionFlag('fns.welcomed')) ? 'start' : 'catalog';
   else landing = stored('fns.visited', null) ? 'catalog' : 'start';
@@ -5436,6 +5472,7 @@ function fnsBoot() {
   } else {
     setScreen(landing, {fromHash: true});
   }
+  if (resumeInstall) document.getElementById('save').click();
   loadRecommends();
   // A store manifest was served and the installer is checking the bucket
   // for a newer release (InstallerExt._checkManifest). When the release
@@ -5484,7 +5521,9 @@ function fnsBoot() {
   // on the set: never on a first run or a first visit (the guided setup is
   // their introduction, and unseenNow recorded everything as shown), never
   // where Apply is refused anyway.
-  if (!firstrun && !firstVisit && announceOn && unseenAtLoad.size && !(served && locked)) {
+  // Not on a sign-in reload either: the tool just unlocked is not news in
+  // the middle of an install; it is announced on the next visit.
+  if (!firstrun && !firstVisit && !resumed && announceOn && unseenAtLoad.size && !(served && locked)) {
     prepareNewTools();
     renderNewBanner();
   }

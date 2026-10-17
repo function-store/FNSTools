@@ -18,3 +18,5 @@ that release's entry in packaging/CHANGELOG.md and ships inside the
 release's manifest. An empty file is fine -- the entry then carries just
 the auto-generated package list.
 -->
+
+The install picker keeps your place when a Patreon sign-in or "I just pledged" refreshes it: your ticks stay, an open install step re-plans with the tools the sign-in unlocked, and the newly unlocked tool is announced on your next visit instead of in the middle of the install (arrives with the next installer and bootstrap rebuild).

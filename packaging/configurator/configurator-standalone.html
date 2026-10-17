@@ -1381,7 +1381,7 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
 window.FNS_MANIFEST = {
  "schema": 1,
  "release": "v3.2.73",
- "notes": "The install picker's one-line note after a starting point (\"16 tools ticked...\") sits above the footer; it used to cover the footer's buttons for a few seconds.\nThe install picker's last step names the Patreon picks it cannot install yet: the plan carries a \"Waiting for Patreon\" line with the sign-in, recheck or join action, and the installed report keeps the one-line note; before, a locked pick was recorded as wanted and left unmentioned there.",
+ "notes": "The install picker keeps your place when a Patreon sign-in or \"I just pledged\" refreshes it: your ticks stay, an open install step re-plans with the tools the sign-in unlocked, and the newly unlocked tool is announced on your next visit instead of in the middle of the install (arrives with the next installer and bootstrap rebuild).",
  "channel": "stable",
  "base_url": "https://storage.functionstore.tools/fnstools",
  "toolkit": {
@@ -1602,8 +1602,8 @@ window.FNS_MANIFEST = {
  "agent_skill": {
   "version": "v3.2.73",
   "path": "packaging/dist/agent-skill.json",
-  "bytes": 516450,
-  "sha256": "7e6066dcf60832e3bd012cf837fb92212c57ade18391928cdbbc7b5c7b09b8ce",
+  "bytes": 516778,
+  "sha256": "a794593813df5d15b66c72c619418d720d5c7fbf0528445237fe0875ebf57b1c",
   "files": 91,
   "url": "https://storage.functionstore.tools/fnstools/v3.2.73/agent-skill.json"
  },
@@ -10561,8 +10561,8 @@ window.FNS_MANIFEST = {
     "url": "https://storage.functionstore.tools/fnstools/v3.2.73/FNS_Updater.tox"
    },
    "search": {
-    "head": "changed clicking feature help icon indicator notes packages release self selfupdate show update wiki",
-    "body": "actually alongside appears available border case chapter configs custom data download ensure externally fetch file following happen hash hub installed landed machine means opens outlined package plain popup prompt readable reload replace replaced retained roams save saved say setting shows silences skip small state stay stays store take time toolbar turn uninstalled usual verifying yellow"
+    "head": "agent changed clicking feature help icon indicator install notes packages release self selfupdate show skill update wiki",
+    "body": "actually adds agents alongside appears appends available beside block border build case chapter claude code coding command commands configs copies copy current custom data download ensure externally fetch file fnstools folder following generated happen hash hotkeys hub idempotent installed landed launch logs machine means methods newer older opens outlined outside owns package pages plain points popup promoted prompt quick quicklaunch reached read readable refresh registries reload replace replaced reported retained roams save saved say sees setting setup shipped ships short shows silences skip small state stay stays store take tells text time toolbar touches turn twice uninstalled usual verifying walks went writes yellow"
    }
   },
   {
@@ -13572,6 +13572,36 @@ function fnsBoot() {
   function memberPicked() {
     return Array.from(picked).some(function (n) { return byName[n] && byName[n].family; });
   }
+  // The picker reloads itself when a sign-in or "I just pledged" changes
+  // the account (watchAuth, refreshAccount). Served, a reload rebuilt the
+  // ticks from the install record and landed on the catalog, so someone
+  // who signed in at the install step lost what they had picked, met the
+  // tool they had just unlocked as "new since you last looked", and was
+  // back at Pick Tools (field report 2026-10-17). Those reloads carry the
+  // place across; any other load starts fresh.
+  var RESUME_KEY = 'fns.resume';
+  function reloadKeepingPlace() {
+    try {
+      sessionStorage.setItem(RESUME_KEY, JSON.stringify({
+        at: Date.now(), screen: curScreen,
+        drawer: document.documentElement.hasAttribute('data-drawer'),
+        picked: Array.from(picked), placing: Array.from(placing), family: familyOn}));
+    } catch (e) { /* sandboxed: the reload starts fresh, as before */ }
+    location.reload();
+  }
+  var resumed = null;
+  try {
+    resumed = JSON.parse(sessionStorage.getItem(RESUME_KEY) || 'null');
+    sessionStorage.removeItem(RESUME_KEY);
+  } catch (e) { resumed = null; }
+  if (resumed && !(Date.now() - (resumed.at || 0) < 15 * 60 * 1000)) resumed = null;
+  if (resumed) {
+    picked.clear();
+    (resumed.picked || []).forEach(function (n) { if (pickable(byName[n])) picked.add(n); });
+    placing.clear();
+    (resumed.placing || []).forEach(function (n) { if (pickable(byName[n])) placing.add(n); });
+    if (typeof resumed.family === 'boolean') familyOn = resumed.family;
+  }
 
   // Release, TD build and the verification promise were a meta line under
   // the headline; they are said where the download question is actually
@@ -14919,7 +14949,7 @@ function fnsBoot() {
     acctAskedAt = nowMs;
     fetch('/auth/status').then(function (r) { return r.json(); })
       .then(function (st) {
-        if (acctKey(st) !== acctKey(account)) location.reload();
+        if (acctKey(st) !== acctKey(account)) reloadKeepingPlace();
       })
       .catch(function () { /* no server answer: keep what the page has */ });
   }
@@ -16064,7 +16094,7 @@ function fnsBoot() {
             // that could never come.
             if (acctSig(st) !== before) {
               showDialog((st.status || 'Done.') + '\nRefreshing the picker…', false);
-              setTimeout(function () { location.reload(); }, 900);
+              setTimeout(reloadKeepingPlace, 900);
               return;
             }
             // keep watching through every TRANSITIONAL status -- the
@@ -16788,7 +16818,13 @@ function fnsBoot() {
   // browse, with the set one click away on the count.
   var fromHash = screenOfHash(location.hash);
   var landing;
-  if (fromHash) landing = fromHash;
+  // back where a sign-in reload left off (reloadKeepingPlace); the
+  // install step re-plans, so a tool the sign-in unlocked joins the plan
+  var resumeInstall = !!(resumed && served && resumed.screen === 'install' && !locked);
+  if (resumed && served && resumed.screen) {
+    landing = resumeInstall ? 'catalog'
+      : (resumed.screen === 'catalog' && resumed.drawer ? 'set' : resumed.screen);
+  } else if (fromHash) landing = fromHash;
   else if (FNS_EMBEDDED) landing = 'catalog';
   else if (served) landing = (firstrun && !sessionFlag('fns.welcomed')) ? 'start' : 'catalog';
   else landing = stored('fns.visited', null) ? 'catalog' : 'start';
@@ -16804,6 +16840,7 @@ function fnsBoot() {
   } else {
     setScreen(landing, {fromHash: true});
   }
+  if (resumeInstall) document.getElementById('save').click();
   loadRecommends();
   // A store manifest was served and the installer is checking the bucket
   // for a newer release (InstallerExt._checkManifest). When the release
@@ -16852,7 +16889,9 @@ function fnsBoot() {
   // on the set: never on a first run or a first visit (the guided setup is
   // their introduction, and unseenNow recorded everything as shown), never
   // where Apply is refused anyway.
-  if (!firstrun && !firstVisit && announceOn && unseenAtLoad.size && !(served && locked)) {
+  // Not on a sign-in reload either: the tool just unlocked is not news in
+  // the middle of an install; it is announced on the next visit.
+  if (!firstrun && !firstVisit && !resumed && announceOn && unseenAtLoad.size && !(served && locked)) {
     prepareNewTools();
     renderNewBanner();
   }

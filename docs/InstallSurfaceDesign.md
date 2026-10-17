@@ -701,6 +701,54 @@ and two of its artifacts installed clean into a cooking-disabled trial.
 The FirstRunTestPlan runs on a clean TD remain. The root tox carries the
 refreshed dev picker page (saved by a later PI save that day).
 
+## After phase 5 (2026-10-17): the toast, and the picks that wait
+
+Two field reports from the owner on the shipped page, both in
+`index.html` only (the standalone regenerated as before):
+
+1. **The toast sat on the footer.** `.toast` is fixed to the bottom of
+   the page, and for its few seconds it covered the catalog footer's
+   buttons, which read as a tooltip rendered in their place. `toast()`
+   now lifts it by the footer's height when the footer is visible
+   (`#catfoot.offsetParent`), so it hovers above the count and the
+   primary; framed in the console, where there is no footer, it keeps
+   its old place.
+2. **The last step names the Patreon picks it cannot install.**
+   `installable()` keeps a locked Plus pick out of the plan and records
+   it as wanted, so it installs by itself after a sign-in; until now the
+   plan and the done report never mentioned it, which read as the pick
+   being dropped. The install screen carries `#instwait`, a "Waiting for
+   Patreon" block under the report that `showInstall` fills from the
+   drawer's own line (`renderPlusLine(target, noteOnly)`): on the plan it
+   has the sentence and the actions (sign in, recheck, join, by account
+   state, as in the drawer); on the done report it keeps the sentence
+   and the docs link without the actions; progress, failed and the
+   script state hide it (the script's hint already says the paste hands
+   the Patreon picks to the picker inside TouchDesigner). Measured on
+   the served sim with a POST-aware server: plan "1 of these needs a
+   Patreon sign-in; it installs once your account includes it. Sign in
+   with Patreon", then Install, then "Installed" with the AutoRes chip,
+   the same sentence without the button, and Browse more tools; the
+   site's script state shows no block. The "Add FNS tab to OP Create"
+   switch was checked at the same time: it defaults on. Off-machine it
+   reads the stored switch (`fns.family`, on unless a previous untick
+   stored off); served it follows the last selection when one recorded
+   the choice, and otherwise is on unless family members are installed
+   without the family, which is what a previous untick leaves behind.
+   Nothing changed there.
+
+Shipped the same day as release v3.2.73, a rails-only release: no
+package moved, FNSTools.tox and FNS_Installer.tox went 3.2.72 to 3.2.73
+(the bootstrap still carrying updater 3.2.28) and the developer kit was
+rebuilt under the new label. Before the upload the staged bootstrap was
+loaded into a cooking-disabled container: installer 3.2.73, updater
+3.2.28, the embedded page carrying both fixes, empty storage on every
+rail, no errors; CookBar installed from the staged release snapshot with
+its extensions ready and ExpressionPOP reported available as a family
+member. `verify_release.py v3.2.73`: all 62 free artifacts and the three
+rails match the staged bytes on the versioned and the latest paths. The
+FirstRunTestPlan on a clean TD still remains.
+
 ## What update announcing deliberately is NOT
 
 - The web/get flavor has no updates surface — updates are meaningless

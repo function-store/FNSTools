@@ -45,3 +45,5 @@ If you install FNSTools later in the same project:
 ## For AI agents and scripts
 
 The same rules apply to an assistant or a script working in your project: change tools through their parameters, never inside `/FNSTools`. The short version for agents is at [/llms.txt](/llms.txt), and the toolkit container carries the same rules in its `README`.
+
+An agent that should know the toolkit itself, every package's methods, commands, hotkeys and parameters, gets that from the agent skill: run **Install agent skill** and read [Use FNSTools from a coding agent](/docs/guides/agent-skill/).

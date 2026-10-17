@@ -48,6 +48,8 @@ Coming from the 2023 toolkit (v2)? Read [Moving from v2](https://functionstore.t
 
 Requires **TouchDesigner 2025 or newer**, Windows or macOS. Full instructions and alternative install paths: [functionstore.tools](https://functionstore.tools/#get).
 
+Working with a coding agent? FNSTools ships an agent skill: run **Install agent skill** from the command palette and the agent gets a reference to every installed package, its promoted methods, quick-launch commands, hotkeys and settings, generated from the release you have. [Use FNSTools from a coding agent](https://functionstore.tools/docs/guides/agent-skill/) explains the setup.
+
 ## For tool developers
 
 Building a tool that publishes into the toolkit, a button on the toolbar, an entry in a pane bar or the main menu, a tab in the palette, a settings page? Download the developer kit, [`FNSTools-DevKit.zip`](https://storage.functionstore.tools/fnstools/latest/FNSTools-DevKit.zip): the eleven registries, each as its own `.tox`, with a README. Drop the ones your tool publishes into at the root of a development project. No picker, no updater, so take the kit of the release you target. Each registry page on [functionstore.tools/docs](https://functionstore.tools/docs/) carries its contract, and the pattern itself is in [docs/RegistryScheme.md](docs/RegistryScheme.md).
