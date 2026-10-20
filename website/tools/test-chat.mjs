@@ -6,7 +6,7 @@ import { MockLanguageModelV4, mockValues } from 'ai/test';
 import {
   answer, searchDocs, readDoc, validatePicks, clampMessages, instructions, LIMITS,
 } from '../api/_lib/finder.js';
-import { POST, OPTIONS } from '../api/chat.js';
+import { GET, POST, OPTIONS } from '../api/chat.js';
 import { readFileSync } from 'node:fs';
 
 const data = JSON.parse(readFileSync(new URL('../api/_data/chat.json', import.meta.url), 'utf8'));
@@ -123,10 +123,31 @@ await check('answer: a plain text reply has no picks', async () => {
   assert.ok(out.reply.includes('FNSTools'));
 });
 
-await check('answer: stops after the step cap', async () => {
-  const { model, prompts } = scripted(...Array.from({ length: 20 }, (_, i) => call('searchDocs', { query: 'x' + i }, 's' + i)));
-  await answer({ messages: [{ role: 'user', content: 'anything' }] }, { model });
-  assert.equal(prompts.length, LIMITS.steps);
+await check('answer: the last step is forced to recommend', async () => {
+  const choices = [];
+  let n = 0;
+  const model = new MockLanguageModelV4({
+    doGenerate: async (opts) => {
+      choices.push(opts.toolChoice && opts.toolChoice.type === 'tool' ? opts.toolChoice.toolName : 'auto');
+      n += 1;
+      return opts.toolChoice && opts.toolChoice.type === 'tool'
+        ? call('recommend', { reply: 'Nothing fits.', picks: [] }, 'r' + n)
+        : call('searchDocs', { query: 'x' + n }, 's' + n);
+    },
+  });
+  const out = await answer({ messages: [{ role: 'user', content: 'anything' }] }, { model });
+  assert.equal(choices.length, LIMITS.steps);
+  assert.equal(choices[choices.length - 1], 'recommend');
+  assert.ok(choices.slice(0, -1).every((c) => c === 'auto'));
+  assert.equal(out.reply, 'Nothing fits.');
+});
+
+await check('answer: reads past the cap are refused', async () => {
+  const names = data.tools.slice(0, LIMITS.reads + 1).map((t) => t.name);
+  const { model } = scripted(...names.map((nm, i) => call('readDoc', { name: nm }, 'd' + i)),
+    call('recommend', { reply: 'ok', picks: [] }, 'r'));
+  const out = await answer({ messages: [{ role: 'user', content: 'anything' }] }, { model });
+  assert.equal(out.read.length, LIMITS.reads);
 });
 
 await check('answer: a conversation ending on the assistant is refused', async () => {
@@ -147,6 +168,15 @@ await check('CORS: site, previews and the installer allowed; others not', () => 
   for (const o of ['https://evil.example', 'http://127.0.0.1.evil.example:80', 'https://functionstore.tools.evil.example']) {
     assert.equal(OPTIONS(req(o, null, 'OPTIONS')).headers.get('access-control-allow-origin'), null, o);
   }
+});
+
+await check('GET says whether a model is configured', async () => {
+  const saved = process.env.CHAT_MODEL;
+  delete process.env.CHAT_MODEL;
+  assert.deepEqual(await GET(req('https://functionstore.tools', null, 'GET')).json(), { ready: false });
+  process.env.CHAT_MODEL = 'test/none';
+  assert.deepEqual(await GET(req('https://functionstore.tools', null, 'GET')).json(), { ready: true });
+  if (saved === undefined) delete process.env.CHAT_MODEL; else process.env.CHAT_MODEL = saved;
 });
 
 await check('POST without CHAT_MODEL answers 503', async () => {

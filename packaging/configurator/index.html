@@ -444,6 +444,28 @@ dialog::backdrop { background: rgba(0,0,0,0.7); }
 .qres-sub { margin: 10px 0 2px; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); }
 .qres.plus { border-color: var(--plus-faint); }
 
+/* ── the tool finder chat (docs/PickerChatbot.md) ── */
+.ask-log { display: flex; flex-direction: column; gap: 10px; margin: 0 0 12px; }
+.ask-msg {
+  max-width: 88%; padding: 9px 13px; border-radius: 10px; font-size: 14px; line-height: 1.55;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.ask-msg.user { align-self: flex-end; background: var(--accent-dim); color: var(--text); border: 1px solid var(--accent); }
+.ask-msg.bot { align-self: flex-start; background: var(--bg-2); color: var(--text); border: 1px solid var(--border); }
+.ask-msg.bot a { color: var(--accent); }
+.ask-msg.wait { color: var(--text-dim); font-style: italic; }
+.ask-msg.err { border-color: rgba(248,113,113,0.5); color: var(--text-dim); }
+.ask-picks { display: flex; flex-direction: column; gap: 4px; align-self: stretch; }
+.ask-picks .qres-desc { -webkit-line-clamp: 3; }
+.ask-form { display: flex; gap: 8px; align-items: flex-end; }
+.ask-form textarea {
+  flex: 1; min-height: 44px; max-height: 160px; resize: vertical; padding: 10px 12px;
+  border-radius: 8px; border: 1px solid var(--border); background: var(--bg-2); color: var(--text);
+  font: inherit; font-size: 14px; line-height: 1.45;
+}
+.ask-form textarea:focus { outline: none; border-color: var(--accent); }
+.ask-note { margin: 8px 0 0; font-size: 12px; color: var(--text-faint); line-height: 1.5; }
+
 /* ── toast ── */
 .toast {
   position: fixed; bottom: 14px; right: 18px; padding: 8px 14px;
@@ -1089,6 +1111,9 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
   #screen-quiz .quiz-options { flex-direction: row; flex-wrap: wrap; gap: 8px; }
   #screen-quiz .qopt { border-radius: 999px; }
   .quiz-foot { justify-content: flex-end; }
+  #screen-ask .quiz { max-width: 720px; padding: 22px 0 16px; }
+  #screen-ask .quiz-prompt { font-size: 22px; }
+  body.app #screen-ask .quiz-prompt { font-size: 19px; }
   .inst { max-width: 760px; padding: 22px 0 16px; }
   .inst h2 { margin: 0 0 6px; font-size: 22px; font-weight: 700; letter-spacing: -0.015em; }
   body.app .inst h2 { font-size: 19px; }
@@ -1165,6 +1190,7 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
       <div class="presets" id="presets">
         <button class="preset primary" id="pre-last" hidden><b>Set up like last time</b><span id="pre-last-desc"></span><span class="pick">Install now ›</span></button>
         <button class="preset" id="pre-quiz" hidden><b>Answer a few questions</b><span>A few quick questions, then a set picked for how you work.</span><span class="pick">Find my set ›</span></button>
+        <button class="preset" id="pre-ask" hidden><b>Describe what you need</b><span>Tell the tool finder what gets in your way in TouchDesigner. It picks tools and says why.</span><span class="pick">Ask ›</span></button>
         <button class="preset" id="pre-starter"><b>Recommended</b><span id="pre-starter-desc"></span><span class="pick">Start here ›</span></button>
         <button class="preset" id="pre-all"><b>Everything</b><span id="pre-all-desc"></span><span class="pick">Select all ›</span></button>
         <button class="preset" id="pre-none"><b>Pick my own</b><span>Start from an empty list and browse the catalog.</span><span class="pick">Browse ›</span></button>
@@ -1192,6 +1218,30 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
       <span class="spacer"></span>
       <button type="button" class="btn btn-secondary" id="quiz-next">Next</button>
       <button type="button" class="btn btn-primary" id="quiz-use" hidden>Use this selection</button>
+    </div>
+  </section>
+
+  <!-- S1b "Describe what you need": the tool finder chat. The reader
+       writes, /api/chat/ answers with picks, the picks render as the
+       questionnaire's rows; Use this selection lands on the catalog the
+       same way. Shown only when the endpoint says it is ready
+       (docs/PickerChatbot.md). -->
+  <section class="screen" id="screen-ask" hidden>
+    <div class="quiz" id="ask">
+      <div class="quiz-progress">Tool finder</div>
+      <h2 class="quiz-prompt">What gets in your way in TouchDesigner?</h2>
+      <p class="quiz-hint">Describe a problem or something you want to do. The finder reads the FNSTools docs and picks the tools that help.</p>
+      <div class="ask-log" id="ask-log" aria-live="polite"></div>
+      <form class="ask-form" id="ask-form">
+        <textarea id="ask-input" maxlength="1500" rows="2" placeholder="For example: my networks get messy and I lose track of what feeds what"></textarea>
+        <button type="submit" class="btn btn-secondary" id="ask-send">Send</button>
+      </form>
+      <p class="ask-note">What you write is sent to an AI model (Google Gemini, through Vercel) to pick tools. It is not stored.</p>
+    </div>
+    <div class="sum quiz-foot">
+      <button type="button" class="btn btn-quiet" id="ask-back">Back</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn btn-primary" id="ask-use" hidden>Use this selection</button>
     </div>
   </section>
 
@@ -3837,6 +3887,62 @@ function fnsBoot() {
     renderWelcomeAccess();
     setScreen('start');
   }
+  /** One result row: checkbox, name with its chips and links, and a line
+   *  under it -- the finder's reason when there is one, else the tool's
+   *  description. Shared by the questionnaire and the tool finder;
+   *  `state` collects the ticks ({chosen, plus}). */
+  function pickRow(r, ticked, state) {
+    var p = byName[r.name];
+    var row = document.createElement('label');
+    row.className = 'qres' + (isPlus(p) ? ' plus' : '');
+    var cb = document.createElement('input');
+    cb.type = 'checkbox'; cb.checked = ticked;
+    state.chosen[r.name] = ticked;
+    if (isPlus(p)) state.plus[r.name] = cb;
+    cb.addEventListener('change', function () {
+      state.chosen[r.name] = cb.checked;
+      if (cb.checked && lockedPatreon([r.name]).length) {
+        askPatreon([r.name], function () {
+          cb.checked = false; state.chosen[r.name] = false;
+        });
+      }
+    });
+    row.appendChild(cb);
+    var body = document.createElement('span');
+    body.className = 'qres-body';
+    // the same name line a card has: title, docs, and the curated
+    // link-outs; a reader deciding on a recommendation needs the docs
+    // one click away, not after leaving the dialog
+    var nm = document.createElement('span');
+    nm.className = 'qres-name';
+    var t = document.createElement('b');
+    t.textContent = titleOf(p);
+    nm.appendChild(t);
+    if (isPlus(p)) {
+      nm.appendChild(chip(tierLabel(p.access)
+        ? 'Patreon:' + tierLabel(p.access) : 'Patreon', 'plus'));
+    }
+    if (pricingOf(p)) {
+      nm.appendChild(chip(pricingOf(p).summary, 'trial'));
+    }
+    [['help_url', 'docs ↗'], ['homepage', 'site ↗'], ['changelog_url', 'changelog ↗']]
+      .forEach(function (k) {
+        if (!p[k[0]]) return;
+        var l = docsLink(p[k[0]], k[1], 'help');
+        // the row is a <label>: a link click must not toggle its box
+        l.addEventListener('click', function (e) { e.stopPropagation(); });
+        nm.appendChild(l);
+      });
+    body.appendChild(nm);
+    if (r.why || p.description) {
+      var ds = document.createElement('span');
+      ds.className = 'qres-desc';
+      ds.textContent = r.why || p.description;
+      body.appendChild(ds);
+    }
+    row.appendChild(body);
+    return row;
+  }
   function quizRender(onUse) {
     var n = quiz.questions.length;
     var prog = document.getElementById('quiz-progress');
@@ -3897,58 +4003,8 @@ function fnsBoot() {
     next.hidden = true; use.hidden = !picks.length;
     var chosenNames = {};
     var plusBoxes = {};   // the Plus rows' checkboxes, for Leave Plus out
-    function resultRow(r, ticked) {
-      var p = byName[r.name];
-      var row = document.createElement('label');
-      row.className = 'qres' + (isPlus(p) ? ' plus' : '');
-      var cb = document.createElement('input');
-      cb.type = 'checkbox'; cb.checked = ticked;
-      chosenNames[r.name] = ticked;
-      if (isPlus(p)) plusBoxes[r.name] = cb;
-      cb.addEventListener('change', function () {
-        chosenNames[r.name] = cb.checked;
-        if (cb.checked && lockedPatreon([r.name]).length) {
-          askPatreon([r.name], function () {
-            cb.checked = false; chosenNames[r.name] = false;
-          });
-        }
-      });
-      row.appendChild(cb);
-      var body = document.createElement('span');
-      body.className = 'qres-body';
-      // the same name line a card has: title, docs, and the curated
-      // link-outs; a reader deciding on a recommendation needs the docs
-      // one click away, not after leaving the dialog
-      var nm = document.createElement('span');
-      nm.className = 'qres-name';
-      var t = document.createElement('b');
-      t.textContent = titleOf(p);
-      nm.appendChild(t);
-      if (isPlus(p)) {
-        nm.appendChild(chip(tierLabel(p.access)
-          ? 'Patreon:' + tierLabel(p.access) : 'Patreon', 'plus'));
-      }
-      if (pricingOf(p)) {
-        nm.appendChild(chip(pricingOf(p).summary, 'trial'));
-      }
-      [['help_url', 'docs ↗'], ['homepage', 'site ↗'], ['changelog_url', 'changelog ↗']]
-        .forEach(function (k) {
-          if (!p[k[0]]) return;
-          var l = docsLink(p[k[0]], k[1], 'help');
-          // the row is a <label>: a link click must not toggle its box
-          l.addEventListener('click', function (e) { e.stopPropagation(); });
-          nm.appendChild(l);
-        });
-      body.appendChild(nm);
-      if (p.description) {
-        var ds = document.createElement('span');
-        ds.className = 'qres-desc';
-        ds.textContent = p.description;
-        body.appendChild(ds);
-      }
-      row.appendChild(body);
-      return row;
-    }
+    var rowState = {chosen: chosenNames, plus: plusBoxes};
+    function resultRow(r, ticked) { return pickRow(r, ticked, rowState); }
     // A recommendation starts ticked only when this account can install it.
     // A Patreon tool the reader cannot get yet is still offered, unticked:
     // ticked by default it read as part of the install for a signed-out
@@ -4023,6 +4079,117 @@ function fnsBoot() {
     document.getElementById('quiz-next').onclick = function () {
       quizStep += 1; quizRender(onUse);
     };
+  }
+
+  // --- the tool finder (docs/PickerChatbot.md) ---------------------------
+  // On the site (and its Previews) the endpoint is same-origin; served by
+  // the installer from 127.0.0.1, or opened from a file, it is the live
+  // site's. /api/chat/ keeps its trailing slash: vercel.json redirects the
+  // bare path, and a CORS preflight never follows a redirect.
+  var CHAT_URL = /(^|\.)functionstore\.tools$|\.vercel\.app$|^localhost$/.test(location.hostname)
+    ? '/api/chat/' : FNS_DOCS + '/api/chat/';
+  var chatReady = false;
+  // A GET says whether the finder is switched on (a model configured). No
+  // answer, offline, or not yet: the Start card stays hidden.
+  try {
+    fetch(CHAT_URL, {cache: 'no-store'})
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        chatReady = !!(d && d.ready);
+        var b = document.getElementById('pre-ask');
+        if (b && chatReady) b.hidden = false;
+      })
+      .catch(function () { /* finder unreachable: the card stays hidden */ });
+  } catch (e) { /* no fetch: no finder */ }
+  var ask = {messages: [], state: {chosen: {}, plus: {}}, names: [], busy: false};
+  function askAccess() {
+    return bulkTools.some(function (p) { return isPlus(p) && installable(p.name); }) ? 'patreon' : 'free';
+  }
+  // Plain text with its http(s) links made clickable; nothing is parsed
+  // as HTML.
+  function askText(el, text) {
+    var parts = String(text || '').split(/(https?:\/\/[^\s)]+)/);
+    parts.forEach(function (t, i) {
+      if (!t) return;
+      if (i % 2) {
+        var url = t.replace(/[.,;:]+$/, '');
+        el.appendChild(docsLink(url, url.replace(/^https?:\/\//, '')));
+        if (url.length < t.length) el.appendChild(document.createTextNode(t.slice(url.length)));
+      } else {
+        el.appendChild(document.createTextNode(t));
+      }
+    });
+  }
+  function askBubble(cls, text) {
+    var b = mk('div', 'ask-msg ' + cls);
+    askText(b, text);
+    document.getElementById('ask-log').appendChild(b);
+    b.scrollIntoView({block: 'nearest'});
+    return b;
+  }
+  function askSend() {
+    var input = document.getElementById('ask-input');
+    var text = String(input.value || '').trim();
+    if (!text || ask.busy) return;
+    input.value = '';
+    ask.messages.push({role: 'user', content: text});
+    askBubble('user', text);
+    var wait = askBubble('bot wait', 'Reading the docs…');
+    ask.busy = true;
+    document.getElementById('ask-send').disabled = true;
+    function done() {
+      ask.busy = false;
+      document.getElementById('ask-send').disabled = false;
+      if (wait.parentNode) wait.parentNode.removeChild(wait);
+      input.focus();
+    }
+    function failed(msg) {
+      done();
+      // the turn did not happen: take it back so a retry is clean
+      ask.messages.pop();
+      askBubble('bot err', msg);
+    }
+    fetch(CHAT_URL, {method: 'POST', headers: {'Content-Type': 'application/json'},
+                     body: JSON.stringify({messages: ask.messages, access: askAccess()})})
+      .then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (d) {
+        if (!d || d.error || typeof d.reply !== 'string') {
+          failed((d && d.error) || 'The tool finder could not answer. Try again, or use the questions instead.');
+          return;
+        }
+        done();
+        var picks = (d.picks || []).filter(function (r) { return byName[r.name]; });
+        ask.messages.push({role: 'assistant', content: d.reply
+          + (picks.length ? '\n(Picked: ' + picks.map(function (r) { return r.name; }).join(', ') + ')' : '')});
+        askBubble('bot', d.reply);
+        if (!picks.length) return;
+        var box = mk('div', 'ask-picks');
+        picks.forEach(function (r) {
+          if (ask.names.indexOf(r.name) === -1) ask.names.push(r.name);
+          box.appendChild(pickRow(r, installable(r.name) && !handPick(byName[r.name]), ask.state));
+        });
+        document.getElementById('ask-log').appendChild(box);
+        document.getElementById('ask-use').hidden = false;
+        box.scrollIntoView({block: 'nearest'});
+      })
+      .catch(function () {
+        failed('Could not reach the tool finder. Check the connection, or use the questions instead.');
+      });
+  }
+  function askStart(onUse) {
+    ask = {messages: [], state: {chosen: {}, plus: {}}, names: [], busy: false};
+    document.getElementById('ask-log').textContent = '';
+    document.getElementById('ask-use').hidden = true;
+    setScreen('ask');
+    document.getElementById('ask-form').onsubmit = function (e) { e.preventDefault(); askSend(); };
+    document.getElementById('ask-input').onkeydown = function (e) {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); askSend(); }
+    };
+    document.getElementById('ask-back').onclick = function () { quizShow(false); };
+    document.getElementById('ask-use').onclick = function () {
+      onUse(ask.names.filter(function (nm) { return ask.state.chosen[nm]; }));
+    };
+    document.getElementById('ask-input').focus();
   }
 
   function applyPreset(names) {
@@ -4119,6 +4286,9 @@ function fnsBoot() {
     };
     pre.onclick = function () { choose(starter); };
     preQuiz.onclick = function () { quizStart(function (names) { choose(names, null, true); }); };
+    var preAsk = document.getElementById('pre-ask');
+    preAsk.hidden = !chatReady;
+    preAsk.onclick = function () { askStart(function (names) { choose(names, null, true); }); };
     document.getElementById('pre-all').onclick = function () {
       choose(bulkTools.map(function (p) { return p.name; }));
     };
@@ -5161,6 +5331,7 @@ function fnsBoot() {
   // derives from `picked`, `placing`, `familyOn` and `wantBind`.
   var SCREENS = {start: document.getElementById('screen-start'),
                  quiz: document.getElementById('screen-quiz'),
+                 ask: document.getElementById('screen-ask'),
                  catalog: document.getElementById('screen-catalog'),
                  install: document.getElementById('screen-install')};
   var curScreen = null;
@@ -5214,13 +5385,13 @@ function fnsBoot() {
     h = String(h || '').toLowerCase();
     if (h === '#set') return 'set';
     if (h === '#install') return 'catalog';
-    if (h === '#start' || h === '#quiz') return 'start';
+    if (h === '#start' || h === '#quiz' || h === '#ask') return 'start';
     if (h === '#catalog' || h.indexOf('#cat-') === 0 || HASH_ACCESS[h]) return 'catalog';
     return null;
   }
   // the step each screen belongs to: the catalog is step two, the
   // questionnaire belongs to Start
-  var STEP_OF = {start: 'start', quiz: 'start', catalog: 'set', install: 'install'};
+  var STEP_OF = {start: 'start', quiz: 'start', ask: 'start', catalog: 'set', install: 'install'};
   var STEP_ORDER = ['start', 'set', 'install'];
   // the last step names the flavor's real finish: an install where the
   // page can install, the paste script where it cannot

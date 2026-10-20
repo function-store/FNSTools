@@ -18,12 +18,13 @@ export const LIMITS = {
   messages: 12,
   messageChars: 1500,
   totalChars: 8000,
-  steps: 6,
+  steps: 5,
+  reads: 3,
   outputTokens: 1200,
   picks: 8,
   searchHits: 8,
-  docChars: 6000,
-  timeoutMs: 25000,
+  docChars: 4000,
+  timeoutMs: 40000,
 };
 
 const TOOLS = data.tools;
@@ -155,17 +156,24 @@ Rules:
   already say, call readDoc on it. Use searchDocs to find candidates.
 - Give your answer by calling recommend once, with each pick's reason written
   in the reader's own terms and taken from the tool's doc. Keep the reply short.
+- A pick must directly do what the reader asked for. Sharing a word with the
+  request (camera, sequence, colour) is not a fit. A tool that only helps
+  around the edges is not a pick: leave it out. Fewer, exact picks beat a long list.
 - Free and Patreon tools are both fair picks. Say plainly when a pick is a Patreon tool.
   ${can}
-- If nothing in the catalog fits, say so and call recommend with no picks.
-  Do not stretch a tool to fit.
+- If nothing in the catalog does what they asked, say so plainly, call
+  recommend with no picks, and suggest the community page
+  https://functionstore.tools/community/ or the Derivative forum.
+- You may read at most ${LIMITS.reads} docs; then recommend.
 - Ask at most one clarifying question, and only when the request is too vague to pick anything.
 - A how-to question about an FNSTools tool gets a few lines taken from that
   tool's doc (call readDoc) and a link to its docs page. Never answer from memory.
 - You do not give general TouchDesigner help. For questions about
   TouchDesigner itself, say briefly that you only know FNSTools and point to
   https://docs.derivative.ca or https://forum.derivative.ca.
-- Write in English, in plain sentences, no headings.
+- Write in English, in plain sentences: no headings, no markdown, no backticks.
+  In the reply, call a tool by its title (BorderlessTD), never its catalog
+  name (FNS_BorderlessTD); the catalog name is only for tool calls.
 
 Catalog (name | title | category | access | description | tags):
 ${CATALOG}`;
@@ -199,6 +207,7 @@ export async function answer({ messages, access }, { model, abortSignal } = {}) 
   }
   const read = [];
   let final = null;
+  let reads = 0;
   const result = await generateText({
     model,
     instructions: instructions(access),
@@ -206,7 +215,13 @@ export async function answer({ messages, access }, { model, abortSignal } = {}) 
     maxOutputTokens: LIMITS.outputTokens,
     timeout: LIMITS.timeoutMs,
     abortSignal,
+    reasoning: 'low',
     stopWhen: [hasToolCall('recommend'), isStepCount(LIMITS.steps)],
+    // The last step can only answer: a model still searching when the steps
+    // run out would otherwise end with no picks and no reply.
+    prepareStep: ({ stepNumber }) => (stepNumber >= LIMITS.steps - 1
+      ? { toolChoice: { type: 'tool', toolName: 'recommend' }, activeTools: ['recommend'] }
+      : undefined),
     tools: {
       searchDocs: tool({
         description: 'Keyword search across every FNSTools tool doc. Returns matching tools and sections.',
@@ -217,6 +232,8 @@ export async function answer({ messages, access }, { model, abortSignal } = {}) 
         description: 'Read one FNSTools tool\'s documentation by its catalog name.',
         inputSchema: z.object({ name: z.string().describe('Exact catalog name, e.g. FNS_BorderlessTD') }),
         execute: async ({ name }) => {
+          reads += 1;
+          if (reads > LIMITS.reads) return { error: `Read limit reached (${LIMITS.reads}). Call recommend now.` };
           const d = readDoc(name);
           if (!d.error) read.push(d.name);
           return d;

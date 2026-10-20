@@ -2,6 +2,10 @@
 // _lib/finder.js; this file is HTTP only: CORS, body parsing, errors.
 // Design: docs/PickerChatbot.md.
 //
+// Call it as /api/chat/ WITH the trailing slash: vercel.json sets
+// trailingSlash, so /api/chat answers a 308, and a browser refuses to follow
+// a redirect on a CORS preflight (the installer's 127.0.0.1 page needs one).
+//
 // The model is a Vercel AI Gateway id in CHAT_MODEL (e.g. "google/<model>").
 // On Vercel the Gateway authenticates with the project's OIDC token; locally
 // it reads AI_GATEWAY_API_KEY. With no CHAT_MODEL the endpoint answers 503,
@@ -20,7 +24,7 @@ function cors(origin) {
   const h = { Vary: 'Origin' };
   if (origin && ALLOWED.some((r) => r.test(origin))) {
     h['Access-Control-Allow-Origin'] = origin;
-    h['Access-Control-Allow-Methods'] = 'POST, OPTIONS';
+    h['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS';
     h['Access-Control-Allow-Headers'] = 'Content-Type';
     h['Access-Control-Max-Age'] = '600';
   }
@@ -32,6 +36,13 @@ function json(status, body, origin) {
     status,
     headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', ...cors(origin) },
   });
+}
+
+// Whether the finder is switched on. The picker asks before it shows its
+// Start card, so a deploy with no model (production until launch, an
+// offline installer) never offers a chat that cannot answer.
+export function GET(request) {
+  return json(200, { ready: !!process.env.CHAT_MODEL }, request.headers.get('origin'));
 }
 
 export function OPTIONS(request) {
@@ -56,6 +67,11 @@ export async function POST(request) {
     return json(200, out, origin);
   } catch (e) {
     console.error('chat failed:', e && e.name, e && e.message);
+    // The Gateway's per-model rate limit (5 a minute on the free tier,
+    // measured 2026-10-20) surfaces wrapped in the SDK's retry error.
+    if (/rate ?limit/i.test(`${e && e.name} ${e && e.message}`)) {
+      return json(429, { error: 'The tool finder is busy right now. Try again in a minute, or use the questions instead.' }, origin);
+    }
     return json(502, { error: 'The tool finder could not answer. Try again, or use the questions instead.' }, origin);
   }
 }
