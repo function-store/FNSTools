@@ -6,6 +6,8 @@ features:
     anchor: the-fns-button
   - name: The tabs
     anchor: the-tabs
+  - name: Perform Mode
+    anchor: perform-mode
   - name: Drop to register
     anchor: drop-to-register
   - name: Contributing a tab
@@ -16,7 +18,10 @@ feature_list:
     does: Left-clicking the FNS button in the main-menu bar opens the hub on the tab you were last on; quick-launch offers Open FNS Hub too.
   - name: FNS button menu
     anchor: the-fns-button
-    does: 'Right-clicking the FNS button lists every tab, the console''s Settings and Install & remove pages, and Show entries that bring hidden tabs back.'
+    does: 'Right-clicking the FNS button lists every tab, the console''s Settings and Install & remove pages, Show entries that bring hidden tabs back, the Perform Mode toggle, and links to the docs, the website and the Patreon page.'
+  - name: Perform Mode
+    anchor: perform-mode
+    does: 'One switch for a show: the tools that only serve the network editor stop, the FNS button turns red, and switching back brings everything back as it was. Follows TouchDesigner''s Perform Mode (F1) by default.'
   - name: Toolbar configurator
     anchor: the-tabs
     does: 'Reorders, groups, hides and shows the widgets on TouchDesigner''s bookmark bar and adds dividers between them; right-click a name for its docs.'
@@ -75,13 +80,13 @@ root that has the registries has the hub.
 | Gesture | What happens |
 |---|---|
 | **Left-click** | opens the hub on the tab you were last on |
-| **Right-click** | a menu: every tab, then the console's *Settings* and *Install & remove* pages |
+| **Right-click** | a menu: every tab, then the console's *Settings* and *Install & remove* pages, the **FNSTools Perform Mode** toggle (checked while it is on; see [Perform Mode](#perform-mode)), then *Toolbar tool docs…*, *Documentation*, *Website* and *Support FNSTools on Patreon* |
 | **Drop a panel COMP on it** | registers it into a surface; see [Drop to register](#drop-to-register) |
 
 From Python, `op.FNS_HUBREGISTRY.Open()` opens the hub; `Open(tab='navbar')`
 lands on a tab by its canonical name (`toolbar`, `navbar`, `mainmenu`,
 `console`, or a contributed one). The quick-launch palette offers *Open FNS
-Hub* and *Open main-menu configurator*.
+Hub*, *Open main-menu configurator* and *Toggle FNSTools perform mode*.
 
 ## The tabs
 
@@ -125,6 +130,45 @@ button's right-click menu ("Show …"). Tab order and the active tab roam with
 your settings through [ConfigRegistry](/docs/fns-configregistry/), as do
 the three configurators' layouts. A tool carrying a *Refresh* pulse is
 refreshed every time its tab is shown.
+
+## Perform Mode
+
+Many FNS tools exist for building: they draw on the network editor, watch
+the mouse and the panes, and keep themselves ready while you work. During a
+show none of that helps, and some of it costs frame time even when nothing
+on screen shows it. **Perform Mode** switches all of it off at once.
+
+Switch it from any of these:
+
+- the FNS button's right-click menu, **FNSTools Perform Mode**
+- the quick-launch palette, *Toggle FNSTools perform mode*
+- **Perform Mode** on the FNSTools page of the `/FNSTools` root
+
+While it is on, the FNS button turns red and its tooltip says how to switch
+it off, so a project that opens performing explains itself.
+
+**What stops:** Cook Bar, QuickMarks' pins and list, POP Overlay and the
+network overlay that shows them; the Radial Menu, which does not open; the
+scene changers' *Cook While Editing*, so only the show's scenes cook;
+Autosave, while its *Skip In Perform Mode* is on; HydroHomie's reminders;
+the operator family's update checks; and the small watchers behind
+hovering, dragging and the window title. The toolkit's log waits and
+catches up when you switch back, errors included.
+
+**What keeps running:** everything a show uses, such as BeatMod, the scene
+changers' switching, Remote, Output, the family operators you placed, and
+the MIDI and OSC mappers.
+
+No tool setting changes. Each tool keeps its own on/off and display
+settings, so switching Perform Mode off brings back exactly what was on.
+
+**Follow TD Perform Mode**, next to it on the root (on by default), turns
+Perform Mode on when you enter TouchDesigner's Perform Mode (F1) and puts
+it back to what it was when you leave. Switch following off if you want the
+two to stay separate. Both settings are saved with the project and never
+carried to other projects, so a show file can open ready to perform. The
+guide [Working with FNSTools in your project](/docs/guides/working-in-your-project/#performing-a-show)
+covers it from the show side.
 
 ## Drop to register
 

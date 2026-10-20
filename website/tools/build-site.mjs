@@ -769,8 +769,13 @@ function defaultCell(row) {
   return String(d);
 }
 
-/** TD's own separator entries are layout, not choices. */
+/** TD's own separator entries are layout, not choices. A menu that lists
+ *  the computer itself (network interfaces, audio devices) ships no items:
+ *  they would be the author's own (build_manifest.MACHINE_MENU_PARS). */
 function menuLine(row) {
+  if (row.menu_source === 'machine') {
+    return '<div class="par-menu">Options: read from your computer when the tool runs</div>';
+  }
   const items = (row.menu || []).filter((m) => m.name !== '_separator_');
   if (!items.length) return '';
   const shown = items.slice(0, 8).map((m) => `<code>${esc(m.label)}</code>`);

@@ -899,6 +899,27 @@
    "access": "8323905",
    "preview": true
   },
+  "FNS_RadialMenu": {
+   "category": "Interface",
+   "description": "A ring of slots around the mouse in the network editor, opened with a hotkey. Each slot runs one of your FNS commands or calls your own Python callback, acting on the operator you point at or the selection. Fill and rearrange the slots in the wheel itself: click an empty slot to pick a command, Ctrl+click to reassign, Shift+click to swap, right-click to rename or clear.",
+   "fits": [
+    "speed",
+    "network",
+    "ui"
+   ],
+   "access": "8323905",
+   "preview": true
+  },
+  "FNS_SpaceMaker": {
+   "category": "Network",
+   "description": "Makes room in the network editor: hold a hotkey, sweep a rectangle, and the operators in the way move aside, each the way the edge of the rectangle met it. Rows and columns keep their spacing, annotations move as whole groups, and Ctrl+Z undoes a whole sweep.",
+   "fits": [
+    "speed",
+    "network"
+   ],
+   "access": "8323905",
+   "preview": true
+  },
   "FNS_OpSequencer": {
    "category": "Time & sequencing",
    "homepage": "https://seq.functionstore.tools",
@@ -1309,7 +1330,7 @@
   },
   "SlideShow": {
    "category": "Show & output",
-   "description": "A slideshow of a folder of images: timed or stepped with next and previous, in order or random, with a crossfade between slides and a fitted output resolution.",
+   "description": "A slideshow of a folder of images and movies: timed or stepped with next and previous, in order or random, moving on when a movie ends, with a crossfade between slides and a fitted output resolution.",
    "placement": "none",
    "fits": [
     "show",
@@ -1388,6 +1409,11 @@
     "chops"
    ],
    "access": "8323905"
+  },
+  "pandora": {
+   "category": "Miscellaneous",
+   "description": "A prank in a tox. One pulse swaps the desktop wallpaper for the TouchDesigner banana and keeps the old one safe, another puts it back, and a toggle quacks on every mouse click.",
+   "preview": true
   }
  }
 }

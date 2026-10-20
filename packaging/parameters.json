@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "release": "v3.2.74",
+ "release": "v3.2.75",
  "td_build": "2025.33070",
  "packages": {
   "ChopBank": [
@@ -3167,7 +3167,7 @@
     "name": "Skipperform",
     "label": "Skip In Perform Mode",
     "style": "Toggle",
-    "help": "Skip scheduled saves while the project is in Perform Mode. Save Now still works.",
+    "help": "Skip scheduled saves while FNSTools' Perform Mode is on, which follows TouchDesigner's Perform Mode by default (without the toolkit root, TouchDesigner's Perform Mode). Save Now still works.",
     "default": true,
     "page": "Autosave"
    },
@@ -17921,6 +17921,610 @@
     "page": "Custom"
    }
   ],
+  "FNS_RadialMenu": [
+   {
+    "name": "Active",
+    "label": "Active",
+    "style": "Toggle",
+    "help": "Let the hotkey open the radial menu. Off, the hotkey does nothing.",
+    "default": true,
+    "page": "Radial Menu"
+   },
+   {
+    "name": "Shortcut",
+    "label": "Shortcut",
+    "style": "Str",
+    "help": "Hotkey that opens the radial menu around the mouse in the network editor, and closes it again. Rebind it here or in the Hotkey Manager.",
+    "default": "ctrl.shift.q",
+    "page": "Radial Menu"
+   },
+   {
+    "name": "Size",
+    "label": "Size",
+    "style": "Int",
+    "help": "Diameter of the wheel on screen, in points.",
+    "default": 300,
+    "section": true,
+    "page": "Radial Menu"
+   },
+   {
+    "name": "Animation",
+    "label": "Animation",
+    "style": "Menu",
+    "help": "How the wheel opens: Pop grows and fades it in over Animation Time, None shows it at once.",
+    "default": "pop",
+    "menu": [
+     {
+      "name": "pop",
+      "label": "Pop"
+     },
+     {
+      "name": "none",
+      "label": "None"
+     }
+    ],
+    "page": "Radial Menu"
+   },
+   {
+    "name": "Animtime",
+    "label": "Animation Time",
+    "style": "Float",
+    "help": "How long the Pop takes, in seconds, counted from the first frame the wheel is on screen.",
+    "default": 0.25,
+    "page": "Radial Menu"
+   },
+   {
+    "name": "Resetslots",
+    "label": "Reset Slots",
+    "style": "Pulse",
+    "help": "Put the starter wheel back in every slot of the main wheel: parent and operator parameters, the Component Editor for both, the operator viewer, copy path, home and save. Ctrl+Z undoes it.",
+    "section": true,
+    "page": "Radial Menu"
+   },
+   {
+    "name": "Opencallbacks",
+    "label": "Callbacks DAT",
+    "style": "Pulse",
+    "help": "Make (or open) the callbacks DAT at the project root, tagged fns_radialmenu_callbacks. Callback slots call its functions by name; onOpen, onPick, onClose and onFillRing are called as the wheel opens, picks, closes and fills a Callback wheel.",
+    "page": "Radial Menu"
+   },
+   {
+    "name": "Slot",
+    "label": "Slots",
+    "style": "Sequence",
+    "help": "",
+    "default": 0,
+    "page": "Slots"
+   },
+   {
+    "name": "Slot0kind",
+    "label": "Kind",
+    "style": "Menu",
+    "help": "What the slot does: run a Command, call a Callback in the callbacks DAT, Create an operator, toggle a Flag, change a Parameter, Go to a network, or nothing (Empty: clicking it picks a command).",
+    "default": "empty",
+    "menu": [
+     {
+      "name": "empty",
+      "label": "Empty"
+     },
+     {
+      "name": "command",
+      "label": "Command"
+     },
+     {
+      "name": "callback",
+      "label": "Callback"
+     },
+     {
+      "name": "create",
+      "label": "Create Operator"
+     },
+     {
+      "name": "flag",
+      "label": "Toggle Flag"
+     },
+     {
+      "name": "par",
+      "label": "Parameter"
+     },
+     {
+      "name": "go",
+      "label": "Go To"
+     },
+     {
+      "name": "blank",
+      "label": "Blank here"
+     }
+    ],
+    "page": "Slots"
+   },
+   {
+    "name": "Slot0target",
+    "label": "Target",
+    "style": "Str",
+    "help": "What the slot acts with: a command id, a callback function name, an operator type, a flag, a parameter name, or a network (parent, home, mark:N or a path).",
+    "default": "",
+    "page": "Slots"
+   },
+   {
+    "name": "Slot0label",
+    "label": "Label",
+    "style": "Str",
+    "help": "The name shown on the wheel. Empty shows the target.",
+    "default": "",
+    "page": "Slots"
+   },
+   {
+    "name": "Slot0args",
+    "label": "Args",
+    "style": "Str",
+    "help": "JSON: a command's arguments, a parameter's value or cycle, and the slot's options (_sticky, _confirm).",
+    "default": "",
+    "page": "Slots"
+   },
+   {
+    "name": "Slot1kind",
+    "label": "Kind",
+    "style": "Menu",
+    "help": "What the slot does: run a Command, call a Callback in the callbacks DAT, Create an operator, toggle a Flag, change a Parameter, Go to a network, or nothing (Empty: clicking it picks a command).",
+    "default": "empty",
+    "menu": [
+     {
+      "name": "empty",
+      "label": "Empty"
+     },
+     {
+      "name": "command",
+      "label": "Command"
+     },
+     {
+      "name": "callback",
+      "label": "Callback"
+     },
+     {
+      "name": "create",
+      "label": "Create Operator"
+     },
+     {
+      "name": "flag",
+      "label": "Toggle Flag"
+     },
+     {
+      "name": "par",
+      "label": "Parameter"
+     },
+     {
+      "name": "go",
+      "label": "Go To"
+     },
+     {
+      "name": "blank",
+      "label": "Blank here"
+     }
+    ],
+    "page": "Slots"
+   },
+   {
+    "name": "Slot1target",
+    "label": "Target",
+    "style": "Str",
+    "help": "What the slot acts with: a command id, a callback function name, an operator type, a flag, a parameter name, or a network (parent, home, mark:N or a path).",
+    "default": "",
+    "page": "Slots"
+   },
+   {
+    "name": "Slot1label",
+    "label": "Label",
+    "style": "Str",
+    "help": "The name shown on the wheel. Empty shows the target.",
+    "default": "",
+    "page": "Slots"
+   },
+   {
+    "name": "Slot1args",
+    "label": "Args",
+    "style": "Str",
+    "help": "JSON: a command's arguments, a parameter's value or cycle, and the slot's options (_sticky, _confirm).",
+    "default": "",
+    "page": "Slots"
+   },
+   {
+    "name": "Slot2kind",
+    "label": "Kind",
+    "style": "Menu",
+    "help": "What the slot does: run a Command, call a Callback in the callbacks DAT, Create an operator, toggle a Flag, change a Parameter, Go to a network, or nothing (Empty: clicking it picks a command).",
+    "default": "empty",
+    "menu": [
+     {
+      "name": "empty",
+      "label": "Empty"
+     },
+     {
+      "name": "command",
+      "label": "Command"
+     },
+     {
+      "name": "callback",
+      "label": "Callback"
+     },
+     {
+      "name": "create",
+      "label": "Create Operator"
+     },
+     {
+      "name": "flag",
+      "label": "Toggle Flag"
+     },
+     {
+      "name": "par",
+      "label": "Parameter"
+     },
+     {
+      "name": "go",
+      "label": "Go To"
+     },
+     {
+      "name": "blank",
+      "label": "Blank here"
+     }
+    ],
+    "page": "Slots"
+   },
+   {
+    "name": "Slot2target",
+    "label": "Target",
+    "style": "Str",
+    "help": "What the slot acts with: a command id, a callback function name, an operator type, a flag, a parameter name, or a network (parent, home, mark:N or a path).",
+    "default": "",
+    "page": "Slots"
+   },
+   {
+    "name": "Slot2label",
+    "label": "Label",
+    "style": "Str",
+    "help": "The name shown on the wheel. Empty shows the target.",
+    "default": "",
+    "page": "Slots"
+   },
+   {
+    "name": "Slot2args",
+    "label": "Args",
+    "style": "Str",
+    "help": "JSON: a command's arguments, a parameter's value or cycle, and the slot's options (_sticky, _confirm).",
+    "default": "",
+    "page": "Slots"
+   },
+   {
+    "name": "Slot3kind",
+    "label": "Kind",
+    "style": "Menu",
+    "help": "What the slot does: run a Command, call a Callback in the callbacks DAT, Create an operator, toggle a Flag, change a Parameter, Go to a network, or nothing (Empty: clicking it picks a command).",
+    "default": "empty",
+    "menu": [
+     {
+      "name": "empty",
+      "label": "Empty"
+     },
+     {
+      "name": "command",
+      "label": "Command"
+     },
+     {
+      "name": "callback",
+      "label": "Callback"
+     },
+     {
+      "name": "create",
+      "label": "Create Operator"
+     },
+     {
+      "name": "flag",
+      "label": "Toggle Flag"
+     },
+     {
+      "name": "par",
+      "label": "Parameter"
+     },
+     {
+      "name": "go",
+      "label": "Go To"
+     },
+     {
+      "name": "blank",
+      "label": "Blank here"
+     }
+    ],
+    "page": "Slots"
+   },
+   {
+    "name": "Slot3target",
+    "label": "Target",
+    "style": "Str",
+    "help": "What the slot acts with: a command id, a callback function name, an operator type, a flag, a parameter name, or a network (parent, home, mark:N or a path).",
+    "default": "",
+    "page": "Slots"
+   },
+   {
+    "name": "Slot3label",
+    "label": "Label",
+    "style": "Str",
+    "help": "The name shown on the wheel. Empty shows the target.",
+    "default": "",
+    "page": "Slots"
+   },
+   {
+    "name": "Slot3args",
+    "label": "Args",
+    "style": "Str",
+    "help": "JSON: a command's arguments, a parameter's value or cycle, and the slot's options (_sticky, _confirm).",
+    "default": "",
+    "page": "Slots"
+   },
+   {
+    "name": "Slot4kind",
+    "label": "Kind",
+    "style": "Menu",
+    "help": "What the slot does: run a Command, call a Callback in the callbacks DAT, Create an operator, toggle a Flag, change a Parameter, Go to a network, or nothing (Empty: clicking it picks a command).",
+    "default": "empty",
+    "menu": [
+     {
+      "name": "empty",
+      "label": "Empty"
+     },
+     {
+      "name": "command",
+      "label": "Command"
+     },
+     {
+      "name": "callback",
+      "label": "Callback"
+     },
+     {
+      "name": "create",
+      "label": "Create Operator"
+     },
+     {
+      "name": "flag",
+      "label": "Toggle Flag"
+     },
+     {
+      "name": "par",
+      "label": "Parameter"
+     },
+     {
+      "name": "go",
+      "label": "Go To"
+     },
+     {
+      "name": "blank",
+      "label": "Blank here"
+     }
+    ],
+    "page": "Slots"
+   },
+   {
+    "name": "Slot4target",
+    "label": "Target",
+    "style": "Str",
+    "help": "What the slot acts with: a command id, a callback function name, an operator type, a flag, a parameter name, or a network (parent, home, mark:N or a path).",
+    "default": "",
+    "page": "Slots"
+   },
+   {
+    "name": "Slot4label",
+    "label": "Label",
+    "style": "Str",
+    "help": "The name shown on the wheel. Empty shows the target.",
+    "default": "",
+    "page": "Slots"
+   },
+   {
+    "name": "Slot4args",
+    "label": "Args",
+    "style": "Str",
+    "help": "JSON: a command's arguments, a parameter's value or cycle, and the slot's options (_sticky, _confirm).",
+    "default": "",
+    "page": "Slots"
+   },
+   {
+    "name": "Slot5kind",
+    "label": "Kind",
+    "style": "Menu",
+    "help": "What the slot does: run a Command, call a Callback in the callbacks DAT, Create an operator, toggle a Flag, change a Parameter, Go to a network, or nothing (Empty: clicking it picks a command).",
+    "default": "empty",
+    "menu": [
+     {
+      "name": "empty",
+      "label": "Empty"
+     },
+     {
+      "name": "command",
+      "label": "Command"
+     },
+     {
+      "name": "callback",
+      "label": "Callback"
+     },
+     {
+      "name": "create",
+      "label": "Create Operator"
+     },
+     {
+      "name": "flag",
+      "label": "Toggle Flag"
+     },
+     {
+      "name": "par",
+      "label": "Parameter"
+     },
+     {
+      "name": "go",
+      "label": "Go To"
+     },
+     {
+      "name": "blank",
+      "label": "Blank here"
+     }
+    ],
+    "page": "Slots"
+   },
+   {
+    "name": "Slot5target",
+    "label": "Target",
+    "style": "Str",
+    "help": "What the slot acts with: a command id, a callback function name, an operator type, a flag, a parameter name, or a network (parent, home, mark:N or a path).",
+    "default": "",
+    "page": "Slots"
+   },
+   {
+    "name": "Slot5label",
+    "label": "Label",
+    "style": "Str",
+    "help": "The name shown on the wheel. Empty shows the target.",
+    "default": "",
+    "page": "Slots"
+   },
+   {
+    "name": "Slot5args",
+    "label": "Args",
+    "style": "Str",
+    "help": "JSON: a command's arguments, a parameter's value or cycle, and the slot's options (_sticky, _confirm).",
+    "default": "",
+    "page": "Slots"
+   },
+   {
+    "name": "Slot6kind",
+    "label": "Kind",
+    "style": "Menu",
+    "help": "What the slot does: run a Command, call a Callback in the callbacks DAT, Create an operator, toggle a Flag, change a Parameter, Go to a network, or nothing (Empty: clicking it picks a command).",
+    "default": "empty",
+    "menu": [
+     {
+      "name": "empty",
+      "label": "Empty"
+     },
+     {
+      "name": "command",
+      "label": "Command"
+     },
+     {
+      "name": "callback",
+      "label": "Callback"
+     },
+     {
+      "name": "create",
+      "label": "Create Operator"
+     },
+     {
+      "name": "flag",
+      "label": "Toggle Flag"
+     },
+     {
+      "name": "par",
+      "label": "Parameter"
+     },
+     {
+      "name": "go",
+      "label": "Go To"
+     },
+     {
+      "name": "blank",
+      "label": "Blank here"
+     }
+    ],
+    "page": "Slots"
+   },
+   {
+    "name": "Slot6target",
+    "label": "Target",
+    "style": "Str",
+    "help": "What the slot acts with: a command id, a callback function name, an operator type, a flag, a parameter name, or a network (parent, home, mark:N or a path).",
+    "default": "",
+    "page": "Slots"
+   },
+   {
+    "name": "Slot6label",
+    "label": "Label",
+    "style": "Str",
+    "help": "The name shown on the wheel. Empty shows the target.",
+    "default": "",
+    "page": "Slots"
+   },
+   {
+    "name": "Slot6args",
+    "label": "Args",
+    "style": "Str",
+    "help": "JSON: a command's arguments, a parameter's value or cycle, and the slot's options (_sticky, _confirm).",
+    "default": "",
+    "page": "Slots"
+   },
+   {
+    "name": "Slot7kind",
+    "label": "Kind",
+    "style": "Menu",
+    "help": "What the slot does: run a Command, call a Callback in the callbacks DAT, Create an operator, toggle a Flag, change a Parameter, Go to a network, or nothing (Empty: clicking it picks a command).",
+    "default": "empty",
+    "menu": [
+     {
+      "name": "empty",
+      "label": "Empty"
+     },
+     {
+      "name": "command",
+      "label": "Command"
+     },
+     {
+      "name": "callback",
+      "label": "Callback"
+     },
+     {
+      "name": "create",
+      "label": "Create Operator"
+     },
+     {
+      "name": "flag",
+      "label": "Toggle Flag"
+     },
+     {
+      "name": "par",
+      "label": "Parameter"
+     },
+     {
+      "name": "go",
+      "label": "Go To"
+     },
+     {
+      "name": "blank",
+      "label": "Blank here"
+     }
+    ],
+    "page": "Slots"
+   },
+   {
+    "name": "Slot7target",
+    "label": "Target",
+    "style": "Str",
+    "help": "What the slot acts with: a command id, a callback function name, an operator type, a flag, a parameter name, or a network (parent, home, mark:N or a path).",
+    "default": "",
+    "page": "Slots"
+   },
+   {
+    "name": "Slot7label",
+    "label": "Label",
+    "style": "Str",
+    "help": "The name shown on the wheel. Empty shows the target.",
+    "default": "",
+    "page": "Slots"
+   },
+   {
+    "name": "Slot7args",
+    "label": "Args",
+    "style": "Str",
+    "help": "JSON: a command's arguments, a parameter's value or cycle, and the slot's options (_sticky, _confirm).",
+    "default": "",
+    "page": "Slots"
+   }
+  ],
   "FNS_RandomCHOP": [
    {
     "name": "Samples",
@@ -19801,6 +20405,59 @@
     "page": "About"
    }
   ],
+  "FNS_SpaceMaker": [
+   {
+    "name": "Active",
+    "label": "Active",
+    "style": "Toggle",
+    "help": "Let the hotkey make room. Off, the hotkey does nothing.",
+    "default": true,
+    "page": "Space Maker"
+   },
+   {
+    "name": "Shortcut",
+    "label": "Shortcut",
+    "style": "Str",
+    "help": "Hold it over a network editor, move the mouse to sweep a rectangle, and release the key: the operators in the way move aside. Esc while holding puts them back. Rebind it here or in the Hotkey Manager.",
+    "default": "ctrl.shift.a",
+    "page": "Space Maker"
+   },
+   {
+    "name": "Rectangle",
+    "label": "Rectangle",
+    "style": "Menu",
+    "help": "How the rectangle shows while you sweep. Annotation: a network box in the network, labelled with what is moving, removed when you let go. Off: only the operators moving show the sweep.",
+    "default": "annotation",
+    "menu": [
+     {
+      "name": "annotation",
+      "label": "Annotation"
+     },
+     {
+      "name": "off",
+      "label": "Off"
+     }
+    ],
+    "page": "Space Maker"
+   },
+   {
+    "name": "Gap",
+    "label": "Gap",
+    "style": "Int",
+    "help": "How far, in network units, a moving operator keeps from one it pushes along.",
+    "default": 40,
+    "section": true,
+    "page": "Space Maker"
+   },
+   {
+    "name": "Snap",
+    "label": "Snap",
+    "style": "Int",
+    "help": "Every move is rounded up to a multiple of this many network units.",
+    "default": 50,
+    "page": "Space Maker"
+   }
+  ],
   "FNS_SwapOps": [
    {
     "name": "Active",
@@ -20433,16 +21090,7 @@
     "style": "Menu",
     "help": "Driver for Play Audio: the system default (DirectSound/CoreAudio) or ASIO. The list is the Audio Device Out's own.",
     "default": "default",
-    "menu": [
-     {
-      "name": "default",
-      "label": "default (DirectSound/CoreAudio)"
-     },
-     {
-      "name": "asio",
-      "label": "ASIO"
-     }
-    ],
+    "menu_source": "machine",
     "page": "Timeline"
    },
    {
@@ -20451,48 +21099,7 @@
     "style": "Menu",
     "help": "Output device for Play Audio, from this machine's list for the chosen driver. A device this machine does not have plays on the default device.",
     "default": "default",
-    "menu": [
-     {
-      "name": "default",
-      "label": "default"
-     },
-     {
-      "name": "{0.0.0.00000000}.{c841de8b-3933-4f45-91a5-0c999e44046a}||VoiceMeeter_Input_(VB-Audio_VoiceMeeter_VAIO)||1",
-      "label": "VoiceMeeter Input (VB-Audio VoiceMeeter VAIO)"
-     },
-     {
-      "name": "{0.0.0.00000000}.{10711ef0-d144-4df4-af6b-06156ecf3a97}||Wimaxit_FHD_(NVIDIA_High_Definition_Audio)||2",
-      "label": "Wimaxit FHD (NVIDIA High Definition Audio)"
-     },
-     {
-      "name": "{0.0.0.00000000}.{2b2188cf-0071-47dc-bf68-9220ec0f8d6c}||Speakers_(Steam_Streaming_Speakers)||3",
-      "label": "Speakers (Steam Streaming Speakers)"
-     },
-     {
-      "name": "{0.0.0.00000000}.{6489cdff-e24a-4a77-83ae-1adaea80617f}||Headphones_(Oculus_Virtual_Audio_Device)||4",
-      "label": "Headphones (Oculus Virtual Audio Device)"
-     },
-     {
-      "name": "{0.0.0.00000000}.{73fbce98-5118-4680-ad75-f02caca4f40b}||CABLE_Input_(VB-Audio_Virtual_Cable)||5",
-      "label": "CABLE Input (VB-Audio Virtual Cable)"
-     },
-     {
-      "name": "{0.0.0.00000000}.{a77edfcf-bddb-4ab6-967b-9443816ade2f}||DELL_S3422DWG_(NVIDIA_High_Definition_Audio)||6",
-      "label": "DELL S3422DWG (NVIDIA High Definition Audio)"
-     },
-     {
-      "name": "{0.0.0.00000000}.{bcb07c3b-15af-4159-bba3-b26796b6824c}||VoiceMeeter_Aux_Input_(VB-Audio_VoiceMeeter_AUX_VAIO)||7",
-      "label": "VoiceMeeter Aux Input (VB-Audio VoiceMeeter AUX VAIO)"
-     },
-     {
-      "name": "{0.0.0.00000000}.{dd6d0839-d444-4f10-953a-7f8d21953d19}||Speakers_(Steam_Streaming_Microphone)||8",
-      "label": "Speakers (Steam Streaming Microphone)"
-     },
-     {
-      "name": "{0.0.0.00000000}.{f7d9ce51-5afe-4ac9-af6a-7145e81e85c4}||Speakers_(Focusrite_USB_Audio)||9",
-      "label": "Speakers (Focusrite USB Audio)"
-     }
-    ],
+    "menu_source": "machine",
     "page": "Timeline"
    },
    {
@@ -23121,7 +23728,7 @@
     "label": "Active",
     "style": "Toggle",
     "help": "Receive OSC. Off closes the listening port and leaves the mappings untouched.",
-    "default": true,
+    "default": false,
     "section": true,
     "page": "Custom"
    },
@@ -23169,16 +23776,7 @@
     "style": "StrMenu",
     "help": "Which network interface to listen on. Empty means all of them; set it on a machine with several network cards.",
     "default": "",
-    "menu": [
-     {
-      "name": "192.168.42.66",
-      "label": "192.168.42.66"
-     },
-     {
-      "name": "100.120.110.27",
-      "label": "100.120.110.27"
-     }
-    ],
+    "menu_source": "machine",
     "page": "Custom"
    },
    {
@@ -23186,7 +23784,7 @@
     "label": "Talkback Active",
     "style": "Toggle",
     "help": "Send values back out over OSC as they change, so a controller with motorised faders or LEDs can follow TouchDesigner.",
-    "default": true,
+    "default": false,
     "section": true,
     "page": "Custom"
    },
@@ -23204,16 +23802,7 @@
     "style": "StrMenu",
     "help": "Which network interface talkback is sent from. '*' lets the OS choose.",
     "default": "*",
-    "menu": [
-     {
-      "name": "192.168.42.66",
-      "label": "192.168.42.66"
-     },
-     {
-      "name": "100.120.110.27",
-      "label": "100.120.110.27"
-     }
-    ],
+    "menu_source": "machine",
     "page": "Custom"
    },
    {
@@ -26486,6 +27075,14 @@
     "page": "Custom"
    },
    {
+    "name": "Autoskipondone",
+    "label": "Auto-Skip on Done",
+    "style": "Toggle",
+    "help": "For movies: go to the next slide when the current movie reaches its end, without waiting for Period. Stills are unaffected.",
+    "default": false,
+    "page": "Custom"
+   },
+   {
     "name": "Opacity",
     "label": "Crossfade Opacity",
     "style": "Float",
@@ -27731,6 +28328,9 @@
    "FNS_ConfigRegistry",
    "FNS_ToolbarRegistry"
   ],
+  "FNS_RadialMenu": [
+   "FNS_ConfigRegistry"
+  ],
   "FNS_Remote": [
    "FNS_ConfigRegistry",
    "FNS_ToolbarRegistry"
@@ -27748,6 +28348,9 @@
   "FNS_SetSmoothness": [
    "FNS_ConfigRegistry",
    "FNS_ToolbarRegistry"
+  ],
+  "FNS_SpaceMaker": [
+   "FNS_ConfigRegistry"
   ],
   "FNS_SwapOps": [
    "FNS_ConfigRegistry",
@@ -27921,6 +28524,9 @@
   "FNS_QuickTime": [
    "toolbar"
   ],
+  "FNS_RadialMenu": [
+   "overlay"
+  ],
   "FNS_RandomCHOP": [
    "opmenu"
   ],
@@ -27938,6 +28544,7 @@
    "toolbar"
   ],
   "FNS_SimpleSceneChanger": [],
+  "FNS_SpaceMaker": [],
   "FNS_SwapOps": [
    "toolbar"
   ],
@@ -28478,6 +29085,13 @@
      "codepoint": "U+F13AB",
      "file": "FNS_QuickTime-toolbar.png"
     }
+   }
+  ],
+  "FNS_RadialMenu": [
+   {
+    "surface": "overlay",
+    "widget": "FNS_RadialMenu",
+    "label": "FNS_RadialMenu"
    }
   ],
   "FNS_RandomCHOP": [

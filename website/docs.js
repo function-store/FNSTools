@@ -22,9 +22,13 @@
 (function () {
   var mount = document.getElementById('search');
   if (!mount || !window.PagefindUI) return;
+  // No baseUrl override. The index is built with `--site docs`, so every
+  // result URL is relative to that folder (`/fns-hub/`), and Pagefind
+  // prefixes it with the base it infers from where its bundle loads from
+  // (`/docs/pagefind/` -> `/docs/`). Forcing `/` here sent every search
+  // result to `/<slug>/`, a 404 on the live site (2026-10-20).
   new window.PagefindUI({
     element: '#search',
-    baseUrl: '/',
     showSubResults: true,
     showImages: false,
     resetStyles: false,

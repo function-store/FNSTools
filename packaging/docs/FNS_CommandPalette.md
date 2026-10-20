@@ -4,6 +4,8 @@ summary: 'A command palette inside TouchDesigner: every command your FNS tools d
 features:
   - name: CommandPalette
     anchor: commandpalette
+  - name: How the pieces fit
+    anchor: how-the-command-pieces-fit
   - name: Prefixes
     anchor: prefixes
   - name: Commands tab
@@ -29,6 +31,9 @@ feature_list:
   - name: Typo-tolerant word matching
     anchor: commandpalette
     does: 'Every typed word must hit; strict matches rank first, then initials, typos and letters in order, with British and American spellings treated alike.'
+  - name: Find a command by what it does
+    anchor: commandpalette
+    does: 'A word also matches a command''s help line and its tool''s description and documentation, so copy finds PasteFromClipboard, and the row says why it matched.'
   - name: Step through command parameters
     anchor: commandpalette
     does: 'Enter on a command that declares parameters walks them one at a time, as filtered pick rows for menus or text fields showing type and default.'
@@ -80,7 +85,11 @@ Enter or a click to act, Esc to close. Clicking anywhere else closes it too.
 
 The list is fed by [CommandRegistry](/docs/fns-commandregistry/): every
 command any installed FNS tool declares, without the tools knowing this
-palette exists. TouchDesigner's own palette components are in the same list,
+palette exists. A component of your own publishes its commands the same way
+by carrying [CommandKit](/docs/fns-commandkit/), and
+[TDX Launcher Ultra](https://launcher.functionstore.xyz) lists the same
+commands outside TouchDesigner; [how the pieces fit](#how-the-command-pieces-fit)
+is below. TouchDesigner's own palette components are in the same list,
 read from the Palette Browser's model, so your own palette folders are
 included; Enter on one places it into the network you came from, right of
 everything and selected.
@@ -102,7 +111,19 @@ of a word (`opne ext`, `nosie`; one slip for words of four to seven letters,
 two from eight) and last the letters in order (`tmln`). Spellings either side
 of the Atlantic are the same word (`randomise` finds Randomize). A hit in the
 title ranks above the same hit in a tool name, and the file path of a
-component only counts when the word is literally in it.
+component only counts when the word is literally in it. The letters-in-order
+reading only fills the list when nothing matched more strictly, so `delete`
+is not answered by a component whose long name happens to hold those letters.
+
+A command also answers to **what it does**: a word of three letters or more
+that starts a word of its help line, of its tool's description or of the
+main words of its tool's documentation finds it, ranked under the same word
+in a title or tool name. `copy` finds PasteFromClipboard, `bookmark` finds
+QuickMarks. Such a row says why it is there (`in docs: copy`, `in help:
+image`), and at most two commands of one tool are listed for a documentation
+word, since that word belongs to the whole tool. The description and
+documentation words come from the store manifest the updater downloads, so
+they are there once the updater has checked the store at least once.
 
 Enter on a command that declares parameters walks them one at a time. A menu parameter becomes pick rows filtered as you type, the rest a
 text field whose placeholder names the parameter, its type and its default.
@@ -112,6 +133,27 @@ backs out to the list.
 ### Palette components
 
 TouchDesigner's own palette components are rows like any other, tagged `TOX`. Choosing one (Enter, or a click) loads it into the network the palette was opened over and **hands it to your mouse**, exactly like a new operator from the OP Create dialog: move it where you want and click to place. You can also **press a row and drag it** into any network pane, the gesture TouchDesigner's own Palette browser uses. Derivative's built-in components ship as bundles (the component, its icon and its help text in one wrapper); the palette unwraps them either way, so what lands in your network is the component itself.
+
+## How the command pieces fit
+
+This palette is one of two consumers of a four-piece system. It never talks
+to a tool directly: it asks the registry for the list and hands a chosen
+command back to it to run.
+
+| Piece | Role | Where it lives |
+|---|---|---|
+| **CommandPalette** (this page) | A consumer inside TouchDesigner: a hotkey, a ranked list, Enter runs the command | Installed like any tool |
+| [CommandRegistry](/docs/fns-commandregistry/) | Collects every command tools declare, plus TouchDesigner's own, and serves one list to whatever can run them | A core package promoted to `/sys`, installed with the toolkit's core; the launcher's companion carries the same copy |
+| [CommandKit](/docs/fns-commandkit/) | Lets any component of your own publish commands: mark a method, or declare a spec | A direct child of that component. FNS tools carry the same module in their ExtUtils and announce themselves, so they never need the kit |
+| [TDX Launcher Ultra](https://launcher.functionstore.xyz) | The other consumer, outside TouchDesigner: its tray palette lists the same commands under `>` and `?` and runs them in the session you summoned it over | A separate desktop app with its own releases |
+
+Without the registry the palette still opens and still places
+TouchDesigner's palette components, with no tool commands to list. Favourites,
+hidden commands and presets are one machine-wide file that this palette and
+the launcher both read and write, keyed by tool name and command id, so a
+star in one is a star in the other; the query history stays per consumer.
+The [Commands tab](#commands-tab) in Hub is where that curation is managed
+from inside TouchDesigner.
 
 ## Prefixes
 
@@ -125,7 +167,7 @@ them.
 | `=` | Components only |
 | `/`, `./`, `../` | Navigate the network: `/` is the root, `.` or `./` is where you came from, each `..` goes up a level |
 | `~` | Public methods of the promoted extensions on the selected COMP, else the current one, else the network you came from |
-| `#` | One tool's commands: `#` lists the tools, `#QuickMarks ` lists that tool's commands |
+| `#` | One tool's commands: `#` lists the tools, `#QuickMarks ` lists that tool's commands. A word that is not in a tool's name finds the tools whose description or documentation has it: `#copy` |
 
 Navigation and tool rows drill in with Right and back out with Left, keeping
 whichever convention you are typing in.
@@ -149,6 +191,10 @@ Ctrl+D stars the selected command or component; starred rows lead within
 their tier. Ctrl+H hides the selected command from the palette; the Commands
 tab shows it again. Alt+Up and Alt+Down cycle the queries you have run
 before.
+
+Right-click a row for its menu: Run, Star or Unstar, Hide (Delete preset on
+a preset), and, with FNS_RadialMenu installed, Add to radial menu, which puts
+the command in the first empty slot of the radial menu's main wheel.
 
 **Only what can run.** A tool that is bypassed or has cooking off does not
 offer its commands until it is back on. A tool that is not in the project but

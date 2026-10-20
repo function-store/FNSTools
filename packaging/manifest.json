@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "release": "v3.2.74",
- "notes": "The install picker keeps your place when a Patreon sign-in or \"I just pledged\" refreshes it: your ticks stay, an open install step re-plans with the tools the sign-in unlocked, and the newly unlocked tool is announced on your next visit instead of in the middle of the install (arrives with the next installer and bootstrap rebuild).\n\n\nThe install picker never gets stuck waiting on Patreon: a membership check gives up after a minute with a clear message, a browser sign-in after ten, a refused check says why at once, and a new Cancel button stops the wait. Your ticks and step stay as they are either way. A sign-in made right after pledging gets one quiet re-check half a minute later, so a pledge Patreon had not confirmed yet still shows up without pressing anything (arrives with the next installer and bootstrap rebuild).",
+ "release": "v3.2.75",
+ "notes": "",
  "channel": "stable",
  "base_url": "https://storage.functionstore.tools/fnstools",
  "toolkit": {
@@ -220,12 +220,12 @@
   "QuickMarks"
  ],
  "agent_skill": {
-  "version": "v3.2.74",
+  "version": "v3.2.75",
   "path": "packaging/dist/agent-skill.json",
-  "bytes": 516871,
-  "sha256": "d6fa607c261c1157b9d42a54ab6f56892c3e23314cf4b0a2bd21aae7af6aea16",
+  "bytes": 520549,
+  "sha256": "34f0971587c27e5b35528f5b4cc50ad9a5043a0648ea8249023a6e3047de4f25",
   "files": 91,
-  "url": "https://storage.functionstore.tools/fnstools/v3.2.74/agent-skill.json"
+  "url": "https://storage.functionstore.tools/fnstools/v3.2.75/agent-skill.json"
  },
  "packages": [
   {
@@ -357,7 +357,7 @@
     "path": "packaging/dist/ChopBank.tox",
     "bytes": 168902,
     "sha256": "64fee2e2b8c6ce9f14dc20218749580a5437c6fc5e8676a98fb4b62509e3d67d",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/ChopBank.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/ChopBank.tox"
    },
    "search": {
     "head": "add blocks build output perchannel processing",
@@ -426,7 +426,7 @@
     "path": "packaging/dist/ChopProcess.tox",
     "bytes": 111014,
     "sha256": "f1ac9962b0c07eebf443e5f4c27e28c1379e915d41080dd269aec3adb2298aeb",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/ChopProcess.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/ChopProcess.tox"
    },
    "search": {
     "head": "bank fader input output smoothing",
@@ -492,7 +492,7 @@
     "path": "packaging/dist/CircularDistortionTOP.tox",
     "bytes": 33950,
     "sha256": "ea6aaf12e6163bba9014e0dcf7cfa1e82886bb4ee692722489100793c25a7d7d",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/CircularDistortionTOP.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/CircularDistortionTOP.tox"
    },
    "search": {
     "head": "animated extend inputs output ring",
@@ -549,7 +549,7 @@
     "path": "packaging/dist/ColorGen.tox",
     "bytes": 10734,
     "sha256": "e41417a029e8169f380318ea4971101132c1be35b7d5e8f5299ee04845285f22",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/ColorGen.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/ColorGen.tox"
    },
    "search": {
     "head": "animate col formula image inputs outcol outlookup outputs strip",
@@ -607,7 +607,7 @@
     "path": "packaging/dist/ColorGenPro.tox",
     "bytes": 13806,
     "sha256": "525c2786dfa5a803c1bae67c28fb6efad6813091a90e58dcf0a08770079388b5",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/ColorGenPro.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/ColorGenPro.tox"
    },
    "search": {
     "head": "behavior coefficients col edge image inputs outcol outlookup outputs region strip",
@@ -665,7 +665,7 @@
     "path": "packaging/dist/ComplexMix.tox",
     "bytes": 16430,
     "sha256": "139348876d49d01c0923fee99b002e75ff80b6822280928f06f5ad9222a04a68",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/ComplexMix.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/ComplexMix.tox"
    },
    "search": {
     "head": "chainable inputs operations output outputs perpixel pixel sample weighting",
@@ -723,7 +723,7 @@
     "path": "packaging/dist/ComplexOp.tox",
     "bytes": 18566,
     "sha256": "6eb6655fb3bc13ae3e46de34ee352911a9f3067529fe9d1479edc3a38fb3d8b2",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/ComplexOp.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/ComplexOp.tox"
    },
    "search": {
     "head": "borders complexplane inputs inverses output",
@@ -855,7 +855,7 @@
     "path": "packaging/dist/ConstantCHOP.tox",
     "bytes": 152310,
     "sha256": "633ef66f89b2938a937034ef5246a3b2fcef9cb7e9b0e1942cbf257a4ad945f6",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/ConstantCHOP.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/ConstantCHOP.tox"
    },
    "search": {
     "head": "channels constants outputs plus properties table",
@@ -868,7 +868,7 @@
    "kind": "tool",
    "category": "Network",
    "description": "Draws a bar above every operator in the network you are viewing: its cook time on top, its GPU memory below, so the expensive parts of a network stand out at a glance, with the numbers beside them if you like. A Top List in a corner names the heaviest operators and takes you to one with a click. Its toolbar button switches it on; Ctrl+right-click the button for a global Hog CHOP to stress-test against. Based on Anton Heestand's Cook Bar.",
-   "version": "1.0.4",
+   "version": "1.0.5",
    "help_url": "https://functionstore.tools/docs/cookbar/",
    "surfaces": [
     "overlay",
@@ -942,16 +942,16 @@
     "network",
     "dev"
    ],
-   "whatsnew": "a COMP whose cooking is switched off (by hand, or by a scene changer's Control Cook) now shows a grey hatched bar, and Values reads \"cooking off\", so a frozen network explains itself.",
+   "whatsnew": "stops scanning while FNSTools Perform Mode is on.",
    "artifact": {
     "path": "packaging/dist/CookBar.tox",
-    "bytes": 327718,
-    "sha256": "1a34bf5ba0985104101de525b33f83b1f104ccae3fd9594bf2b5d53c9e3d1219",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/CookBar.tox"
+    "bytes": 338502,
+    "sha256": "3b423a19906b17692e9416898a8b1003d04d1b35f731243d04394b470eb3ce0d",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/CookBar.tox"
    },
    "search": {
     "head": "active bars bottom budget command cooking cookingoff cooktime count holds hub leaves long margin marker max numeric ops order overlay rank reading rows settings shared showing stays toggle totals turning untouched values",
-    "body": "accident across adds annotations arrow background bigger blue change changer choice choose cmd collapsed come control cooked cooks copes cost costs counts cpu current cyan diagonal dial dim dimmer display downward drawn drew earlier eats edges editor everything fades fading faint far fill fills fit flags fnshub fnsoverlayregistry folds follows frame full gray grayed green grows hand hatched height hides hold installs last launch lights lists little lower mac macos means meant measured middle move moving nearer networks nodes number outline pane panes past patch paused picks play playing points press proportion quick quicklaunch ranks read readable reads red registry removes rest rgba row run running save saved scene screen second select selected sets ships show shows sit sits size small stands starting starts startup starved stay stop strip stripes switch switched switching tabs taller ten textures things three timeline times tops turns unless versions view watch whichever wider width working writes yellow zoom"
+    "body": "accident across adds annotations arrow background bigger blue change changer choice choose cmd collapsed come control cooked cooks copes cost costs counts cpu current cyan diagonal dial dim dimmer display downward drawn drew earlier eats edges editor everything fades fading faint far fill fills fit flags fnshub fnsoverlayregistry folds follows frame full gray grayed green grows hand hatched height hides hold installs last launch lights lists little lower mac macos means meant measured middle move moving nearer networks nodes number outline pane panes past patch paused picks play playing points press proportion quick quicklaunch ranks read readable reads red registry removes rest rgba row run running save saved scene screen second select selected sets ships show sit sits size small stands starting starts startup starved stay stop strip stripes switch switched switching tabs taller ten textures things three timeline times tops turns unless versions view watch whichever wider width working writes yellow zoom"
    }
   },
   {
@@ -1032,7 +1032,7 @@
     "path": "packaging/dist/EaseInterpolator.tox",
     "bytes": 14046,
     "sha256": "473641ca6f784da05d3f02f4ffc9b6081f67a784946d617dfc6033c3e2dffa44",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/EaseInterpolator.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/EaseInterpolator.tox"
    },
    "search": {
     "head": "curves eased incustomease inputs output",
@@ -1097,7 +1097,7 @@
     "path": "packaging/dist/ExpressionPOP.tox",
     "bytes": 150622,
     "sha256": "f91b21cbaf2ac1bdb7d17e42bfa04d2086413ba6529ed28499abe79cdbca4731",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/ExpressionPOP.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/ExpressionPOP.tox"
    },
    "search": {
     "head": "code generated gpu info inputs line linebyline outcode outinfo outpop outputs result",
@@ -1170,7 +1170,7 @@
     "path": "packaging/dist/FeedbackDisplace.tox",
     "bytes": 113358,
     "sha256": "907eb2b033bf05e83162eb9fa1bc6e62a8ec0ddb42301eef4499ddbdb843af94",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FeedbackDisplace.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/FeedbackDisplace.tox"
    },
    "search": {
     "head": "blur image indisplace inputs output",
@@ -1231,11 +1231,11 @@
     "path": "packaging/dist/FloatDataRecorder.tox",
     "bytes": 13094,
     "sha256": "1091d5e80cee03d56c898700a1cb8c0b6cf9ca9133df3db13948d2f36b662aff",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FloatDataRecorder.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/FloatDataRecorder.tox"
    },
    "search": {
     "head": "inputs outcolor outpointcloud outputs recording stream threestream",
-    "body": "build camera captures channels error exists file frames fresh hardware installation later line play played playedback player plugged rec recorded saved sensor shows side skeleton stays step streams take test textures turn write"
+    "body": "build camera captures channels error exists file frames fresh hardware installation later line play played playedback player plugged rec recorded saved sensor side skeleton stays step streams take test textures turn write"
    }
   },
   {
@@ -1295,7 +1295,7 @@
     "path": "packaging/dist/FNS_AltSelect.tox",
     "bytes": 134870,
     "sha256": "a60dec55aa490bd6b81b0872ae1c49efb404e4621ae9fd372ef4c39ac968130e",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_AltSelect.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_AltSelect.tox"
    },
    "search": {
     "head": "active altdrag drag hold later leave match ready readytouse selected size sweeps tagged",
@@ -1308,7 +1308,7 @@
    "kind": "tool",
    "category": "Network",
    "description": "Hold Alt while placing a generator TOP to have it come in pre-set to composite over its input.",
-   "version": "3.2.9",
+   "version": "3.2.10",
    "help_url": "https://functionstore.tools/docs/fns-autocombine/",
    "surfaces": [],
    "shortcut": "AUTO_COMBINE",
@@ -1350,12 +1350,12 @@
     "art",
     "speed"
    ],
-   "whatsnew": "No longer raises \"Invalid OP object\" when operators are deleted in the network it watches; the watcher that reports new and deleted operators tripped over the operators that had just been deleted.",
+   "whatsnew": "stops following the network you view while FNSTools Perform Mode is on.",
    "artifact": {
     "path": "packaging/dist/FNS_AutoCombine.tox",
-    "bytes": 149966,
-    "sha256": "221f7c0374e06373cc54f8a961d1ab01cafbd5acca76c9f9533ed08c7363479b",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_AutoCombine.tox"
+    "bytes": 152678,
+    "sha256": "8c4adbdf915f24eeab7901fe985b328bd4adc5004b3c8d56d826e8ffe819a1ef",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_AutoCombine.tox"
    },
    "search": {
     "head": "altplace configurable defaults dropped format operation",
@@ -1368,7 +1368,7 @@
    "kind": "tool",
    "category": "Network",
    "description": "Hold Alt while placing a generator TOP to have its resolution follow the project (or the panel it sits in).",
-   "version": "3.2.9",
+   "version": "3.2.10",
    "help_url": "https://functionstore.tools/docs/fns-autores/",
    "surfaces": [],
    "shortcut": "AUTO_RES",
@@ -1410,12 +1410,12 @@
     "speed",
     "show"
    ],
-   "whatsnew": "No longer raises \"Invalid OP object\" when operators are deleted in the network it watches; the watcher that reports new and deleted operators tripped over the operators that had just been deleted.",
+   "whatsnew": "stops following the network you view while FNSTools Perform Mode is on.",
    "artifact": {
     "path": "packaging/dist/FNS_AutoRes.tox",
-    "bytes": 152694,
-    "sha256": "7c773b2214e53846d9e114c21639984166ae1b27cc51ffa242bf45073441139c",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_AutoRes.tox"
+    "bytes": 155366,
+    "sha256": "0213102624904e1b3db19dd3b7f8bfd4642fa600e0de0487f0cd9a8e27ccd040",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_AutoRes.tox"
    },
    "search": {
     "head": "acts available color custom dropped expression following format holding mac output parent projectfollowing sets size type",
@@ -1428,7 +1428,7 @@
    "kind": "tool",
    "category": "Project",
    "description": "Save the project on a timer without touching the timeline, honouring your increment and backup preferences, and skipping saves while you are performing.",
-   "version": "3.2.8",
+   "version": "3.2.9",
    "help_url": "https://functionstore.tools/docs/fns-autosave/",
    "surfaces": [
     "mainmenu"
@@ -1532,12 +1532,12 @@
     "show",
     "learn"
    ],
-   "whatsnew": "Wait For Mouse Rest (off by default) holds a due save until the mouse has rested for Mouse Rest seconds, so the save never interrupts a drag; the mouse is watched only while a save waits. Turning Active on or off, or changing the interval, from the parameter dialog or the main menu button now takes effect at once (it used to wait for the next reload).",
+   "whatsnew": "Skip In Perform Mode follows FNSTools Perform Mode, which follows TouchDesigner's by default (a copy without the toolkit root still reads TouchDesigner's own).",
    "artifact": {
     "path": "packaging/dist/FNS_Autosave.tox",
-    "bytes": 227110,
-    "sha256": "35d191ecd9a73f906af6992e69fcbf062309bb3320c904998b9fbd659673b6aa",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_Autosave.tox"
+    "bytes": 233590,
+    "sha256": "4105e6e8f38028b15e411d54c4a062701af0d4f16fc552d4a94c6ecfd660a3bf",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_Autosave.tox"
    },
    "search": {
     "head": "interrupting interval main mode modified mouse overwrite projects rest saving show skip status staying timed toggle unchanged wait",
@@ -1580,7 +1580,7 @@
     "path": "packaging/dist/FNS_BackupCleaner.tox",
     "bytes": 390414,
     "sha256": "ae279d357c444c87eb316f26e05ee53b105ab1fd171ac1eb5ec4d9d9174e5155",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_BackupCleaner.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/FNS_BackupCleaner.tox"
    }
   },
   {
@@ -1655,7 +1655,7 @@
     "path": "packaging/dist/FNS_BeatMod.tox",
     "bytes": 528280,
     "sha256": "ee46812b647b1cee7d0f2d410a9885fc9d0a4587744ab1b0500acf56d01d04df",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_BeatMod.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/FNS_BeatMod.tox"
    }
   },
   {
@@ -1664,7 +1664,7 @@
    "kind": "tool",
    "category": "Interface",
    "description": "Borderless TouchDesigner window, plus timeline hiding.",
-   "version": "3.2.10",
+   "version": "3.2.11",
    "help_url": "https://functionstore.tools/docs/fns-borderlesstd/",
    "surfaces": [
     "mainmenu",
@@ -1726,16 +1726,16 @@
     "live",
     "ui"
    ],
-   "whatsnew": "",
+   "whatsnew": "the window title stops refreshing its unsaved-changes mark every second while FNSTools Perform Mode is on.",
    "artifact": {
     "path": "packaging/dist/FNS_BorderlessTD.tox",
-    "bytes": 378078,
-    "sha256": "8b96584bd9c54ddde0d697d3ceb8a3f5e4e93028a0e879c68eabbd739df3e34d",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_BorderlessTD.tox"
+    "bytes": 389654,
+    "sha256": "657b68068b86f7d6dc5f6e43c9533cf592b9e78bbc3ad4fd33e6edcc807ef364",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_BorderlessTD.tox"
    },
    "search": {
     "head": "bar buttons cleaner color control enable esc escape fix force full fullscreen hide indicator key pause screen shift shiftesc show start startup state title undo windows",
-    "body": "asserts better carries come contributes decides displays element exactly example fancy features file fixed forum handy happens hatch hidden hides immediately links longer look lose mac macos main mainmenu names needed normally opens paused play playback press provides puts reasserts recolored reliably removes restored run ship ships shortly shows smaller space starts substitute switched toggle turn turns tutorials wiki zone"
+    "body": "asserts better carries come contributes decides displays element exactly example fancy features file fixed forum handy happens hatch hidden hides immediately links longer look lose mac macos main mainmenu names needed normally opens paused play playback press provides puts reasserts recolored reliably removes restored run ship ships shortly smaller space starts substitute switched toggle turn turns tutorials wiki zone"
    }
   },
   {
@@ -1805,7 +1805,7 @@
     "path": "packaging/dist/FNS_CamSequencer.tox",
     "bytes": 312288,
     "sha256": "d945daf05d7ceaf1f1d925011084d646d2a2ce99292e222806cf4172146a7af3",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_CamSequencer.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/FNS_CamSequencer.tox"
    }
   },
   {
@@ -1855,7 +1855,7 @@
     "path": "packaging/dist/FNS_Collect.tox",
     "bytes": 223606,
     "sha256": "478d5bf515f0e9e9ec574e35a968efc0f959d5f65f254cfd87d71b11af6e9c67",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_Collect.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/FNS_Collect.tox"
    }
   },
   {
@@ -1864,7 +1864,7 @@
    "kind": "tool",
    "category": "Interface",
    "description": "Operator and family colour palettes, with the active palette roaming through config.",
-   "version": "3.2.10",
+   "version": "3.2.11",
    "help_url": "https://functionstore.tools/docs/fns-colorui/",
    "surfaces": [
     "console",
@@ -2049,12 +2049,12 @@
     "screen",
     "ui"
    ],
-   "whatsnew": "",
+   "whatsnew": "its browser stops checking every frame whether its viewer is open while FNSTools Perform Mode is on.",
    "artifact": {
     "path": "packaging/dist/FNS_ColorUI.tox",
-    "bytes": 312038,
-    "sha256": "a4b44dd2091635cfc4f7985cfe78dca94e012f0a6a51d9376569336078c4d0c7",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_ColorUI.tox"
+    "bytes": 316742,
+    "sha256": "1954d6d17a322a76d2bd268b283e575cf1256b2e481d6c3be168d23215525106",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_ColorUI.tox"
    },
    "search": {
     "head": "auto autoload browser colors console element elements export expose families hub import json load local locally opcolor presets recolor save saving share",
@@ -2098,7 +2098,7 @@
     "path": "packaging/dist/FNS_CommandKit.tox",
     "bytes": 39902,
     "sha256": "a532c428a89cffac538594b0d04895a832336c06eeb544f204e614f8c327f3b0",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_CommandKit.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_CommandKit.tox"
    },
    "search": {
     "head": "adopting announce apart changes child code commandpalette context copies decorator derives direct everything explicit identity ids imports knowing main options permanent placed readme reannounce rules safe serves state synchronously tdxl tell thread throughout worth",
@@ -2111,13 +2111,13 @@
    "kind": "tool",
    "category": "Interface",
    "description": "A command palette inside TouchDesigner: every command your FNS tools declare and TouchDesigner's own palette components in one ranked list, opened with a hotkey and aware of what you are looking at. Manage favourites and hidden commands from its tab in Hub.",
-   "version": "3.2.15",
+   "version": "3.2.16",
    "help_url": "https://functionstore.tools/docs/fns-commandpalette/",
    "surfaces": [
     "hub"
    ],
    "shortcut": "",
-   "ops": 201,
+   "ops": 202,
    "requires": [
     "FNS_ConfigRegistry",
     "FNS_HubRegistry"
@@ -2126,7 +2126,9 @@
    "key_available": false,
    "license": "",
    "seats": null,
-   "integrates_with": [],
+   "integrates_with": [
+    "FNS_Updater"
+   ],
    "tox_carrier": "own",
    "cooking": true,
    "min_td_build": "2025.33070",
@@ -2157,6 +2159,11 @@
      "name": "Catalogue",
      "signature": "(rebuild: bool = False)",
      "doc": "Every row the palette can offer, commands first."
+    },
+    {
+     "name": "Choose",
+     "signature": "(onChosen, title: str = None)",
+     "doc": "Open the palette as a picker: Enter or a click on a command or a preset hands it to onChosen instead of running it, as a dict {'key', 'label', 'kwargs'}; closing without a pick calls onChosen(None)."
     },
     {
      "name": "ClearUsage",
@@ -2276,16 +2283,16 @@
     "dev",
     "ui"
    ],
-   "whatsnew": "",
+   "whatsnew": "a picker mode lets another tool ask you to choose a command; the radial menu fills its slots with it. Right-click a row for its menu: Run, Star, Hide or Delete preset, and Add to radial menu. search finds a command by what it does. A typed word also matches the command's help line and its tool's description and documentation, so \"copy\" finds PasteFromClipboard and \"bookmark\" finds QuickMarks; such a row says why it matched (\"in docs: copy\"), and `#copy` lists the tools whose docs say copy. Letters scattered through a long name (\"delete\" in TD_SearchPalette) no longer fill the list when a real match exists, and TouchDesigner's own commands are listed once when the TDXL launcher companion is in the project too. Typing is two to three times faster on longer words (copy: 40 ms to 13 ms per keystroke). a fresh install starts with an empty query history.",
    "artifact": {
     "path": "packaging/dist/FNS_CommandPalette.tox",
-    "bytes": 325886,
-    "sha256": "b8e31048b6d720413ba91396d976c26a9384b5aa87918fc063d81cd5fbbea36e",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_CommandPalette.tox"
+    "bytes": 336310,
+    "sha256": "4403d8038dd1389e5af6188209d80c18bac27f7d5be386beb5df4febe17e7892",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_CommandPalette.tox"
    },
    "search": {
-    "head": "call complete context contextaware copies copy current drag extension hands history install matching methods mouse navigate persistence plus prefixes presets press query rank ranking rebindable roaming row run scope scoping several star stars step tolerant typo typotolerant usage word",
-    "body": "accepts act addressed alt anywhere app arguments atlantic backs badge badged badges baked beats better breaks browser built builtin builtins bundles bypassed callable calls came cares carry cell character checks choice choosing class clear clicking close closes colored commandregistry completes config configregistry conflicts contributes convention cooking count counts couple cover ctrl cycle decide declares defaults deletes derivative dimmed directions display downloading drill eight empty enter entered esc everything exactly exists expose exposes extensions fades far fed field file fill fills filter filtered finds flags focus folders follow footer forgets four general gesture global help hide hides higher hit hotkeymanager icon identity included initials input ins installed installs keeping keyed keystroke kind knowing label last launch launcher lead leading leaves letters level lift lists literally lives loads looser lowercase manager match matches members method middle missing model move moving names narrows navigation needed new offer onekeystroke ones opens opt optin order pane path persist picks placed placeholder placement places prefix preset projects promoted prompting public queries quick randomize ranks reaching read readings reason rebinds rebuilds recorded refresh refused registered registry require required resolves rest root rows runs satisfies saved saves saving saying says scopes searchable selected seven ship shorter show shows side similar slip small snapshot specific spellings starred start starting stay steps strictly subject survive tag tagged take takes taking tdxlu text tier ties time title tray turn turning type typed typing underscore unwraps values visible walk walks weeks whichever window wins wiring words wrap wrapper"
+    "head": "call complete context contextaware copies copy current drag extension find hands history install matching methods mouse navigate persistence plus prefixes presets press query rank ranking rebindable roaming row run scope scoping several star stars step tolerant typo typotolerant usage word",
+    "body": "accepts act add addressed alt answered answers anywhere app arguments atlantic backs badge badged badges baked beats belongs better breaks browser built builtin builtins bundles bypassed callable calls came cares carry cell character checked checks choice choosing class clear clicking clipboard close closes colored come commandregistry completes config configregistry conflicts contributes convention cooking count counts couple cover ctrl cycle decide declares defaults delete deletes derivative description dimmed directions display documentation downloading downloads drill eight empty enter entered esc everything exactly exists expose exposes extensions fades far fed field file fill fills filter filtered finds flags fnsradialmenu focus folders follow footer forgets four general gesture global happens help hide hides higher hit hold hotkeymanager icon identity image included initials input ins installed installs keeping keyed keystroke kind knowing label last launch launcher lead leading leaves letters lettersinorder level lift line listed lists literally lives loads long looser lowercase main manager manifest marks match matched matches members method middle missing model move moving names narrows navigation needed new offer onekeystroke ones opens opt optin order pane paste pastefromclipboard path persist picks placed placeholder placement places prefix preset projects promoted prompting public puts queries quick quickmarks radial randomize ranks reaching read reading readings reason rebinds rebuilds recorded refresh refused registered registry require required resolves rest rightclick root rows runs satisfies saved saves saving saying says scopes searchable selected seven ship shorter show side similar slip slot small snapshot specific spellings starred start starting starts stay steps store strictly subject survive tag tagged take takes taking tdxlu text three tier ties time title tray turn turning type typed typing underscore unstar unwraps updater values visible walk walks weeks wheel whichever window wins wiring words wrap wrapper"
    }
   },
   {
@@ -2294,7 +2301,7 @@
    "kind": "core",
    "category": "Core",
    "description": "Collects the commands your tools declare and serves them to whatever can run them: the in-TouchDesigner command palette and the TDX launcher. Discovery is by tag, so a tool installed before any consumer still appears the moment one arrives.",
-   "version": "3.2.8",
+   "version": "3.2.9",
    "help_url": "https://functionstore.tools/docs/fns-commandregistry/",
    "surfaces": [],
    "shortcut": "",
@@ -2558,6 +2565,20 @@
      "owner": "FNS_BuiltinCommands/TD_Session"
     },
     {
+     "name": "CustomizeOp",
+     "id": "customizeop",
+     "label": "Customize op",
+     "help": "Open the Component Editor on the selected component, to add custom parameters.",
+     "owner": "FNS_BuiltinCommands/TD_Session"
+    },
+    {
+     "name": "CustomizeParent",
+     "id": "customizeparent",
+     "label": "Customize parent",
+     "help": "Open the Component Editor on the component whose network you are in, to add custom parameters.",
+     "owner": "FNS_BuiltinCommands/TD_Session"
+    },
+    {
      "name": "LoadRecent",
      "id": "loadrecent",
      "label": "Load recent file",
@@ -2583,6 +2604,13 @@
      "id": "openopviewer",
      "label": "Open op viewer",
      "help": "Open the selected operator's viewer window.",
+     "owner": "FNS_BuiltinCommands/TD_Session"
+    },
+    {
+     "name": "OpenParentParameters",
+     "id": "openparentparameters",
+     "label": "Open parent parameters",
+     "help": "Open a floating parameter dialog for the component whose network you are in.",
      "owner": "FNS_BuiltinCommands/TD_Session"
     },
     {
@@ -2703,12 +2731,12 @@
     }
    ],
    "global_shortcut": "FNS_COMMANDREGISTRY",
-   "whatsnew": "",
+   "whatsnew": "three more of TouchDesigner's own commands: Open parent parameters, Customize parent and Customize op (the Component Editor for the network you are in, or the selected component).",
    "artifact": {
     "path": "packaging/dist/FNS_CommandRegistry.tox",
-    "bytes": 99286,
-    "sha256": "fefdb998c3291aadb456afe1921791981edd481504cc6786f6192b4cab143795",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_CommandRegistry.tox"
+    "bytes": 101598,
+    "sha256": "68c28774a5dfb16a128980c8920f4f645f6609712b218c07dcac767bf36a363b",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_CommandRegistry.tox"
    },
    "search": {
     "head": "apart api based built builtin carries commandpalette consumers context copies copy curation declaration declared depend derived duplicates methods moves newest pinned presets registries several stands state surface survives tagbased tdxl tray validation version wins work",
@@ -2957,7 +2985,7 @@
     "path": "packaging/dist/FNS_ConfigHost.tox",
     "bytes": 106486,
     "sha256": "a2faa8db9f0cc6bd67eb5af466605633d5f797be49112a10c8e776a5ddeb0dd9",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_ConfigHost.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_ConfigHost.tox"
    },
    "search": {
     "head": "adopting callbacks key load named parent registration section stored thing",
@@ -2970,7 +2998,7 @@
    "kind": "core",
    "category": "Core",
    "description": "Settings persistence registry: one aggregated JSON in the user palette, so preferences follow you across projects and survive updates. The raw master, promoted to /sys.",
-   "version": "3.2.9",
+   "version": "3.2.10",
    "help_url": "https://functionstore.tools/docs/fns-configregistry/",
    "surfaces": [],
    "shortcut": "",
@@ -3198,12 +3226,12 @@
     }
    ],
    "global_shortcut": "FNS_CONFIGREGISTRY",
-   "whatsnew": "your toolbar, navbar, main menu and hub tab arrangement follows you between projects only where you changed it; everything else takes each release's layout. A project is saved into your settings only after you rearrange something in it, so opening and saving a project never spreads whatever layout it happened to load with. Before, a settings file replayed an older release's order over the new one, and tools added by an update landed out of place.",
+   "whatsnew": "a tool that an update replaced mid-session gets its saved settings back straight away. It used to run on its shipped defaults until TouchDesigner restarted, and a project save in between wrote those defaults over your saved settings.",
    "artifact": {
     "path": "packaging/dist/FNS_ConfigRegistry.tox",
-    "bytes": 105926,
-    "sha256": "0cda4c77af504061d0b4678afb1af95bbc6edeee4371d04cf42dc26a539af196",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_ConfigRegistry.tox"
+    "bytes": 107990,
+    "sha256": "16bbcc6ce386b44f58308773f8bb1acc845e1bf8cd80f0524cea1d9e9713db9b",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_ConfigRegistry.tox"
    },
    "search": {
     "head": "automatic browser components console contents copy core couple custom exceptions expr exprhotstrings externalizing file global host hot load optemplates pls probably reset resetpls save states strings synchronize syncing templates",
@@ -3386,11 +3414,11 @@
     "path": "packaging/dist/FNS_Console.tox",
     "bytes": 118478,
     "sha256": "e48f3671f297ad34816e4647bcf50fed09864570252d7417ff0487a65108315d",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_Console.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_Console.tox"
    },
    "search": {
     "head": "api browser canonical checkout chosen color colorui concern config contained contribute contributed contributing dat developing dormant enabled example export expose exposure expression hand handoff hide host hot hotsynced http idle import label local locked managing minutes names opening order owns panel python reexpression register registry remove renders runs scope self selfcontained server shipped show shown sibling someone source sources stamp status surface switches synced system tabs take ten troubleshooting verbatim visible worked",
-    "body": "across active adds alive alone answer answering answers applies arrived arrives artifact asked asset authored auto autoregister bar bare binding block bootstrap bootstraps bound built builtin builtins call callbacks calls capability card carries cause cef change changed changes checkbox choice clashing cloning close closed code command components configregistry consequences consoles container contribution contributions control cooks copy created css dats decides decision declared deep deeplink defaults defining demand descend design dialogs digits direct directly disagree disk dispatcher displayed divider document download drag drop dropped edit edits embedded embody embodyexternalized empty enables end endpoints ends entirely ephemeral everything execute exists explicitly exposed exposes extension external externalized externaltox failed feeds fifty file filters finer fire fix flag flicker flip flipped floating follow follows forward forwarded forwards fragment frame free fresh function future global globals grouped handles header hidden hides high hits holding hook hotsyncs html idles iframe implements included inert inline inproject ins installed installer installing instead intd interface java javascript jump kicks knowledge last later launcher layer leaves letters level link list lists live lives load localonly look looking looks machine manager masters meaning method methods mirrored missing mode navbar new nobody offers ones opens optional ordered original owner package par parent pars paths persisted persistence persists picked picks plugin point polls port post posts pre predates prefix prerelease process projects promotes property publish publishes pulls pulse pushes rail raise raises reach reachable reaches read readonly reads reapplies rebuilt refuse regardless registered registers registration registries relative release reload reloadkicks remember removed removes render rendered renderer rendering republishes request requires reregister reserved resolve resolves returns reverts rewrites ride roams root rootrelative route routes routing rule rules run running safe safely save saved says scratch script scroll scrollable scrollspy scrubs search second seconds section sections sense serve serverside serves serving setting several ships shows side single sit sits skipped sort sorted spy stamped stamping standalone state stay stays steer step sticky stop stops structural survives suspects switch switched symptom syncs tables takes talking talks tdxlpp text textport texture therefore thing toolbar tox transport turns unchecking untouched updated updates url urls urlsafe user validated value viewer watchers window works write writes writing written wrong"
+    "body": "across active adds alive alone answer answering answers applies arrived arrives artifact asked asset authored auto autoregister bar bare binding block bootstrap bootstraps bound built builtin builtins call callbacks calls capability card carries cause cef change changed changes checkbox choice clashing cloning close closed code command components configregistry consequences consoles container contribution contributions control cooks copy created css dats decides decision declared deep deeplink defaults defining demand descend design dialogs digits direct directly disagree disk dispatcher displayed divider document download drag drop dropped edit edits embedded embody embodyexternalized empty enables end endpoints ends entirely ephemeral everything execute exists explicitly exposed exposes extension external externalized externaltox failed feeds fifty file filters finer fire fix flag flicker flip flipped floating follow follows forward forwarded forwards fragment frame free fresh function future global globals grouped handles header hidden hides high hits holding hook hotsyncs html idles iframe implements included inert inline inproject ins installed installer installing instead intd interface java javascript jump kicks knowledge last later launcher layer leaves letters level link list lists live lives load localonly look looking looks machine manager masters meaning method methods mirrored missing mode navbar new nobody offers ones opens optional ordered original owner package par parent pars paths persisted persistence persists picked picks plugin point polls port post posts pre predates prefix prerelease process projects promotes property publish publishes pulls pulse pushes rail raise raises reach reachable reaches read readonly reads reapplies rebuilt refuse regardless registered registers registration registries relative release reload reloadkicks remember removed removes render rendered renderer rendering republishes request requires reregister reserved resolve resolves returns reverts rewrites ride roams root rootrelative route routes routing rule rules run running safe safely save saved says scratch script scroll scrollable scrollspy scrubs search second seconds section sections sense serve serverside serves serving setting several ships side single sit sits skipped sort sorted spy stamped stamping standalone state stay stays steer step sticky stop stops structural survives suspects switch switched symptom syncs tables takes talking talks tdxlpp text textport texture therefore thing toolbar tox transport turns unchecking untouched updated updates url urls urlsafe user validated value viewer watchers window works write writes writing written wrong"
    }
   },
   {
@@ -3399,7 +3427,7 @@
    "kind": "tool",
    "category": "Parameters",
    "description": "Promote parameters to a parent with binds or expressions, customize name/label/range on drop, plus extension creation, parent shortcuts, parameter clearing and IOP promotion. Also carries the pane-bar drag-drop hijack and path-cell injection, and four stock-TouchDesigner shortcuts for opening parameters and the COMP editor.",
-   "version": "3.2.13",
+   "version": "3.2.14",
    "help_url": "https://functionstore.tools/docs/fns-custompartools/",
    "surfaces": [
     "navbar",
@@ -3620,12 +3648,12 @@
     "dev",
     "speed"
    ],
-   "whatsnew": "No longer raises \"Invalid OP object\" when operators are deleted in the network it watches; the watcher that reports new and deleted operators tripped over the operators that had just been deleted. This is the watcher behind QuickExt.",
+   "whatsnew": "its parent and current-COMP parameter and Customize commands share an identity with the toolkit's built-in ones, so quick-launch lists each once. QuickExt stops following the network you view while FNSTools Perform Mode is on. the release no longer carries a path into the author's Downloads folder on QuickParCustom.",
    "artifact": {
     "path": "packaging/dist/FNS_CustomParTools.tox",
-    "bytes": 1180234,
-    "sha256": "c7e0aaa257a4e50e4c98f31185c6aa8f136ed5994e3e87654bc67b6091f2c7c8",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_CustomParTools.tox"
+    "bytes": 1199498,
+    "sha256": "2e04b039cf373bd935cc9f669dadc81a161a44c5d8d4758b6cd634fca7f3b442",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_CustomParTools.tox"
    },
    "search": {
     "head": "active add additive alongside alt alternative altleftclick applied arity base binding callback callbacks change class clear clearpars cmd code collapse collision creates ctrl current cursor custompar customparcustomize customparhelper dangling dat declaration declare declaring decorators documented draganddrop editors enforced exactly examples execute existing expected export ext features five found handler handlers harvesting helper hotkeys hovered icon importing inherit init invoked jump key keyboard leftclick longer mac manipulate method middle middleclick mods modules myhotkeys names naming navbar new nodes nonode params pars pathbar properties quick quickext quickly quickparcustom rebind rebuilds reharvesting reported resolve resolved returns rightclick runs scratch seeded selected selection shift shiftleftclick shiftrightclick signatures static strings strongly style switch table target targets usage value visible works",
@@ -3698,7 +3726,7 @@
     "path": "packaging/dist/FNS_ExprHotStrings.tox",
     "bytes": 199766,
     "sha256": "6574d9c67495b6220f78964bbe87e08fc94aa9540728b9e79e2a18c17de615ab",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_ExprHotStrings.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_ExprHotStrings.tox"
    },
    "search": {
     "head": "abbreviation bind breakdown expansion expression important inline parent path promote table tube typing wrap youtube",
@@ -3776,7 +3804,7 @@
     "path": "packaging/dist/FNS_GeoPilot.tox",
     "bytes": 355096,
     "sha256": "d8bf19afb05e05f907e6fa5ce59f336f3d98cc5c28be4e8a71147395f2ff4cc7",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_GeoPilot.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/FNS_GeoPilot.tox"
    }
   },
   {
@@ -3815,7 +3843,7 @@
     "path": "packaging/dist/FNS_GlobalOutSelect.tox",
     "bytes": 273782,
     "sha256": "61692bdea0625e3fa3aa267fa8e3b1b0ffc36755d5ac32bb574783afd4df41c6",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_GlobalOutSelect.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_GlobalOutSelect.tox"
    },
    "search": {
     "head": "jump outs refresh row rows selects viewer",
@@ -3896,7 +3924,7 @@
     "path": "packaging/dist/FNS_GlobalVolControl.tox",
     "bytes": 274550,
     "sha256": "dcbe215f9c4573ef07820052481214f046fb9923271dd674e70e15cc10b3cdb4",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_GlobalVolControl.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_GlobalVolControl.tox"
    },
    "search": {
     "head": "application applicationwide master mute overall slider wide",
@@ -4075,7 +4103,7 @@
     "path": "packaging/dist/FNS_HotkeyManager.tox",
     "bytes": 258070,
     "sha256": "2640c41dd1c6c6898eafa6d529318fb41b95d9f184e59e683701f773cc176582",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_HotkeyManager.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_HotkeyManager.tox"
    },
    "search": {
     "head": "allows binding bindings cell column conflicts defaults externalized hotkeys keys load persist pressing projects projectwide rebind reset rightclick save wide",
@@ -4088,7 +4116,7 @@
    "kind": "core",
    "category": "Core",
    "description": "The FNS button in TouchDesigner's main-menu bar and the one-stop manager window behind it: the Toolbar, Navbar and Main Menu configurators as tabs, the console, and any tab a tool contributes. Drop a panel COMP on the button to register it into a surface.",
-   "version": "3.2.14",
+   "version": "3.2.15",
    "help_url": "https://functionstore.tools/docs/fns-hub/",
    "surfaces": [
     "hub",
@@ -4167,12 +4195,17 @@
     {
      "name": "OpenMenu",
      "signature": "()",
-     "doc": "Right-click on the FNS button: jump straight to a tab, to one of the console's pages, or to the documentation and the website."
+     "doc": "Right-click on the FNS button: jump straight to a tab, to one of the console's pages, toggle FNSTools Perform Mode, or go to the documentation, the website or the Patreon join page."
     },
     {
      "name": "OpenTabParameters",
      "signature": "(index)",
      "doc": "The owning tool's parameter window (the mappers are configured there), from a tab's right-click menu."
+    },
+    {
+     "name": "PerformOn",
+     "signature": "()",
+     "doc": "State chip for TogglePerform: the toolkit root's Perform Mode (docs/PerformMode.md)."
     },
     {
      "name": "RefreshTabs",
@@ -4193,6 +4226,11 @@
      "name": "Tabs",
      "signature": "()",
      "doc": "The shown tabs, in bar order (dicts from FNS_HubRegistry.Tabs)."
+    },
+    {
+     "name": "TogglePerform",
+     "signature": "()",
+     "doc": "Toggle FNSTools Perform Mode: the tools that only serve the network editor stop, and come back as they were."
     }
    ],
    "commands": [
@@ -4207,18 +4245,24 @@
      "id": "openmainmenuconfigurator",
      "label": "Open main-menu configurator",
      "help": "Open FNS Hub on the Main Menu tab (the configurator lives in the hub)."
+    },
+    {
+     "name": "TogglePerform",
+     "id": "toggleperform",
+     "label": "Toggle FNSTools perform mode",
+     "help": "Toggle FNSTools Perform Mode: the tools that only serve the network editor stop, and come back as they were."
     }
    ],
-   "whatsnew": "group brackets survive an in-session update: the restore keeps looking while tools are still being replaced and spends its retries only on a settled bar, a group none of whose members is present yet is retried, and a new RepublishOwned re-places the brackets once an update has finished. a Reset toolbar pulse on the Toolbar tab (its parameters, page Toolbar) puts the bar back to the layout it shipped with after asking: every tool to its stamped slot, TD's own items, dividers and groups to the shipped table, and the settings file stops replaying the old positions. For a project whose bar came out of an update with tools tied at one number.",
+   "whatsnew": "a command, Toggle FNSTools perform mode, with its state shown in the palette. the FNS button in the main menu turns red while FNSTools Perform Mode is on, and its tooltip says where to switch it off, so a project that opens performing explains why its authoring tools are quiet. the FNS button's right-click menu switches FNSTools Perform Mode (checked while it is on) and ends with Support FNSTools on Patreon, which opens the Patreon join page.",
    "artifact": {
     "path": "packaging/dist/FNS_Hub.tox",
-    "bytes": 1193426,
-    "sha256": "60bbfc35404a48b1407cbbfb00d8da8d353b5bf8165f287f303437704681deef",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_Hub.tox"
+    "bytes": 1202234,
+    "sha256": "71e4496a83a713d3cc29df19a7298ab530269fa9b1cc6a2cff3c19eb08b191a1",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_Hub.tox"
    },
    "search": {
-    "head": "arrange commands configurator contribute contributing contributions corner hide layout leftclick margin opmenu overlay python rightclick roaming rows show strip styles",
-    "body": "active add added anywhere appears arrows bars beats bookmark bottom bring browser built builtins buttons canonical carries carrying change choice close color colorui come comes command commandpalette concern config configregistry configured context contract contributed contribution cook copy core dat decides decorations developer developerfacing distance dividers docs drag draw draws dropdown dropped edges editor end entries entry everything exactly expr exprhotstrings facing filters fixed fixedwidth flip folder front gear gesture global globaloutselect group happens hidden hiding host hot hubcontract immediately included initializes ins install installed item items keyword larger last launch layer layers layouts list lists live manage mapper mappers marks master midi midimapper mirrored move names needed offers ones opcolor opens order original osc oscmapper outlines overlayregistry owning package pages palette pane perbar placed pop publishes pulse puts quick quicklaunch quickmarks reads receives refresh refreshed registering registers registration registries registry remove rendered reorder restores roam roams root row runs says scroll search searchwords select self selfregistering serves settings shipped shown shows side simply single singlerow sit small sop stamp stamped star stays strings style surfaces switch switches table take three time toolkit twice uis uninstalling viewer web went widgets width words wraps"
+    "head": "arrange commands configurator contribute contributing contributions corner fnstools follow hide layout leftclick margin mode opmenu overlay perform python rightclick roaming rows running show stops strip styles",
+    "body": "active add added anywhere appears arrows autosave bars beat beatmod beats bookmark bottom bring brings browser building built builtins buttons canonical carried carries carrying catches change changers changes checked checks choice close color colorui come comes command commandpalette concern config configregistry configured context contract contributed contribution cook copy core costs covers dat decides decorations developer developerfacing display distance dividers docs documentation drag dragging draw draws dropdown dropped edges editing editor end enter entries entry errors everything exactly exist explains expr exprhotstrings facing file filters fixed fixedwidth flip folder following frame front gear gesture global globaloutselect group guide happens helps hidden hiding homie host hot hovering hubcontract hydro hydrohomie immediately included initializes ins install installed item items keyword larger last launch layer layers layouts leave list lists live log manage mapper mappers marks master midi midimapper mirrored mod mouse move names needed offers ones opcolor opens operators order original osc oscmapper outlines output overlayregistry owning package pages palette pane panes patreon perbar performing pins placed pop projects publishes pulse puts quick quicklaunch quickmarks radial reads ready receives red refresh refreshed registering registers registration registries registry reminders remote remove rendered reorder restores roam roams root row runs saved says scene scenes screen scroll search searchwords select self selfregistering separate serves setting settings shipped shown side simply single singlerow sit skip small sop stamp stamped star stay stays strings style support surfaces switch switches switching table take three time title toggle toolkit tooltip turns twice uis uninstalling update viewer waits watch watchers web website went widgets width words work working wraps"
    }
   },
   {
@@ -4352,11 +4396,11 @@
     "path": "packaging/dist/FNS_HubRegistry.tox",
     "bytes": 86950,
     "sha256": "2393d2a2e253625f07de64ff7249aa2f3d1e2ce5de18767110963ba4f4100b36",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_HubRegistry.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_HubRegistry.tox"
    },
    "search": {
     "head": "api authors callback content exposure healing help hidden host label order python self selfhealing show shown stay url",
-    "body": "across active alongside anywhere area browser close console contributing controls copy core dat decides defaults displayed draws empty entry extension global heals implements injects instead know live load mirror mirrored mytool names navbar ones package palette panel parent pop projects prunes publishing register registers registertab registration registries render renders rest say says scope settabdisplayed shape ships shows six small sop stays surface switched toolbar updater usual view viewer visibility web writes"
+    "body": "across active alongside anywhere area browser close console contributing controls copy core dat decides defaults displayed draws empty entry extension global heals implements injects instead know live load mirror mirrored mytool names navbar ones package palette panel parent pop projects prunes publishing register registers registertab registration registries render renders rest say says scope settabdisplayed shape ships six small sop stays surface switched toolbar updater usual view viewer visibility web writes"
    }
   },
   {
@@ -4365,7 +4409,7 @@
    "kind": "tool",
    "category": "Miscellaneous",
    "description": "A toolbar reminder to drink water at an interval you set. Off by default.",
-   "version": "3.2.9",
+   "version": "3.2.10",
    "help_url": "https://functionstore.tools/docs/fns-hydrohomie/",
    "surfaces": [
     "toolbar"
@@ -4432,16 +4476,16 @@
      "help": "Show or hide the hydration reminder overlay."
     }
    ],
-   "whatsnew": "",
+   "whatsnew": "while FNSTools Perform Mode is on the reminder neither animates nor pops up; one that comes due starts its interval over. The animation was the tool's whole cost while the reminder showed (0.24 ms a frame, 12 operators), and it shows from project start until dismissed.",
    "artifact": {
     "path": "packaging/dist/FNS_HydroHomie.tox",
-    "bytes": 212622,
-    "sha256": "0c80e7d25b379396465efe05e793700279c6a2a2f54806079d649db0b1364fdb",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_HydroHomie.tox"
+    "bytes": 218654,
+    "sha256": "135837c4704e0a0cdd6c186a09a46ea9872cd43a08fda1bf918d5d540c6053fc",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_HydroHomie.tox"
    },
    "search": {
     "head": "changed enable icon minutes reminds",
-    "body": "alert clicking disabled enabled feature important later opens optional recommended remind rightclick settings shows sips small taking thank turn"
+    "body": "alert clicking disabled enabled feature important later opens optional recommended remind rightclick settings sips small taking thank turn"
    }
   },
   {
@@ -4450,7 +4494,7 @@
    "kind": "tool",
    "category": "Network",
    "description": "Browse the internal operators and the OP tree of the network you are in, from a popup opened off the pane bar. One browser instance serves every pane; the bar carries only the button.",
-   "version": "3.2.7",
+   "version": "3.2.8",
    "help_url": "https://functionstore.tools/docs/fns-iopbrowser/",
    "surfaces": [
     "navbar"
@@ -4477,12 +4521,12 @@
     "learn",
     "ui"
    ],
-   "whatsnew": "",
+   "whatsnew": "its menu stops checking the mouse every frame while FNSTools Perform Mode is on.",
    "artifact": {
     "path": "packaging/dist/FNS_iopBrowser.tox",
-    "bytes": 222982,
-    "sha256": "0e9875e9715746b77d4459fc9341e3c5f694d2167b896911e9ee76f614ff6dba",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_iopBrowser.tox"
+    "bytes": 226718,
+    "sha256": "14a9256cb6d84ed124f23dcd10f458f2eea04be560c2e65f096f490c475ee58c",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_iopBrowser.tox"
    },
    "search": {
     "head": "add available bars drag drop hierarchy iops navigate parent parenthierarchy searchable",
@@ -4677,7 +4721,7 @@
     "path": "packaging/dist/FNS_MainMenuRegistry.tox",
     "bytes": 95110,
     "sha256": "6d02921a955106112d03d96cbb424d3487e5d236fd69a4c7cde913ad2282312a",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_MainMenuRegistry.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_MainMenuRegistry.tox"
    },
    "search": {
     "head": "edit entries entry hide hub order publish",
@@ -4731,7 +4775,7 @@
     "path": "packaging/dist/FNS_MediaBrowser.tox",
     "bytes": 228078,
     "sha256": "eacb51f9a4c0c181235399ec725075175b357eedaed96ba5a2220f1bffa64c05",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_MediaBrowser.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/FNS_MediaBrowser.tox"
    }
   },
   {
@@ -4740,7 +4784,7 @@
    "kind": "tool",
    "category": "Project",
    "description": "Two small toolbar utilities: a Background Viewer toggle for the network's backdrop TOPs and CHOPs, and a global Mouse In CHOP you can drag channels from onto parameters.",
-   "version": "3.2.10",
+   "version": "3.2.11",
    "help_url": "https://functionstore.tools/docs/fns-misc/",
    "surfaces": [
     "toolbar"
@@ -4798,12 +4842,12 @@
     "network",
     "ui"
    ],
-   "whatsnew": "",
+   "whatsnew": "its toolbar button stops checking its state every frame while FNSTools Perform Mode is on.",
    "artifact": {
     "path": "packaging/dist/FNS_Misc.tox",
-    "bytes": 259070,
-    "sha256": "2ee1cc88eca3a82278f5e75dbe0fc257fc15ee2da8e9a4ba7860acec0a740787",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_Misc.tox"
+    "bytes": 267886,
+    "sha256": "a749fde181bba0527aff3ed4d497841d0ccbecf6a9e1303e8775883ceedad8e5",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_Misc.tox"
    },
    "search": {
     "head": "clear display drive flags interaction",
@@ -4863,7 +4907,7 @@
     "path": "packaging/dist/FNS_MixSequencer.tox",
     "bytes": 52382,
     "sha256": "9e3a5b2642e5ac4397848c347d7091ad11321f94fcdb296ed48f6848f6adf3d0",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_MixSequencer.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/FNS_MixSequencer.tox"
    }
   },
   {
@@ -5049,11 +5093,11 @@
     "path": "packaging/dist/FNS_NavbarRegistry.tox",
     "bytes": 98174,
     "sha256": "fbc78f9c97044741dd4f2cd98b366614d833c8463901b856db4dc41e0ff75d74",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_NavbarRegistry.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_NavbarRegistry.tox"
    },
    "search": {
     "head": "authors copy host hub layout package panel registration",
-    "body": "appear bars behind browser config configregistry core custom custompartools dropping entries flip global handles hide hierarchy installed installing interact iop iopbrowser items later live load main mainmenu new ones order panes par parent parenthierarchy plus registered registers reorder roams self selfinstalling several ships show shown shows side sit stamped user widget"
+    "body": "appear bars behind browser config configregistry core custom custompartools dropping entries flip global handles hide hierarchy installed installing interact iop iopbrowser items later live load main mainmenu new ones order panes par parent parenthierarchy plus registered registers reorder roams self selfinstalling several ships show shown side sit stamped user widget"
    }
   },
   {
@@ -5115,7 +5159,7 @@
     "path": "packaging/dist/FNS_OpenExt.tox",
     "bytes": 134158,
     "sha256": "e6af06f8e0bf8ccd001c8a11d6dc4795908549d7c95054cfab0cfcb28f09ff5a",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_OpenExt.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_OpenExt.tox"
    },
    "search": {
     "head": "command ctrl current edit editor external hotkey launch press promoted quick quicklaunch",
@@ -5128,7 +5172,7 @@
    "kind": "tool",
    "category": "Core",
    "description": "The FNS tab in the OP Create dialog: an operator family whose members are FNS tools placed from the store as one node each, with stubs for projects that travel and in-place updates that keep retained parameters and state. Built with TDFam.",
-   "version": "0.1.10",
+   "version": "0.1.11",
    "help_url": "https://functionstore.tools/docs/fns-opfamily/",
    "surfaces": [],
    "shortcut": "",
@@ -5314,16 +5358,16 @@
      ]
     }
    ],
-   "whatsnew": "",
+   "whatsnew": "its update check pauses while FNSTools Perform Mode is on and resumes when perform ends.",
    "artifact": {
     "path": "packaging/dist/FNS_OpFamily.tox",
-    "bytes": 329958,
-    "sha256": "1847cf5c4304115497db92d6aba26aa6b0ed101fcac98c22ae68c09c7a6bdb92",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_OpFamily.tox"
+    "bytes": 331974,
+    "sha256": "d980ca10c45fb70c9e3c64f9b057d31df363bb1c2fce4ed75dbf9118210dc8f3",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_OpFamily.tox"
    },
    "search": {
     "head": "add alternatives come commands credits declared launch manifest manifestdeclared mirrored operators optional quick quicklaunch remove replace retention stub sync update",
-    "body": "account act actions adds alternative anywhere apache appears applying bar base belong beside brick cam camsequencer changer choice colored command complete copies dan designs dialogs doors dotsimulate entitled entry extra fifth fnstools folder frozen function gate held hintz holds inputs install installed installer installing know last later leaves licence light limited lists long looking lyell machine mix mixsequencer molnar named new newest noise notice offered opsequencer outputs package packages palette pane pass placeholder plain plus position pro promotes proscenechanger protier pulses random reads real red registry release removes report rest resync run runs scene selection sequencer setting ship shows simple simplescenechanger spawn start stay step sticks stock stubbed survive switch switchtools takes things three tick tier toggle toolkit tox travels turn turns type untick updated updater upgrades version wherever wiring working"
+    "body": "account act actions adds alternative anywhere apache appears applying bar base belong beside brick cam camsequencer changer choice colored command complete copies dan designs dialogs doors dotsimulate entitled entry extra fifth fnstools folder frozen function gate held hintz holds inputs install installed installer installing know last later leaves licence light limited lists long looking lyell machine mix mixsequencer molnar named new newest noise notice offered opsequencer outputs package packages palette pane pass placeholder plain plus position pro promotes proscenechanger protier pulses random reads real red registry release removes report rest resync run runs scene selection sequencer setting ship simple simplescenechanger spawn start stay step sticks stock stubbed survive switch switchtools takes things three tick tier toggle toolkit tox travels turn turns type untick updated updater upgrades version wherever wiring working"
    }
   },
   {
@@ -5389,7 +5433,7 @@
     "path": "packaging/dist/FNS_OpMenuMods.tox",
     "bytes": 353846,
     "sha256": "ba589d32ccb4fd233de7e99b9af889c7cfb3278fed39cef0b921e44823790de5",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_OpMenuMods.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_OpMenuMods.tox"
    },
    "search": {
     "head": "acronyms based custom define dotsimulate filters greg hub keyword opmenu optype registry registrybased removable searchwords table words",
@@ -5584,7 +5628,7 @@
     "path": "packaging/dist/FNS_OpMenuRegistry.tox",
     "bytes": 107142,
     "sha256": "85590f3468083b1208979f551388af5e0af6119ed97f5ddf9862175cadafb4ef",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_OpMenuRegistry.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_OpMenuRegistry.tox"
    },
    "search": {
     "head": "alternatives chain contribute contributions filterchain injection nodes nodetable opmenu panel shared store table word",
@@ -5644,7 +5688,7 @@
     "path": "packaging/dist/FNS_OpSequencer.tox",
     "bytes": 117126,
     "sha256": "053c4aff4006aa3774330275b6217e7cd18c129f26d95400382235d7999d95eb",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_OpSequencer.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/FNS_OpSequencer.tox"
    }
   },
   {
@@ -5653,7 +5697,7 @@
    "kind": "tool",
    "category": "Network",
    "description": "A library of preconfigured operator templates to drop into a network.",
-   "version": "3.2.12",
+   "version": "3.2.13",
    "help_url": "https://functionstore.tools/docs/fns-optemplates/",
    "surfaces": [
     "opmenu",
@@ -5885,16 +5929,16 @@
     "speedCHOP",
     "triggerCHOP"
    ],
-   "whatsnew": "No longer raises \"Invalid OP object\" when operators are deleted in the network it watches; the watcher that reports new and deleted operators tripped over the operators that had just been deleted.",
+   "whatsnew": "stops following the network you view while FNSTools Perform Mode is on.",
    "artifact": {
     "path": "packaging/dist/FNS_OpTemplates.tox",
-    "bytes": 396752,
-    "sha256": "a806da465f7e8692b1ec27b59fbbfc1ba72fddc7287f932387de159b8c50be3e",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_OpTemplates.tox"
+    "bytes": 401128,
+    "sha256": "bfc9d854647fcadc50dbf8504c13c46bf85000061eaaa62315a717a4e94cd02e",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_OpTemplates.tox"
    },
    "search": {
     "head": "addition adoption alternatively alternatives appear avoid base bypass chains clicking config connection cooking defining definitions disable drag edit errors exciting external feature fnstools follow global icon important innovative insert issues known libraries lives maintaining middle middleclick middleclicking needed older packages palette performance probably push registry rightclick save saved saving scope several shared snippets start strongly substitute suggested template toolbar turned type untouched upgrade upgrading usage user window",
-    "body": "active actually add adding additional adopt adopted affect allowing alternative anywhere aside asking asks assumptions attribute automatically behave behind beside broken camera carried carry case cases chain changed chapter check choice choose choosing chosen cleaned come commands comps conflicts connections contained container copy core created creates creating current custom dead deadend decision declares define defined demand described desired desires divider downloaded draganddrop due earlier edits end enter exist exists extracted factory figure file files floating folder followed former found four full fully geo guess harmless heart help higher historical hitting hold holds input inputs inserting install installing instead last light listed live lived loaded loads log looks mac machine majority manually mark means migration mirrors mode moment moved multiple named names naming new newer normal offers old ones opens operators opmenuregistry opportunity ops output outside overwrites package parallel pars placed placements places placing point pointed pop present projectscoped publishes put random read readonly recently references relative renames render replaced replaces resolved restart retired root runs saves says scoped script second setting settings setups ship shipped show shows simply single snippet started starting states stay stays store swap switching tags taken textport time toolkit tox trigger typing update updates usecases value version versions watcher watches wins work working works writes wrong wrote"
+    "body": "active actually add adding additional adopt adopted affect allowing alternative anywhere aside asking asks assumptions attribute automatically behave behind beside broken camera carried carry case cases chain changed chapter check choice choose choosing chosen cleaned come commands comps conflicts connections contained container copy core created creates creating current custom dead deadend decision declares define defined demand described desired desires divider downloaded draganddrop due earlier edits end enter exist exists extracted factory figure file files floating folder followed former found four full fully geo guess harmless heart help higher historical hitting hold holds input inputs inserting install installing instead last light listed live lived loaded loads log looks mac machine majority manually mark means migration mirrors mode moment moved multiple named names naming new newer normal offers old ones opens operators opmenuregistry opportunity ops output outside overwrites package parallel pars placed placements places placing point pointed pop present projectscoped publishes put random read readonly recently references relative renames render replaced replaces resolved restart retired root runs saves says scoped script second setting settings setups ship shipped show simply single snippet started starting states stay stays store swap switching tags taken textport time toolkit tox trigger typing update updates usecases value version versions watcher watches wins work working works writes wrong wrote"
    }
   },
   {
@@ -5972,7 +6016,7 @@
     "path": "packaging/dist/FNS_OpToClipboard.tox",
     "bytes": 136702,
     "sha256": "77fe987d7e82666e017fc40ccd94b4451f21cb9dd992cc32950f6e20d6b1086b",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_OpToClipboard.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_OpToClipboard.tox"
    },
    "search": {
     "head": "cmd copying ctrl currently easily expressions pressing references shift",
@@ -6069,7 +6113,7 @@
     "path": "packaging/dist/FNS_Output.tox",
     "bytes": 207582,
     "sha256": "286cb55ab06e48a18589e1a12fca25026f880e8f77b856930f3d53896e14a27d",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_Output.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_Output.tox"
    },
    "search": {
     "head": "choose drag leftclick rightclick",
@@ -6082,7 +6126,7 @@
    "kind": "tool",
    "category": "Network",
    "description": "One overlay over the network editor you are working in, composited from every tool that draws there: each tool hands over its own image, and this registry fits it over your view, stacks it with the rest and shows it above the nodes, without touching your network's display flags or annotations.",
-   "version": "0.2.1",
+   "version": "0.2.2",
    "help_url": "https://functionstore.tools/docs/fns-overlayregistry/",
    "surfaces": [],
    "shortcut": "",
@@ -6107,6 +6151,11 @@
      "name": "CreateGroup",
      "signature": "(first, last=None, label=None)",
      "doc": "Manager API: wrap the run from `first` to `last` (inclusive, in current bar order) in a new group."
+    },
+    {
+     "name": "Cursor",
+     "signature": "()",
+     "doc": "The mouse over a network editor as (network, x, y) in network units, or None when it is over no network editor of this TD's main window."
     },
     {
      "name": "GroupPath",
@@ -6162,7 +6211,7 @@
     },
     {
      "name": "RegisterPanelWidget",
-     "signature": "(panel, canonical, anchor='topleft', order=None, margin=None, shown=True, active=True, tool=None, pars=None)",
+     "signature": "(panel, canonical, anchor='topleft', order=None, margin=None, shown=True, active=True, tool=None, pars=None, at=None)",
      "doc": "Show `panel` (a panel COMP) as an interactive widget pinned to a corner of the network editor you work in, at its own size on screen."
     },
     {
@@ -6216,6 +6265,11 @@
      "doc": "Everything a client layer needs to render, as one dict."
     },
     {
+     "name": "WidgetRect",
+     "signature": "(canonical)",
+     "doc": "(network, x, y, width, height) of a widget as placed now, in network units of the network it shows in, or None while it is not shown."
+    },
+    {
      "name": "WidgetSpecs",
      "signature": "()",
      "doc": "Every registered widget as {canonical: spec}: panel_path, anchor, order, margin, shown, active, tool_path and pars (the overlay manager's view; a copy, editing it changes nothing)."
@@ -6232,12 +6286,12 @@
     }
    ],
    "global_shortcut": "FNS_OVERLAYREGISTRY",
-   "whatsnew": "dragging a container from the network editor onto the FNS button shows the Register menu again while an overlay is showing; the overlay no longer encloses the operators under it. A tool's layer (Cook Bar) now shows on a fresh install without a manual Unregister and Register: a host that comes up before the global registry waits for it. on a Non-Commercial licence the overlay is drawn at the size it reports, so layers line up (it used to miss the licence, and TD drew it smaller than layers expected); interactive widgets stay on screen when a newer version of the registry takes over. This is version 0.2.1, shared with TDXCollab; it also no longer leaves a \"cook dependency loop\" warning on the registry after its extension reinitialises.",
+   "whatsnew": "Cursor() tells a tool where the mouse is in the network editor under it, in network units, read on demand. It is TDXCollab's measured cursor code moved into the registry so the two share one copy. widgets can open at a point (the radial menu opens at the mouse), WidgetRect() says where a widget sits, and a widget panel now always takes the mouse: the annotation's empty text body sat on top of it before. shows no layer or widget while FNSTools Perform Mode is on, and stops its frame loop.",
    "artifact": {
     "path": "packaging/dist/FNS_OverlayRegistry.tox",
-    "bytes": 98846,
-    "sha256": "4ec06498f1927952da6b8872ca66fdfcc408468f2a2b4c04135d985037076e14",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_OverlayRegistry.tox"
+    "bytes": 103158,
+    "sha256": "df778187724e840916ace6c068c130f92555df397c52a329c1a25ee96fed8546",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_OverlayRegistry.tox"
    },
    "search": {
     "head": "active api authors corner data displayed drawing follows host hub layer layers leaves manage managing margin order panel publish runs shared shown untouched widget widgets",
@@ -6400,11 +6454,11 @@
     "path": "packaging/dist/FNS_PaletteRegistry.tox",
     "bytes": 91358,
     "sha256": "07842e759e7085bfe3c5b915a4416e344d8d32a01285908c286d79ec6680756c",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_PaletteRegistry.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_PaletteRegistry.tox"
    },
    "search": {
     "head": "api authors callback callbacks canonical dat expose fitted host hotkey intact label order panels python register registered resized reuses several shown",
-    "body": "across adds alongside appear bad behind block calls contributed contributing contribution controls copy core costs defaults define disappear display displayed duplicate empty entry exactly expressions field fires flag focusing folder foldertab free front global height hidden hides included inert last leaves list lives load loads means mirror mirrors mytool names navbar optional originals package parent pars point process promoted published publishing push puts rebuilt registertab registration registries rejected render repoint reported rest restores rewrites route row saved search searchpalette select sequence serves settabdisplayed shape ships show showing shows size skipped small source state status stays strip surface switches toggled toolbar unique usual views web widget width written"
+    "body": "across adds alongside appear bad behind block calls contributed contributing contribution controls copy core costs defaults define disappear display displayed duplicate empty entry exactly expressions field fires flag focusing folder foldertab free front global height hidden hides included inert last leaves list lives load loads means mirror mirrors mytool names navbar optional originals package parent pars point process promoted published publishing push puts rebuilt registertab registration registries rejected render repoint reported rest restores rewrites route row saved search searchpalette select sequence serves settabdisplayed shape ships show showing size skipped small source state status stays strip surface switches toggled toolbar unique usual views web widget width written"
    }
   },
   {
@@ -6538,11 +6592,11 @@
     "path": "packaging/dist/FNS_PaneSearchRegistry.tox",
     "bytes": 85782,
     "sha256": "04e77d1258ef4d83ada669abe88b877dcc552501f6df424c9a7a060e459be461",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_PaneSearchRegistry.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_PaneSearchRegistry.tox"
    },
    "search": {
     "head": "api authors contributed controls host operators python reach register stays widget",
-    "body": "adds alongside arrows builds canonical changed contribution contributions copies core dat displayed entry extensible field fix global lives load mytool names navbar opens order package panel promoted publishes reaches rebuilt registerwidget registration registries replace replaces returns saved script searchfix shape ships shows small state surface take time toolbar unregister unregisterwidget"
+    "body": "adds alongside arrows builds canonical changed contribution contributions copies core dat displayed entry extensible field fix global lives load mytool names navbar opens order package panel promoted publishes reaches rebuilt registerwidget registration registries replace replaces returns saved script searchfix shape ships small state surface take time toolbar unregister unregisterwidget"
    }
   },
   {
@@ -6551,7 +6605,7 @@
    "kind": "core",
    "category": "Core",
    "description": "Named, persistent pane-type entries for TD's panebar: any COMP can appear in the pane-type dropdown and be recalled with configurable owner, type, window actions and callbacks.",
-   "version": "3.2.7",
+   "version": "3.2.8",
    "help_url": "https://functionstore.tools/docs/fns-panetyperegistry/",
    "surfaces": [],
    "shortcut": "",
@@ -6704,12 +6758,12 @@
     }
    ],
    "global_shortcut": "FNS_PANETYPEREGISTRY",
-   "whatsnew": "",
+   "whatsnew": "its readme stops watching its colour every frame while FNSTools Perform Mode is on.",
    "artifact": {
     "path": "packaging/dist/FNS_PaneTypeRegistry.tox",
-    "bytes": 174366,
-    "sha256": "256fd8d92dfdeda34a6024a13badaa950965e586400869c5f826a04578753305",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_PaneTypeRegistry.tox"
+    "bytes": 175814,
+    "sha256": "ea7d23a9b6cd65ca1afc3da65c0df2419c8f8f34fc9410da035658d427546e24",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_PaneTypeRegistry.tox"
    },
    "search": {
     "head": "authors custom entry recall register registered rightclick rows setup types",
@@ -6722,7 +6776,7 @@
    "kind": "tool",
    "category": "Network",
    "description": "Hover a parent in the pane-bar path with Alt to see its parent shortcut, global shortcut and internal operators, and Ctrl to see its custom parameters and values. Click any item to copy a reference to it. It works on the path you already have and adds no button of its own.",
-   "version": "3.2.7",
+   "version": "3.2.8",
    "help_url": "https://functionstore.tools/docs/fns-parenthierarchy/",
    "surfaces": [
     "navbar"
@@ -6839,16 +6893,16 @@
     "dev",
     "ui"
    ],
-   "whatsnew": "",
+   "whatsnew": "a leftover frame callback that could never run (its condition did not parse and the method it called was removed) is switched off. Its hover chain and its menu rest while FNSTools Perform Mode is on.",
    "artifact": {
     "path": "packaging/dist/FNS_ParentHierarchy.tox",
-    "bytes": 201126,
-    "sha256": "22afce1d037f3b7ba2002e8c4d9441250537d5a24bff664dd79c22e7d9507789",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_ParentHierarchy.tox"
+    "bytes": 205094,
+    "sha256": "60b2dd0ab9758e83935e61cfb92d19a3a2dfda9cb67280df8b5b86e361a170de",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_ParentHierarchy.tox"
    },
    "search": {
     "head": "althover api browser calls ctrlhover customization expands extension extensions integration iop iopbrowser navbar row shortcuts view",
-    "body": "accessors attribute attributes bookkeeping buries buttons call came capitalized class clicking code constants copies customparhelper described dictionary different drop effect elements exactly existing expression fetching flip folds form forty furthermore generates helper hide hit holding hovering hub individual installed installing instance intact items label labelled list listing lists lives long main mainmenu manages members methods move navigation object package panel par param paste poll promotes properties property reach read register registers relative reorder resolves rightclicking rows run script self selfinstalling sets show shown shows side signature simply somebody stays straight target thing trigger type window"
+    "body": "accessors attribute attributes bookkeeping buries buttons call came capitalized class clicking code constants copies customparhelper described dictionary different drop effect elements exactly existing expression fetching flip folds form forty furthermore generates helper hide hit holding hovering hub individual installed installing instance intact items label labelled list listing lists lives long main mainmenu manages members methods move navigation object package panel par param paste poll promotes properties property reach read register registers relative reorder resolves rightclicking rows run script self selfinstalling sets show shown side signature simply somebody stays straight target thing trigger type window"
    }
   },
   {
@@ -6857,7 +6911,7 @@
    "kind": "tool",
    "category": "Parameters",
    "description": "Create Parameter CHOP/DAT and Parameter Execute DAT nodes inside a COMP from its custom parameters, by drag and drop or hotkey.",
-   "version": "3.2.10",
+   "version": "3.2.11",
    "help_url": "https://functionstore.tools/docs/fns-paropdrop/",
    "surfaces": [
     "toolbar"
@@ -6928,12 +6982,12 @@
     "dev",
     "speed"
    ],
-   "whatsnew": "",
+   "whatsnew": "its modifier-key checks stop cooking every frame while FNSTools Perform Mode is on; they are read when you drop.",
    "artifact": {
     "path": "packaging/dist/FNS_ParOPDrop.tox",
-    "bytes": 202942,
-    "sha256": "9635b032f1a48fa21ef14eec2c7f6f39b59c55f4d6f8a5f9ba4db7aaf0489177",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_ParOPDrop.tox"
+    "bytes": 208878,
+    "sha256": "88ba49411267999e5867728d4d57dd5edad2545b1c190b3021e54b33c3f8bfe9",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_ParOPDrop.tox"
    },
    "search": {
     "head": "alt channel comps ctrl dats dragdrop drops exec hotkeys operators opt param pars shift single",
@@ -7101,7 +7155,7 @@
     "path": "packaging/dist/FNS_ParRandomizer.tox",
     "bytes": 199478,
     "sha256": "7f3cc14fb648bc95dffa4088e305c73ac7b6b4d8a06cb4a3314ab12dace6b59a",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_ParRandomizer.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_ParRandomizer.tox"
    },
    "search": {
     "head": "ctrl current defaults drag dragdrop drop hotkey hovered reset rightclick selected shift store",
@@ -7114,7 +7168,7 @@
    "kind": "tool",
    "category": "Network",
    "description": "Shows each POP's attributes over the network editor: on every POP, the one under the mouse, the selected ones, or both, with point counts and each attribute's type and size. Monitor adds the first points' values for the POP you point at or select. Its toolbar button and Alt+Shift+O switch it on.",
-   "version": "0.1.3",
+   "version": "0.1.4",
    "help_url": "https://functionstore.tools/docs/fns-popoverlay/",
    "surfaces": [
     "overlay",
@@ -7148,12 +7202,12 @@
     "art",
     "dev"
    ],
-   "whatsnew": "",
+   "whatsnew": "stops while FNSTools Perform Mode is on.",
    "artifact": {
     "path": "packaging/dist/FNS_POPOverlay.tox",
-    "bytes": 295574,
-    "sha256": "8be91989f9fc7f9a3f0a8437da970a5faa46788c4b204ee0880f62619dd96801",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_POPOverlay.tox"
+    "bytes": 305702,
+    "sha256": "adb0851be3e7fce8c416d140e082c168a0be68bf2e8e409af738665abd13049a",
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/FNS_POPOverlay.tox"
    }
   },
   {
@@ -7162,7 +7216,7 @@
    "kind": "tool",
    "category": "Interface",
    "description": "A preview pane for whatever you drop on it: TOPs, POPs, SOPs, 3D textures, geometry, panels and other components render in place, and a POP can be opened as a live table or in its own viewer window.",
-   "version": "3.2.8",
+   "version": "3.2.9",
    "help_url": "https://functionstore.tools/docs/fns-previewpanel/",
    "surfaces": [
     "panebar"
@@ -7275,12 +7329,12 @@
     "learn",
     "ui"
    ],
-   "whatsnew": "",
+   "whatsnew": "the PopViewer stops checking every frame whether it is on screen while FNSTools Perform Mode is on (0.04 ms a frame).",
    "artifact": {
     "path": "packaging/dist/FNS_PreviewPanel.tox",
-    "bytes": 891370,
-    "sha256": "d515ee01bbf3c6366b963232da5c5d287814050549b6e897c4a4b0350465f746",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_PreviewPanel.tox"
+    "bytes": 897602,
+    "sha256": "7171f482adfa691c30ae9fcc18f2787743912bf00ee2871eafb506be6dfc78e8",
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/FNS_PreviewPanel.tox"
    }
   },
   {
@@ -7289,7 +7343,7 @@
    "kind": "tool",
    "category": "Show & output",
    "description": "The Pro scene changer: everything SimpleSceneChanger does, plus per-scene modes, fade times and easing, a cue table with play, timeline, timecode and CHOP drivers, CHOP output blending, and fleet follow with scene offset and sync timing. Runs beside the simple one in the same fleet.",
-   "version": "1.0.8",
+   "version": "1.0.9",
    "help_url": "https://functionstore.tools/docs/fns-proscenechanger/",
    "surfaces": [],
    "shortcut": "",
@@ -7332,12 +7386,12 @@
      "fleet"
     ]
    },
-   "whatsnew": "Next Cue on a held last cue now ends the list and fires onCueListDone, and Go to Cue on a stopped list goes straight to that cue instead of passing through the first one. Cook While Editing, as in SimpleSceneChanger: a scene you are editing keeps cooking off air while Control Cook is on.",
+   "whatsnew": "Cook While Editing pauses while FNSTools Perform Mode is on, so only the show's scenes cook.",
    "artifact": {
     "path": "packaging/dist/FNS_ProSceneChanger.tox",
-    "bytes": 120806,
-    "sha256": "f68c192403662db2ff305c0894d8a33bfc787ea708999a89bc2bd25cb7af5d5d",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_ProSceneChanger.tox"
+    "bytes": 122414,
+    "sha256": "d8826d461f6d54c12c40ea2fee12eba8d17fe16725823dc8e94bdf11fefc339b",
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/FNS_ProSceneChanger.tox"
    }
   },
   {
@@ -7420,7 +7474,7 @@
     "path": "packaging/dist/FNS_QuickCollapse.tox",
     "bytes": 148358,
     "sha256": "14528e05e15773fffd38a24449c53f938a1d58be4a6991660eef4f220505ba24",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_QuickCollapse.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_QuickCollapse.tox"
    },
    "search": {
     "head": "base key keystroke nodes onekey parent selected",
@@ -7433,7 +7487,7 @@
    "kind": "tool",
    "category": "Interface",
    "description": "Pane layout shortcuts.",
-   "version": "3.2.8",
+   "version": "3.2.9",
    "help_url": "https://functionstore.tools/docs/fns-quickpane/",
    "surfaces": [],
    "shortcut": "",
@@ -7505,12 +7559,12 @@
     "speed",
     "network"
    ],
-   "whatsnew": "",
+   "whatsnew": "most of its pane gesture's per-frame work rests while FNSTools Perform Mode is on (0.026 to 0.006 ms a frame).",
    "artifact": {
     "path": "packaging/dist/FNS_QuickPane.tox",
-    "bytes": 137374,
-    "sha256": "8d44e3fb46bf06bece8972590abd5d25211cb8d67330804a9c8fa12388fa28d6",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_QuickPane.tox"
+    "bytes": 140182,
+    "sha256": "a66eaacc2b1fb4cd0f4ceff98e0fa32a6e23d4084a7abc42d10bd700bf208821",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_QuickPane.tox"
    },
    "search": {
     "head": "arrow command drag gesture hand hold keys modifiers panes peek press ratio split splitting",
@@ -7569,11 +7623,57 @@
     "path": "packaging/dist/FNS_QuickTime.tox",
     "bytes": 195662,
     "sha256": "84d15ab4c1fc6241275e00e6e99c3b6cc73130a293245245925c277be7d16930",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_QuickTime.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_QuickTime.tox"
    },
    "search": {
     "head": "middle middleclick multiplier reset timers",
     "body": "common current except fraction half icon internal leftclick likewise lookups popup pulsing reach ready real rightclick runs scaled scales speed thing timing useful zero"
+   }
+  },
+  {
+   "name": "FNS_RadialMenu",
+   "title": "RadialMenu",
+   "kind": "tool",
+   "category": "Interface",
+   "description": "A ring of slots around the mouse in the network editor, opened with a hotkey. Each slot runs one of your FNS commands or calls your own Python callback, acting on the operator you point at or the selection. Fill and rearrange the slots in the wheel itself: click an empty slot to pick a command, Ctrl+click to reassign, Shift+click to swap, right-click to rename or clear.",
+   "version": "0.1.0",
+   "help_url": "https://functionstore.tools/docs/fns-radialmenu/",
+   "surfaces": [
+    "overlay"
+   ],
+   "shortcut": "",
+   "ops": 101,
+   "requires": [
+    "FNS_ConfigRegistry",
+    "FNS_OverlayRegistry"
+   ],
+   "access": "preview",
+   "key_available": false,
+   "license": "",
+   "seats": null,
+   "integrates_with": [],
+   "tox_carrier": "own",
+   "cooking": true,
+   "min_td_build": "2025.33070",
+   "hotkeys": [
+    {
+     "keys": "ctrl.shift.q",
+     "op": "FNS_RadialMenu",
+     "par": "Shortcut"
+    }
+   ],
+   "preview": true,
+   "fits": [
+    "speed",
+    "network",
+    "ui"
+   ],
+   "whatsnew": "new, as a preview. A ring of slots around the mouse in the network editor, opened with Ctrl+Shift+Q, starting with TouchDesigner basics (parent and operator parameters, the Component Editor for both, viewer, copy path, home, save). Slots run FNS commands or your own Python callbacks and are filled in the wheel itself: click an empty slot to pick from the command palette, Ctrl+click to reassign, Shift+click to swap, hold a slot to rename or clear it. Slots can also create an operator at the mouse (wired from the operator you point at, or from all the selected ones), toggle a flag, set, toggle or cycle a parameter, or go to the parent, home, a QuickMark or a network. A slot can stay open after it runs (Sticky) or ask for a second click. Further wheels are components with their own hotkeys: made inside the tool they follow you to every project, made in your project they stay with it and are offered in their own network and below. A slot can be this project's only (callbacks and Go To slots are by default), kept with the project while the wheel itself follows you, or blanked in one project. Each wheel has its own colour, and rolling the mouse wheel over an open wheel steps through them. They can open by themselves over a matching operator, network, tag or held modifier, and a wheel can fill itself from your most used commands, your favourites, your QuickMarks or a callback. A slot whose command is not installed is drawn dimmed, and a slot that cannot run keeps the wheel open and says why in its centre. does not open while FNSTools Perform Mode is on, and closes if it turns on.",
+   "artifact": {
+    "path": "packaging/dist/FNS_RadialMenu.tox",
+    "bytes": 263206,
+    "sha256": "fbfbf3de10d4ad9b8fe7c580b80248b27ba932e28b0b4e924a45bc0e53b1a595",
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/FNS_RadialMenu.tox"
    }
   },
   {
@@ -7648,7 +7748,7 @@
     "path": "packaging/dist/FNS_RandomCHOP.tox",
     "bytes": 128758,
     "sha256": "d12a7368bfac2b04b434f54de90aad6e8ab62378f01e970130fcbaf3009fefff",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_RandomCHOP.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/FNS_RandomCHOP.tox"
    }
   },
   {
@@ -7657,13 +7757,13 @@
    "kind": "tool",
    "category": "Control & mapping",
    "description": "Control the project from your phone over your own network: parameter pages, a perform window and multi-touch, paired by QR with no cloud and no account.",
-   "version": "3.2.13",
+   "version": "3.2.14",
    "help_url": "https://functionstore.tools/docs/fns-remote/",
    "surfaces": [
     "toolbar"
    ],
    "shortcut": "FNS_REMOTE",
-   "ops": 145,
+   "ops": 146,
    "requires": [
     "FNS_ConfigRegistry",
     "FNS_ToolbarRegistry"
@@ -7695,12 +7795,12 @@
     "params",
     "osc"
    ],
-   "whatsnew": "",
+   "whatsnew": "the pairing link and its key, the server status, the bound port and the pairing page address are no longer saved with the tool or the project, so a save while it serves leaves nothing of the session in the file; the list of connected phones is not saved either. A fresh install starts with LAN access off (the documented default), no component exposed and its server stopped, and a copy saved while it served stops listening when it loads with Active off.",
    "artifact": {
     "path": "packaging/dist/FNS_Remote.tox",
-    "bytes": 272982,
-    "sha256": "e74e74bb681120c495e8fcdf7ec66ca2e4054af21a63d911dae2705cbff884bc",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_Remote.tox"
+    "bytes": 281182,
+    "sha256": "17a42d1f6f0f1b482ce3d88932801ef0f2e78954c6b98dbff8bfd072750f2ac0",
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/FNS_Remote.tox"
    }
   },
   {
@@ -7805,7 +7905,7 @@
     "path": "packaging/dist/FNS_ResetPLS.tox",
     "bytes": 216526,
     "sha256": "f84543289582084c5a235e0154f9e061fbbb4ad5fcc1612c9fd12f404d52a225",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_ResetPLS.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_ResetPLS.tox"
    },
    "search": {
     "head": "base breakdown callback callbacks conf container custom dat dats depth disable edit enable everything except exceptions frame global limit misc names onreset optypes pars ptypes root script search sop startup static timeline toggles tube type youtube",
@@ -7926,7 +8026,7 @@
     "path": "packaging/dist/FNS_SearchFix.tox",
     "bytes": 210278,
     "sha256": "9347a851f1aba13cc0fd49bcaa75517b8ae9cc7df0a731942e14f43ffd4ad908",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_SearchFix.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_SearchFix.tox"
    },
    "search": {
     "head": "bars best close closes commands deep finds launch match matching mean patterns quick quicklaunch repatch results searching spaces step underscores wildcard",
@@ -7939,7 +8039,7 @@
    "kind": "tool",
    "category": "Interface",
    "description": "Search field for TouchDesigner's palette browser, installed into the palette on startup. Based on Yea Chen's TD-SearchPalette.",
-   "version": "3.2.9",
+   "version": "3.2.10",
    "help_url": "https://functionstore.tools/docs/fns-searchpalette/",
    "surfaces": [],
    "shortcut": "TDX_SEARCH_PALETTE",
@@ -7967,12 +8067,12 @@
     "learn",
     "ui"
    ],
-   "whatsnew": "",
+   "whatsnew": "Hide Palette When Idle stops watching the palette while FNSTools Perform Mode is on.",
    "artifact": {
     "path": "packaging/dist/FNS_SearchPalette.tox",
-    "bytes": 135070,
-    "sha256": "9309b17fee3b67a88473138d27d3455cbe75dc219abc421fb523869527bd2727",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_SearchPalette.tox"
+    "bytes": 137166,
+    "sha256": "957de3f90c0dc1015f65401bb33f8c9e444dc9b48e4886af260b6c7dd5dc0864",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_SearchPalette.tox"
    },
    "search": {
     "head": "auto behavior case caseinsensitive editing exclude exclusions fallback focus folder fuzzy hotkey insensitive install latest multiple navigation ranked rebindable results substring tdx tdxsearchpalette text uninstall version wildcards word words work",
@@ -8052,7 +8152,7 @@
     "path": "packaging/dist/FNS_SetSmoothness.tox",
     "bytes": 256686,
     "sha256": "116b1728117c9fe1569fc6c153143c5f9d60b754a90c0b7bd45cccd568f75fc3",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_SetSmoothness.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_SetSmoothness.tox"
    },
    "search": {
     "head": "apply change commands common launch opening quick quicklaunch setting time toolbar",
@@ -8065,7 +8165,7 @@
    "kind": "tool",
    "category": "Show & output",
    "description": "Scene changer for TOP outputs: wire your scenes in, then cut, fade or ease between them by select, timer, A/B fader or CHOP, with cooking control so only the scenes on screen cook. Base and Pro instances find each other and can follow a leader across screens.",
-   "version": "1.0.9",
+   "version": "1.0.10",
    "help_url": "https://functionstore.tools/docs/fns-simplescenechanger/",
    "surfaces": [],
    "shortcut": "",
@@ -8107,12 +8207,54 @@
      "fade"
     ]
    },
-   "whatsnew": "Cook While Editing (Cooking page, on by default): with Control Cook on, a scene you open in a network editor keeps cooking while it is off air, so its viewers stay live while you work on it.",
+   "whatsnew": "Cook While Editing pauses while FNSTools Perform Mode is on, so only the show's scenes cook.",
    "artifact": {
     "path": "packaging/dist/FNS_SimpleSceneChanger.tox",
-    "bytes": 101086,
-    "sha256": "2267a1ce0ada426c929c9bd59d361b7c6e1bbf5edab28e587c4c667bf1c11f0e",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_SimpleSceneChanger.tox"
+    "bytes": 102646,
+    "sha256": "5c1f9cd7b88128efba509dbd12937b16acdccab88bf8ee08a40e1fcbdc5d2642",
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/FNS_SimpleSceneChanger.tox"
+   }
+  },
+  {
+   "name": "FNS_SpaceMaker",
+   "title": "SpaceMaker",
+   "kind": "tool",
+   "category": "Network",
+   "description": "Makes room in the network editor: hold a hotkey, sweep a rectangle, and the operators in the way move aside, each the way the edge of the rectangle met it. Rows and columns keep their spacing, annotations move as whole groups, and Ctrl+Z undoes a whole sweep.",
+   "version": "0.1.0",
+   "help_url": "https://functionstore.tools/docs/fns-spacemaker/",
+   "surfaces": [],
+   "shortcut": "",
+   "ops": 85,
+   "requires": [
+    "FNS_ConfigRegistry"
+   ],
+   "access": "preview",
+   "key_available": false,
+   "license": "",
+   "seats": null,
+   "integrates_with": [],
+   "tox_carrier": "own",
+   "cooking": true,
+   "min_td_build": "2025.33070",
+   "hotkeys": [
+    {
+     "keys": "ctrl.shift.a",
+     "op": "FNS_SpaceMaker",
+     "par": "Shortcut"
+    }
+   ],
+   "preview": true,
+   "fits": [
+    "speed",
+    "network"
+   ],
+   "whatsnew": "new, as a preview. Hold Ctrl+Shift+A over the network editor and sweep a rectangle: the operators in the way slide aside while you sweep, each the way the edge of the rectangle met it (come down onto a row and it goes down, come at it from the side and it goes sideways). A row or column moves as one block just far enough to clear the rectangle, pushes only what it would run into, and keeps docked operators with their host. Sweep into an annotation from outside and the whole group moves; start inside one to make room within it, and it grows to keep what it holds. Release to keep the result, Esc to put it back, Ctrl+Z to undo a whole sweep. The rectangle can show as a network box or not at all.",
+   "artifact": {
+    "path": "packaging/dist/FNS_SpaceMaker.tox",
+    "bytes": 170622,
+    "sha256": "35a8ab1596d974779274be9d62ee8da40c29ac19b018c563efc92e8b2578f9d8",
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/FNS_SpaceMaker.tox"
    }
   },
   {
@@ -8176,7 +8318,7 @@
     "path": "packaging/dist/FNS_SwapOps.tox",
     "bytes": 197694,
     "sha256": "c403bdc4fd08aa591e7ea9049a3ae56a657cafd159c2e650c59f9f93f2ad464a",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_SwapOps.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_SwapOps.tox"
    },
    "search": {
     "head": "cases different line mirror operators selected works",
@@ -8246,7 +8388,7 @@
     "path": "packaging/dist/FNS_SwitchOPs.tox",
     "bytes": 134846,
     "sha256": "b67839d17bdedbdeb33c8a1ecbcd8e80107948c2e1d38dcd95cc32da521b60a0",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_SwitchOPs.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_SwitchOPs.tox"
    },
    "search": {
     "head": "active ctrl jump press toggle",
@@ -8315,7 +8457,7 @@
     "path": "packaging/dist/FNS_SwitchTools.tox",
     "bytes": 122254,
     "sha256": "84c6ef347a18f6b2cdbce98765a9ecc19fd15aed66ec94815717cc4e4cc35ab2",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_SwitchTools.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/FNS_SwitchTools.tox"
    },
    "search": {
     "head": "callbacks cooking drive selection",
@@ -8503,11 +8645,11 @@
     "path": "packaging/dist/FNS_TimelineRegistry.tox",
     "bytes": 102878,
     "sha256": "e2b29f6124cdec518595704aaec293022c8964f84179f04ca08edaca02b99e48",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_TimelineRegistry.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_TimelineRegistry.tox"
    },
    "search": {
     "head": "adds api authors background contributed grow host placement python registration stays three unused widgets zone zones",
-    "body": "alongside anchored appears arrives base blocks canonical chrome consumer contribution contributions copy core creep depends disappears displayed drawn existing extensible final fixed fixedheight follow global growth height increment incrementandrestore incremented knowing last later layout load media mirrors mytool names navbar numbers order package panel picks piece play plus promoted publishes rebuilt recomputed reference register registers registerwidget registries reregisters rest restore returns saved scheme select session settles shape ships shown shows small stay stored surface takes taller timelinetools toolbar transparent unclipped underneath unregister unregisterwidget"
+    "body": "alongside anchored appears arrives base blocks canonical chrome consumer contribution contributions copy core creep depends disappears displayed drawn existing extensible final fixed fixedheight follow global growth height increment incrementandrestore incremented knowing last later layout load media mirrors mytool names navbar numbers order package panel picks piece play plus promoted publishes rebuilt recomputed reference register registers registerwidget registries reregisters rest restore returns saved scheme select session settles shape ships shown small stay stored surface takes taller timelinetools toolbar transparent unclipped underneath unregister unregisterwidget"
    }
   },
   {
@@ -8606,7 +8748,7 @@
     "path": "packaging/dist/FNS_TimelineTools.tox",
     "bytes": 404622,
     "sha256": "2c1b692540a632ac93cae762452d978430539c23d2d89ea828b579af4665b218",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/FNS_TimelineTools.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/FNS_TimelineTools.tox"
    }
   },
   {
@@ -8797,7 +8939,7 @@
     "path": "packaging/dist/FNS_ToolbarRegistry.tox",
     "bytes": 92782,
     "sha256": "12737cfd0d6f0a891b1b20f9c6f4afefe9b241803819e0a13acb8038189300b7",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_ToolbarRegistry.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_ToolbarRegistry.tox"
    },
    "search": {
     "head": "arrange authors central drop host hub panel register state",
@@ -8810,7 +8952,7 @@
    "kind": "core",
    "category": "Core",
    "description": "In-place toolkit updates, with settings preserved across the replacement.",
-   "version": "3.2.29",
+   "version": "3.2.30",
    "help_url": "https://functionstore.tools/docs/fns-updater/",
    "surfaces": [],
    "shortcut": "FNS_UPDATER",
@@ -9178,16 +9320,16 @@
      "hidden": true
     }
    ],
-   "whatsnew": "Sign in in the picker, when it takes over a Patreon session this computer already holds, now asks Patreon for your membership right away; it used to keep the session's old answer (up to six hours) so a fresh pledge needed \"I just pledged\". A sign-in or membership check left waiting by a reload of the updater no longer reads \"checking\" forever.",
+   "whatsnew": "an update keeps the parts of a tool that hold your own work (children the tool tags fns_keep, such as the radial menu's wheels), in either config scope. If the update fails, they go back into the restored copy. a fresh install shows signed out and no update result until it checks.",
    "artifact": {
     "path": "packaging/dist/FNS_Updater.tox",
-    "bytes": 225710,
-    "sha256": "5da4e297760a6739c5d0e38ec40cb7a39560c48c7671c6e1fc0f89880bdbea2e",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_Updater.tox"
+    "bytes": 230718,
+    "sha256": "b9c2ddee059ee50f05d5400c205730b1cd3b7ca464454326f5d356b8802ff302",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_Updater.tox"
    },
    "search": {
     "head": "agent changed clicking feature help icon indicator install notes packages release self selfupdate show skill update wiki",
-    "body": "actually adds agents alongside appears appends available beside block border build case chapter claude code coding command commands configs copies copy current custom data download ensure externally fetch file fnstools folder following generated happen hash hotkeys hub idempotent installed landed launch logs machine means methods newer older opens outlined outside owns package pages plain points popup promoted prompt quick quicklaunch reached read readable refresh registries reload replace replaced reported retained roams save saved say sees setting setup shipped ships short shows silences skip small state stay stays store take tells text time toolbar touches turn twice uninstalled usual verifying walks went writes yellow"
+    "body": "actually adds agents alongside appears appends available beside block border build case chapter claude code coding command commands configs copies copy current custom data download ensure externally fetch file fnstools folder following generated happen hash hotkeys hub idempotent installed landed launch logs machine means methods newer older opens outlined outside owns package pages plain points popup promoted prompt quick quicklaunch reached read readable refresh registries reload replace replaced reported retained roams save saved say sees setting setup shipped ships short silences skip small state stay stays store take tells text time toolbar touches turn twice uninstalled usual verifying walks went writes yellow"
    }
   },
   {
@@ -9270,7 +9412,7 @@
     "path": "packaging/dist/FNS_VSCodeTools.tox",
     "bytes": 719320,
     "sha256": "9740dee636b2e1b2ac6d472096b548a75cfe63df8007164207be01c2eee643c2",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/FNS_VSCodeTools.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/FNS_VSCodeTools.tox"
    },
    "search": {
     "head": "alt breakdown choose clear clearing ctrl file leftclick path python rightclick script settings shift ship shipping syncs typing vscode workspace youtube",
@@ -9331,7 +9473,7 @@
     "path": "packaging/dist/InfinityCHOP.tox",
     "bytes": 11374,
     "sha256": "2a90c61f3b126de6194cdd0bb7c9820bac0aaa9127ef17395ec2e14dc8eb3e1f",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/InfinityCHOP.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/InfinityCHOP.tox"
    }
   },
   {
@@ -9384,7 +9526,7 @@
     "path": "packaging/dist/InstanceTrailer.tox",
     "bytes": 11902,
     "sha256": "3f0538bdb08e75b491452c6796d599b8bae88c064b796b4ce16db7fe5c746e06",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/InstanceTrailer.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/InstanceTrailer.tox"
    },
    "search": {
     "head": "drive inputs last output outputs ready sample",
@@ -9397,7 +9539,7 @@
    "kind": "tool",
    "category": "CHOPs & sensing",
    "description": "Picks one player out of a Kinect skeleton stream: whoever stands inside the bounds you set becomes the active player, and their joints ride out as clean channels until they leave.",
-   "version": "1.0.3",
+   "version": "1.0.4",
    "help_url": "https://functionstore.tools/docs/kinectsingleplayer/",
    "surfaces": [],
    "shortcut": "",
@@ -9436,12 +9578,12 @@
      "bounds"
     ]
    },
-   "whatsnew": "",
+   "whatsnew": "no longer cooks every frame without Kinect data (0.16 ms a frame). Its in-range checks no longer force time slicing, so they follow the Kinect stream when one is connected and rest when none is.",
    "artifact": {
     "path": "packaging/dist/KinectSinglePlayer.tox",
-    "bytes": 12414,
-    "sha256": "84fc9369675d1a1d3497162ca240b0b89e7c779d7dc0b9fef23a3b446167fd9a",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/KinectSinglePlayer.tox"
+    "bytes": 12350,
+    "sha256": "20819ef93c8e036a906e4c17c9330c8b2ae72f2ae7dd69464aced5c82a39e901",
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/KinectSinglePlayer.tox"
    },
    "search": {
     "head": "automatic based boundsbased flag handover outactive outputs outsingleplayer selection",
@@ -9502,7 +9644,7 @@
     "path": "packaging/dist/LayerSep3D.tox",
     "bytes": 44070,
     "sha256": "565322900ebb0b87f5111549bbac9210fd0d7fb81139168b6482624293f75eb9",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/LayerSep3D.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/LayerSep3D.tox"
    },
    "search": {
     "head": "chopdriven color curve edges incolor inmask inmix inputs insoftness instanced inthreshold mask outlayers output outputs overrides perlayer separate slice source texture",
@@ -9558,7 +9700,7 @@
     "path": "packaging/dist/LinkOPs.tox",
     "bytes": 12142,
     "sha256": "a614770482e6542dab9d5abcd5c1a3692b815a631bb343feae74c11fffd4234a",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/LinkOPs.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/LinkOPs.tox"
    },
    "search": {
     "head": "automatically constant constantonly constants current leave linking list optionally pattern",
@@ -9571,7 +9713,7 @@
    "kind": "tool",
    "category": "Visual",
    "description": "Draw a mask with the mouse straight onto the image: a panel you paint in, with the mask and the masked image as outputs, a lock and a reset.",
-   "version": "1.0.4",
+   "version": "1.0.5",
    "help_url": "https://functionstore.tools/docs/maskdraw/",
    "surfaces": [],
    "shortcut": "",
@@ -9610,12 +9752,12 @@
      "matte"
     ]
    },
-   "whatsnew": "",
+   "whatsnew": "no longer reads the mouse every frame. A callback that did nothing kept its mouse chain cooking (0.07 ms a frame); it is switched off, which changes nothing you can see.",
    "artifact": {
     "path": "packaging/dist/MaskDraw.tox",
     "bytes": 105358,
-    "sha256": "86838dd1dbf0b2c4d5c287445aa873e724d4f091f567b23e6c8b62ec1589cfa6",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/MaskDraw.tox"
+    "sha256": "a12c8d41c6c87c58fd79bb19b195f3331338270e29fb6909329a11ff9a882f4c",
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/MaskDraw.tox"
    },
    "search": {
     "head": "bar debug display erase finished gestures inputs outmask outmasked save toggles",
@@ -9717,7 +9859,7 @@
     "path": "packaging/dist/midiMapper.tox",
     "bytes": 345422,
     "sha256": "1f9670bf59d392da8ece65f279e5617f5413d6a97be23b6c400bb71d25f6cb44",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/midiMapper.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/midiMapper.tox"
    },
    "search": {
     "head": "across alpha alphamoonbase alt auto autolearn autoreset berlin cmd device drag draganddrop dragdrop dragdropping drop knob leftclick mapping middle middleclick moonbase move new osc par pls projects reset resetmidipls rightclick simple startup stuck",
@@ -9777,7 +9919,7 @@
     "path": "packaging/dist/MoveDetectDir.tox",
     "bytes": 14638,
     "sha256": "56f88d76a361c944cbf8f340ce321238b2d1ebffbd53479656a2e1acb855d63c",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/MoveDetectDir.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/MoveDetectDir.tox"
    },
    "search": {
     "head": "inputs output",
@@ -9834,7 +9976,7 @@
     "path": "packaging/dist/OpenOp.tox",
     "bytes": 9942,
     "sha256": "de6ba42d18550aa0b01b2761aa406e2c8a33dcd9aec3f6455d623b0b8dab1167",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/OpenOp.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/OpenOp.tox"
    },
    "search": {
     "head": "hand windows",
@@ -9847,7 +9989,7 @@
    "kind": "tool",
    "category": "Control & mapping",
    "description": "Map OSC messages to parameters. Mappings are saved into the project folder by design.",
-   "version": "3.2.7",
+   "version": "3.2.8",
    "help_url": "https://functionstore.tools/docs/oscmapper/",
    "surfaces": [
     "hub"
@@ -9938,12 +10080,12 @@
     "ui",
     "osc"
    ],
-   "whatsnew": "",
+   "whatsnew": "the OSC In and OSC Out operators no longer keep the author's network addresses underneath their address expressions. Active and Talkback Active start off, so a new copy neither listens nor sends OSC until you switch them on. Both now stay with the project: switching them in one project no longer switches them in every other project on the machine.",
    "artifact": {
     "path": "packaging/dist/oscMapper.tox",
-    "bytes": 240110,
-    "sha256": "eb7fef37a63f582469a8e6c7b033b4898d04dcbf5658ca04afe232996ac973ae",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/oscMapper.tox"
+    "bytes": 243542,
+    "sha256": "f6b55c8ec622267d00529994ddb2e750fd0c4ed55026a4880384b4b7b4e2b921",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/oscMapper.tox"
    },
    "search": {
     "head": "alpha alphamoonbase based berlin learn learnbased mapping moonbase range simple",
@@ -9956,7 +10098,7 @@
    "kind": "tool",
    "category": "3D and Particles",
    "description": "A 2D particle simulation as a POP loop: a source image emits particles, curl noise and wind effectors steer them with lookup ranges, trails stretch them, and the loop rides out as points for your own render.",
-   "version": "1.0.4",
+   "version": "1.0.5",
    "help_url": "https://functionstore.tools/docs/particles2d-pop/",
    "surfaces": [],
    "shortcut": "",
@@ -9999,12 +10141,12 @@
      "loop"
     ]
    },
-   "whatsnew": "",
+   "whatsnew": "no longer cooks every frame while nothing uses it. Its placeholder source, used when nothing is connected, was an animated 1x1 noise that two of its own parameters pulled every frame (0.26 ms a frame); the placeholder is now still.",
    "artifact": {
     "path": "packaging/dist/Particles2D_POP.tox",
-    "bytes": 15430,
-    "sha256": "bbeda20409dc886a25d601838259697a2c3ae531442f23c33c5a102cdaca7c6b",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/Particles2D_POP.tox"
+    "bytes": 15518,
+    "sha256": "2f436b4534ed33397779e8d027ec2741f7eaae875854f8356cb5ef5179c44bcb",
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/Particles2D_POP.tox"
    },
    "search": {
     "head": "carry effector emit ineffectorcurl ineffectorwind inloopin inputs insource loopin loopout motion outloopout output",
@@ -10017,7 +10159,7 @@
    "kind": "tool",
    "category": "3D and Particles",
    "description": "A GPU particle system driven by images: a thresholded source emits particles, and look, life, turbulence, wind and force fields shape them, each optionally read from its own image, with a feedback pass for trails and one rendered output.",
-   "version": "2.0.2",
+   "version": "2.0.3",
    "help_url": "https://functionstore.tools/docs/particlesgpuultimate/",
    "surfaces": [],
    "shortcut": "",
@@ -10062,12 +10204,6 @@
      "par": "file",
      "kind": "tdinstall",
      "path": "<td>/Samples/Geo/defnull.geo"
-    },
-    {
-     "op": "particlesGpu/base_textures/moviefilein2",
-     "par": "file",
-     "kind": "absolute",
-     "path": "<abs>/images.png"
     }
    ],
    "placement": "none",
@@ -10099,12 +10235,12 @@
      "trails"
     ]
    },
-   "whatsnew": "",
+   "whatsnew": "the Snow texture no longer points at an image on the original author's desktop, which no install ever had; the slot is empty until the tool ships its own snow image.",
    "artifact": {
     "path": "packaging/dist/ParticlesGpuUltimate.tox",
-    "bytes": 516206,
-    "sha256": "c7df6537437dfd353a61c3b38aaecda131a34a5a7265a4a738e29b9d7363b330",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/ParticlesGpuUltimate.tox"
+    "bytes": 516174,
+    "sha256": "174c5054a37b0d1c280c9c3be43650ea4370339351a2554e2f0aafa02f10761e",
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/ParticlesGpuUltimate.tox"
    },
    "search": {
     "head": "col effector emission flow imagedriven incolraw inlifesource inmain inoptflowraw inposraw inputs inturbsource inwindsource main maps optflow optical placed pos raw separate turb",
@@ -10292,7 +10428,7 @@
     "path": "packaging/dist/PasteFromClipboard.tox",
     "bytes": 212278,
     "sha256": "bd6571c6c569032b4b6e56a9a194f2a713a4e2c289034cbd35bc94e8591cbfa2",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/PasteFromClipboard.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/PasteFromClipboard.tox"
    },
    "search": {
     "head": "alt annotate copy directly folder locked save",
@@ -10305,7 +10441,7 @@
    "kind": "tool",
    "category": "Visual",
    "description": "A kaleidoscopic prism: the input rendered through instanced, rotating polygon facets in up to three ring patterns, with softness, a chromatic distortion pass, fit and transform, and a dry/wet mix. An alternative for the Tile TOP and the Mirror TOP.",
-   "version": "1.0.5",
+   "version": "1.0.6",
    "help_url": "https://functionstore.tools/docs/prismtop/",
    "surfaces": [
     "opmenu"
@@ -10367,12 +10503,12 @@
      "chromatic"
     ]
    },
-   "whatsnew": "",
+   "whatsnew": "no longer cooks every frame while nothing uses it. A parameter that only needed the number of instances read it from the animated pattern chain, which kept all 22 of those operators cooking in every copy you placed and were not using (0.77 ms a frame each); it now counts the instances directly, and the prism animates as before whenever its output is used.",
    "artifact": {
     "path": "packaging/dist/PrismTOP.tox",
-    "bytes": 118478,
-    "sha256": "ae712525f0c42471a11a3c46e586234606ad4ede864d9d1b5c3370b7ea776ff6",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/PrismTOP.tox"
+    "bytes": 119982,
+    "sha256": "72d105b4bf01a07ef186cdb902cf030c25d792bb665b7cf71debec9cbfca9496",
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/PrismTOP.tox"
    },
    "search": {
     "head": "edges inputs original output rotation soft stacking swinging underlay",
@@ -10385,7 +10521,7 @@
    "kind": "tool",
    "category": "Network",
    "description": "Bookmark network locations and jump back to them with Ctrl+number. Your marks show on the network editor: a list in a corner you can click, and a pin at each marked spot. Bookmarks stay project-local by design. Based on Alex Guevara's QuickMarks.",
-   "version": "3.2.9",
+   "version": "3.2.10",
    "help_url": "https://functionstore.tools/docs/quickmarks/",
    "surfaces": [
     "overlay"
@@ -10619,12 +10755,12 @@
     "network",
     "speed"
    ],
-   "whatsnew": "Ctrl+number lands on the stored view on the first press. The network editor sometimes takes the switch a few frames late and opened the network at its old view, so a jump could need a second press; the jump now checks its view for a few frames and puts it back if the editor overwrote it.",
+   "whatsnew": "its pins and list stop while FNSTools Perform Mode is on.",
    "artifact": {
     "path": "packaging/dist/QuickMarks.tox",
-    "bytes": 214374,
-    "sha256": "1ae088c7bde042807f474ca6293a7303b209d55379ba543e60e428d8929b9da5",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/QuickMarks.tox"
+    "bytes": 220894,
+    "sha256": "601a77c2e48ac9b132c059b7e7453ce6d7f4240f251f769c67bf9c784d6d8607",
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/QuickMarks.tox"
    },
    "search": {
     "head": "active change clickable hotkey mark order outlines overlay picks pins recall remove save saved spots starts straight switches ten toggle unless",
@@ -10669,7 +10805,7 @@
     "path": "packaging/dist/RealRamp.tox",
     "bytes": 112326,
     "sha256": "563339c037606765bed02c8b9768c799f4b80c451a77fad04013204eeb604d5d",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/RealRamp.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/RealRamp.tox"
    },
    "search": {
     "head": "animated four geometries glsl input inputs mirror output repeat resolution",
@@ -10740,7 +10876,7 @@
     "path": "packaging/dist/SeqMod.tox",
     "bytes": 24622,
     "sha256": "8323a9f6e2090ad3a157f32c0b97e443d04c9e1d24ea4c40a841159164acb0c9",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/SeqMod.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/SeqMod.tox"
    },
    "search": {
     "head": "add callbacks come follow remove tells",
@@ -10752,12 +10888,12 @@
    "title": "SlideShow",
    "kind": "tool",
    "category": "Show & output",
-   "description": "A slideshow of a folder of images: timed or stepped with next and previous, in order or random, with a crossfade between slides and a fitted output resolution.",
-   "version": "1.0.5",
+   "description": "A slideshow of a folder of images and movies: timed or stepped with next and previous, in order or random, moving on when a movie ends, with a crossfade between slides and a fitted output resolution.",
+   "version": "1.0.6",
    "help_url": "https://functionstore.tools/docs/slideshow/",
    "surfaces": [],
    "shortcut": "",
-   "ops": 77,
+   "ops": 100,
    "requires": [],
    "access": "8323905",
    "key_available": false,
@@ -10770,31 +10906,31 @@
    "hotkeys": [],
    "portability": [
     {
-     "op": "Playback/movie0/moviefilein1",
+     "op": "Movies/movie0/moviefilein1",
      "par": "file",
      "kind": "tdinstall",
      "path": "<td>/Samples/Map/Nature/Movie.1.mp4"
     },
     {
-     "op": "Playback/movie1/moviefilein1",
+     "op": "Movies/movie1/moviefilein1",
      "par": "file",
      "kind": "tdinstall",
      "path": "<td>/Samples/Map/Nature/Movie.2.mp4"
     },
     {
-     "op": "Playback/movie2/moviefilein1",
+     "op": "Movies/movie2/moviefilein1",
      "par": "file",
      "kind": "tdinstall",
      "path": "<td>/Samples/Map/Nature/Movie.3.mp4"
     },
     {
-     "op": "Playback/movie3/moviefilein1",
+     "op": "Movies/movie3/moviefilein1",
      "par": "file",
      "kind": "tdinstall",
      "path": "<td>/Samples/Map/Nature/Movie.4.mp4"
     },
     {
-     "op": "Playback/movie4/moviefilein1",
+     "op": "Movies/movie4/moviefilein1",
      "par": "file",
      "kind": "tdinstall",
      "path": "<td>/Samples/Map/Nature/Movie.5.mp4"
@@ -10814,9 +10950,14 @@
      "doc": "Advance to the next slide; called by the timer each period."
     },
     {
+     "name": "OnMovieDone",
+     "signature": "()",
+     "doc": "A movie reached its end (Movies_callbacks): with Auto-Skip on Done, go on."
+    },
+    {
      "name": "OnNext",
      "signature": "()",
-     "doc": "Show the next slide."
+     "doc": "Show the next slide, and restart the period when one is set."
     },
     {
      "name": "OnPeriod",
@@ -10826,12 +10967,12 @@
     {
      "name": "OnPrev",
      "signature": "()",
-     "doc": "Show the previous slide."
+     "doc": "Show the previous slide, and restart the period when one is set."
     },
     {
-     "name": "OnStart",
-     "signature": "()",
-     "doc": "Generate a fresh random play order; called when the show starts."
+     "name": "OnRandom",
+     "signature": "(_val)",
+     "doc": "Random switched: off continues in order from the slide on screen, on starts a fresh shuffle from here."
     }
    ],
    "fits": [
@@ -10845,7 +10986,7 @@
     "op_name": "slideShow",
     "op_label": "Slide Show",
     "op_group": "COMP",
-    "summary": "A slideshow of a folder of images: timed or stepped with next and previous, in order or random, with a crossfade between slides.",
+    "summary": "A slideshow of a folder of images and movies: timed or stepped with next and previous, in order or random, moving on when a movie ends, with a crossfade between slides.",
     "is_filter": false,
     "compatible_types": [
      "TOP"
@@ -10856,19 +10997,21 @@
      "folder",
      "crossfade",
      "playlist",
-     "photos"
+     "photos",
+     "movies",
+     "video"
     ]
    },
-   "whatsnew": "",
+   "whatsnew": "plays movies as well as images, and a new Auto-Skip on Done moves to the next slide when a movie reaches its end. Fixed: with Period at zero a started timer flipped the slides every frame; Prev restarted the timer even with Period at zero; switching Random off jumped to another slide instead of continuing from the one on screen; after a script reload the next step started over from the first slide. The crossfade between slides is kept. a fresh install starts on the first slide.",
    "artifact": {
     "path": "packaging/dist/SlideShow.tox",
-    "bytes": 18942,
-    "sha256": "956983c0baa34805b4deaee1e8a902f1a3fc88cbe0730f7421c5595b05a65466",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/SlideShow.tox"
+    "bytes": 29702,
+    "sha256": "1b8e4b3a3c4eeea684d32b5ca56440121f702e8b9649e1e037dfde8733e2105e",
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/SlideShow.tox"
    },
    "search": {
-    "head": "play playback",
-    "body": "change crossfades crossfading current draws image moves new old period played plays point prev shuffle shuffles step time zero"
+    "head": "auto autoskip move play playback skip",
+    "body": "applies change clips comes crossfades crossfading current draws end image lengths longer moment moves new old period placed played plays point prev reaches sample screen shuffle shuffles soon start step stills time zero"
    }
   },
   {
@@ -10910,7 +11053,7 @@
     "path": "packaging/dist/ThresholdColor.tox",
     "bytes": 109774,
     "sha256": "9bf7712e5cef7e7b27212c0021ce938c26c9188abcc538e75dbd94dffb23ade4",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/ThresholdColor.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/ThresholdColor.tox"
    },
    "search": {
     "head": "colorkeeping inputs instead keeping output white",
@@ -11026,7 +11169,7 @@
     "path": "packaging/dist/TopToMidi.tox",
     "bytes": 115158,
     "sha256": "c6bf22bff87446f2ddaeac43da78202e1c06a9efca3e26b4cd949791df18b325",
-    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.74/TopToMidi.tox"
+    "url": "https://storage.functionstore.tools/fnstools/plus/v3.2.75/TopToMidi.tox"
    },
    "search": {
     "head": "audio dependency idle index inputs install keyboard mapping mingus mode outnotes outputs outsampled outsampledchop outviz preview processing sample sampled sampling scales setup value viz",
@@ -11075,11 +11218,11 @@
     "path": "packaging/dist/ParHoverMIDI_VSN1.tox",
     "bytes": 362816,
     "sha256": "eaab30dc48f656e2408be67c01626426f61ce2feb0b9256f1a64d163c1f064d0",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/ParHoverMIDI_VSN1.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/ParHoverMIDI_VSN1.tox"
    },
    "search": {
     "head": "custom help install pan setup size switching turn updates",
-    "body": "access across afterwards alt builtin buttons checks come configuration connection controllers core current data device docs documentation editor encoders enter everything exclusive externalize features follows foreign full git github governs grid groups hardware hold hovered hub import including input instant integration later leds linked long longpressing mac managed manager mapper note option output package part places port preset pressing primary recall recent recommended recovery relative releases replace reports repository requirements rgb run save select self selfmanaged show shows site slot state store switch system time twist updater updating upstream usb versions works xyz"
+    "body": "access across afterwards alt builtin buttons checks come configuration connection controllers core current data device docs documentation editor encoders enter everything exclusive externalize features follows foreign full git github governs grid groups hardware hold hovered hub import including input instant integration later leds linked long longpressing mac managed manager mapper note option output package part places port preset pressing primary recall recent recommended recovery relative releases replace reports repository requirements rgb run save select self selfmanaged show site slot state store switch system time twist updater updating upstream usb versions works xyz"
    }
   },
   {
@@ -11129,7 +11272,7 @@
     "path": "packaging/dist/TDXMap.tox",
     "bytes": 934742,
     "sha256": "339116402eff423173e944862f7f623c3cede0c1593b6a5ac2328d87a65ac4ba",
-    "url": "https://storage.functionstore.tools/fnstools/v3.2.74/TDXMap.tox"
+    "url": "https://storage.functionstore.tools/fnstools/v3.2.75/TDXMap.tox"
    },
    "search": {
     "head": "base day device drag dragtomap installable installing licence licensing picker product toolkit trial updates",

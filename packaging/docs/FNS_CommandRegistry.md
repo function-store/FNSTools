@@ -4,6 +4,8 @@ summary: 'Collects the commands your tools declare, and TouchDesigner''s own, an
 features:
   - name: Command Registry
     anchor: command-registry
+  - name: How the pieces fit
+    anchor: how-the-command-pieces-fit
   - name: What a command carries
     anchor: what-a-command-carries
   - name: Built-in commands
@@ -75,6 +77,28 @@ The authoring side is a separate package, [CommandKit](/docs/fns-commandkit/),
 and the split is deliberate: a tool needs the kit and *no* registry. Every call a
 tool makes is guarded, so with no registry in the session nothing happens and
 nothing errors.
+
+## How the command pieces fit
+
+Four pieces make the command system, and this registry is the one in the
+middle: tools write into it, palettes read from it, and neither side knows
+the other.
+
+| Piece | Role | Where it lives |
+|---|---|---|
+| **CommandRegistry** (this page) | Collects every command tools declare, plus TouchDesigner's own, and serves one list to whatever can run them | A core package promoted to `/sys`, installed with the toolkit's core; the launcher's companion carries the same copy |
+| [CommandKit](/docs/fns-commandkit/) | Lets any component publish commands: mark a method, or declare a spec | A direct child of your own component. FNS tools carry the same module in their ExtUtils and announce themselves, so they never need the kit |
+| [CommandPalette](/docs/fns-commandpalette/) | A consumer inside TouchDesigner: a hotkey, a ranked list, Enter runs the command | Installed like any tool |
+| [TDX Launcher Ultra](https://launcher.functionstore.xyz) | A consumer outside TouchDesigner: its tray palette lists the same commands under `>` and `?` and runs them in the session you summoned it over | A separate desktop app with its own releases |
+
+A project can hold any subset. A tool alone announces into nothing and
+works as before; the registry alone serves the built-ins to nobody; a palette
+alone opens with no tool commands to list. The registry reaches a project two
+ways, as this core package and inside the launcher's companion, and a project
+with both sees a single registry, since the newer copy wins and the other is
+set aside. Favourites, hidden commands and presets are one machine-wide file
+that both consumers read and write, keyed by tool name and command id, so
+curation made in one shows in the other.
 
 ## What a command carries
 
