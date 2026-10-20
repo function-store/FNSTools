@@ -16,6 +16,14 @@ A coding agent that opens a project with FNSTools in it sees a container full of
 
 Everything on a package page is generated from the shipped build, so it describes the tools you have and nothing else. A release is refused when the authored pages name a shortcut or a method the build does not carry.
 
+## Onboard your agent from here
+
+Paste this line into your coding agent. It fetches the setup instructions, installs the skill into the project you are in and reports where it went. TouchDesigner does not need to be open, and FNSTools does not need to be installed yet.
+
+<div class="copyline"><code id="agent-prompt">Fetch and execute the instructions at https://functionstore.tools/agent-setup/prompt.md to set me up for FNSTools</code><button type="button" class="btn btn-secondary copy-btn" data-copy-from="agent-prompt">Copy</button></div>
+
+The instructions are published at [agent-setup/prompt.md](/agent-setup/prompt.md). They install the same folder the command below does, verified against the release manifest, and they name no release: the manifest carries it, so the line above stays the same across updates.
+
 ## Install it in a project
 
 1. Install FNSTools, as in [Getting started](/docs/guides/getting-started/). The skill arrives with the toolkit: the store refresh places it in your user palette, beside the operator family.

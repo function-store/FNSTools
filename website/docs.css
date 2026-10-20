@@ -888,3 +888,20 @@ span.fl-name { color: var(--text); }
   .fl-feats li { grid-template-columns: minmax(0, 1fr); }
   .fl-cat { scroll-margin-top: 230px; }
 }
+
+/* One line to copy (the agent prompt on the agent-skill guide): the text
+   in a code box, the button beside it; stacked under 600px. */
+.docs-body .copyline {
+  display: flex; align-items: stretch; gap: 10px; margin: 14px 0 18px;
+}
+.docs-body .copyline code {
+  flex: 1; display: block; padding: 10px 12px; border-radius: 8px;
+  background: var(--bg-deep); border: 1px solid var(--border); color: var(--text);
+  font-size: 13px; line-height: 1.5; white-space: normal; word-break: break-word;
+  user-select: all;
+}
+.docs-body .copyline .btn { align-self: center; white-space: nowrap; }
+@media (max-width: 600px) {
+  .docs-body .copyline { flex-direction: column; }
+  .docs-body .copyline .btn { align-self: flex-start; }
+}

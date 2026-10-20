@@ -1410,7 +1410,7 @@
    ],
    "access": "8323905"
   },
-  "pandora": {
+  "PandorasTox": {
    "category": "Miscellaneous",
    "description": "A prank in a tox. One pulse swaps the desktop wallpaper for the TouchDesigner banana and keeps the old one safe, another puts it back, and a toggle quacks on every mouse click.",
    "preview": true

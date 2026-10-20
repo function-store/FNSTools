@@ -73,3 +73,44 @@
   if (mq.addEventListener) mq.addEventListener('change', onChange);
   else if (mq.addListener) mq.addListener(onChange);
 })();
+
+// Copy buttons: a .copy-btn copies the text of the element its
+// data-copy-from names (the one-line agent prompt on the agent-skill
+// guide). The button is the only affordance; the text stays selectable
+// for a reader whose browser refuses the clipboard call.
+(function () {
+  var btns = [].slice.call(document.querySelectorAll('.copy-btn[data-copy-from]'));
+  btns.forEach(function (btn) {
+    var src = document.getElementById(btn.getAttribute('data-copy-from'));
+    if (!src) return;
+    var label = btn.textContent;
+    function show(text, ms) {
+      btn.textContent = text;
+      setTimeout(function () { btn.textContent = label; }, ms);
+    }
+    // execCommand is the path for a browser that has no clipboard API or
+    // refuses the call (an embedded pane, a page without a user gesture)
+    function fallback(text) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      document.body.removeChild(ta);
+      if (ok) show('Copied', 1600); else show('Select and copy', 2400);
+    }
+    btn.addEventListener('click', function () {
+      var text = src.textContent.trim();
+      if (!navigator.clipboard) { fallback(text); return; }
+      navigator.clipboard.writeText(text).then(function () {
+        show('Copied', 1600);
+      }, function () {
+        fallback(text);
+      });
+    });
+  });
+})();

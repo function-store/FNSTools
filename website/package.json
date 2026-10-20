@@ -9,7 +9,8 @@
     "pages": "node tools/build-site.mjs",
     "search": "node -e \"require('fs').rmSync('docs/pagefind',{recursive:true,force:true})\" && pagefind --site docs --output-subdir pagefind",
     "serve": "npx --yes serve .",
-    "cms": "node tools/cms.mjs"
+    "cms": "node tools/cms.mjs",
+    "test:chat": "node tools/test-chat.mjs"
   },
   "devDependencies": {
     "gray-matter": "^4.0.3",
@@ -17,5 +18,9 @@
     "markdown-it": "^14.1.0",
     "markdown-it-anchor": "^9.2.0",
     "pagefind": "^1.1.1"
+  },
+  "dependencies": {
+    "ai": "^7.0.146",
+    "zod": "^4.6.7"
   }
 }

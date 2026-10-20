@@ -2449,6 +2449,61 @@ if (fs.existsSync(cfgSrc)) {
   fs.writeFileSync(FEED, JSON.stringify(feed, null, 1) + '\n');
   console.log(`built /catalog.json (${tools.length} tools, ${categoriesOut.length} categories, `
     + `${feed.family.length} family, ${feed.guides.length} guides)`);
+
+  // ------------------------------------- api/_data/chat.json — the tool finder
+  //
+  // What the /get chatbot (api/chat.js) is allowed to know: the feed's tools,
+  // so previews are already gone, plus each one's doc split into sections for
+  // its searchDocs/readDoc tools. Imported by the function, so the bundler
+  // carries it; gitignored by its own folder's .gitignore. docs/PickerChatbot.md
+  const CHAT = path.join(WEB, 'api', '_data', 'chat.json');
+  const plain = (s) => String(s || '')
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+  const sectionsOf = (body) => {
+    const out = [];
+    let cur = { heading: 'Overview', text: '' };
+    for (const line of String(body).split('\n')) {
+      const m = /^#{2,3}\s+(.*)$/.exec(line);
+      if (m) {
+        if (plain(cur.text)) out.push(cur);
+        cur = { heading: m[1].trim(), text: '' };
+      } else {
+        cur.text += line + '\n';
+      }
+    }
+    if (plain(cur.text)) out.push(cur);
+    return out.map((s) => ({ heading: s.heading, text: plain(s.text) }));
+  };
+  const chat = {
+    generated: feed.generated,
+    tools: tools.map((t) => {
+      const p = pages.find((x) => x.name === t.name);
+      const meta = (p && p.meta) || {};
+      return {
+        name: t.name,
+        title: t.title,
+        category: t.category,
+        access: t.access,
+        tier: t.tier,
+        description: t.description,
+        fits: (curated[t.name] && curated[t.name].fits) || [],
+        url: t.url,
+        features: (meta.feature_list || []).map((f) => `${f.name}: ${f.does}`),
+        hotkeys: (meta.hotkeys || []).map((h) => `${h.keys}: ${h.does}`),
+        sections: p ? sectionsOf(p.body) : [],
+      };
+    }),
+  };
+  fs.mkdirSync(path.dirname(CHAT), { recursive: true });
+  fs.writeFileSync(CHAT, JSON.stringify(chat) + '\n');
+  console.log(`built api/_data/chat.json (${chat.tools.length} tools, `
+    + `${Math.round(fs.statSync(CHAT).size / 1024)} KB)`);
 }
 
 // ------------------------------------------- /sitemap.xml and /robots.txt

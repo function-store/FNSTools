@@ -1093,6 +1093,9 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
   .inst h2 { margin: 0 0 6px; font-size: 22px; font-weight: 700; letter-spacing: -0.015em; }
   body.app .inst h2 { font-size: 19px; }
   .inst-hint { margin: 0 0 14px; font-size: 13.5px; color: var(--text-dim); line-height: 1.6; }
+  .inst-agent { margin-top: 14px; }
+  .inst-agent code { display: block; margin: 8px 0; padding: 8px 10px; border-radius: 8px; background: var(--bg-deep); border: 1px solid var(--border); color: var(--text); white-space: normal; word-break: break-word; user-select: all; }
+  .inst-agent .btn { padding: 4px 12px; font-size: 12.5px; }
   .inst pre.out { max-height: none; }
   .inst-report { margin-top: 4px; }
   .inst-wait { margin-top: 16px; }
@@ -1310,6 +1313,10 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
       <h2 id="insttitle">Install plan</h2>
       <p class="inst-hint" id="insthint"></p>
       <pre class="out" id="instout"></pre>
+      <!-- site only (window.FNS_SITE): the one line that onboards a coding
+           agent, beside the paste script; the Hub inside TouchDesigner has
+           the Install agent skill command for this -->
+      <p class="inst-hint inst-agent" id="instagent" hidden>Using a coding agent? Paste this into it and it installs the FNSTools agent skill into your project: <code id="instagentline">Fetch and execute the instructions at https://functionstore.tools/agent-setup/prompt.md to set me up for FNSTools</code> <button type="button" class="btn btn-secondary" id="instagentcopy">Copy</button></p>
       <div class="dlg-report inst-report" id="instreport" hidden></div>
       <!-- the picks the account cannot install yet: not in the plan, still
            shown at the last step with the route that unlocks them -->
@@ -4375,6 +4382,7 @@ function fnsBoot() {
     document.getElementById('instinstall').hidden = !((state === 'plan' && opts.installable) || state === 'failed');
     document.getElementById('instinstall').textContent = state === 'failed' ? 'Install again' : 'Install';
     document.getElementById('instcopy').hidden = state !== 'script';
+    document.getElementById('instagent').hidden = !(window.FNS_SITE && state === 'script');
     document.getElementById('instsave').hidden = !(state === 'script' && !served && !window.FNS_SITE);
     document.getElementById('instopen').hidden = state !== 'done';
     document.getElementById('instopen').disabled = false;
@@ -4529,6 +4537,10 @@ function fnsBoot() {
   document.getElementById('instcopy').addEventListener('click', function () {
     toClipboard(document.getElementById('instout').textContent,
                 document.getElementById('instcopy'));
+  });
+  document.getElementById('instagentcopy').addEventListener('click', function () {
+    toClipboard(document.getElementById('instagentline').textContent.trim(),
+                document.getElementById('instagentcopy'));
   });
   // The account line, once: it changes only across a sign-in, which ends in
   // a page reload anyway.
