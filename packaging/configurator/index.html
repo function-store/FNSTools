@@ -4150,7 +4150,7 @@ function fnsBoot() {
       askBubble('bot err', msg);
     }
     fetch(CHAT_URL, {method: 'POST', headers: {'Content-Type': 'application/json'},
-                     body: JSON.stringify({messages: ask.messages, access: askAccess()})})
+                     body: JSON.stringify({messages: ask.messages, access: askAccess(), shown: ask.names})})
       .then(function (r) { return r.json().catch(function () { return {}; }); })
       .then(function (d) {
         if (!d || d.error || typeof d.reply !== 'string') {
@@ -4159,8 +4159,9 @@ function fnsBoot() {
         }
         done();
         var picks = (d.picks || []).filter(function (r) { return byName[r.name]; });
-        ask.messages.push({role: 'assistant', content: d.reply
-          + (picks.length ? '\n(Picked: ' + picks.map(function (r) { return r.name; }).join(', ') + ')' : '')});
+        // the history stays plain dialogue; what was offered travels as
+        // `shown` (a picks line here was copied back as a plain answer)
+        ask.messages.push({role: 'assistant', content: d.reply});
         askBubble('bot', d.reply);
         if (!picks.length) return;
         var box = mk('div', 'ask-picks');

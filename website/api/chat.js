@@ -57,11 +57,11 @@ export async function POST(request) {
   try {
     body = await request.json();
   } catch {
-    return json(400, { error: 'Send a JSON body: {messages, access}.' }, origin);
+    return json(400, { error: 'Send a JSON body: {messages, access, shown}.' }, origin);
   }
   const access = body && body.access === 'patreon' ? 'patreon' : 'free';
   try {
-    const out = await answer({ messages: body && body.messages, access },
+    const out = await answer({ messages: body && body.messages, access, shown: body && body.shown },
       { model, abortSignal: request.signal });
     if (out.error) return json(400, out, origin);
     return json(200, out, origin);

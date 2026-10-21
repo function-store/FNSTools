@@ -141,21 +141,47 @@ function catalogLines() {
 
 const CATALOG = catalogLines();
 
-/** The system instructions; `access` is what this reader can install. */
-export function instructions(access) {
+/**
+ * The system instructions. `access` is what this reader can install;
+ * `shown` names the tools already offered in this conversation, sent by the
+ * page as a list so the history itself stays plain dialogue (picks written
+ * into an assistant turn were copied back as a plain-text answer).
+ */
+export function instructions(access, shown = []) {
   const can = access === 'patreon'
     ? 'This reader is a Patreon supporter and can install Patreon tools.'
     : 'This reader can install free tools. Patreon tools need a Patreon membership.';
+  const already = shown.length
+    ? `
+
+Already offered in this conversation: ${shown.join(', ')}. When the reader asks for more,
+pick other tools that still fit; do not offer these again unless they ask about one.`
+    : '';
   return `You are the tool finder on the FNSTools website. FNSTools is a toolkit of
 add-on tools for TouchDesigner. A reader tells you what they struggle with or
 want to do in TouchDesigner, and you pick the FNSTools tools that help.
+
+First, before anything else, decide whether the reader's latest message
+names a concrete problem or task ("my timeline takes too much room", "I want
+to map my MIDI controller") or only a broad area of work ("I do live shows",
+"I make generative art", "I build installations", "make TouchDesigner
+better"). For a broad area, do not search and do not pick: call recommend
+with no picks and a reply that asks which part they mean, offering three or
+four concrete parts the catalog covers. For live shows that could be:
+controlling parameters from MIDI or OSC, sending output to projectors or
+screens, switching scenes or inputs, keeping the show running smoothly. If
+your previous turn already asked such a question, pick from their answer.
 
 Rules:
 - Only recommend tools from the catalog below, by their exact name. Never invent a tool.
 - Before recommending a tool for anything its one-line description does not
   already say, call readDoc on it. Use searchDocs to find candidates.
-- Give your answer by calling recommend once, with each pick's reason written
-  in the reader's own terms and taken from the tool's doc. Keep the reply short.
+- Every turn ends with exactly one recommend call: picks, a clarifying
+  question, a how-to answer and a decline all go through it (with picks
+  empty when there are none). Never answer in plain text.
+- Each pick's reason is written in the reader's own terms and taken from the
+  tool's doc. Keep the reply to two or three sentences; the picks are shown
+  under it, so do not list them again in the reply.
 - A pick must directly do what the reader asked for. Sharing a word with the
   request (camera, sequence, colour) is not a fit. A tool that only helps
   around the edges is not a pick: leave it out. Fewer, exact picks beat a long list.
@@ -165,7 +191,7 @@ Rules:
   recommend with no picks, and suggest the community page
   https://functionstore.tools/community/ or the Derivative forum.
 - You may read at most ${LIMITS.reads} docs; then recommend.
-- Ask at most one clarifying question, and only when the request is too vague to pick anything.
+- Ask at most one clarifying question in a row.
 - A how-to question about an FNSTools tool gets a few lines taken from that
   tool's doc (call readDoc) and a link to its docs page. Never answer from memory.
 - You do not give general TouchDesigner help. For questions about
@@ -176,7 +202,27 @@ Rules:
   name (FNS_BorderlessTD); the catalog name is only for tool calls.
 
 Catalog (name | title | category | access | description | tags):
-${CATALOG}`;
+${CATALOG}${already}`;
+}
+
+/** Strips the markdown a model writes anyway: emphasis, backticks, bullets. */
+export function plainReply(text) {
+  return String(text || '')
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/`([^`]*)`/g, '$1')
+    .replace(/^[ \t]*[*-][ \t]+/gm, '- ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+/** Keeps the names of tools already offered that the catalog knows. */
+function shownTitles(shown) {
+  const out = [];
+  for (const n of (Array.isArray(shown) ? shown : []).slice(0, 40)) {
+    const t = findTool(n);
+    if (t && !out.includes(t.name)) out.push(t.name);
+  }
+  return out;
 }
 
 /** Trims a conversation to the caps, newest turns kept. */
@@ -200,64 +246,90 @@ export function clampMessages(messages) {
  * Answers one turn. Returns {reply, picks, dropped, read}: picks are
  * catalog-validated, read names the docs the model opened.
  */
-export async function answer({ messages, access }, { model, abortSignal } = {}) {
+export async function answer({ messages, access, shown }, { model, abortSignal } = {}) {
   const msgs = clampMessages(messages);
   if (!msgs.length || msgs[msgs.length - 1].role !== 'user') {
     return { error: 'The conversation must end with a message from you.' };
   }
   const read = [];
+  const already = shownTitles(shown);
   let final = null;
   let reads = 0;
-  const result = await generateText({
+  const tools = {
+    searchDocs: tool({
+      description: 'Keyword search across every FNSTools tool doc. Returns matching tools and sections.',
+      inputSchema: z.object({ query: z.string().describe('Words describing the problem or feature') }),
+      execute: async ({ query }) => searchDocs(query),
+    }),
+    readDoc: tool({
+      description: 'Read one FNSTools tool\'s documentation by its catalog name.',
+      inputSchema: z.object({ name: z.string().describe('Exact catalog name, e.g. FNS_BorderlessTD') }),
+      execute: async ({ name }) => {
+        reads += 1;
+        if (reads > LIMITS.reads) return { error: `Read limit reached (${LIMITS.reads}). Call recommend now.` };
+        const d = readDoc(name);
+        if (!d.error) read.push(d.name);
+        return d;
+      },
+    }),
+    recommend: tool({
+      description: 'Give the final answer: a short reply and the picked tools. Call once, last.',
+      inputSchema: z.object({
+        reply: z.string().describe('A short answer to the reader, plain sentences'),
+        picks: z.array(z.object({
+          name: z.string().describe('Exact catalog name'),
+          why: z.string().describe('One sentence in the reader\'s terms'),
+        })).describe('Best first; empty when nothing fits or when only answering a question'),
+      }),
+      execute: async ({ reply, picks }) => {
+        // Never offer again what this conversation already offered: the
+        // instructions ask, and the model still repeats (TDXMap twice).
+        const v = validatePicks((picks || []).filter((p) => {
+          const t = findTool(p && p.name);
+          return !(t && already.includes(t.name));
+        }));
+        final = { reply: String(reply || '').trim(), ...v };
+        return { accepted: v.accepted.map((p) => p.name), dropped: v.dropped };
+      },
+    }),
+  };
+  const base = {
     model,
-    instructions: instructions(access),
+    instructions: instructions(access, already),
     messages: msgs,
     maxOutputTokens: LIMITS.outputTokens,
     timeout: LIMITS.timeoutMs,
     abortSignal,
     reasoning: 'low',
-    stopWhen: [hasToolCall('recommend'), isStepCount(LIMITS.steps)],
-    // The last step can only answer: a model still searching when the steps
-    // run out would otherwise end with no picks and no reply.
-    prepareStep: ({ stepNumber }) => (stepNumber >= LIMITS.steps - 1
-      ? { toolChoice: { type: 'tool', toolName: 'recommend' }, activeTools: ['recommend'] }
-      : undefined),
-    tools: {
-      searchDocs: tool({
-        description: 'Keyword search across every FNSTools tool doc. Returns matching tools and sections.',
-        inputSchema: z.object({ query: z.string().describe('Words describing the problem or feature') }),
-        execute: async ({ query }) => searchDocs(query),
-      }),
-      readDoc: tool({
-        description: 'Read one FNSTools tool\'s documentation by its catalog name.',
-        inputSchema: z.object({ name: z.string().describe('Exact catalog name, e.g. FNS_BorderlessTD') }),
-        execute: async ({ name }) => {
-          reads += 1;
-          if (reads > LIMITS.reads) return { error: `Read limit reached (${LIMITS.reads}). Call recommend now.` };
-          const d = readDoc(name);
-          if (!d.error) read.push(d.name);
-          return d;
-        },
-      }),
-      recommend: tool({
-        description: 'Give the final answer: a short reply and the picked tools. Call once, last.',
-        inputSchema: z.object({
-          reply: z.string().describe('A short answer to the reader, plain sentences'),
-          picks: z.array(z.object({
-            name: z.string().describe('Exact catalog name'),
-            why: z.string().describe('One sentence in the reader\'s terms'),
-          })).describe('Best first; empty when nothing fits or when only answering a question'),
-        }),
-        execute: async ({ reply, picks }) => {
-          const v = validatePicks(picks);
-          final = { reply: String(reply || '').trim(), ...v };
-          return { accepted: v.accepted.map((p) => p.name), dropped: v.dropped };
-        },
-      }),
-    },
-  });
-  if (final) {
-    return { reply: final.reply || result.text.trim(), picks: final.accepted, dropped: final.dropped, read };
+    tools,
+  };
+  let result;
+  try {
+    result = await generateText({
+      ...base,
+      // Every step calls a tool, so every turn ends in recommend: a turn
+      // answered in plain text draws no rows on the page.
+      toolChoice: 'required',
+      stopWhen: [hasToolCall('recommend'), isStepCount(LIMITS.steps)],
+      // The last step can only answer: a model still searching when the
+      // steps run out would otherwise end with no picks and no reply.
+      prepareStep: ({ stepNumber }) => (stepNumber >= LIMITS.steps - 1
+        ? { toolChoice: { type: 'tool', toolName: 'recommend' }, activeTools: ['recommend'] }
+        : undefined),
+    });
+  } catch (e) {
+    // A model that answers in text anyway makes the SDK throw on the
+    // required tool choice. Ask once more, with recommend the only option.
+    if (final || !/tool choice was required|did not contain a (tool call|call to the required tool)/i.test(String(e && e.message))) throw e;
+    result = await generateText({
+      ...base,
+      toolChoice: { type: 'tool', toolName: 'recommend' },
+      activeTools: ['recommend'],
+      stopWhen: isStepCount(1),
+    });
   }
-  return { reply: result.text.trim(), picks: [], dropped: [], read };
+  if (final) {
+    return { reply: plainReply(final.reply || result.text), picks: final.accepted, dropped: final.dropped, read };
+  }
+  return { reply: plainReply(result.text), picks: [], dropped: [], read };
 }
