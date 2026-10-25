@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "release": "v3.2.75",
+ "release": "v3.2.76",
  "td_build": "2025.33070",
  "packages": {
   "ChopBank": [
@@ -12554,7 +12554,7 @@
     "label": "Volume",
     "style": "Float",
     "help": "TouchDesigner's overall output volume, 0 to 1. This is the application-wide level, not a per-operator one.",
-    "default": 0.0,
+    "default": 1.0,
     "page": "Custom"
    },
    {
@@ -23831,6 +23831,280 @@
     "page": "Repositorie"
    }
   ],
+  "PandorasTox": [
+   {
+    "name": "Active",
+    "label": "Quack On Click",
+    "style": "Toggle",
+    "help": "On, every mouse click anywhere on this computer plays the quack, whether or not TouchDesigner has focus. Off by default, and nothing listens while it is off.",
+    "default": false,
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Quackfile",
+    "label": "Quack File",
+    "style": "File",
+    "help": "Your own sound for the click (.wav, .mp3, .aif, .m4a). Empty plays the built-in quack, which the tool synthesizes once into its palette folder.",
+    "default": "",
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Volume",
+    "label": "Volume",
+    "style": "Float",
+    "help": "Playback volume of the quack. 0 is silent, 1 is the file as recorded.",
+    "default": 0.8,
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Randomspeed",
+    "label": "Random Speed",
+    "style": "Toggle",
+    "help": "Every quack plays at a speed of its own, picked between Speed Min and Speed Max, so the pitch wanders from click to click. Off plays the file as it is.",
+    "default": true,
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Speedmin",
+    "label": "Speed Min",
+    "style": "Float",
+    "help": "The slowest, deepest a random quack can be. 1 is the file as recorded, 0.5 an octave down.",
+    "default": 0.7,
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Speedmax",
+    "label": "Speed Max",
+    "style": "Float",
+    "help": "The fastest, highest a random quack can be. 2 is an octave up.",
+    "default": 1.6,
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Quacknow",
+    "label": "Quack Now",
+    "style": "Pulse",
+    "help": "Play the quack once, to hear what a click will do.",
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Gobananas",
+    "label": "Go Bananas",
+    "style": "Pulse",
+    "help": "Make TouchDesigner's banana the desktop wallpaper, laid out per Banana Style. The wallpaper and style in use are backed up first, once, so Restore Wallpaper can undo it. Windows only.",
+    "section": true,
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Wallpaperstyle",
+    "label": "Banana Style",
+    "style": "Menu",
+    "help": "How Windows lays the 1280 by 720 banana over the desktop. Fill crops it to the screen, Fit letterboxes it, Stretch distorts it, Tile repeats it, Center shows it at its own size, Span stretches one banana across every monitor.",
+    "default": "fill",
+    "menu": [
+     {
+      "name": "fill",
+      "label": "Fill"
+     },
+     {
+      "name": "fit",
+      "label": "Fit"
+     },
+     {
+      "name": "stretch",
+      "label": "Stretch"
+     },
+     {
+      "name": "tile",
+      "label": "Tile"
+     },
+     {
+      "name": "center",
+      "label": "Center"
+     },
+     {
+      "name": "span",
+      "label": "Span"
+     }
+    ],
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Restorewallpaper",
+    "label": "Restore Wallpaper",
+    "style": "Pulse",
+    "help": "Put back the wallpaper and style Go Bananas backed up, then forget the backup. Does nothing when there is no backup.",
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Backedup",
+    "label": "Backed Up Wallpaper",
+    "style": "Str",
+    "help": "What Restore Wallpaper brings back: the wallpaper that was in use when Go Bananas ran, or empty when nothing is backed up. Read-only, set by the tool.",
+    "default": "",
+    "readonly": true,
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Scramblecolors",
+    "label": "Scramble UI Colors",
+    "style": "Pulse",
+    "help": "Give every one of TouchDesigner's UI colors a new value, per Color Scheme. The colors in use are backed up first, once, so Restore UI Colors can undo it. Scrambling again starts from the backed-up colors, so the chaos never compounds.",
+    "section": true,
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Colorscheme",
+    "label": "Color Scheme",
+    "style": "Menu",
+    "help": "Random gives each color any value at all. Banana keeps each color's lightness and paints it banana yellow, so the UI stays readable and entirely wrong. Hue Shift turns every hue by one random amount and keeps lightness and saturation.",
+    "default": "random",
+    "menu": [
+     {
+      "name": "random",
+      "label": "Random"
+     },
+     {
+      "name": "banana",
+      "label": "Banana"
+     },
+     {
+      "name": "hueshift",
+      "label": "Hue Shift"
+     }
+    ],
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Restorecolors",
+    "label": "Restore UI Colors",
+    "style": "Pulse",
+    "help": "Put back every UI color Scramble UI Colors backed up, then forget the backup. Does nothing when there is no backup.",
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Colorsbackedup",
+    "label": "Backed Up Colors",
+    "style": "Str",
+    "help": "How many UI colors Restore UI Colors brings back and when they were saved, or empty when nothing is backed up. Read-only, set by the tool.",
+    "default": "",
+    "readonly": true,
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Scrambleops",
+    "label": "Scramble Operators",
+    "style": "Pulse",
+    "help": "Fly every operator in the network you are looking at to a random spot, at a random size. Positions, sizes and colors are backed up first, once per network, so Restore Operators can undo it. Docked operators stay with their hosts.",
+    "section": true,
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Bananaops",
+    "label": "Assemble A Banana",
+    "style": "Pulse",
+    "help": "Fly the operators of the network you are looking at into the shape of a banana and paint them yellow. Backed up the same way as Scramble Operators.",
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Flightseconds",
+    "label": "Flight Seconds",
+    "style": "Float",
+    "help": "How long a scramble, a banana or a restore spends in the air. The operators swerve and swell on the way.",
+    "default": 2.0,
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Restoreops",
+    "label": "Restore Operators",
+    "style": "Pulse",
+    "help": "Fly every backed-up operator back to where it was, at its old size and color, then forget the backup. Does nothing when there is no backup.",
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Opsbackedup",
+    "label": "Backed Up Operators",
+    "style": "Str",
+    "help": "How many operators Restore Operators brings back, in how many networks, or empty when nothing is backed up. Read-only, set by the tool.",
+    "default": "",
+    "readonly": true,
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Shyops",
+    "label": "Shy Operators",
+    "style": "Toggle",
+    "help": "On, the operator under the cursor and its neighbours within Shy Radius hide (their expose flag goes off) and come back once the cursor has moved Shy Radius away. This tool, the toolkit root and TouchDesigner's own networks are never touched, so it can always be turned off. Off by default; pauses in Perform Mode.",
+    "default": false,
+    "section": true,
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Shyradius",
+    "label": "Shy Radius",
+    "style": "Int",
+    "help": "In screen pixels: how far around the operator under the cursor its neighbours hide, and how far the cursor must travel before a hidden operator dares to come back.",
+    "default": 250,
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Unhideops",
+    "label": "Show Shy Operators",
+    "style": "Pulse",
+    "help": "Bring back every operator Shy Operators has hidden, right now. Turning Shy Operators off does the same.",
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Shyhidden",
+    "label": "Hiding Right Now",
+    "style": "Str",
+    "help": "How many operators are hidden by Shy Operators at this moment. Read-only, set by the tool.",
+    "default": "",
+    "readonly": true,
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Wallpaperonstart",
+    "label": "Go Bananas On Start",
+    "style": "Toggle",
+    "help": "When the project opens, or this tool is created in one, Go Bananas runs by itself a couple of seconds in. Save it on in the project you are pranking. The shipped copy arrives with it off.",
+    "default": false,
+    "section": true,
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Colorsonstart",
+    "label": "Scramble Colors On Start",
+    "style": "Toggle",
+    "help": "When the project opens, or this tool is created in one, Scramble UI Colors runs by itself, per Color Scheme. The shipped copy arrives with it off.",
+    "default": false,
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Scrambleopsonstart",
+    "label": "Scramble Operators On Start",
+    "style": "Toggle",
+    "help": "When the project opens, or this tool is created in one, Scramble Operators runs on the network that is open at that moment. The shipped copy arrives with it off.",
+    "default": false,
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Bananaopsonstart",
+    "label": "Assemble Banana On Start",
+    "style": "Toggle",
+    "help": "When the project opens, or this tool is created in one, Assemble A Banana runs on the network that is open at that moment. The shipped copy arrives with it off.",
+    "default": false,
+    "page": "PandorasTox"
+   },
+   {
+    "name": "Undoonsave",
+    "label": "Undo Before Save",
+    "style": "Toggle",
+    "help": "Right before the project is saved, every prank is undone at once: operators fly home instantly and are shown again, the UI colors and the wallpaper come back. The saved file never carries a prank; the On Start toggles bring it back on the next open. Quack On Click and Shy Operators keep their toggles, so they resume when the saved project is opened.",
+    "default": true,
+    "page": "PandorasTox"
+   }
+  ],
   "Particles2D_POP": [
    {
     "name": "Particles",
@@ -28574,6 +28848,7 @@
   "oscMapper": [
    "hub"
   ],
+  "PandorasTox": [],
   "Particles2D_POP": [],
   "ParticlesGpuUltimate": [],
   "PasteFromClipboard": [],
@@ -29321,7 +29596,7 @@
    "label": "Package Version",
    "style": "Str",
    "help": "The package version the FNS updater compares against the release manifest.",
-   "default": "1.0.4"
+   "default": "1.0.5"
   },
   {
    "name": "Author",

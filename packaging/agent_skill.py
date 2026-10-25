@@ -306,6 +306,10 @@ def ParameterLines(name, parameters):
         menu = [m for m in (p.get('menu') or []) if isinstance(m, dict) and m.get('name')]
         if menu:
             head += ', menu %s' % ', '.join(_code(str(m['name'])) for m in menu)
+        elif p.get('menu_source') == 'machine':
+            # build_manifest.MACHINE_MENU_PARS: the items are the user's own
+            # network interfaces or audio devices, read when the tool runs
+            head += ', menu read from the computer it runs on'
         help_ = (p.get('help') or '').strip()
         lines.append(head + (': ' + help_ if help_ else ''))
     while lines and lines[0] == '':

@@ -79,6 +79,8 @@ class _OverlayApi:
 				'panel_path': info.get('panel_path', ''),
 			}
 		for name, spec in self._widgets().items():
+			if spec.get('anchor') == 'at':
+				continue	# opened at a point for a moment (a radial menu): nothing to arrange
 			out[WIDGET + name] = {
 				'kind': 'widget', 'canonical': name,
 				'display': '1' if spec.get('shown', True) else '0',

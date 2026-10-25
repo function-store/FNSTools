@@ -29,8 +29,10 @@ import hljsPython from 'highlight.js/lib/languages/python';
 import hljsJavascript from 'highlight.js/lib/languages/javascript';
 import hljsBash from 'highlight.js/lib/languages/bash';
 import hljsJson from 'highlight.js/lib/languages/json';
+import hljsGlsl from 'highlight.js/lib/languages/glsl';
 
 hljs.registerLanguage('python', hljsPython);
+hljs.registerLanguage('glsl', hljsGlsl);
 hljs.registerLanguage('javascript', hljsJavascript);
 hljs.registerLanguage('js', hljsJavascript);
 hljs.registerLanguage('bash', hljsBash);
@@ -54,7 +56,6 @@ const GH = 'https://github.com/function-store/FunctionStore_tools';
 const PATREON = 'https://patreon.com/function_store';
 // Rolling pointer published by packaging/publish.py; base_url in manifest.json.
 const BUCKET = 'https://storage.functionstore.tools/fnstools';
-const EDIT_BASE = `${GH}/blob/main/packaging/docs`;
 
 const problems = [];
 const fail = (msg) => problems.push(msg);
@@ -252,9 +253,9 @@ const unlockRoute = (name) => {
   const patreon = tier ? `the Patreon ${tier} tier or higher` : 'a Patreon membership';
   return ROUTES.keys.has(name) ? `${patreon}, or a Gumroad licence key` : patreon;
 };
-/** "Patreon:Base" -- the route and its lowest tier in one word; plain
- *  "Patreon" when the manifest names no tier. */
-const tierMark = (name) => (tierOf(name) ? `Patreon:${tierOf(name)}` : 'Patreon');
+/** "Patreon · Base" -- the route and its lowest tier, as the picker's chip
+ *  writes it; plain "Patreon" when the manifest names no tier. */
+const tierMark = (name) => (tierOf(name) ? `Patreon · ${tierOf(name)}` : 'Patreon');
 /** The row marker for one package: PLUS_MARK with the tier in it. */
 const plusMark = (name) => `<span class="plus-mark" title="Unlocks with ${esc(unlockRoute(name))}">${esc(tierMark(name))}</span>`;
 // A priced family product (catalog `pricing`): not Patreon-gated, installs
@@ -433,6 +434,10 @@ for (const p of pages) {
   if (mode === 'generated' && ids.has('parameters') && (PARAMS.packages || {})[p.name]?.length) {
     fail(`${p.file}: duplicate Parameters references; remove the handwritten list or set parameter_reference: authored`);
   }
+  // featuresSection() owns #features, built from feature_list.
+  if (ids.has('features') && Array.isArray(p.meta.feature_list) && p.meta.feature_list.length) {
+    fail(`${p.file}: a ## Features heading duplicates the generated list; put the features in feature_list`);
+  }
   anchorsOf.set(p.slug, ids);
 }
 
@@ -589,6 +594,9 @@ const navLinks = [
 ];
 
 const docsStyleVersion = createHash('sha256').update(fs.readFileSync(path.join(WEB, 'docs.css'))).digest('hex').slice(0, 12);
+// The shared tool list (docs/FinderAndToolRow.md): the landing page and /features/.
+const toolListVersion = createHash('sha256').update(fs.readFileSync(path.join(WEB, 'tool-list.css')))
+  .update(fs.readFileSync(path.join(WEB, 'tool-list.js'))).digest('hex').slice(0, 12);
 
 // ------------------------------------------------------- search and sharing
 //
@@ -638,8 +646,9 @@ function breadcrumbLd(crumbs) {
 /** "ColorGen for TouchDesigner": the word people search with, said once. */
 const forTD = (title) => (/touchdesigner/i.test(title) ? title : `${title} for TouchDesigner`);
 
-/** head() options: `crumbs` adds breadcrumb data; `noindex` keeps a page out of search and the sitemap. */
-function head(title, description, canonical, { crumbs = null, noindex = false } = {}) {
+/** head() options: `crumbs` adds breadcrumb data; `noindex` keeps a page out of search and the sitemap;
+ *  `toolList` loads the shared tool row's stylesheet and script. */
+function head(title, description, canonical, { crumbs = null, noindex = false, toolList = false } = {}) {
   if (!noindex) sitemapUrls.add(canonical);
   return `<!doctype html>
 <html lang="en">
@@ -666,7 +675,9 @@ ${shareTags(canonical)}
      placeholder overran the 244px sidebar and was clipped mid-word. -->
 <link rel="stylesheet" href="/docs/pagefind/pagefind-ui.css" onerror="this.remove()">
 <link rel="stylesheet" href="/site-nav.css">
-<link rel="stylesheet" href="/docs.css?v=${docsStyleVersion}">
+<link rel="stylesheet" href="/docs.css?v=${docsStyleVersion}">${toolList ? `
+<link rel="stylesheet" href="/tool-list.css?v=${toolListVersion}">
+<script src="/tool-list.js?v=${toolListVersion}" defer></script>` : ''}
 </head>
 <body>`;
 }
@@ -708,6 +719,7 @@ const FOOTER = `<footer class="site">
     <div>© 2026 FNSTools · Built for TouchDesigner</div>
     <div class="footer-links">
       <a href="/docs/">Docs</a>
+      <a href="/changelog/">Changelog</a>
       <a href="/community/">Community</a>
       <a href="/patreon/">Patreon</a>
       <a href="/about/">About</a>
@@ -919,6 +931,41 @@ ${blocks}
 </section>`;
 }
 
+/** The tool's features, read from the same `feature_list` that builds
+ *  /features/, so the page and that list cannot drift apart and the prose
+ *  never has to repeat them. It goes after the page's first section: the
+ *  opening says what the tool is for, this says what it can do, and the
+ *  walkthrough follows. A doc with one section or none gets it at the end. */
+function featuresSection(p) {
+  const list = featuresOf(p);
+  if (!list.length) return '';
+  const items = list.map((f) => {
+    const name = f.anchor
+      ? `<a class="fl-name" href="#${esc(f.anchor)}">${esc(f.name)}</a>`
+      : `<span class="fl-name">${esc(f.name)}</span>`;
+    const notes = (f.platform ? `<span class="fl-note">${esc(f.platform)}</span>` : '')
+      + (f.authors ? '<span class="fl-note fl-note--authors">for tool authors</span>' : '');
+    return `    <li>${name}<span class="fl-does">${md.renderInline(String(f.does))}${notes}</span></li>`;
+  });
+  return `<section class="page-features">
+  <h2 id="features">Features</h2>
+  <ul class="fl-feats">
+${items.join('\n')}
+  </ul>
+</section>
+`;
+}
+
+/** p.html with featuresSection() placed before its second <h2>. */
+function withFeatures(p) {
+  const section = featuresSection(p);
+  if (!section) return p.html;
+  const h2s = [...p.html.matchAll(/<h2[\s>]/g)];
+  if (h2s.length < 2) return `${p.html}\n${section}`;
+  const at = h2s[1].index;
+  return p.html.slice(0, at) + section + p.html.slice(at);
+}
+
 /** One collapsible group in the sidebar.
  *
  *  <details open> rather than a plain <div>: on a phone the flat list was
@@ -1105,10 +1152,10 @@ for (const p of pages) {
   // "visible and locked", so the page is public and complete. What differs is
   // one badge and one callout saying how to get it.
   if (isPlus(p.name)) {
-    badges.push(`<a class="badge badge-cat" href="/patreon/" title="Unlocks with ${esc(unlockRoute(p.name))}">◆ ${esc(tierMark(p.name))}</a>`);
+    badges.push(`<a class="badge badge-plus" href="/patreon/" title="Unlocks with ${esc(unlockRoute(p.name))}">◆ ${esc(tierMark(p.name))}</a>`);
   }
   for (const v of variantsOf(p.name)) {
-    badges.push(`<a class="badge badge-cat" href="/patreon/" title="${esc('Unlocks at the ' + variantTier(v) + ' tier or higher')}">◆ ${esc(variantTier(v))} build</a>`);
+    badges.push(`<a class="badge badge-plus" href="/patreon/" title="${esc('Unlocks at the ' + variantTier(v) + ' tier or higher')}">◆ ${esc(variantTier(v))} build</a>`);
   }
   const pricing = pricingOf(p.name);
   if (pricing) {
@@ -1201,8 +1248,11 @@ for (const p of pages) {
         ? 'parameter-reference' : 'parameters')
     : '';
   const hasGetIt = Boolean(plusNote || variantNote || trialNote || downloadNote);
-  const tocItems = features
-      .map((f) => `<li><a href="#${esc(f.anchor)}">${featIcon(f)}${esc(f.name)}</a></li>`)
+  const tocLink = (f) => `<li><a href="#${esc(f.anchor)}">${featIcon(f)}${esc(f.name)}</a></li>`;
+  // "Features" sits where withFeatures() puts its section: after the first.
+  const tocItems = features.slice(0, 1).map(tocLink)
+    .concat(featuresOf(p).length ? ['<li><a href="#features">Features</a></li>'] : [])
+    .concat(features.slice(1).map(tocLink))
     .concat(hasGetIt ? [`<li><a href="#get-it">Get it</a></li>`] : [])
     .concat(entriesOf(p.name).length
       ? [`<li><a href="#where-it-appears">Where it appears</a></li>`] : [])
@@ -1216,7 +1266,7 @@ for (const p of pages) {
   // decoration inside the running text and is gone by request. The file is
   // still authored and still rides the table of contents, which is a list
   // of links rather than prose.
-  const body = p.html;
+  const body = withFeatures(p);
 
   // Shortcuts: the KEYS come from the manifest, which build_manifest
   // fills from FNS_HotkeyManager on every build, so a rebound key
@@ -1259,8 +1309,7 @@ for (const p of pages) {
   const undocumented = p.body.trim() ? '' : `<p class="page-todo">This tool
     does not have a written page yet. The generated sections below are read
     straight from the component, so they are accurate. What is missing is
-    the prose. <a href="${EDIT_BASE}/${p.file}" target="_blank"
-    rel="noopener">Write it →</a></p>`;
+    the prose.</p>`;
 
   const html = `${head(`${forTD(p.title)} | FNSTools docs`, p.description || `${p.title} documentation.`, `${SITE}/docs/${p.slug}/`,
     { crumbs: [['Docs', `${SITE}/docs/`], [p.title, `${SITE}/docs/${p.slug}/`]] })}
@@ -1286,7 +1335,6 @@ ${body}
   ${shortcuts}
   ${parSection}
   ${registrySection(p.name)}
-  <p class="edit-page"><a href="${EDIT_BASE}/${p.file}" target="_blank" rel="noopener">Edit this page on GitHub →</a></p>
 </main>
 </div>
 ${FOOT}`;
@@ -1326,7 +1374,6 @@ ${sidebar(`guides/${g.slug}`)}
   <div class="docs-body">
 ${g.html}
   </div>
-  <p class="edit-page"><a href="${GH}/blob/main/website/content/guides/${g.file}" target="_blank" rel="noopener">Edit this page on GitHub →</a></p>
 </main>
 </div>
 ${FOOT}`);
@@ -1501,17 +1548,39 @@ ${FOOT}`);
 // category, its pitch and its count stay in the open and the list opens on
 // demand. <details> keeps it working with JS off and findable by Ctrl+F.
 //
-// Core is open by default: it is the shortest way to answer "what is this
-// thing actually made of" for someone who just arrived.
-const grid = displayCategories.map((cat) => {
+// Inside a fold every tool is the shared row (docs/FinderAndToolRow.md): a
+// <details> whose summary is the one-line row and whose body is the tool's
+// feature_list. website/tool-list.js adds the tick (written to fns.pick, which
+// /get restores), the search, the Free/Patreon filter and the two views.
+const featInline = new MarkdownIt({ html: false, linkify: false });
+// What the picker lets a reader tick: a tool, never a companion; core goes in
+// as a unit. Read from the repo manifest, the same rule as pickable() in
+// packaging/configurator/index.html, so a tick here never vanishes in /get.
+const pickableNames = new Set(JSON.parse(fs.readFileSync(path.join(REPO, 'packaging', 'manifest.json'), 'utf8'))
+  .packages.filter((p) => p && p.kind === 'tool' && !p.companion).map((p) => p.name));
+const toolRow = (p) => {
+  const feats = featuresOf(p);
+  const pick = pickableNames.has(p.name)
+    ? ` data-pick-name="${esc(p.name)}" data-pick-title="${esc(p.title)}"` : ` data-pick-title="${esc(p.title)}"`;
+  const body = feats.length
+    ? `<div class="trow-body"><ul class="trow-feats">${feats.map((f) =>
+      `<li><a class="f-name" href="/docs/${p.slug}/${f.anchor ? `#${esc(f.anchor)}` : ''}">${esc(f.name)}</a>: <span class="f-does">${featInline.renderInline(String(f.does))}</span></li>`).join('')}</ul></div>`
+    : '';
+  return `            <li class="trow"${pick} data-cat="${esc(p.category)}" data-paid="${isPlus(p.name) ? 1 : 0}">`
+    + `<details class="trow-d"><summary class="trow-s">`
+    + `<span class="trow-tick pick-slot"></span>`
+    + `<span class="trow-name"><b>${esc(p.title)}</b>${isPlus(p.name) ? plusMark(p.name) : ''}${variantMark(p.name)}${trialMark(p.name)}</span>`
+    + `<span class="trow-desc">${esc(p.description || p.meta.summary || '')}</span>`
+    + `<span class="trow-side"><a class="trow-docs" href="/docs/${p.slug}/">Docs ↗</a>`
+    + (feats.length ? `<span class="trow-n">${feats.length} feature${feats.length === 1 ? '' : 's'}</span>` : '')
+    + `</span></summary>${body}</details></li>`;
+};
+const totalFeatures = pages.reduce((n, p) => n + featuresOf(p).length, 0);
+const toolCats = displayCategories.map((cat) => {
   const inCat = pages
     .filter((p) => p.category === cat)
     .sort((a, b) => a.title.localeCompare(b.title, 'en', { sensitivity: 'base' }));
-  const items = inCat.map((p) => `          <div class="feat">
-            <div class="feat-icon" aria-hidden="true">${GLYPH[cat] || '·'}</div>
-            <div class="feat-text"><strong><a href="/docs/${p.slug}/">${esc(p.title)}</a>${isPlus(p.name) ? plusMark(p.name) : ''}${variantMark(p.name)}${trialMark(p.name)}</strong><span>${esc(p.description || p.meta.summary)}</span></div>
-          </div>`).join('\n');
-  if (!items) return '';
+  if (!inCat.length) return '';
   const plusHere = inCat.filter((p) => isPlus(p.name)).length;
   const count = `${inCat.length} tool${inCat.length === 1 ? '' : 's'}`
     + (plusHere ? ` · ${plusHere} Patreon` : '');
@@ -1532,10 +1601,32 @@ const grid = displayCategories.map((cat) => {
           <span class="cat-count">${count}</span>
         </summary>
         <div class="cat-list">
-${items}${more}
+          <ul class="trows">
+${inCat.map(toolRow).join('\n')}
+          </ul>${more}
         </div>
       </details>`;
 }).filter(Boolean).join('\n');
+const plusCount = pages.filter((p) => isPlus(p.name)).length;
+// The bar is hidden until tool-list.js shows it: without the script it would
+// be controls that do nothing.
+const grid = `    <div class="tl" id="toolkit-list">
+      <div class="tl-bar" hidden>
+        <input type="search" class="tl-q" placeholder="Filter by name or by what a tool does: rename, MIDI, backup, record…" autocomplete="off" aria-label="Filter tools">
+        <div class="tl-seg" role="group" aria-label="Access">
+          <button type="button" data-access="all" aria-pressed="true">All</button>
+          <button type="button" data-access="free" aria-pressed="false">Free <span class="k">${pages.length - plusCount}</span></button>
+          <button type="button" data-access="patreon" aria-pressed="false"><span class="dia" aria-hidden="true">◆</span> Patreon <span class="k">${plusCount}</span></button>
+        </div>
+        <button type="button" class="tl-expand" aria-pressed="false">Expand all</button>
+      </div>
+      <p class="tl-status" aria-live="polite"></p>
+      <div class="tl-results" hidden><p class="tl-results-head">Best matches first</p><ul class="trows"></ul></div>
+      <p class="tl-empty" hidden>No tool matches. Try fewer words, or set the filter back to All.</p>
+      <div class="tl-cats">
+${toolCats}
+      </div>
+    </div>`;
 
 // ------------------------------- the rest of the family, from family.json
 const familyBlock = family.map((p) => `      <a class="prod" href="${esc(p.url)}" target="_blank" rel="noopener">
@@ -1672,6 +1763,9 @@ ${jsonLd({ '@graph': [
   // "N tools" always matches the catalogue this build actually rendered.
   out = out.replace(/(<span class="js-fns-count">)[^<]*(<\/span>)/g,
     `$1${pages.length}$2`);
+  out = out.replace(/(<span class="js-feature-count">)[^<]*(<\/span>)/g,
+    `$1${totalFeatures}$2`);
+  out = out.replace(/\/tool-list\.(css|js)(\?v=[0-9a-f]*)?"/g, (_m, ext) => `/tool-list.${ext}?v=${toolListVersion}"`);
 
   if (live) {
     console.log(`release ${live.release} published (${live.packages?.length ?? '?'} packages)`);
@@ -1708,15 +1802,18 @@ if (fs.existsSync(plusSrc)) {
     .filter((p) => isPlus(p.name))
     .sort((a, b) => a.title.localeCompare(b.title, 'en', { sensitivity: 'base' }));
 
+  // One line per tool under its category heading: the list only grows, and
+  // cards with a description and a button each made it a scroll.
   const plusList = plusPages.length
-    ? `<div class="plus-pkgs">\n` + plusPages.map((p) => `  <a class="plus-pkg" href="/docs/${p.slug}/">
-    <span>
-      <b>${esc(p.title)}</b>
-      <span>${esc(p.description || p.meta.summary || '')}</span>
-      <span class="cat-of">${GLYPH[p.category] || '·'} ${esc(p.category)}${tierOf(p.name) ? ` · ${esc(tierOf(p.name))} tier or higher` : ''}${ROUTES.keys.has(p.name) ? ' · Gumroad key available' : ''}</span>
-    </span>
-    <span class="btn btn-secondary">Read the docs →</span>
-  </a>`).join('\n') + `\n</div>`
+    ? `<div class="plus-list">\n` + categories
+      .map((cat) => [cat, plusPages.filter((p) => p.category === cat)])
+      .filter(([, inCat]) => inCat.length)
+      .map(([cat, inCat]) => `  <section class="plus-cat">
+    <h3><span class="side-glyph" aria-hidden="true">${GLYPH[cat] || '·'}</span>${esc(cat)}<span class="plus-cat-count">${inCat.length}</span></h3>
+    <ul>
+${inCat.map((p) => `      <li><a href="/docs/${p.slug}/"><b>${esc(p.title)}</b><span class="plus-mark">${esc(tierMark(p.name))}</span><span class="plus-row-desc">${esc(p.description || p.meta.summary || '')}</span></a></li>`).join('\n')}
+    </ul>
+  </section>`).join('\n') + `\n</div>`
     // Not an error: a catalog with nothing gated is a legitimate state, and
     // the page still has to explain what Patreon unlocks when the first one lands.
     : `<p class="plus-pkgs-empty">Nothing is gated in the current catalogue; every package on this site installs free.</p>`;
@@ -1744,7 +1841,7 @@ if (fs.existsSync(plusSrc)) {
   fs.mkdirSync(path.join(WEB, 'patreon'), { recursive: true });
   fs.writeFileSync(path.join(WEB, 'patreon', 'index.html'),
     `${head('FNSTools on Patreon: supporter tools, and what stays free',
-      'Nearly all of FNSTools is free and MIT. A few tools unlock with a Patreon membership or a Gumroad licence key, redeemed inside TouchDesigner. Here is exactly how that works.',
+      'Nearly all of FNSTools is free and MIT. A few tools unlock with a Patreon membership, connected inside TouchDesigner. Here is exactly how that works.',
       `${SITE}/patreon/`)}
 <!-- GENERATED by tools/build-site.mjs from website/content/patreon.html — do not edit here -->
 ${header('/patreon/')}
@@ -1810,6 +1907,73 @@ ${FOOT}`);
   console.log(`built /${slug}/`);
 }
 
+// ------------------------------------------ /changelog/ — every release
+//
+// packaging/CHANGELOG.md as a page, newest release first. The release
+// pipeline writes that file (release_one._writeChangelog) and already leaves
+// previews out of new entries; older entries can still name a tool that is a
+// preview today, so those lines are dropped here the way /features/ drops
+// them. A line's tool links to its docs page when it has one.
+const CHANGELOG = path.join(REPO, 'packaging', 'CHANGELOG.md');
+if (!fs.existsSync(CHANGELOG)) {
+  console.warn('note: packaging/CHANGELOG.md missing — /changelog/ not built, and every link to it 404s');
+} else {
+  const releases = [];
+  for (const line of fs.readFileSync(CHANGELOG, 'utf8').split(/\r?\n/)) {
+    // one early section is "## Unreleased" with no date; it keeps its own heading
+    const h = line.match(/^## (\S+)(?: -- (\d{4}-\d{2}-\d{2}))?\s*$/);
+    if (h) {
+      releases.push({ label: h[1], date: h[2] || '', items: [], prose: [] });
+    } else if (releases.length && line.startsWith('- ')) {
+      releases[releases.length - 1].items.push(line.slice(2));
+    } else if (releases.length && line.trim()) {
+      releases[releases.length - 1].prose.push(line.trim());
+    }
+  }
+  const pageOf = new Map(pages.map((p) => [p.name, p]));
+  let dropped = 0;
+  const item = (raw) => {
+    const cut = raw.indexOf(' -- ');
+    const head = cut < 0 ? raw : raw.slice(0, cut);
+    const text = cut < 0 ? '' : raw.slice(cut + 4);
+    const name = head.split(' ')[0];
+    if (curated[name] && curated[name].preview === true && !SHOW_PREVIEWS) {
+      dropped += 1;
+      return '';
+    }
+    const p = pageOf.get(name);
+    const who = p ? `<a href="/docs/${p.slug}/">${esc(p.title)}</a>` : esc(name);
+    const ver = head.slice(name.length).trim();
+    return `<li>${who}${ver ? ` <span class="chg-ver">${esc(ver)}</span>` : ''}${
+      text ? ` ${md.renderInline(text)}` : ''}</li>`;
+  };
+  const body = releases.map((r) => {
+    const items = r.items.map(item).filter(Boolean);
+    return `<h2 id="${esc(r.label.toLowerCase().replace(/\./g, '-'))}">${esc(r.label)}${
+      r.date ? ` <span class="chg-date">${esc(r.date)}</span>` : ''}</h2>
+${items.length ? `<ul class="chg">${items.join('\n')}</ul>` : ''}
+${r.prose.map((t) => `<p>${md.renderInline(t)}</p>`).join('\n')}`;
+  }).join('\n');
+  checkLinks(body, 'packaging/CHANGELOG.md', null);
+  if (problems.length) {
+    console.error('build refused — unresolved internal links:\n' +
+      problems.map((x) => `  - ${x}`).join('\n'));
+    process.exit(1);
+  }
+  fs.mkdirSync(path.join(WEB, 'changelog'), { recursive: true });
+  fs.writeFileSync(path.join(WEB, 'changelog', 'index.html'),
+    `${head('Changelog | FNSTools', 'Every FNSTools release, newest first: which tools moved to which version, and what changed in each.', `${SITE}/changelog/`)}
+<!-- GENERATED by tools/build-site.mjs from packaging/CHANGELOG.md — do not edit here -->
+${header('/changelog/')}
+<main class="plus-page changelog">
+<h1>Changelog</h1>
+<p class="lede">Every FNSTools release, newest first. Each line names a tool, the version it moved to, and what changed. The updater shows the same note next to an update inside TouchDesigner.</p>
+${body}
+</main>
+${FOOT}`);
+  console.log(`built /changelog/ (${releases.length} releases${dropped ? `, ${dropped} preview line${dropped === 1 ? '' : 's'} left out` : ''})`);
+}
+
 // ------------------------------------------ /features/ — every feature
 //
 // What every package does, one line per feature, from each doc's
@@ -1849,8 +2013,11 @@ ${FOOT}`);
     const marks = (isPlus(p.name) ? plusMark(p.name) : '') + variantMark(p.name) + trialMark(p.name)
       + (isPreview(p) ? '<span class="plus-mark fl-preview" title="Not released: shown because FNS_SHOW_PREVIEWS=1">Preview</span>' : '');
     const paid = isPlus(p.name) || Boolean(pricingOf(p.name));
-    return `    <article class="fl-tool" data-paid="${paid ? 1 : 0}">
-      <h3>${title}${marks}</h3>
+    // the shared tick (tool-list.js): picks made here arrive ticked in /get
+    const pick = pickableNames.has(p.name) && !isPreview(p)
+      ? ` data-pick-name="${esc(p.name)}" data-pick-title="${esc(p.title)}"` : '';
+    return `    <article class="fl-tool" data-paid="${paid ? 1 : 0}"${pick}>
+      <div class="fl-head">${pick ? '<span class="pick-slot"></span>' : ''}<h3>${title}${marks}</h3></div>
       <p class="fl-desc">${esc(p.description || p.meta.summary || '')}</p>
       <ul class="fl-feats">
 ${featuresOf(p).map((f) => featureItem(p, f)).join('\n')}
@@ -1875,7 +2042,7 @@ ${inCat.map(toolBlock).join('\n')}
   fs.writeFileSync(path.join(WEB, 'features', 'index.html'), `${head(
     'Every feature | FNSTools for TouchDesigner',
     `All ${total} features of the ${listed.length} FNSTools packages, grouped by category, each linked to the part of the tool's documentation that explains it.`,
-    `${SITE}/features/`, { noindex: SHOW_PREVIEWS })}
+    `${SITE}/features/`, { noindex: SHOW_PREVIEWS, toolList: true })}
 <!-- GENERATED by tools/build-site.mjs from the feature_list frontmatter in packaging/docs/ — do not edit here -->
 ${header('/features/')}
 <main class="features-page" data-previews="${SHOW_PREVIEWS ? 'shown' : 'hidden'}">
@@ -1906,34 +2073,104 @@ ${sections}
   var status = document.getElementById('fl-status');
   var empty = document.getElementById('fl-empty');
   var access = 'all';
-  var tools = Array.prototype.slice.call(document.querySelectorAll('.fl-tool'));
-  var index = tools.map(function (t) {
-    var head = (t.querySelector('h3').textContent + ' ' + t.querySelector('.fl-desc').textContent + ' '
-      + t.closest('.fl-cat').getAttribute('data-cat')).toLowerCase();
-    var items = Array.prototype.slice.call(t.querySelectorAll('.fl-feats li')).map(function (li) {
-      return { li: li, text: li.textContent.toLowerCase(), authors: li.hasAttribute('data-authors') };
+  // Ranked by WHERE a typed word sits (docs/FeatureSearchPosition.md): a
+  // feature's name leads with what the feature does, so its first word
+  // ranks first. Places, best first; a feature takes its worst word's.
+  var LEAD = 0, NAME = 1, DOES = 2, ANY = 3, TOOL = 4, DESC = 5;
+  var words = function (s) { return s.split(/[^a-z0-9]+/).filter(Boolean); };
+  var main = document.querySelector('main.features-page');
+  var jump = document.querySelector('.fl-jump');
+  var sections = Array.prototype.slice.call(document.querySelectorAll('.fl-cat'));
+  var results = document.createElement('section');
+  results.className = 'fl-cat fl-results';
+  results.hidden = true;
+  results.innerHTML = '<h2>Best matches first</h2>';
+  main.insertBefore(results, sections[0] || empty);
+  var index = [];
+  sections.forEach(function (sec) {
+    sec._tools = Array.prototype.slice.call(sec.querySelectorAll('.fl-tool')).map(function (t, ti) {
+      var tool = (t.querySelector('h3').textContent + ' ' + sec.getAttribute('data-cat')).toLowerCase();
+      var items = Array.prototype.slice.call(t.querySelectorAll('.fl-feats li')).map(function (li, i) {
+        var name = li.querySelector('.fl-name').textContent.toLowerCase();
+        var does = li.querySelector('.fl-does').textContent.toLowerCase();
+        return { li: li, order: i, name: name, nameWords: words(name), does: does,
+                 doesWords: words(does), authors: li.hasAttribute('data-authors') };
+      });
+      var entry = { el: t, order: ti, tool: tool, toolWords: words(tool),
+                    desc: t.querySelector('.fl-desc').textContent.toLowerCase(),
+                    paid: t.getAttribute('data-paid') === '1', items: items };
+      index.push(entry);
+      return entry;
     });
-    return { el: t, head: head, paid: t.getAttribute('data-paid') === '1', items: items };
   });
+  function wordAt(ws, w) {
+    for (var i = 0; i < ws.length; i++) if (ws[i].indexOf(w) === 0) return i;
+    return -1;
+  }
+  function place(w, t, it) {
+    var at = wordAt(it.nameWords, w);
+    if (at === 0) return LEAD;
+    if (at > 0) return NAME;
+    if (wordAt(it.doesWords, w) >= 0) return DOES;
+    if (it.name.indexOf(w) !== -1 || it.does.indexOf(w) !== -1) return ANY;
+    if (wordAt(t.toolWords, w) >= 0 || t.tool.indexOf(w) !== -1) return TOOL;
+    if (t.desc.indexOf(w) !== -1) return DESC;
+    return -1;
+  }
+  var byRank = function (a, b) { return a._rank - b._rank || a._order - b._order; };
   function apply() {
-    var words = q.value.toLowerCase().split(/\\s+/).filter(Boolean);
-    var hit = function (text) { return words.every(function (w) { return text.indexOf(w) !== -1; }); };
+    var qs = q.value.toLowerCase().split(/\\s+/).filter(Boolean);
     var nTools = 0, nFeats = 0;
     index.forEach(function (t) {
       var ok = access === 'all' || (access === 'paid') === t.paid;
-      var whole = ok && hit(t.head);
-      var shown = 0;
+      var best = Infinity;
       t.items.forEach(function (it) {
-        var on = ok && (authors.checked || !it.authors) && (whole || hit(t.head + ' ' + it.text));
+        var r = (ok && (authors.checked || !it.authors)) ? 0 : -1;
+        for (var k = 0; k < qs.length && r >= 0; k++) {
+          var p = place(qs[k], t, it);
+          r = p < 0 ? -1 : Math.max(r, p);
+        }
+        it.rank = r;
+        if (r >= 0 && r < best) best = r;
+      });
+      // A description lists the whole tool only when no feature of it
+      // answers on its own: "open" in CommandPalette's description must not
+      // list every one of its features.
+      var shown = 0, atBest = 0;
+      t.items.forEach(function (it) {
+        var on = it.rank >= 0 && (it.rank < DESC || best === DESC);
         it.li.hidden = !on;
+        it.li._rank = on ? it.rank : Infinity;
+        it.li._order = it.order;
         if (on) shown++;
+        if (on && it.rank === best) atBest++;
       });
       t.el.hidden = !shown;
+      // a tie on the best place goes to the tool with more features there
+      t.el._rank = shown ? best - Math.min(atBest, 40) / 100 : Infinity;
       if (shown) { nTools++; nFeats += shown; }
     });
-    document.querySelectorAll('.fl-cat').forEach(function (sec) {
-      sec.hidden = !sec.querySelector('.fl-tool:not([hidden])');
+    // While a query is present the tools are ONE list, best first, as the
+    // picker's search is: grouped by category, a tool whose feature leads
+    // with the word would sit under another category's passing mention.
+    // Cleared, every tool goes back to its category in page order.
+    var searching = qs.length > 0;
+    index.forEach(function (t) {
+      var ul = t.el.querySelector('.fl-feats');
+      t.items.map(function (it) { return it.li; }).sort(byRank).forEach(function (li) { ul.appendChild(li); });
+      t.el._order = searching ? index.indexOf(t) : t.order;
     });
+    results.hidden = !searching || !nTools;
+    jump.style.display = searching ? 'none' : '';
+    if (searching) {
+      sections.forEach(function (sec) { sec.hidden = true; });
+      index.map(function (t) { return t.el; }).sort(byRank).forEach(function (el) { results.appendChild(el); });
+    } else {
+      sections.forEach(function (sec) {
+        sec._tools.forEach(function (t) { sec.appendChild(t.el); });
+        sec.hidden = !sec.querySelector('.fl-tool:not([hidden])');
+      });
+    }
     empty.hidden = nTools > 0;
     status.textContent = nFeats + ' feature' + (nFeats === 1 ? '' : 's') + ' in ' + nTools + ' tool' + (nTools === 1 ? '' : 's');
   }
@@ -1976,7 +2213,9 @@ const recommends = fs.existsSync(RECOMMENDS) ? JSON.parse(fs.readFileSync(RECOMM
 // FNS_SHOW_DRAFTS=1 (the CMS's Build site sets it) shows them, marked, for
 // the local preview; the public build never sets it.
 const SHOW_DRAFTS = process.env.FNS_SHOW_DRAFTS === '1';
-const highlights = (recommends.tools || []).filter((t) => SHOW_DRAFTS || t.draft !== true);
+// a row flagged `ours` is a product of ours the installer cannot place; the
+// picker shows it on its own line, and it is not "from other creators"
+const highlights = (recommends.tools || []).filter((t) => (SHOW_DRAFTS || t.draft !== true) && t.ours !== true);
 
 const PLATFORM_LABEL = {
   github: 'Get it on GitHub', patreon: 'Get it on Patreon', gumroad: 'Get it on Gumroad',
@@ -2257,9 +2496,9 @@ if (fs.existsSync(cfgSrc)) {
     manifest.quiz = catalog.quiz;
   }
   if (!manifest.presets && repoManifest.presets) manifest.presets = repoManifest.presets;
-  // Category, description and fits are curated in the catalog and are
-  // presentation only; the catalog is newer than any published release,
-  // so it wins for these three (what ships, versions, artifacts and
+  // Category, description, fits and search_words are curated in the catalog
+  // and are presentation only; the catalog is newer than any published
+  // release, so it wins for these four (what ships, versions, artifacts and
   // access stay the published manifest's). The category list itself
   // comes from the catalog for the same reason.
   manifest.categories = categories;
@@ -2277,14 +2516,31 @@ if (fs.existsSync(cfgSrc)) {
   for (const pkg of repoManifest.packages || []) {
     if (pkg.search) repoSearch[pkg.name] = pkg.search;
   }
+  // Each tool's features (its doc's feature_list) for the opened card
+  // (docs/FinderAndToolRow.md), as "name: does" in plain text: the picker
+  // draws them with textContent. The release manifest does not carry them
+  // yet, so the served picker opens its cards without a list until it does.
+  const plainDoes = (s) => String(s).replace(/`/g, '').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    .replace(/\*\*([^*]+)\*\*/g, '$1');
+  const pageByName = new Map(pages.map((p) => [p.name, p]));
   for (const pkg of manifest.packages || []) {
     if (repoSearch[pkg.name]) pkg.search = repoSearch[pkg.name];
+    const fp = pageByName.get(pkg.name);
+    const feats = fp ? featuresOf(fp) : [];
+    if (feats.length) pkg.features = feats.map((f) => `${f.name}: ${plainDoes(f.does)}`);
     const row = curated[pkg.name] || curated['FNS_' + pkg.name];
     if (!row) continue;
     if (row.category) pkg.category = row.category;
     if (row.description) pkg.description = row.description;
     if (Array.isArray(row.fits) && row.fits.length) pkg.fits = row.fits;
     else delete pkg.fits;
+    // the picker's catalog tags, normalised as build_manifest.CuratedSearchWords
+    const words = (Array.isArray(row.search_words) ? row.search_words
+      : String(row.search_words || '').replace(/,/g, ' ').split(/\s+/))
+      .map((w) => String(w).trim().toLowerCase())
+      .filter((w) => /^[a-z0-9][a-z0-9+-]*$/.test(w));
+    if (words.length) pkg.search_words = [...new Set(words)];
+    else delete pkg.search_words;
   }
   let page = fs.readFileSync(cfgSrc, 'utf8');
   // The standalone website needs no app-mode label above its heading.
@@ -2480,9 +2736,11 @@ if (fs.existsSync(cfgSrc)) {
     if (plain(cur.text)) out.push(cur);
     return out.map((s) => ({ heading: s.heading, text: plain(s.text) }));
   };
+  // The feed lists the Core registries too (the docs carry their pages);
+  // they are plumbing every install brings, never something to recommend.
   const chat = {
     generated: feed.generated,
-    tools: tools.map((t) => {
+    tools: tools.filter((t) => !isDeprioritized(t.category)).map((t) => {
       const p = pages.find((x) => x.name === t.name);
       const meta = (p && p.meta) || {};
       return {

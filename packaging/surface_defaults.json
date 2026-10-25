@@ -983,6 +983,12 @@
    ".": {
     "Workspace": ""
    }
+  },
+  "oscMapper": {
+   ".": {
+    "Active": false,
+    "Active2": false
+   }
   }
  }
 }

@@ -2,28 +2,45 @@
 package: FNS_SwitchOPs
 summary: Press Ctrl+Tab to jump back and forth between the last two operators you selected.
 features:
-  - name: SwitchOPs
-    anchor: switchops
+  - name: Why use it
+    anchor: why-use-it
+  - name: How to use it
+    anchor: how-to-use-it
+hotkeys:
+  - keys: ctrl.tab
+    does: Jump back to the operator you selected before this one; press again to return
 feature_list:
-  - name: Toggle between last two operators
-    anchor: switchops
+  - name: Toggle between the last two operators
+    anchor: how-to-use-it
     does: 'Jumps focus back to the operator you were on before this one, and back again on the next press.'
   - name: Jump back across networks
-    anchor: switchops
+    anchor: how-to-use-it
     does: 'Remembers the last two selected operators wherever they are, so after diving into a component you return without retracing the path.'
+  - name: Rebind the key
+    anchor: how-to-use-it
+    does: 'Rebind it on the tool or in HotkeyManager, like every shortcut in the toolkit.'
 ---
 
-## SwitchOPs
+## Why use it
 
-`Ctrl+Tab` (`Alt+Tab` on macOS, since the system owns Cmd+Tab) jumps focus back
-to the operator you were on before this one. Press it again and you are back.
-It is Alt+Tab for your network.
+A lot of edits involve two operators: the one you are changing and the one where
+you see the result, or a parameter in one component and the expression that
+reads it in another. Clicking between them, through the path bar when they sit
+in different networks, is most of the work.
 
-The pair it remembers is the **last two operators you selected**, so it works
-across networks: dive into a component to change something, hit the shortcut,
-and you are back where you were without retracing the path.
+SwitchOPs is Alt+Tab for your network. One key takes you back to the operator
+you were on before; the same key brings you back.
 
-Configuration is one hotkey and an **Active** toggle. Rebind
-the key from its own parameter or from
-[HotkeyManager](/docs/fns-hotkeymanager/), like every other shortcut in the
-toolkit.
+## How to use it
+
+- Select an operator, then another. Press `Ctrl+Tab` (`Alt+Tab` on macOS, since
+  the system owns `Cmd+Tab`) to go back to the first. Press it again and you are
+  back.
+- The pair it remembers is the last two operators you selected, so it works
+  across networks: dive into a component to change something, press the
+  shortcut, and you are back where you were without retracing the path.
+- To use another key, rebind **Shortcut** or use
+  [HotkeyManager](/docs/fns-hotkeymanager/), like every other shortcut in the
+  toolkit.
+- To keep the key free for something else, switch off **Active** or run
+  **Toggle SwitchOPs** from quick-launch.

@@ -85,7 +85,7 @@ check('Patreon dialog: sign-in shown whenever the session entitles nothing, rech
       and "recheck.hidden = !(hasAuthRail && account && !reconnect && authActions.recheck);" in idx)
 check('the page reloads when the connection state changes, not only the products',
       "+ '|' + String(!(a && a.connected === false))" in idx
-      and 'if (acctSig(st) !== before) {' in idx)
+      and 'if (acctSig(st) !== before\n' in idx)
 
 print('5. a session that entitles nothing offers the way in')
 check('one rule decides it, for every surface',
@@ -114,14 +114,15 @@ check('/auth/status reports the label and the check time, not only products',
       and "'checked_at': checked_at})" in ins)
 check('the watcher compares the WHOLE record, so a sign-in that unlocks nothing still lands',
       'function acctSig(a) {' in idx and 'var before = acctSig(account);' in idx
-      and 'if (acctSig(st) !== before) {' in idx)
-check('it waits ten minutes and says how long it has waited',
-      'if (++authPolls > 400) {' in idx
+      and 'if (acctSig(st) !== before\n' in idx)
+check('a browser sign-in waits ten minutes and says how long it has waited',
+      'var BROWSER_LIMIT_MS = 600000;' in idx
+      and 'if (Date.now() - authStarted > authLimit) {' in idx
       and "Still waiting, ' + secs + 's. You can leave this " in idx)
 check('every auth dialog carries Reload picker; other dialogs do not',
       'id="dlgreload" hidden' in idx
       and "document.getElementById('dlgreload').hidden = !reloadable;" in idx
-      and "function showDialog(text, installable, hint, reloadable) {" in idx)
+      and "function showDialog(text, installable, hint, reloadable, cancellable) {" in idx)
 check('the sign-in reply stops telling the reader to reload a page that has no reload',
       "'Finish signing in in your browser. '" in ins
       and 'then reload this page.' not in ins)

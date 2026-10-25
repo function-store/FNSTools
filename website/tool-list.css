@@ -1,0 +1,107 @@
+/* The shared tool row and list (docs/FinderAndToolRow.md): the landing page's
+   "What's in the toolkit" and /features/. Hand-authored; both pages define
+   the color tokens it reads (--text, --plus, --accent, ...).
+
+   A row is a <details>: the summary is the one-line row, the body holds the
+   features. It opens and closes with JS off, and the browser's find-in-page
+   reaches the feature text inside a closed one. The tick is added by
+   tool-list.js, since a pick means nothing without the script that carries it. */
+
+.tl-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 0 0 14px; }
+.tl-bar[hidden] { display: none; }
+.tl-q {
+  flex: 1 1 260px; min-width: 0; font: inherit; font-size: 15px; color: var(--text);
+  background: var(--bg-1); border: 1px solid var(--border-strong); border-radius: 8px; padding: 10px 14px;
+}
+.tl-q:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.tl-seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; padding: 3px; gap: 2px; background: var(--bg-1); flex: none; }
+.tl-seg button {
+  font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; border: 0; border-radius: 6px;
+  padding: 7px 12px; background: transparent; color: var(--text-dim); white-space: nowrap;
+}
+.tl-seg button[aria-pressed="true"] { background: var(--bg-3); color: var(--text); }
+.tl-seg .k { font-weight: 400; color: var(--text-faint); margin-left: 3px; }
+.tl-seg .dia { color: var(--plus); }
+/* Expand all / Collapse all: one toggle, its label says what a press does */
+.tl-expand {
+  flex: none; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
+  padding: 9px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-1); color: var(--text-dim);
+}
+.tl-expand:hover { color: var(--text); border-color: var(--border-strong); }
+.tl-expand[aria-pressed="true"] { color: var(--text); background: var(--bg-3); }
+.tl-status { font-size: 12.5px; color: var(--text-faint); margin: -4px 0 10px; min-height: 1em; }
+.tl-results-head { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); margin: 6px 0 4px; }
+.tl-empty { color: var(--text-faint); font-size: 14px; padding: 14px 0; }
+
+/* ── the row ── */
+.trows { list-style: none; margin: 0; padding: 0; }
+.trow { margin: 0 -10px; border-radius: 4px; }
+.trow:hover { background: var(--bg-2); }
+.trow-s {
+  list-style: none; cursor: pointer;
+  display: grid; grid-template-columns: auto minmax(0, auto) minmax(0, 1fr) auto; column-gap: 12px; align-items: baseline;
+  padding: 7px 10px;
+}
+.trow-s::-webkit-details-marker { display: none; }
+.trow-s:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 4px; }
+.trow-tick { width: 0; }
+.tl.js .trow-tick { width: 20px; }
+.tick {
+  width: 20px; height: 20px; border-radius: 4px; cursor: pointer; padding: 0; vertical-align: -4px;
+  border: 1px solid var(--border-strong); background: var(--bg); color: transparent; font-size: 12px; line-height: 1;
+}
+.tick:hover { border-color: var(--accent); color: var(--text-faint); }
+/* /features/: the tick leads the tool's heading */
+.fl-head { display: flex; align-items: baseline; gap: 10px; }
+.fl-head h3 { min-width: 0; }
+.tick[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #0a0a0a; font-weight: 700; }
+.trow-name { display: flex; align-items: baseline; gap: 8px; white-space: nowrap; }
+.trow-name b { font-size: 14.5px; font-weight: 600; color: var(--text); }
+.trow-s:hover .trow-name b, .trow-d[open] .trow-name b { color: var(--accent); }
+.trow-name .plus-mark { margin: 0; padding: 0 5px; font-size: 10px; letter-spacing: 0.03em; vertical-align: 0; }
+.trow-desc { min-width: 0; font-size: 13.5px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.trow-d[open] .trow-desc { white-space: normal; }
+.trow-side { display: flex; align-items: baseline; gap: 10px; white-space: nowrap; }
+.trow-n { font-size: 11.5px; color: var(--text-faint); }
+.trow-n::after { content: ' ▾'; font-size: 9px; }
+.trow-d[open] .trow-n::after { content: ' ▴'; }
+/* the docs link shows on hover, keyboard focus, or with the row open (touch has no hover) */
+.trow-docs { font-size: 12px; font-weight: 600; visibility: hidden; }
+.trow:hover .trow-docs, .trow:focus-within .trow-docs, .trow-d[open] .trow-docs { visibility: visible; }
+.trow-hit { grid-column: 3 / -1; font-size: 12.5px; color: var(--text-faint); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.trow-hit mark, .trow-feats mark { background: none; color: var(--accent-bright); }
+
+.trow-body { padding: 0 10px 12px calc(10px + 20px + 12px); }
+.tl:not(.js) .trow-body { padding-left: 10px; }
+.trow-feats { list-style: none; margin: 0; padding: 0 0 0 12px; border-left: 1px solid var(--border-strong); }
+.trow-feats li { font-size: 13px; color: var(--text-dim); padding: 2px 0; }
+.trow-feats li[hidden] { display: none; }
+.trow-feats .f-name { color: var(--text); font-weight: 600; }
+.trow-feats .f-name:hover { color: var(--accent); }
+.trow-feats code { font-size: 0.92em; }
+
+/* ── the bar that carries picks into /get ── */
+.tl-carry {
+  /* under the sticky header (10) and its mobile menu, over the page */
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 7;
+  background: rgba(17,17,17,0.96); backdrop-filter: blur(10px); border-top: 1px solid var(--border-strong);
+}
+.tl-carry[hidden] { display: none; }
+.tl-carry-in { max-width: var(--max-w, 1140px); margin: 0 auto; padding: 10px 24px; display: flex; align-items: center; gap: 14px; }
+.tl-carry b { font-size: 14px; color: var(--text); white-space: nowrap; }
+.tl-carry-names { flex: 1; min-width: 0; font-size: 12.5px; color: var(--text-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tl-carry-clear { font: inherit; font-size: 12.5px; background: none; border: 0; color: var(--text-faint); cursor: pointer; }
+.tl-carry-clear:hover { color: var(--text); }
+.tl-carry .btn { padding: 8px 14px; font-size: 13.5px; }
+
+@media (max-width: 700px) {
+  .trow-s { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .trow-side { grid-column: 3; grid-row: 1; }
+  .trow-desc { grid-column: 2 / -1; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .trow-d[open] .trow-desc { display: block; }
+  .trow-n { display: none; }
+  .trow-hit { grid-column: 2 / -1; }
+  .trow-body { padding-left: 10px; }
+  .tl-carry-names { display: none; }
+  .tl-carry-in { padding: 10px 16px; }
+}

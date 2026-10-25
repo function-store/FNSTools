@@ -130,6 +130,12 @@ page, an unknown key, or an entry without `name` and `does`, and notes any
 released package with no `feature_list`. `python tests/test_feature_list.py`
 fails until every released package has one.
 
+The same list is printed on the tool's own page as its **Features** section,
+placed before the page's second `##` heading (at the end when there is only
+one) and linked from "On this page". The prose never repeats it, and the build
+refuses a doc that hand-writes a `## Features` heading while it has a
+`feature_list`.
+
 ## Free and Patreon
 
 The site has two audiences at once: someone who has never heard of any of
@@ -349,6 +355,28 @@ A package must exist in `catalog.json` before it can have docs — that file
 is derived from the TouchDesigner project, so new packages appear by
 adding the tool the normal way and re-running `build_manifest.py`. The CMS
 edits packages; it does not invent them.
+
+### Writing a tool page
+
+A tool page is read first by someone deciding whether the tool is worth
+installing, then by the same person trying to use it. The generated parts
+(the lede, Features, Get it, Where it appears, Shortcuts, Parameters) already
+say what the tool is made of, so the prose covers what they cannot:
+
+- `## Why use it`: the problem in concrete terms, a moment a TouchDesigner
+  user recognises, then how the tool answers it. A paragraph or two.
+- `## How to use it`: a walkthrough from a fresh install to a result, as steps
+  or bullets. Name a parameter where a step uses it and leave describing it to
+  the generated table.
+- More `##` sections for jobs that need their own walkthrough (leaving things
+  out, scripting it, contributing to it), and `## Inputs and outputs` on
+  operators.
+
+Write it the way you would explain the tool to a colleague: plain statements,
+real examples, bullet lists where they read better than paragraphs. No
+parameter-by-parameter lists, no em-dashes or ` -- ` asides, no "rather than",
+and no "it is not X, it is Y". FNS_ResetPLS, FNS_BorderlessTD, QuickMarks and
+PrismTOP are written this way.
 
 The landing page's tool catalogue is generated too, between the
 `<!-- TOOLS:START -->` / `<!-- TOOLS:END -->` markers in `index.html`, as

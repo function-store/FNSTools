@@ -82,7 +82,7 @@ check('widgets also leave before a save', ext.count('self._removeWidgets()') >= 
 check('the shipped registry carries no widget registrations', "'overlay_path', 'widgets'" in pre)
 check('each tool passes its own margin with its corner and order, no offset',
       "def RegisterPanelWidget(self, panel, canonical, anchor='topleft', order=None, margin=None," in ext
-      and 'offset' not in ext and "'margin': max(0.0," in ext)
+      and 'offset=' not in ext and "'margin': max(0.0," in ext)
 check('widgets in one corner stack in order, each its own margin from the one before',
       'stacked[anchor] = along + margin + ' in ext and 'oy = (along + margin) / zoom' in ext
       and "key=lambda w: (float(w[2].get('order', self.WIDGET_ORDER)), w[0])" in ext)
@@ -295,6 +295,20 @@ check('the master drops its relayed widget table',
       "self.ownerComp.unstore('widgets')" in ext)
 check('the widget cleanup reads storage without forming a dependency',
       "self.ownerComp.storage.get('widgets')" in ext and "fetch('widgets', None" not in ext)
+# 2026-10-22, FNSTools_pre in a clean project: POP Overlay's host had
+# Auto-register off and its layer registered active, so switching the tool
+# off never reached the global and the overlay stayed up
+check('a layer whose tool is off is never drawn, whatever its entry says',
+      'if not self._toolLayerActive(info):' in ext
+      and "host.par['Layeractive']" in ext)
+check('Layer Active and Displayed reach the global with Auto-register off too',
+      re.search(r"def onParLayeractive\(self, _par, _val, _prev\):\s+self\._hostExtFromPar\(_par\)\._sendLayerFlags\(\)", ext)
+      is not None
+      and re.search(r"def onParDisplayed\(self, _par, _val, _prev\):\s+self\._hostExtFromPar\(_par\)\._sendLayerFlags\(\)", ext)
+      is not None
+      and 'elif self._ownsLiveLayer():' in ext)
+check('ownership is asked of the global, not of HostCanonical alone',
+      "api._resolveSourceRegistry(info) == self.ownerComp" in ext)
 print()
 if FAILS:
     print('FAILED %d: %s' % (len(FAILS), ', '.join(FAILS)))

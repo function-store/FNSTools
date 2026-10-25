@@ -151,6 +151,9 @@ TOKEN_EARLY_REFRESH = 60
 # a response at all. Module level, not class constants: a capitalised class
 # member is promoted onto FNS_Updater's public surface (td-python.md).
 GATE_TIMEOUT_MS = 20000
+# Statuses that say an answer is still on its way. The picker waits while
+# Authstatus reads like one of these, so one must never outlive its flow.
+TRANSITIONAL_STATUS = ('checking', 'waiting', 'finishing')
 GATE_TIMEOUT_FRAMES = 1500          # 25s at 60 fps, after the DAT's 20s
 
 
@@ -181,6 +184,36 @@ class ExtAuth:
 		self._plus = tdu.Dependency(False)
 		self._refreshPlus()
 		fnsLog('AUTH: init')
+		# a reinit drops any flow in flight (its callbacks and timeouts
+		# belonged to the old instance), so a status still saying
+		# "checking..." would read as waiting forever; a frame later,
+		# out of construction
+		run('args[0].valid and args[0].ext.ExtAuth.settleStaleStatus()',
+			self.ownerComp, delayFrames=1, delayRef=op.TDResources)
+
+	def settleStaleStatus(self):
+		"""Wiring: on init, replace a transitional Authstatus left by the
+		previous instance with the account's plain status."""
+		p = getattr(self.ownerComp.par, 'Authstatus', None)
+		if p is None or self._signin is not None:
+			return
+		if any(w in str(p.eval()).lower() for w in TRANSITIONAL_STATUS):
+			self._setStatus(self.AuthStatus())
+
+	def CancelPending(self):
+		"""Stop waiting on a sign-in or a membership check (the picker's
+		Cancel). The browser listener closes and its nonce is forgotten, so
+		a late sign-in is refused; a late recheck answer still records the
+		truth it brings. Never raises."""
+		try:
+			had = self._signin is not None or getattr(self, '_recheck_cb', None) is not None
+			self._cancelSignin('cancelled')
+			self._recheck_cb = None
+			self._gate_wait = getattr(self, '_gate_wait', 0) + 1   # orphan any armed timeout
+			self._setStatus(self.AuthStatus())
+			return {'ok': True, 'cancelled': had, 'status': self.AuthStatus()}
+		except Exception as e:
+			return {'ok': False, 'why': str(e)}
 
 	# ------------------------------------------------------------------
 	# entitlement as a dependency
@@ -759,10 +792,18 @@ class ExtAuth:
 		if self.Account() is None:
 			self._shared_checked = False
 			if self.Account() is not None:
-				self._setStatus(self.AuthStatus())
 				fnsLog('AUTH: adopted the machine session instead of a '
 					   'browser sign-in')
-				return {'ok': True, 'why': 'adopted the machine session'}
+				# Sign in was pressed, so the account is wanted as it is NOW:
+				# the adopted session's products are the gate's cached answer
+				# (up to six hours old, from before a pledge made since), and
+				# a pledge then needed "I just pledged" (field report
+				# 2026-10-17). Recheck settles the status either way.
+				res = self.Recheck()
+				if not res.get('ok'):
+					self._setStatus('%s (could not check your membership: %s)'
+									% (self.AuthStatus(), res.get('why')))
+				return {'ok': True, 'why': 'adopted the machine session; checking your membership'}
 		ws = self._ensureServer()
 		if ws is None:
 			return {'ok': False, 'why': 'could not create the callback listener'}

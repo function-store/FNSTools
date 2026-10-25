@@ -245,6 +245,29 @@ def CuratedAlternatives(meta):
                    if str(x).strip() and ALT_TYPE_RE.match(str(x).strip())})
 
 
+SEARCH_WORD_RE = re.compile(r'^[a-z0-9][a-z0-9+-]*$')
+
+
+def CuratedSearchWords(meta):
+    """The catalog's `search_words`: words the install picker matches like a
+    family tag, for any package, a foreign one or one outside the operator
+    family included (docs/PickerSearch.md). TDXMap has no FamManifest, so
+    without them "midi" ranked the tools that tag it above it. Lowercased,
+    in catalog order, once each; a list or one space-separated string, and
+    malformed words are dropped here and reported by CatalogProblems."""
+    raw = meta.get('search_words') if isinstance(meta, dict) else None
+    if isinstance(raw, str):
+        raw = raw.replace(',', ' ').split()
+    if not isinstance(raw, (list, tuple)):
+        return []
+    out = []
+    for x in raw:
+        w = str(x).strip().lower()
+        if w and SEARCH_WORD_RE.match(w) and w not in out:
+            out.append(w)
+    return out
+
+
 def OpMenuHostedNames():
     """Names of the live packages that carry an FNS_OpMenuRegistry host --
     the ones whose alternatives_for is DERIVED, so a curated list on them
@@ -447,6 +470,18 @@ def CatalogProblems(catalog, live_names, opmenu_hosted=None, family_hosted=None)
                                 'carries an FNS_OpMenuRegistry host, which derives it '
                                 'from onAlternatives() -- drop the curated list'
                                 % name)
+        raw_words = meta.get('search_words')
+        if raw_words not in (None, [], ''):
+            if not isinstance(raw_words, (str, list, tuple)):
+                problems.append('%s: search_words must be a list of words' % name)
+            else:
+                tokens = (raw_words.replace(',', ' ').split() if isinstance(raw_words, str)
+                          else list(raw_words))
+                bad_words = [str(t) for t in tokens
+                             if not SEARCH_WORD_RE.match(str(t).strip().lower())]
+                if bad_words:
+                    problems.append('%s: search_words holds %s -- one word each, '
+                                    'letters and digits' % (name, ', '.join(bad_words)))
         # `nopick` (explicit-pick only) is presence-style: true or absent.
         # A false or a string would read as set to one consumer and unset
         # to another, so only the boolean is accepted. It cannot also be
@@ -644,6 +679,9 @@ def ForeignPackages(catalog, lock=None, dist_dir=None, previous=None):
         curated_alts = CuratedAlternatives(meta)
         if curated_alts:
             entry['alternatives_for'] = curated_alts
+        words = CuratedSearchWords(meta)
+        if words:
+            entry['search_words'] = words
         # an FNS family member: curated here (nothing live to reflect); a
         # member is placed into the working network by definition
         curated_family = CuratedFamily(meta)
@@ -1489,6 +1527,28 @@ def _isAboutStamp(row):
 # a package ships, so documenting it would describe controls no user can
 # ever see.
 DEV_PAGES = ('Version Ctrl',)
+# Built-in menus whose items are THIS computer: its network interfaces (an
+# OSC In DAT's Local Address) and its sound hardware (an Audio Device CHOP's
+# Driver and Device). A custom menu that copies one through `menuSource`
+# put the author's LAN and Tailscale addresses (oscMapper) and audio device
+# ids (FNS_TimelineTools) into parameters.json, and from there onto the
+# public docs site and into the agent skill (2026-10-20). Such a row records
+# `menu_source: 'machine'` and no items. Built-in names only, matched by
+# case: a custom par is capitalized, so `par.Device` on a sub-tool is not
+# one of these. tests/test_parameter_docs_private.py fails on an address or
+# device id in the file, which catches a source this list does not name.
+MACHINE_MENU_PARS = ('localaddress', 'device', 'driver')
+_MENU_SOURCE_PAR = re.compile(r'\.par\.([A-Za-z0-9]+)\s*$')
+
+
+def _listsThisMachine(par):
+    """Does this menu copy a built-in menu that lists the computer it runs on?"""
+    try:
+        src = str(par.menuSource or '')
+    except Exception:
+        return False
+    m = _MENU_SOURCE_PAR.search(src)
+    return bool(m) and m.group(1) in MACHINE_MENU_PARS
 
 
 def _plain(val):
@@ -1540,8 +1600,11 @@ def _parRows(page):
         if par.startSection:
             row['section'] = True
         if par.style in ('Menu', 'StrMenu'):
-            row['menu'] = [{'name': str(n), 'label': str(l)} for n, l
-                           in zip(par.menuNames or [], par.menuLabels or [])]
+            if _listsThisMachine(par):
+                row['menu_source'] = 'machine'
+            else:
+                row['menu'] = [{'name': str(n), 'label': str(l)} for n, l
+                               in zip(par.menuNames or [], par.menuLabels or [])]
         rows.append(row)
     return rows
 
@@ -2222,7 +2285,7 @@ def ScrubArtifact(path, notices=None, identity=None):
     (the staging class Embody's own export uses), strip PI's markers and
     every DAT's Info Header from that copy (a header that cannot be
     stripped raises), stamp `notices` (license_notices.Notices) and `identity`
-    ((name, is_global) for package_identity.Stamp) onto it, save it back
+    ((name, is_global, help_url) for package_identity.Stamp) onto it, save it back
     over `path`, destroy the holder. Returns the number of operators
     whose markers changed; raises when the artifact cannot be loaded,
     stamped or saved, so the export reports it instead of hashing marked
@@ -2244,7 +2307,8 @@ def ScrubArtifact(path, notices=None, identity=None):
         if notices:
             _licenseNotices().Stamp(loaded, notices, annotateCOMP)
         if identity:
-            _packageIdentity().Stamp(loaded, identity[0], identity[1], executeDAT)
+            _packageIdentity().Stamp(loaded, identity[0], identity[1], executeDAT,
+                                     help_url=identity[2] if len(identity) > 2 else '')
         if changed or notices or identity:
             loaded.save(path)
         return len(changed)
@@ -2266,7 +2330,8 @@ def ExportPackage(comp, suffix='', notices=None, identity=None):
     while the master keeps them; a scrub that fails fails the export.
     `notices` (license_notices.Notices) are stamped onto the same copy
     (docs/LicenseNotices.md), never the master, and so is `identity`
-    ((name, is_global): Pkgname and <FNS:GLOBAL>, docs/StandaloneTakeover.md).
+    ((name, is_global, help_url): Pkgname, <FNS:GLOBAL>, and the About
+    page's Help and Link buttons, docs/StandaloneTakeover.md).
     """
     os.makedirs(_repo(DIST_DIR), exist_ok=True)
     dest = _repo(DIST_DIR, comp.name + suffix + '.tox')
@@ -2842,6 +2907,12 @@ def Build(export=False, out_path=None, base_url=BASE_URL, release=None):
         if fits:
             entry['fits'] = fits
 
+        # Words the install picker matches like a family tag (catalog
+        # `search_words`, CuratedSearchWords). Presence-style.
+        words = CuratedSearchWords(meta)
+        if words:
+            entry['search_words'] = words
+
         # Operator types this package is an alternative for, DERIVED from its
         # op-menu callbacks (AlternativesFor) when it carries an op-menu host;
         # a package with NO host may curate the list in the catalog instead
@@ -2887,7 +2958,8 @@ def Build(export=False, out_path=None, base_url=BASE_URL, release=None):
                 debug('packaging: %s has no licence notice (%s)' % (name, e))
             else:
                 identity = (name, _packageIdentity().IsGlobal(
-                    entry.get('placement'), entry.get('family'), entry.get('kind')))
+                    entry.get('placement'), entry.get('family'), entry.get('kind')),
+                    entry['help_url'])
                 art = ExportPackage(comp, notices=notices, identity=identity)
             if art:
                 entry['artifact'] = art
@@ -2937,7 +3009,7 @@ def Build(export=False, out_path=None, base_url=BASE_URL, release=None):
                                              notices=vnotices,
                                              identity=(name, _packageIdentity().IsGlobal(
                                                  entry.get('placement'), entry.get('family'),
-                                                 entry.get('kind'))))
+                                                 entry.get('kind')), entry['help_url']))
                     if vart:
                         vrow['artifact'] = vart
                     else:
@@ -2990,6 +3062,24 @@ def Build(export=False, out_path=None, base_url=BASE_URL, release=None):
             continue
         if words and (words['head'] or words['body']):
             entry['search'] = words
+
+    # Each package's features (its doc's feature_list) as plain "name: does"
+    # lines, listed in the picker's opened card (docs/FinderAndToolRow.md).
+    # The site build bakes the same lines into /get; this carries them to
+    # the picker the installer serves. Presence-style like `search`, and
+    # never on a preview, for the same reason.
+    docs_dir = _repo(PKG_DIR, 'docs')
+    sidx = _searchIndex()
+    for entry in packages:
+        if entry.get('preview'):
+            continue
+        path = sidx.DocPath(docs_dir, entry['name'])
+        if not os.path.exists(path):
+            continue
+        with open(path, encoding='utf-8') as f:
+            feats = sidx.FeatureLines(f.read())
+        if feats:
+            entry['features'] = feats
 
     rel = release or _release()
     for entry in packages:

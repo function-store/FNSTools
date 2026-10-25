@@ -57,6 +57,22 @@ AGENT_SKILL_NAME = 'agent-skill.json'
 AGENT_SKILL_DIR = 'agent-skill'
 AGENT_SKILL_SCHEMA = 1
 
+# Package contract (docs/UpdaterHardening.md, "Kept children"): a DIRECT
+# child of a package tagged KEEP_TAG holds the user's work, not the
+# release's. Both replace rails carry it across the swap and put it in
+# place of the new copy's same-named child. A kept subtree that runs an
+# extension is never carried (copying one is TD's most fragile operation);
+# the release's copy stands and the refusal is logged.
+KEEP_TAG = 'fns_keep'
+# Stored on each child an update carried: the id of the TD process that
+# carried it. A tool whose config load would rebuild that child from the
+# roaming file leaves it alone while the mark matches -- the carried child
+# is the live state, newer than anything the file can hold. Another
+# session's mark is stale and only cleared. The mark expires on its own
+# after CARRY_MARK_FRAMES, well after the config apply it is meant for.
+CARRY_MARK = 'fns_carried'
+CARRY_MARK_FRAMES = 600
+
 # ---------------------------------------------------------------------------
 # Discovery -- the one thing this component hardcodes.
 #
@@ -2844,6 +2860,9 @@ class ExtUpdater:
 				res.pop('verify', None)
 				res.pop('reload_token', None)
 				res['ok'], res['why'] = False, 'gone after reload'
+				held = self._settleCarry(None, res.pop('carry', None))
+				if held:
+					res['why'] += held
 				continue
 			token = res.get('reload_token')
 			# An empty token means the COMP had no children to renew, so the
@@ -2860,10 +2879,16 @@ class ExtUpdater:
 					res['why'] = ('reload pulse did nothing -- still the previous '
 								  'contents (unreadable artifact, or a tox this '
 								  'TD build refuses)')
+					# the kept children never left: drop the held copies
+					self._dropCarry(res.pop('carry', None))
 					continue
 			res.pop('verify', None)
 			res.pop('reload_token', None)
 			res.pop('reload_retried', None)
+			held = self._settleCarry(comp, res.pop('carry', None), res)
+			if held:
+				res['ok'], res['why'] = False, held.strip(' -')
+				continue
 			res['ops'] = len(comp.findChildren())
 			errs = comp.errors(recurse=True)
 			if errs:
@@ -3034,8 +3059,15 @@ class ExtUpdater:
 		so for the 41 there is nothing to restore from and the user's settings
 		are simply lost. This is the reason the fleet is moving to
 		reloadcustom off everywhere -- see docs/UpdaterHardening.md.
+
+		Children: the reload recreates every one of them. The ones tagged
+		KEEP_TAG are held first (a carry that fails refuses before anything
+		is written) and put back once the reload is judged.
 		"""
 		name = step['name']
+		holder, carried, refused, why = self._carryOut(comp, name)
+		if why:
+			return {'package': name, 'ok': False, 'why': why}
 		try:
 			if os.path.normcase(os.path.abspath(bound)) != \
 					os.path.normcase(os.path.abspath(step['path'])):
@@ -3044,6 +3076,8 @@ class ExtUpdater:
 					os.makedirs(folder, exist_ok=True)
 				shutil.copyfile(step['path'], bound)
 		except Exception as e:
+			if holder is not None:
+				holder.destroy()  # nothing was reloaded: the kept children never left
 			return {'package': name, 'ok': False,
 					'why': 'could not write %s (%s)' % (bound, str(e)[:80])}
 		# A reload RECREATES the children, so their ids all change. Capturing
@@ -3057,8 +3091,13 @@ class ExtUpdater:
 		self.RecordInstalled(name, digest, step.get('release', ''), target)
 		# The pulse's effect is not visible in this same call, so the count
 		# and error check happen on the next drain tick rather than here.
-		return {'package': name, 'ok': True, 'how': 'rewrote %s' % bound,
-				'verify': comp.path, 'reload_token': token}
+		res = {'package': name, 'ok': True, 'how': 'rewrote %s' % bound,
+			   'verify': comp.path, 'reload_token': token}
+		if holder is not None:
+			res['carry'] = {'holder': holder.name, 'children': carried}
+		if refused:
+			res['carry_refused'] = refused
+		return res
 
 	def _backupFolder(self):
 		"""Where the pre-replace exports live. One deep, per package: the
@@ -3113,6 +3152,125 @@ class ExtUpdater:
 		except Exception as e:
 			debug('UPDATER: could not restore %s from %s: %s' % (name, backup, e))
 			return False
+
+	# --- kept children (KEEP_TAG): carried across either replace rail ---
+
+	@staticmethod
+	def _runsExtension(child):
+		"""Does this child, or any COMP inside it, declare an extension?"""
+		if not child.isCOMP:
+			return False
+		for c in [child] + [k for k in child.findChildren() if k.isCOMP]:
+			for p in c.pars('ext*object'):
+				try:
+					if str(p.expr or '').strip() or str(p.val or '').strip():
+						return True
+				except Exception:
+					return True  # unreadable counts as present: never guess safe
+		return False
+
+	def _carryOut(self, comp, name):
+		"""Hold the package's kept children while the package is replaced.
+
+		Each direct child tagged KEEP_TAG is copied into a holder COMP inside
+		this updater -- which neither rail touches -- with cooking off, so
+		nothing held runs. Returns (holder or None, [[child, x, y], ...],
+		refused names, why). A non-empty `why` refuses the replace: a kept
+		child that could not be held is the user's work, and the swap would
+		destroy it. A kept child that runs an extension is not carried at
+		all (logged, and the release's copy stands), because copying one is
+		the crash-prone operation this updater exists to avoid.
+		"""
+		take, refused = [], []
+		for c in comp.children:
+			if KEEP_TAG not in c.tags:
+				continue
+			if self._runsExtension(c):
+				refused.append(c.name)
+				debug('UPDATER: %s/%s is tagged %s but runs an extension -- not '
+					  'carried, the release\'s copy replaces it' % (name, c.name, KEEP_TAG))
+			else:
+				take.append(c)
+		if not take:
+			return None, [], refused, ''
+		holder = None
+		try:
+			base, n = 'carry_%s' % name, 1
+			hname = base
+			while self.ownerComp.op(hname) is not None:
+				hname, n = '%s_%d' % (base, n), n + 1
+			ys = [c.nodeY for c in self.ownerComp.children] or [0]
+			holder = self.ownerComp.create(baseCOMP, hname)
+			holder.allowCooking = False
+			holder.nodeX, holder.nodeY = 0, min(ys) - 400
+			carried = []
+			for c in take:
+				holder.copy(c, name=c.name)
+				carried.append([c.name, c.nodeX, c.nodeY])
+		except Exception as e:
+			if holder is not None and holder.valid:
+				holder.destroy()
+			return None, [], refused, ('could not hold its kept children (%s) -- '
+									   'refusing to replace it' % str(e)[:80])
+		return holder, carried, refused, ''
+
+	def _carryIn(self, comp, holder, carried):
+		"""Put held children into comp, each in place of (and at the
+		position of) its same-named child there, marked CARRY_MARK. Returns
+		(placed names, names that could not be placed)."""
+		placed, failed = [], []
+		pid = os.getpid()
+		for cname, x, y in carried:
+			held = holder.op(cname)
+			if held is None:
+				failed.append(cname)
+				continue
+			try:
+				old = comp.op(cname)
+				if old is not None:
+					x, y = old.nodeX, old.nodeY
+					old.destroy()
+				new = comp.copy(held, name=cname)
+				new.nodeX, new.nodeY = x, y
+				new.store(CARRY_MARK, pid)
+				# The config apply that should see the mark lands ~30 frames
+				# after the new copy's host registers. When the apply came
+				# first (or never comes: project scope) nothing consumes the
+				# mark, and a stale one would ride the next save into the
+				# .toe or a tox. It expires on its own well after the apply.
+				run('args[0].valid and args[0].unstore(args[1])', new, CARRY_MARK,
+					delayFrames=CARRY_MARK_FRAMES, delayRef=op.TDResources)
+				placed.append(cname)
+			except Exception as e:
+				debug('UPDATER: could not put %s back into %s: %s' % (cname, comp.path, e))
+				failed.append(cname)
+		return placed, failed
+
+	def _settleCarry(self, comp, carry, res=None):
+		"""Finish a carry into comp and remove the holder. '' when done;
+		otherwise a ' -- ...' clause for the result, and the holder stays
+		(it is the only copy of what it holds). comp None: the package is
+		gone, so the holder stays and the clause says where."""
+		if not carry:
+			return ''
+		holder = self.ownerComp.op(carry.get('holder', ''))
+		if holder is None:
+			return ' -- its kept children were lost (holder gone)'
+		if comp is None:
+			return ' -- its kept children are held in %s' % holder.path
+		placed, failed = self._carryIn(comp, holder, carry.get('children') or [])
+		if res is not None:
+			res['carried'] = placed
+		if failed:
+			return ' -- could not put back %s (held in %s)' % (', '.join(failed), holder.path)
+		holder.destroy()
+		return ''
+
+	def _dropCarry(self, carry):
+		"""Remove a holder whose children never left the package."""
+		holder = self.ownerComp.op((carry or {}).get('holder', '')) if carry else None
+		if holder is not None:
+			holder.destroy()
 
 	def _replacePackage(self, step, target=None):
 		name = step['name']
@@ -3201,6 +3359,15 @@ class ExtUpdater:
 			return {'package': name, 'ok': False,
 					'why': 'could not back up the installed version -- '
 						   'refusing to replace it (check the store folder is writable)'}
+		# Kept children (KEEP_TAG) are held outside the package before the
+		# destroy and put into whichever copy stands afterwards: the new one,
+		# or the restored backup when the load fails (the backup holds them
+		# too, as of the same moment -- putting the held ones in is uniform
+		# and costs a copy).
+		holder, carried, refused, why = self._carryOut(dest, name)
+		if why:
+			return {'package': name, 'ok': False, 'why': why}
+		carry = {'holder': holder.name, 'children': carried} if holder is not None else None
 		dest.destroy()
 		before = {c.id for c in carrier.children}
 		try:
@@ -3208,21 +3375,27 @@ class ExtUpdater:
 		except Exception as e:
 			restored = self._restorePackage(carrier, backup, name, nx, ny, color)
 			return {'package': name, 'ok': False,
-					'why': 'loadTox failed: %s%s' % (
+					'why': 'loadTox failed: %s%s%s' % (
 						str(e)[:110],
 						' (previous version restored)' if restored
-						else ' AND THE BACKUP COULD NOT BE RESTORED: ' + backup)}
+						else ' AND THE BACKUP COULD NOT BE RESTORED: ' + backup,
+						self._settleCarry(carrier.op(name) if restored else None, carry))}
 		fresh = [c for c in carrier.children if c.id not in before]
 		new = fresh[0] if fresh else carrier.op(name)
 		if new is None:
 			restored = self._restorePackage(carrier, backup, name, nx, ny, color)
 			return {'package': name, 'ok': False,
-					'why': 'artifact loaded nothing%s' % (
+					'why': 'artifact loaded nothing%s%s' % (
 						' -- previous version restored' if restored
-						else ' AND THE BACKUP COULD NOT BE RESTORED: ' + backup)}
+						else ' AND THE BACKUP COULD NOT BE RESTORED: ' + backup,
+						self._settleCarry(carrier.op(name) if restored else None, carry))}
 		if new.name != name:
 			new.name = name  # TD numbers on collision; the manifest name wins
 		new.nodeX, new.nodeY, new.color = nx, ny, color
+		res = {'package': name}
+		held = self._settleCarry(new, carry, res)
+		if refused:
+			res['carry_refused'] = refused
 		self.RecordInstalled(name, digest, step.get('release', ''), target)
 		errs = new.errors(recurse=True)
 		if errs:
@@ -3233,8 +3406,10 @@ class ExtUpdater:
 			except Exception:
 				pass
 			errs = new.errors(recurse=True)
-		return {'package': name, 'ok': not errs, 'ops': len(new.findChildren()),
-				'why': errs.splitlines()[0][:140] if errs else ''}
+		res.update({'ok': not errs and not held, 'ops': len(new.findChildren()),
+					'why': held.strip(' -') if held
+					else errs.splitlines()[0][:140] if errs else ''})
+		return res
 
 	# ------------------------------------------------------------------
 	# reporting

@@ -77,8 +77,9 @@ print('3. the stamp on an artifact copy')
 
 
 class Par(object):
-    def __init__(self):
+    def __init__(self, name=''):
         self.val, self.expr, self.readOnly, self.help = '', '', False, ''
+        self.name, self.bindExpr = name, ''
 
     def eval(self):
         return self.val
@@ -86,12 +87,15 @@ class Par(object):
 
 class Page(object):
     def __init__(self, owner, name):
-        self.owner, self.name = owner, name
+        self.owner, self.name, self.pars = owner, name, []
 
     def appendStr(self, name, label=''):
-        p = Par()
+        p = Par(name)
         setattr(self.owner.par, name, p)
+        self.pars.append(p)
         return [p]
+
+    appendPulse = appendStr
 
 
 class Comp(object):
@@ -130,6 +134,68 @@ pid.Stamp(f, 'ComplexMix', False)
 check('a non-global package carries no tag, even one copied in by mistake', pid.GLOBAL_TAG not in f.tags)
 check('ReadName answers the stamped name, None when unstamped',
       pid.ReadName(c) == 'FNS_CustomParTools' and pid.ReadName(Comp('X')) is None)
+
+# ------------------------------------------------------------------ 3b
+print('3b. the About page: Help and Link, answered by FNS_About')
+
+
+def _about(comp, **pars):
+    """FNS_About's own pars, as its To Deploy / Custom pages carry them."""
+    a = comp.op('FNS_About')
+    for k, v in pars.items():
+        p = Par(k)
+        p.val = v
+        setattr(a.par, k, p)
+    return a
+
+
+DOCS = 'https://functionstore.tools/docs/oscmapper/'
+t = Comp('oscMapper')
+t.appendCustomPage('About').appendStr('Pkgversion')
+a = _about(t, Helpurl='', Openhelp=False, Authorurl='https://functionstore.xyz/link-in-bio',
+           Openauthor=False, Authorname='Function Store')
+got = pid.Stamp(t, 'oscMapper', True, help_url=DOCS)
+page = t.customPages[0]
+check('the derived docs URL fills an empty FNS_About.Helpurl',
+      a.par.Helpurl.val == DOCS and got.get('help') == DOCS)
+check('the About page gains Help, Link and Author (read-only) beside Pkgversion',
+      [p.name for p in page.pars] == ['Pkgversion', 'Openhelp', 'Openauthor', 'Authorname']
+      and t.par.Authorname.readOnly and t.par.Authorname.val == 'Function Store'
+      and got.get('link') == 'https://functionstore.xyz/link-in-bio')
+check("FNS_About's own pars follow the tool's by bind, so a press reaches its callback",
+      a.par.Openhelp.bindExpr == 'parent().par.Openhelp'
+      and a.par.Openauthor.bindExpr == 'parent().par.Openauthor'
+      and a.par.Authorname.bindExpr == 'parent().par.Authorname')
+pid.Stamp(t, 'oscMapper', True, help_url=DOCS)
+check('stamping twice adds nothing twice', len(page.pars) == 4 and len(t.customPages) == 1)
+
+t = Comp('FNS_SwitchTools')
+a = _about(t, Helpurl='https://example.org/authored/', Openhelp=False)
+pid.Stamp(t, 'FNS_SwitchTools', True, help_url='https://functionstore.tools/docs/fns-switchtools/')
+check('an authored Helpurl is the one override and is kept',
+      a.par.Helpurl.val == 'https://example.org/authored/' and t.par.Openhelp.name == 'Openhelp')
+
+t = Comp('NoDocs')
+_about(t, Helpurl='', Openhelp=False)
+got = pid.Stamp(t, 'NoDocs', False, help_url='')
+check('no docs page, no Help button (never a 404), no About page conjured',
+      'help' not in got and getattr(t.par, 'Openhelp', None) is None and not t.customPages)
+
+t = Comp('LayerSep3D')
+pg = t.appendCustomPage('About')
+pg.appendStr('Author'); pg.appendStr('Link'); pg.appendStr('Pkgversion')
+_about(t, Helpurl='', Openhelp=False, Authorurl='https://x', Openauthor=False, Authorname='Y')
+pid.Stamp(t, 'LayerSep3D', False, help_url='https://functionstore.tools/docs/layersep3d/')
+check('a tool with its own Author / Link pars gets Help only, no twins',
+      [p.name for p in pg.pars] == ['Author', 'Link', 'Pkgversion', 'Openhelp'])
+
+t = Comp('Bare')
+_about(t, Helpurl='')
+pid.Stamp(t, 'Bare', False, help_url='https://functionstore.tools/docs/bare/')
+check('an FNS_About without the Openhelp pulse gets no button it cannot answer',
+      getattr(t.par, 'Openhelp', None) is None)
+check('no FNS_About: nothing to stamp, no error',
+      pid.Stamp(Comp('X', about=False), 'X', False, help_url='https://x') == {})
 
 
 class ParNS(object):
@@ -189,12 +255,14 @@ check('a package that is no longer global loses tag and guard',
 print('4. the release wiring')
 scrub = bm[bm.index('def ScrubArtifact('):bm.index('def ExportPackage(')]
 check('ScrubArtifact stamps identity on the loaded copy and saves it',
-      '_packageIdentity().Stamp(loaded, identity[0], identity[1], executeDAT)' in scrub
+      '_packageIdentity().Stamp(loaded, identity[0], identity[1], executeDAT,' in scrub
+      and "help_url=identity[2] if len(identity) > 2 else ''" in scrub
       and 'if changed or notices or identity:' in scrub)
 check('ExportPackage passes identity through', 'identity=identity)' in bm)
-check('base and variant builds both carry the package name and the global rule',
+check('base and variant builds both carry the package name, the global rule and the docs page',
       bm.count("_packageIdentity().IsGlobal(") == 2
-      and "identity = (name, _packageIdentity().IsGlobal(" in bm)
+      and "identity = (name, _packageIdentity().IsGlobal(" in bm
+      and bm.count("entry['help_url'])") == 2)
 
 # ------------------------------------------------------------------ 5
 print('5. the updater: find, compare, take over')

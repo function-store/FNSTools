@@ -1,48 +1,112 @@
 ---
 package: FNS_ExprHotStrings
-summary: YouTube breakdown
+summary: Type a short abbreviation into a parameter's expression and it expands into the full text.
 features:
-  - name: ExprHotStrings
-    anchor: exprhotstrings
+  - name: Why use it
+    anchor: why-use-it
+  - name: How to use it
+    anchor: how-to-use-it
+  - name: Wrapping a name in op()
+    anchor: wrapping-a-name-in-op
+  - name: Reaching the parent shortcut
+    anchor: reaching-the-parent-shortcut
+  - name: Promoting a parameter as you type
+    anchor: promoting-a-parameter-as-you-type
 video: 'https://www.youtube.com/watch?v=j43gZ0MB2xo'
 feature_list:
   - name: Abbreviation table
-    anchor: exprhotstrings
-    does: 'Abbreviations in the first column expand to the Expands column''s string when used as a parameter expression, for example `#AT` to `absTime.seconds`.'
+    anchor: how-to-use-it
+    does: 'A table of abbreviations and what they expand to, so `#AT` typed as an expression becomes `absTime.seconds`.'
   - name: Inline expansion
-    anchor: exprhotstrings
-    does: 'With Replace inline on (off by default), abbreviations expand inside a longer expression and can be combined, as in `#AT * 0.2`.'
-  - name: Wrap a path in op()
-    anchor: exprhotstrings
-    does: '`#@` wraps what follows in `op(''...'')`, so `#@noise1.par.amp` becomes `op(''noise1'').par.amp`; it has its own enable toggle.'
+    anchor: how-to-use-it
+    does: 'With Replace inline on, abbreviations also expand in the middle of an expression and can be combined, as in `#AT * 0.2`.'
+  - name: Externalize the table to a file
+    anchor: how-to-use-it
+    does: 'With Externalize on, the table is kept in a file, so your abbreviations follow you from project to project.'
+  - name: Wrap a name in op()
+    anchor: wrapping-a-name-in-op
+    does: '`#@noise1.par.amp` becomes `op(''noise1'').par.amp`.'
   - name: Parent shortcut abbreviations
-    anchor: exprhotstrings
-    does: '`#!` resolves to the closest parent shortcut and `#!!` adds `.par` after it, both behind their own enable toggle.'
+    anchor: reaching-the-parent-shortcut
+    does: '`#!` becomes the closest parent shortcut, and `#!!` the same with `.par` after it.'
   - name: Promote a parameter while typing
-    anchor: exprhotstrings
-    does: '`#@!` (Bind) and `#@~` (Expression) promote the parameter you are typing in to its parent via CustomParTools, using its own name or one you supply.'
+    anchor: promoting-a-parameter-as-you-type
+    does: '`#@!` and `#@~` turn the parameter you are typing in into a custom parameter on its parent, linked by a bind or an expression.'
 ---
 
-## ExprHotStrings
+## Why use it
 
-[YouTube breakdown](https://www.youtube.com/watch?v=j43gZ0MB2xo)
+Some expressions you type over and over: `absTime.seconds`, a frame
+counter divided by the end frame, the path to a parent's custom parameters.
+Each one is a dozen keystrokes and a chance to mistype, every time.
 
-Define `Abbreviations` in the first column that when used in a parameter expression will expand to the string defined in the `Expands` column.
-Type `#AT` for `absTime.seconds`! With `Replace inline` enabled on the component (off by default; without it an abbreviation only expands when it is the *entire* expression) the abbreviations work in-line too, meaning you can type `#AT * 0.2` or even combine them!
+ExprHotStrings gives parameter fields text expansion. Define `#AT` once as
+`absTime.seconds`, type `#AT` into any expression, and it is replaced with the
+full text. A few built-in abbreviations go further: they wrap an operator name
+in `op('...')`, find the nearest parent shortcut, or promote the parameter you
+are editing to its parent.
 
-> Most of the behaviors below live behind their own toggle on the component, and only `CustomPar Promote Enable` is on by default: `#@op Wrap Enable` gates `#@`, `#! Parent Shortcut Enable` gates `#!`/`#!!`.
+## How to use it
 
-There is a special reserved abbreviation, `#@` which will wrap anything valid after it in `op('...')`. So `#@noise1.par.amp` becomes `op('noise1').par.amp` saving you some heavy keystrokes!
+1. Open the abbreviation table: the **ExprHotStrings** tab in
+   [FNS_Hub](/docs/fns-hub/), **Edit Table** on the component, or **Open
+   hot-strings editor** from quick-launch.
+2. Add a row. The first column is what you type, the second is what it
+   expands to. Start every abbreviation with a character you would not type
+   otherwise, such as `#`, so it never fires by accident.
+3. Type the abbreviation into a parameter's expression and press `Enter`
+   with the mouse still over the parameter. It expands in place.
 
-Another special abbreviation `#!` will resolve to the closest parent shortcut, as well as `#!!` will also add a .par after it!
+The mouse position matters. Because of what the TouchDesigner API makes
+available, the mouse has to be over the parameter when you finish typing.
+Pressing `Enter` is the easy way; if you click away instead, move the mouse
+back over the parameter.
 
-   - #!.par.Something -> parent.Project.par.Something (for example)
-   - #!!Something -> parent.Project.par.Something (for example)
-   - Encouraging even more to use parent shortcuts (which you can easily add by `ctrl+shift-clicking` on the diamond button
+By default an abbreviation expands only when it is the whole expression.
+Switch on **Replace inline** and it expands anywhere inside one, so
+`#AT * 0.2` works and several abbreviations can share an expression.
+Expansion works in bind expressions too.
 
-Two more abbreviations promote the parameter you're typing in straight to its parent (via [CustomParTools](/docs/fns-custompartools/#custompar-tools), if installed) and replace themselves with the resulting shortcut path:
-   - `#@!` promotes with a **Bind** reference
-   - `#@~` promotes with an **Expression** reference
-   - Leave off a name to reuse the parameter's own name, or supply one, e.g. `#@!MyName`
+With **Externalize** on, the table is kept in a file in the toolkit's
+folder: the same abbreviations follow you from project to project, and you
+can edit the file outside TouchDesigner or keep it in version control.
 
-> **IMPORTANT**: due to what's available through the TD API, you need to have your mouse over the parameter box when finishing typing (either by clicking away, in which case you need to move the mouse over to the parameter again, or my suggested way of hitting `Enter`).
+There is also a [video breakdown](https://www.youtube.com/watch?v=j43gZ0MB2xo)
+on YouTube.
+
+## Wrapping a name in op()
+
+`#@` wraps whatever follows it in `op('...')`. `#@noise1.par.amp` becomes
+`op('noise1').par.amp`, which saves the quotes and brackets every time you
+reach for another operator. It is off by default; switch on **#@op Wrap
+Enable** to use it.
+
+## Reaching the parent shortcut
+
+`#!` resolves to the closest parent shortcut above the operator you are
+editing, and `#!!` adds `.par` after it. With a component whose shortcut is
+`Project` somewhere above:
+
+- `#!.par.Something` becomes `parent.Project.par.Something`
+- `#!!Something` becomes `parent.Project.par.Something`
+
+If no component above has a shortcut, you get `parent()`. Both are off by
+default; switch on **#! Parent Shortcut Enable** to use them.
+
+It is one more reason to give your components parent shortcuts, which you
+can add by `Ctrl+Shift`-clicking the diamond button.
+
+## Promoting a parameter as you type
+
+Two abbreviations turn the parameter you are typing in into a custom
+parameter on its parent component, through
+[CustomParTools](/docs/fns-custompartools/), and replace themselves with the
+shortcut path to it:
+
+- `#@!` promotes it with a **Bind** reference.
+- `#@~` promotes it with an **Expression** reference.
+
+Leave off a name and the new parameter takes the name of the one you are
+typing in; add one to choose it, as in `#@!MyName`. Both are on by default.
+They need CustomParTools installed; without it the text stays as you typed
+it.

@@ -45,7 +45,8 @@ FILENAME = 'recommendations.json'
 SCHEMA = 1
 
 REQUIRED = ('name', 'author', 'url')
-OPTIONAL = ('author_url', 'description', 'category', 'note',
+OPTIONAL = ('ours',  # true: a product of ours the installer cannot place (shown apart from other creators)
+            'author_url', 'description', 'category', 'note',
             # Placement. Present together or not at all -- see below.
             'tox_url', 'sha256', 'bytes', 'pinned_at',
             # The website post (docs/CommunityHighlights.md).
@@ -224,6 +225,8 @@ def validate(doc):
             elif f not in ALLOWED:
                 problems.append('%s: unknown field `%s`' % (where, f))
 
+        if 'ours' in row and not isinstance(row['ours'], bool):
+            problems.append('%s: ours must be true or false' % where)
         for f in ('url', 'author_url'):
             v = str(row.get(f, '')).strip()
             if v and not v.startswith('https://'):

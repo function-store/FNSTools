@@ -558,7 +558,7 @@ class MainMenuRegistryExt(RegistryBase):
 	# Location-independent: resolves through the package's global shortcut,
 	# evaluates to None (no clone, no warning) where it is absent.
 	# _healHostClones and StampHost come from RegistryBase off these two.
-	CLONE_EXPR = "op.FNS.op('FNS_MainMenuRegistry') if hasattr(op, 'FNS') else None"
+	CLONE_EXPR = "tdu.tryExcept(lambda: op.FNS.op('FNS_MainMenuRegistry'), None)"
 
 	# --- entry lifecycle hooks (the tool's callbacks DAT) ---
 

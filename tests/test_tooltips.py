@@ -71,9 +71,16 @@ check('it never eats the pointer', re.search(r'\.fns-tip \{[^}]*pointer-events: 
 
 print('4. the card')
 idx = read(SHELLS[0])
-check('a card\'s tip is its full description plus what it adds',
-      re.search(r"el\.setAttribute\('data-tip', \(p\.description \|\| ''\)\s*\n\s*\+ \(surf\.length", idx)
-      is not None)
+# docs/FinderAndToolRow.md: a click opens the card to its full description,
+# what it adds and its features; a collapsed row's hover carries the full
+# description, where it lands and what it adds, and an open row has no tip
+check('an opened card shows the full description plus what it adds',
+      "adds.textContent = 'Adds: ' + surf.join(', ');" in idx
+      and '#list .card.open .desc:not(.byline) { display: block;' in idx)
+check("a collapsed row's tip is its description, where it lands and what it adds",
+      "rowTip = (p.description || '')" in idx and "+ (lands ? '\\n\\n' + lands : '')" in idx
+      and "none: 'Ticked, it waits on the FNS tab of the OP Create dialog" in idx
+      and "if (isOpen || !rowTip) el.removeAttribute('data-tip');" in idx)
 check('the description clamp still points at the tip',
       "the full text rides the card's data-tip" in idx)
 

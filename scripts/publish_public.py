@@ -88,7 +88,9 @@ ONLY = {
     'website': ('website/', 'packaging/docs/', 'packaging/configurator/',
                 'icons/', 'packaging/catalog.json',
                 'packaging/manifest.json', 'packaging/parameters.json',
-                'packaging/recommendations.json'),
+                'packaging/recommendations.json',
+                # the site builds /changelog/ from it
+                'packaging/CHANGELOG.md'),
 }
 
 
@@ -128,6 +130,9 @@ DECLARED_PRIVATE = (
     # Analysis page, Markers and Background extensions through a helper
     # rooted in the tool's folder, so the name sweep does not see it.
     'tests/test_timeline_audio_analysis.py',
+    # FNS_Autosave (preview since v3.2.76): this test drives the tool's
+    # idle-save logic, so it goes with the tool's withheld source.
+    'tests/test_autosave_idle.py',
     # The design of a Base-gated tool: 750 lines of how FNS_BeatMod's
     # modulators are built. Naming the tool publicly is fine, handing over
     # its construction is not.
@@ -210,6 +215,18 @@ DECLARED_PRIVATE_PREFIXES = (
     'CLAUDE.md',
     'AGENTS.md',
     '.claude/',
+)
+
+# docs/ is the maintainers' design record (plans, research, audits, release
+# machinery), so it stays private by default; the owner's decision
+# (2026-10-22) is that only user-facing documents publish. Allowlisted, not
+# listed out, so a new internal note needs no entry. User docs for each tool
+# live on the website (packaging/docs/); what stays here is what a public
+# page links to. RegistryScheme.md is the pattern the README sends tool
+# builders to. docs/README.md, the generated index, stays private with the
+# rest: its rows summarise every internal note.
+PUBLIC_DOCS = (
+    'docs/RegistryScheme.md',
 )
 
 # Paths whose NAME collides with a gated package but which belong to a
@@ -522,6 +539,8 @@ def Rule(path, gated):
     if any(path == p.rstrip('/') or path.startswith(p)
            for p in DECLARED_PRIVATE_PREFIXES):
         return 'declared'
+    if path.startswith('docs/') and path not in PUBLIC_DOCS:
+        return 'internal-doc'
     if path.lower().endswith(EXAMPLE_SUFFIX):
         return 'example'
     preview = _previewOwnFile(path)

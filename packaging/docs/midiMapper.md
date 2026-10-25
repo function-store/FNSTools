@@ -2,60 +2,102 @@
 package: midiMapper
 summary: Simple MIDI mapping tool by AlphaMoonbase.berlin.
 features:
-  - name: midiMapper
-    anchor: midimapper
-  - name: ResetMIDIPls
-    anchor: resetmidipls
-  - name: Mapper
-    anchor: mapper
+  - name: Why use it
+    anchor: why-use-it
+  - name: How to use it
+    anchor: how-to-use-it
+  - name: Mapping from the toolbar
+    anchor: mapping-from-the-toolbar
     icon: Mapper.png
+  - name: Unsticking a device (ResetMIDIPls)
+    anchor: unsticking-a-device-resetmidipls
 feature_list:
   - name: Drag-and-drop MIDI learn
-    anchor: midimapper
-    does: 'Drop parameters onto the UI, learn, and move a fader or knob to assign it; each mapping''s min/max range can be changed.'
+    anchor: how-to-use-it
+    does: 'Drop parameters onto the mapper, switch on Learn and move a fader or knob to assign it.'
+  - name: Range per mapping
+    anchor: how-to-use-it
+    does: 'Each mapping has its own min and max, so a full fader sweep can cover just part of a parameter.'
+  - name: Learn from the toolbar
+    anchor: mapping-from-the-toolbar
+    does: 'Drop a parameter on the toolbar button and move a knob to map it, without opening the mapper.'
+  - name: Open the mapper from the toolbar
+    anchor: mapping-from-the-toolbar
+    does: 'Click the toolbar button to open the MIDI Mapper, or right-click it for the mapper''s settings.'
+  - name: Settings across projects
+    anchor: how-to-use-it
+    does: 'The tool''s settings follow you across projects through ConfigRegistry, while the mappings stay with the project.'
   - name: Reset a stuck MIDI device
-    anchor: resetmidipls
-    does: ResetMIDIPls bypasses and un-bypasses MIDI operators to unstick them; a button in midiMapper resets the selected Device ID.
+    anchor: unsticking-a-device-resetmidipls
+    does: 'ResetMIDIPls bypasses and un-bypasses MIDI operators to unstick them, for one device or all of them.'
   - name: Reset all from the toolbar
-    anchor: resetmidipls
+    anchor: unsticking-a-device-resetmidipls
     does: Middle-click the midiMapper toolbar button to reset all MIDI operators.
   - name: Auto-reset on startup
-    anchor: resetmidipls
+    anchor: unsticking-a-device-resetmidipls
     does: Can reset all MIDI operators automatically on startup.
-  - name: Settings across projects
-    anchor: resetmidipls
-    does: Its settings persist and follow you across projects through ConfigRegistry; the Registry page controls whether it participates.
-  - name: Learn by toolbar drop
-    anchor: mapper
-    does: 'Drop a parameter on the Mapper toolbar button to auto-learn MIDI, or Alt+drop it to auto-learn OSC, then move a knob.'
-  - name: Open MIDI or OSC Mapper
-    anchor: mapper
-    does: 'Left-click the Mapper button for the MIDI Mapper, Alt+left-click for the OSC Mapper, and Alt+right-click for their settings.'
 ---
 
-## midiMapper
+## Why use it
 
-Simple MIDI mapping tool by AlphaMoonbase.berlin. Drag and drop parameters onto the UI, learn, and move a fader/knob to assign. You can also modify the min/max range.
-Right click on the folder tab to configure.
+Putting a MIDI controller on a parameter by hand means a MIDI In CHOP,
+finding which channel your fader sends, a Select and a Math CHOP to bring it
+into the right range, and an export or expression onto the parameter. Fine
+once; slow when you want twenty knobs on twenty parameters during a
+rehearsal.
 
-## ResetMIDIPls
+midiMapper, a simple MIDI mapping tool by
+[AlphaMoonbase.berlin](https://alphamoonbase.de/), does the learning for you:
+drop the parameters you want to control, move the controls, and they are
+mapped, each with its own range.
 
-Bypass and un-bypass MIDI operators to unstick them (requested by Jacopo)  
-   - Built into `midiMapper` and its button on the toolbar  
-   - 🎛️ In `midiMapper`, a **new button** resets the selected `Device ID`  
-   - 🖱️ **Middle-click** the `midiMapper` toolbar button to reset **all**  
-   - Can be set to **auto-reset all on startup**  
+## How to use it
 
-Its settings persist and follow you across projects through [ConfigRegistry](/docs/fns-configregistry/), like every other tool; the `Registry` page on the component controls whether it participates.
+1. Open the **midiMapper** tab in [FNS_Hub](/docs/fns-hub/). Right-click the
+   tab to configure the tool.
+2. Drag the parameters you want to control onto the mapper. Each one becomes
+   a row waiting to learn.
+3. Switch on **Learn** and move a fader or knob. While Learn is on, the next
+   control you move is assigned to every row still waiting, so drop one
+   parameter at a time, or several to put them all on one knob. Switch
+   **Learn** off when you are done.
+4. Set each mapping's min and max to choose the part of the parameter's range
+   the control covers. The controller's 0 to 127 is spread across it.
 
-## Mapper
+- **To edit mappings by hand,** **Edit Midimap DAT** opens the table, one row
+  per mapping. **Clear** deletes every mapping.
+- **To keep mappings somewhere else,** a shared component for instance, point
+  **Mappingtable** on the Repositorie page at another table, or press
+  **Create** to make one.
 
-Allows quick MIDI/OSC Mapping by **DragDropping** a **Parameter** onto this button, using Galileo [MIDI](/docs/midimapper/#midimapper)/[OSC](/docs/oscmapper/#oscmapper) Mapper. 
+The tool's settings persist and follow you across projects through
+[ConfigRegistry](/docs/fns-configregistry/), like every other tool; the
+`Registry` page on the component controls whether it participates. The
+mappings stay with the project.
 
-* **LeftClick:** MIDI Mapper
-* **Alt(/Cmd)+LeftClick:** OSC Mapper
-* **Alt(/Cmd)+RightClick:** (OSC)MIDI Mapper Settings
-* **DragDrop par:** auto-learn MIDI
-* **Alt(/Cmd)+DragDrop par:** auto-learn OSC
+## Mapping from the toolbar
 
-**Move knob to auto-learn.**
+midiMapper also puts a button on the toolbar, a shortcut into the Galileo
+MIDI Mapper, so you can map a parameter without opening anything:
+
+- **Drop a parameter** on the button and move a knob: the parameter is
+  learned and mapped.
+- **Click** it to open the MIDI Mapper.
+- **Right-click** it for the mapper's settings.
+- **Middle-click** it to reset all MIDI operators (see below).
+
+For OSC controllers, use [oscMapper](/docs/oscmapper/).
+
+## Unsticking a device (ResetMIDIPls)
+
+A MIDI device sometimes stops responding until its operators are switched
+off and on again. ResetMIDIPls, built into midiMapper and requested by
+Jacopo, does that for you: it bypasses every MIDI In CHOP, MIDI Out CHOP and
+MIDI In DAT in the project, waits a moment, and un-bypasses them.
+
+- In midiMapper, the Reset button resets only the device set in **Device
+  ID**.
+- Middle-click the midiMapper button on the toolbar, or pulse **Reset All
+  Midi**, to reset all of them.
+- It can be set to reset all of them automatically on startup.
+- If a device needs longer to let go of its port, raise **Reset Delay (Ms)**.

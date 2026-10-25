@@ -6,11 +6,15 @@ summary: For projects that have the 2023 toolkit inside. Take it out, install v3
 
 FNSTools v3 replaces the 2023 toolkit (`FunctionStore_tools_2023`, versions 2.x). The two cannot share a project: both claim the `FNS` shortcut and the same places in TouchDesigner's interface. Take the old toolkit out of a project before you put v3 in.
 
-v3 needs TouchDesigner 2025 or newer. If you are staying on TouchDesigner 2023, keep using v2: version 2.11.2 is its last release, on [GitHub](https://github.com/function-store/FunctionStore_tools/releases/tag/v2.11.2) and on the [`dev2023` branch](https://github.com/function-store/FunctionStore_tools/tree/dev2023).
+v3 needs TouchDesigner 2025 or newer. If you are staying on TouchDesigner 2023, keep using v2: version 2.12.0 is its last release, on [GitHub](https://github.com/function-store/FunctionStore_tools/releases/tag/v2.12.0) and on the [`dev2023` branch](https://github.com/function-store/FunctionStore_tools/tree/dev2023).
 
-## Why v2 does not offer the update
+## The last v2 offers the move
 
-The v2 updater (the yellow border on the toolbar's `?` icon) only watches the GitHub releases page. v3 is published through functionstore.tools, so v2 keeps reporting that you are up to date. Moving to v3 is a one-time step by hand. After that, v3's own updater keeps every tool current.
+v2.12.0 is the final release of the 2023 toolkit, and its one job is this hand-over. The v2 updater (the yellow border on the toolbar's `?` icon) installs it like any other update. Once it is in, on TouchDesigner 2025 or newer, a dialog offers **Move to v3**, and the `?` icon keeps its yellow border so you can come back to it later. The move saves your settings file, removes the 2023 toolkit and its toolbar from the project, drops the v3 installer at the root and opens its tool picker. After picking your tools, save the project and restart TouchDesigner once; the operator-create menu keeps its old entries until then.
+
+On TouchDesigner 2023 the same release only tells you once that it is the last version. Everything keeps working.
+
+If you would rather do it by hand, or your v2 is older than 2.4 and has no updater, the steps are below. v3 is not published as a GitHub release, so nothing older than v2.12.0 will ever point you at it.
 
 ## Take v2 out of a project
 

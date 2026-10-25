@@ -11,7 +11,7 @@ You need TouchDesigner 2025 or newer, on Windows or macOS.
 ## Install
 
 1. Download [`FNSTools.tox`](https://storage.functionstore.tools/fnstools/latest/FNSTools.tox) and drag it into the root of a project. It arrives empty: the container you drop is where your tools will live. Dropped into a nested network, it moves itself to the root.
-2. The picker opens by itself on the first drop. Choose **Recommended**, **Everything** or **Pick my own** (on a machine that has installed before, **Set up like last time** comes first), adjust the list, press **Review install** and then **Install**. Only the packages you ticked are downloaded, plus the core they need, and every file is verified before it is written.
+2. The picker opens by itself on the first drop. Choose **Recommended**, **Everything** or **Pick my own** (on a machine that has installed before, **Set up like last time** comes first), adjust the list, and press **Install**. If the plan needs a decision (a removal, a missing package, a Patreon tool waiting for a sign-in), the picker shows it first and you press **Install** there. Only the packages you ticked are downloaded, plus the core they need, and every file is verified before it is written.
 3. Save the project and set it as your startup file in `Preferences > General > Startup File Mode`, so every new project opens with your tools in it.
 
 You can also use [the online picker](/get/) and paste its install command into the Textport, or install into a running session from the FNSTools tab of TDX Launcher Ultra.

@@ -46,8 +46,21 @@ never landed to its `.tox` (an externalized package reloads from its
 file, so that work is not unsaved, it is *gone*), a rail artifact older
 than the sources it is built from (`Stage()` hashes rails into the
 manifest regardless, so a stale one publishes bytes nobody built),
-packages shipping with no release notes, and a dirty repo (step 4 below
-is committing what publishing writes).
+packages shipping with no release notes, a dirty repo (step 4 below
+is committing what publishing writes), and a frame-callback Execute DAT
+that neither reads FNSTools Perform Mode nor carries `fns_perform` /
+`fns_show` (a blocker; `scripts/perform_audit.py`, docs/PerformMode.md
+section 6), and anything that cooks every frame while performing and is
+neither in `packaging/perform_floor.json` nor under a `fns_show` COMP (a
+blocker; the last measurement of `scripts/perform_cook_audit.py`, which
+Preflight cannot take itself because measuring needs frames to pass, so a
+missing or stale measurement blocks too). Measure in its own namespace,
+then Preflight again:
+
+```python
+ns = {}; exec(open('scripts/perform_cook_audit.py').read(), ns)
+ns['StartPerformCookAudit'](op.FNS)    # about 8 s; Perform and the panes come back
+```
 
 A note it raises but does not enforce: **registry ripple**. Every package
 vendors a copy of the registry hosts it uses, so one propagation pass
@@ -175,10 +188,22 @@ instruction. When nothing in their sources moved, copy the previous
 release's rails back into `dist/` from `packaging/publish/<label>/` and ship
 them unchanged.
 
-Order matters when the updater is in the release: `BuildBootstrap()` embeds
-`dist/FNS_Updater.tox`, so it has to run AFTER the bump and export, or the
-bootstrap ships the previous updater. Build the installer first, release,
-then rebuild the bootstrap and stage again. The label is unpublished at that
+**A rebuild for a real source change bumps `INSTALLER_VERSION` first.**
+Nothing in the build or the release bumps the rails: both are stamped from
+the hand-kept constant `INSTALLER_VERSION` in `build_installer.py`, and the
+staged manifest's `rails` block reads it back from
+`dist/rails_versions.json`. Forget it and the release ships new bytes under
+the old rail version, the shape the paragraph above calls wrong (v3.2.51
+had to be restaged and force-uploaded for it). `Stage()` does not write a
+changelog line for the rails either; add it by hand:
+`- FNSTools.tox and FNS_Installer.tox A -> B -- <why>; the bootstrap carries updater N`.
+
+Order matters when the release bumps packages: `BuildBootstrap()` embeds
+`dist/FNS_Updater.tox` and `BuildDevKit()` zips the registry toxes from
+`dist/`, so both run AFTER the bump and export, or they ship the previous
+bytes (v3.2.76's first bootstrap carried updater 3.2.30 under a changelog
+line saying 3.2.31). Build the installer first, release, then build the
+bootstrap and the kit and stage again. The label is unpublished at that
 point, so the second `Stage()` is free.
 
 The bootstrap embeds the `FNS_Updater` artifact from `dist/`, so
@@ -309,6 +334,142 @@ installer plans downloads against the store's manifest and re-fetches any
 store file whose sha256 disagrees with it (the store is a mirror — see
 README, "Updating an install"), but a test that bypasses the picker flow
 can still load whatever file a path points at.
+
+## Driving a release from an agent session
+
+The wizard is a TouchDesigner dialog. An agent drives the same rails through
+Envoy's `execute_python`, which runs on TD's main thread and gives up after
+30 s. This section is what that changes, learned on v3.2.69 to v3.2.76
+(2026-10-12 to 2026-10-24).
+
+### Defer the long steps and read their answer from a file
+
+Timings on the dev machine: `Stage()` under 1 s, `BuildInstaller()` a few
+seconds, a `SaveDirty()` of three toxes about 4 s, `BuildBootstrap()` 12 to
+17 s, `Build()` 13 to 18 s, `ReleaseMany()` about 25 s for 8 packages and
+about two minutes for all of them. Everything up to `BuildBootstrap()` fits
+one call; `Build()` and `ReleaseMany()` do not, and a severed call has still
+done whatever it got through. Write the step to a script in the session's
+scratch folder, schedule it, and have it write its result as JSON:
+
+```python
+# execute_python: returns at once, the script runs three frames later
+run("exec(open('<scratch>/release_step.py').read())", delayFrames=3)
+```
+
+```python
+# <scratch>/release_step.py
+import json, sys, traceback
+sys.path.insert(0, 'packaging')          # Stage() imports sign_release
+_fns_result = {}
+try:
+    _fns_ns = {}
+    exec(open('packaging/release_one.py').read(), _fns_ns)
+    _fns_result['release'] = _fns_ns['ReleaseMany'](['AutoRes'], upload=False)
+except Exception:
+    _fns_result['error'] = traceback.format_exc()
+with open('<scratch>/release_step.json', 'w', encoding='utf-8') as f:
+    json.dump(_fns_result, f, indent=1, default=str)
+```
+
+Wait for the JSON file from a background shell loop instead of polling TD.
+
+**Exec each packaging script into its own dict.** A bare
+`exec(open(...).read())` runs in the caller's globals, and the scripts
+define module-level names: `build_installer.py` has
+`OUT = 'packaging/dist/FNS_Installer.tox'`. On v3.2.72 a runner that held
+its result path in a variable named `OUT` wrote its JSON over the
+installer it had just built (1781 bytes where 128502 belonged). Use a fresh
+dict as above, give your own names a prefix no script uses, and check the
+`dist/` artifact sizes before `Stage()`.
+
+### The order when packages bump
+
+1. Bump `INSTALLER_VERSION` if a rail source really changed (see
+   "Rebuilding the rails"), then `EnsureDevRails()` and save the root.
+2. `BuildInstaller()`.
+3. `ReleaseMany(names, upload=False)`, deferred.
+4. `SaveDirty()` the root until `still_dirty == []`, then `save_project`.
+   `ReleaseMany` PI-saves the packages it bumped, but v3.2.70 skipped this
+   step: its bumps never reached the root, 33 masters' `Pkgversion` had
+   reverted by v3.2.71, and that changelog showed the pre-bump versions on
+   the left. Saving here, before the bootstrap is built, also leaves the
+   rails newer than the root suspect, so Preflight does not call them stale.
+5. `BuildBootstrap()` and `BuildDevKit()`, then sweep the artifacts'
+   storage (below), then `Stage()` again.
+
+### A rails-only release
+
+When only the rails changed (the picker page, `InstallerExt.py`,
+`build_installer.py`) and no package bumps, the order differs because
+`_staleRails()` compares the rail artifacts against the root suspect's
+mtime and `ReleaseMany(rails=True)` refuses stale rails. So the root is
+saved FIRST:
+
+1. Bump `INSTALLER_VERSION`.
+2. `EnsureDevRails()`, then `SaveDirty()` the root (twice if a save
+   reinitialised an extension).
+3. `BuildInstaller()` and `BuildBootstrap()`, each in its own call.
+4. Deferred: `_setReleaseLabel('vX')`, `Build()` (it regenerates the
+   manifest under the new label), `BuildDevKit()` (it reads the label from
+   `manifest.json`, so after `Build()`), then
+   `ReleaseMany([], bump='auto', label='vX', upload=False, rails=True)`.
+   The result carries `rails_only: True`.
+5. The changelog entry comes out with an empty package list; add the rails
+   bullet by hand.
+
+Test it cold with no server:
+`Install(sel, manifest_path='packaging/publish/vX/manifest.json', target=<cooking-off trial>, only=[...])`
+takes the artifacts from beside that manifest.
+
+### Sweep the artifacts' storage before staging
+
+`Stage()` and every hash can be green while a tox carries dev state, since
+storage is pickled into the tox and `pre_release_common.py` strips only
+Embody's keys. v3.2.69 shipped the author's QuickMarks, CookBar's Top List
+labels, FNS_ColorUI's colour overrides and FNS_POPOverlay's `_probe` /
+`_clicklog` keys; v3.2.75 nearly shipped FNS_SpaceMaker's `redo_probe`.
+After `ReleaseMany(upload=False)`, load each bumped `packaging/dist/<Name>.tox`
+into a cooking-off holder in `/sys/quiet` (`loadTox`), walk
+`[c] + c.findChildren(type=COMP)`, and list every storage key that is not
+`*ExtStored` (a registry host's `*RegistryExtStored` is normal). A key no DAT
+in the tool mentions is a leftover: fix the tool's `pre_release` hook or
+`unstore()` it on the live master, `Build(export=[names])`, PI-save those
+masters, `Stage()` again. A probe that `store()`s on a package unstores
+before its last save.
+
+### A restage re-reads every package live
+
+`Build(export=['A', 'B'])` re-exports only A and B, but it rebuilds every
+manifest row from the LIVE masters. On 2026-10-22 that wrote a peer
+session's committed but unexported work into other packages' `commands`,
+`ops`, `search` and `api` fields, and into the agent skill, describing code
+their staged toxes did not have. Before a restage, copy `manifest.json`
+aside; after it, diff, and put back every field of a package you did not
+mean to move. `agent_skill.Render` and `WriteTransport` are pure Python and
+re-render the skill from the corrected rows. Uncommitted edits under
+`packaging/docs/` leak the same way (every package's `search` index and the
+skill pages); render from `git archive HEAD packaging/docs` unpacked to a
+scratch folder.
+
+To bump a package again inside a label that is still unpublished, use
+`_versionWritePar()` and `_bumpedVersion()` from `release_one.py` and a
+`release_notes.md` line (`Build()` blanks `whatsnew` when a version moves),
+never a second `ReleaseMany()`, which writes a second changelog entry.
+
+### The upload is the owner's command
+
+The agent's own shell is refused `python packaging/upload.py` as a
+production deploy, and a TD launched through Envoy cannot start it either
+(below). With the owner's go-ahead, start it in their terminal tab:
+
+```powershell
+$env:PYTHONIOENCODING = 'utf-8'; python packaging/upload.py
+```
+
+It takes about 6 minutes for 113 objects. `python packaging/verify_release.py vX`
+follows, then the site rebuild, since its `/get` page reads the published
+manifest.
 
 ---
 

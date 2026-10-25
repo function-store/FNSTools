@@ -117,10 +117,11 @@ check('the page lists released pages plus previewPages',
 check('a bad anchor refuses the build', 'is not a heading on /docs/${p.slug}/' in site)
 check('writes website/features/index.html', "fs.writeFileSync(path.join(WEB, 'features', 'index.html')" in site)
 check('the page says which way it was built', 'data-previews="${SHOW_PREVIEWS ?' in site)
-check('a flagged build is kept out of the sitemap', '{ noindex: SHOW_PREVIEWS }' in site)
+check('a flagged build is kept out of the sitemap', '{ noindex: SHOW_PREVIEWS, toolList: true }' in site)
 check('the docs sidebar links it', '<li><a href="/features/">Feature list</a></li>' in site)
 check('each landing fold links its category', 'class="cat-more" href="/features/#${slugify(cat)}"' in site)
-check('the landing intro links it', '<a href="/features/">search every feature</a>' in read('website', 'index.html'))
+# docs/FinderAndToolRow.md: the intro's link reads "Browse all N features"
+check('the landing intro links it', '<a href="/features/">Browse all <span class="js-feature-count">' in read('website', 'index.html'))
 check("the CMS's Build site sets the flag", "FNS_SHOW_PREVIEWS: '1'" in read('website', 'tools', 'cms.mjs'))
 check('the output is not committed', '/features/' in read('website', '.gitignore').split('\n'))
 check('the hand-written guide is gone',

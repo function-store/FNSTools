@@ -11,6 +11,15 @@
 repo_root=$(git rev-parse --show-toplevel)
 notes="$repo_root/packaging/release_notes.md"
 
+# Perform Mode: new per-frame Python that never reads Perform
+# (docs/PerformMode.md section 6). Also a warning only.
+for py in python python3; do
+  if command -v "$py" >/dev/null 2>&1; then
+    (cd "$repo_root" && "$py" scripts/perform_commit_check.py)
+    break
+  fi
+done
+
 # Package names from the staged paths: modules/suspects/FNSTools/<Name>.tox
 # or modules/suspects/FNSTools/<Name>/... -- the depth-1 suspect layout that
 # defines a package (packaging/README.md, "Package identity").

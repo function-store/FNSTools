@@ -3363,13 +3363,32 @@ class InstallerExt:
                     why = 'no FNS_Updater next to the installer'
                 else:
                     try:
-                        upd.ext.ExtAuth.Recheck()
+                        # a refusal ('signed out', no client) is the answer:
+                        # reporting "Checking" for it left the page waiting
+                        # on a check that never started
+                        res = upd.ext.ExtAuth.Recheck() or {}
+                        if not res.get('ok', True):
+                            why = 'Could not check: %s' % res.get('why', 'refused')
                     except Exception as e:
                         why = str(e)
                 response['Content-Type'] = 'application/json'
                 response['data'] = json.dumps(
                     {'ok': not why,
                      'text': why or 'Checking with Patreon…'})
+            elif method == 'POST' and uri == '/auth/cancel':
+                # the picker's Cancel: stop waiting on a sign-in or a
+                # membership check, and say where the account stands
+                upd = self._updaterComp()
+                res = {'ok': False, 'why': 'no FNS_Updater next to the installer'}
+                if upd is not None:
+                    try:
+                        res = upd.ext.ExtAuth.CancelPending()
+                    except Exception as e:
+                        res = {'ok': False, 'why': str(e)}
+                response['Content-Type'] = 'application/json'
+                response['data'] = json.dumps(
+                    {'ok': bool(res.get('ok')),
+                     'text': res.get('status') or res.get('why') or ''})
             elif method == 'POST' and uri == '/auth/signin':
                 # the picker is where someone MEETS a Plus tool, so it is
                 # where they will want to sign in. Starting it is all this
@@ -3379,15 +3398,22 @@ class InstallerExt:
                 why = ''
                 if upd is None:
                     why = 'no FNS_Updater next to the installer'
-                else:
+                adopted = False
+                if upd is not None:
                     try:
-                        upd.ext.ExtAuth.SignIn()
+                        res = upd.ext.ExtAuth.SignIn() or {}
+                        if not res.get('ok', True):
+                            why = str(res.get('why') or 'sign-in refused')
+                        adopted = 'adopted' in str(res.get('why') or '')
                     except Exception as e:
                         why = str(e)
                 response['Content-Type'] = 'application/json'
                 response['data'] = json.dumps(
                     {'ok': not why,
-                     'text': why or ('Finish signing in in your browser. '
+                     'text': why or ("Signed in with this computer's Patreon "
+                                     'session; checking your membership…'
+                                     if adopted else
+                                     'Finish signing in in your browser. '
                                      'This page notices by itself and '
                                      'refreshes; Reload picker below does '
                                      'it now.')})

@@ -245,46 +245,6 @@
       "tags": [
        "ui"
       ]
-     },
-     {
-      "id": "stock",
-      "label": "Keep TouchDesigner close to stock",
-      "tags": []
-     }
-    ]
-   },
-   {
-    "id": "output",
-    "prompt": "Where does the output go?",
-    "multi": true,
-    "options": [
-     {
-      "id": "projector",
-      "label": "Projectors, LED walls, several displays",
-      "tags": [
-       "projector"
-      ]
-     },
-     {
-      "id": "screen",
-      "label": "The screen in front of me",
-      "tags": [
-       "screen"
-      ]
-     },
-     {
-      "id": "audio",
-      "label": "Sound matters too",
-      "tags": [
-       "audio"
-      ]
-     },
-     {
-      "id": "phone",
-      "label": "Controlled from a phone or tablet",
-      "tags": [
-       "phone"
-      ]
      }
     ]
    },
@@ -371,7 +331,9 @@
     "tidy",
     "show",
     "learn"
-   ]
+   ],
+   "recommended": true,
+   "preview": true
   },
   "FNS_BackupCleaner": {
    "category": "Project",
@@ -418,7 +380,8 @@
     "show",
     "media"
    ],
-   "preview": true
+   "preview": true,
+   "recommended": true
   },
   "FNS_ColorUI": {
    "category": "Interface",
@@ -486,7 +449,8 @@
     "params",
     "speed",
     "dev"
-   ]
+   ],
+   "recommended": true
   },
   "FNS_GlobalOutSelect": {
    "category": "Network",
@@ -552,7 +516,8 @@
     "show",
     "tidy"
    ],
-   "preview": true
+   "preview": true,
+   "recommended": true
   },
   "FNS_Misc": {
    "category": "Project",
@@ -621,10 +586,11 @@
     "show",
     "live",
     "scenes"
-   ]
+   ],
+   "recommended": true
   },
   "FNS_OverlayRegistry": {
-   "category": "Network",
+   "category": "Core",
    "description": "One overlay over the network editor you are working in, composited from every tool that draws there: each tool hands over its own image, and this registry fits it over your view, stacks it with the rest and shows it above the nodes, without touching your network's display flags or annotations."
   },
   "FNS_PaletteRegistry": {
@@ -651,7 +617,8 @@
    "fits": [
     "network",
     "speed"
-   ]
+   ],
+   "recommended": true
   },
   "FNS_ParOPDrop": {
    "category": "Parameters",
@@ -669,7 +636,8 @@
     "params",
     "art",
     "speed"
-   ]
+   ],
+   "recommended": true
   },
   "FNS_PreviewPanel": {
    "category": "Interface",
@@ -697,7 +665,6 @@
   "FNS_QuickPane": {
    "category": "Interface",
    "description": "Pane layout shortcuts.",
-   "recommended": true,
    "fits": [
     "speed",
     "network"
@@ -724,7 +691,8 @@
     "params",
     "osc"
    ],
-   "preview": true
+   "preview": true,
+   "recommended": true
   },
   "FNS_ResetPLS": {
    "category": "Project",
@@ -799,7 +767,6 @@
    "access": "8323905",
    "license": "",
    "seats": null,
-   "recommended": true,
    "fits": [
     "media",
     "audio",
@@ -877,8 +844,7 @@
    "fits": [
     "network",
     "speed"
-   ],
-   "recommended": true
+   ]
   },
   "CookBar": {
    "category": "Network",
@@ -918,7 +884,8 @@
     "network"
    ],
    "access": "8323905",
-   "preview": true
+   "preview": true,
+   "recommended": true
   },
   "FNS_OpSequencer": {
    "category": "Time & sequencing",
@@ -933,7 +900,8 @@
     "time"
    ],
    "access": "8323905",
-   "preview": true
+   "preview": true,
+   "recommended": true
   },
   "FNS_CamSequencer": {
    "category": "Time & sequencing",
@@ -947,7 +915,8 @@
     "time"
    ],
    "access": "8323905",
-   "preview": true
+   "preview": true,
+   "recommended": true
   },
   "FNS_GeoPilot": {
    "category": "Control & mapping",
@@ -988,7 +957,8 @@
     "scenes"
    ],
    "access": "8323905",
-   "preview": true
+   "preview": true,
+   "recommended": true
   },
   "FNS_ProSceneChanger": {
    "category": "Show & output",
@@ -1013,7 +983,8 @@
     "speed",
     "scenes"
    ],
-   "access": "8323905"
+   "access": "8323905",
+   "recommended": true
   },
   "TDXMap": {
    "category": "Control & mapping",
@@ -1037,6 +1008,10 @@
     "show",
     "params",
     "midi"
+   ],
+   "search_words": [
+    "midi",
+    "controller"
    ],
    "pricing": {
     "summary": "14-day trial, then Base or Pro",
@@ -1073,7 +1048,8 @@
     "chops"
    ],
    "access": "8323905",
-   "preview": true
+   "preview": true,
+   "recommended": true
   },
   "ComplexOp": {
    "category": "Visual",
@@ -1082,7 +1058,8 @@
    "fits": [
     "art",
     "visual"
-   ]
+   ],
+   "recommended": true
   },
   "ComplexMix": {
    "category": "Visual",
@@ -1091,7 +1068,8 @@
    "fits": [
     "art",
     "visual"
-   ]
+   ],
+   "recommended": true
   },
   "ThresholdColor": {
    "category": "Visual",
@@ -1220,7 +1198,8 @@
     "visual",
     "live"
    ],
-   "access": "8291595"
+   "access": "8291595",
+   "recommended": true
   },
   "ParHoverMIDI_VSN1": {
    "category": "Control & mapping",
@@ -1413,7 +1392,8 @@
   "PandorasTox": {
    "category": "Miscellaneous",
    "description": "A prank in a tox. One pulse swaps the desktop wallpaper for the TouchDesigner banana and keeps the old one safe, another puts it back, and a toggle quacks on every mouse click.",
-   "preview": true
+   "preview": true,
+   "placement": "pane"
   }
  }
 }

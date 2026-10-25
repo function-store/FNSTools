@@ -181,7 +181,8 @@ check('the selection always says, when the release has a family',
       'if (companions.length) sel.family = familyOn;' in idx)
 check('turning it off counts as a change to apply',
       "var famGoes = served && familyHere && !(famMember && familyOn);" in idx
-      and "(removals || famGoes) ? 'Apply changes…' : 'Review install…'" in idx
+      and "saveApplies = !!(removals || famGoes);" in idx
+      and "save.textContent = saveApplies ? 'Apply changes…'" in idx
       and "notes.push('FNS tab removed')" in idx)
 # 2026-10-17 (wizard phase 1): the switch is the set screen's options row,
 # shown only while a family operator is in the set

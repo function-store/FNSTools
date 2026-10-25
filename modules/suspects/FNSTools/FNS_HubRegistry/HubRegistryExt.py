@@ -45,7 +45,7 @@ class HubRegistryExt(RegistryBase):
 
 	# Location-independent: resolves through the toolkit root's global
 	# shortcut, evaluates to None (no clone, no warning) where it is absent.
-	CLONE_EXPR = "op.FNS.op('FNS_HubRegistry') if hasattr(op, 'FNS') else None"
+	CLONE_EXPR = "tdu.tryExcept(lambda: op.FNS.op('FNS_HubRegistry'), None)"
 
 	HUB_NAME = 'FNS_Hub'          # the surface package, a child of op.FNS
 	TABS_CONTAINER = 'panel/tabs' # the hub container the mirrors live in

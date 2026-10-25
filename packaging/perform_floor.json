@@ -1,0 +1,37 @@
+{
+ "about": "What may keep cooking every frame under /FNSTools while Perform is on. scripts/perform_cook_audit.py measures; Preflight blocks on anything that is neither matched here (fnmatch on the path below the root) nor under a COMP tagged fns_show. Every entry says why. Delete an entry the audit reports unused. docs/PerformMode.md section 6.",
+ "measured": "2026-10-25, TD 2025.33070, two runs of 360 frames, panes on /sys/quiet",
+ "allowed": [
+  {"match": "perform_mode", "why": "the follower's Perform CHOP, about 0.02 ms while following TD's Perform Mode (PerformMode.md section 4)"},
+  {"match": "perform_follow", "why": "the follower's CHOP Execute on perform_mode (section 4)"},
+
+  {"match": "FNS_Remote/remote_server", "why": "show work: the remote's Web Server DAT serves during a show"},
+  {"match": "oscMapper/oscout", "why": "show work: OSC output"},
+  {"match": "FNS_BeatMod/chopexec_mouse", "why": "show work: BeatMod's mouse input"},
+  {"match": "FNS_SimpleSceneChanger/chopexec_select", "why": "show work: scene switching"},
+  {"match": "FNS_SimpleSceneChanger/null_select", "why": "show work: scene switching"},
+  {"match": "FNS_ProSceneChanger/chopexec_select", "why": "show work: scene switching"},
+  {"match": "FNS_ProSceneChanger/null_select", "why": "show work: scene switching"},
+  {"match": "FNS_GeoPilot/joystick_internal", "why": "show work: a placed GeoPilot flies from the controller during a show; this is the idle master's copy (PerformMode.md, GeoPilot is show work)"},
+  {"match": "FNS_GeoPilot/chopexec_source", "why": "show work, as joystick_internal"},
+  {"match": "FNS_GeoPilot/select_source", "why": "show work, as joystick_internal"},
+  {"match": "SlideShow/*", "why": "show work: a presentation tool; the dev project's slideshow plays (its released tox is idle)"},
+
+  {"match": "FeedbackDisplace/*", "why": "visual operator master: a feedback loop cooks every frame in every mode; masters exist only in the dev project (placement none), so this is a family master cook diet item, not a Perform gate (FamilyMasterCookDiet.md)"},
+  {"match": "TopToMidi/*", "why": "visual operator master, as FeedbackDisplace (PerformMode.md phase 0)"},
+  {"match": "ParticlesGpuUltimate/*", "why": "visual operator master, as FeedbackDisplace (phase 0)"},
+
+  {"match": "FNS_HydroHomie/lfo1", "why": "authoring floor left after phase 4: lfo1.play reads Perform, the LFO and timer1 keep a 0.014 ms floor"},
+  {"match": "FNS_HydroHomie/timer1", "why": "as FNS_HydroHomie/lfo1"},
+  {"match": "FNS_BorderlessTD/HideTimeline/timeline1", "why": "follows the timeline's play state, which a Designer-mode show can change (phase 4 second pass)"},
+  {"match": "FNS_QuickPane/base1/feedback1", "why": "Feedback CHOP loop pulls its chain every frame whatever its Time Slice; stopping it needs the loop rebuilt (phase 4)"},
+  {"match": "FNS_QuickPane/base1/hold2", "why": "pulled by the feedback1 loop"},
+  {"match": "FNS_QuickPane/base1/mousein1", "why": "pulled by the feedback1 loop"},
+  {"match": "FNS_AltSelect/null_hk", "why": "Cook Type Always null; gating cooktype leaves it off after perform (phase 4, never gate cooktype)"},
+  {"match": "FNS_ParRandomizer/button_random/null_mod", "why": "Cook Type Always null, as FNS_AltSelect/null_hk"},
+  {"match": "FNS_ParRandomizer/button_random/KeyModifiers1/null1", "why": "Cook Type Always null, as FNS_AltSelect/null_hk"},
+  {"match": "FNS_ParRandomizer/button_random/KeyModifiers1/out1", "why": "fed by KeyModifiers1/null1"},
+  {"match": "FNS_CustomParTools/hijack_dragdrop/null1", "why": "pane-bar Cook Type Always chain (NavbarCookDiet.md)"},
+  {"match": "CookBar/hog_global", "why": "the deliberate stress-test Hog CHOP; bypass is a flag, so no expression can gate it"}
+ ]
+}

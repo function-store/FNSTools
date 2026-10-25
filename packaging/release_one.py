@@ -1088,6 +1088,62 @@ def _agentSkillProblems():
     return problems
 
 
+def _performUnclassified():
+    """Frame-callback Execute DATs under the toolkit root that neither stop
+    while FNSTools Perform Mode is on nor are tagged as show work
+    (scripts/perform_audit.py, docs/PerformMode.md section 6). A blocker
+    since phase 4 emptied the list, so it cannot climb back."""
+    root = getattr(op, 'FNS', None)
+    if root is None:
+        return []
+    ns = {'executeDAT': executeDAT, 'ParMode': ParMode}
+    try:
+        with open(_repo('scripts', 'perform_audit.py'), 'r', encoding='utf-8') as f:
+            exec(f.read(), ns)
+        return list(ns['PerformAudit'](root)['unclassified'])
+    except Exception as e:
+        return ['perform audit failed: %r' % (e,)]
+
+
+def _performCookProblems():
+    """What the measured Perform cook audit says (scripts/perform_cook_audit.py,
+    docs/PerformMode.md section 6): operators that cook every frame while
+    performing and are neither in packaging/perform_floor.json nor show
+    work, and a measurement that is missing, failed, or older than the
+    newest package tox. Reads the last measurement; it cannot take one,
+    because measuring needs frames to pass."""
+    ns = {}
+    try:
+        with open(_repo('scripts', 'perform_cook_audit.py'), 'r', encoding='utf-8') as f:
+            exec(f.read(), ns)
+    except Exception as e:
+        return ['perform cook audit failed to load: %r' % (e,)]
+    data = ns['_read'](_repo(*ns['RESULT_PATH'].split('/')))
+    how = ("run ns = {}; exec(open('scripts/perform_cook_audit.py').read(), ns); "
+           "ns['StartPerformCookAudit'](op.FNS) and Preflight again")
+    if data is None:
+        return ['no measurement yet -- ' + how]
+    if data.get('running'):
+        return ['a measurement is still running -- wait for it, then Preflight again']
+    if data.get('error'):
+        return ['the last measurement failed (%s) -- %s' % (data['error'], how)]
+    suspects = _repo('modules', 'suspects', 'FNSTools')
+    newest, newest_name = _mtime(*ROOT_SUSPECT), 'FNSTools.tox'
+    for dirpath, _dirs, files in os.walk(suspects):
+        for fn in files:
+            if fn.endswith('.tox'):
+                m = os.path.getmtime(os.path.join(dirpath, fn))
+                if m > newest:
+                    newest, newest_name = m, fn
+    if data.get('measured_at', 0) < newest:
+        return ['measured %s, before %s was saved -- %s'
+                % (data.get('measured'), newest_name, how)]
+    floor = ns['_read'](_repo(*ns['FLOOR_PATH'].split('/')))
+    new = ns['Classify'](data.get('hot', []), floor)['new']
+    return ['%s (%s, %d cooks over %s frames)'
+            % (h['path'], h['type'], h['cooks'], data.get('frames')) for h in new]
+
+
 def _agentSkillUndocumented(rows=None):
     """How many promoted members the manifest carries with no docstring:
     the docstring backlog (docs/AgentSkill.md section 5, check 2). A
@@ -1201,6 +1257,21 @@ def Preflight(names=None, quiet=False):
                         'pages would list them with the signature only; write the '
                         'first sentence (docs/AgentSkill.md section 5), rebuild '
                         'the manifest' % undocumented)
+    perform_unclassified = _performUnclassified()
+    if perform_unclassified:
+        blockers.append('perform audit: frame Execute DAT(s) neither gated '
+                        'nor tagged: ' + _some(perform_unclassified)
+                        + ' -- gate them with the guarded read of Perform or '
+                        'tag them fns_perform / fns_show (docs/PerformMode.md '
+                        'section 6), PI-save the package')
+    perform_cooks = _performCookProblems()
+    if perform_cooks:
+        blockers.append('perform cook audit: cooking every frame while performing, '
+                        'and not in packaging/perform_floor.json or tagged fns_show: '
+                        + _some(perform_cooks)
+                        + ' -- gate it (fns-definition-of-done, Per-frame work), tag '
+                        'the show COMP fns_show, or add a floor entry with its reason '
+                        '(docs/PerformMode.md section 6)')
     if unknown:
         warnings.append('not shippable packages, will be skipped: '
                         + _some(unknown))
@@ -1224,6 +1295,8 @@ def Preflight(names=None, quiet=False):
               'gated_leak_risks': leak_risks,
               'agent_skill_problems': skill_problems,
               'agent_skill_undocumented': undocumented,
+              'perform_unclassified': perform_unclassified,
+              'perform_cooks': perform_cooks,
               'noted': noted, 'unnoted': unnoted,
               'git_dirty': len(dirty)}
     if not quiet:

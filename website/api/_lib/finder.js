@@ -139,7 +139,28 @@ function catalogLines() {
   ].join(' | ')).join('\n');
 }
 
+// What the model is given up front, by context mode (docs/PickerChatbot.md,
+// "Search or long context"): 'search' gives the catalog lines and lets it
+// search and read docs with tools; 'features' adds every tool's feature
+// lines; 'docs' adds every tool's whole doc. The last two answer in one
+// request with no searching.
+export const CONTEXTS = ['search', 'features', 'docs'];
+
+function featureBlock() {
+  return TOOLS.map((t) => [`## ${t.name} (${t.title})`, t.description,
+    ...t.features.map((f) => `- ${f}`), ...t.hotkeys.map((h) => `- key ${h}`)]
+    .join('\n')).join('\n\n');
+}
+
+function docsBlock() {
+  return TOOLS.map((t) => [`## ${t.name} (${t.title}) ${t.url}`, t.description,
+    ...t.features.map((f) => `- ${f}`),
+    ...t.sections.map((s) => `### ${s.heading}\n${s.text}`)].join('\n')).join('\n\n');
+}
+
 const CATALOG = catalogLines();
+let FEATURES = null;
+let DOCS = null;
 
 /**
  * The system instructions. `access` is what this reader can install;
@@ -147,7 +168,7 @@ const CATALOG = catalogLines();
  * page as a list so the history itself stays plain dialogue (picks written
  * into an assistant turn were copied back as a plain-text answer).
  */
-export function instructions(access, shown = []) {
+export function instructions(access, shown = [], context = 'search') {
   const can = access === 'patreon'
     ? 'This reader is a Patreon supporter and can install Patreon tools.'
     : 'This reader can install free tools. Patreon tools need a Patreon membership.';
@@ -157,6 +178,26 @@ export function instructions(access, shown = []) {
 Already offered in this conversation: ${shown.join(', ')}. When the reader asks for more,
 pick other tools that still fit; do not offer these again unless they ask about one.`
     : '';
+  const search = context === 'search';
+  let reference = '';
+  if (context === 'features') {
+    FEATURES = FEATURES || featureBlock();
+    reference = `\n\nEvery tool's features (the catalog name, then what it does):\n\n${FEATURES}`;
+  } else if (context === 'docs') {
+    DOCS = DOCS || docsBlock();
+    reference = `\n\nEvery tool's documentation (the catalog name, title and docs page, then the doc):\n\n${DOCS}`;
+  }
+  const lookup = search
+    ? `- Before recommending a tool for anything its one-line description does not
+  already say, call readDoc on it. Use searchDocs to find candidates.
+- You may read at most ${LIMITS.reads} docs; then recommend.
+- A how-to question about an FNSTools tool gets a few lines taken from that
+  tool's doc (call readDoc) and a link to its docs page. Never answer from memory.`
+    : `- Everything you know about the tools is below the catalog. Judge every
+  pick against it, and answer straight away with recommend.
+- A how-to question about an FNSTools tool gets a few lines taken from that
+  tool's ${context === 'docs' ? 'doc below' : 'features below'} and a link to its docs page
+  (https://functionstore.tools/docs/<slug>/ as the catalog gives it). Never answer from memory.`;
   return `You are the tool finder on the FNSTools website. FNSTools is a toolkit of
 add-on tools for TouchDesigner. A reader tells you what they struggle with or
 want to do in TouchDesigner, and you pick the FNSTools tools that help.
@@ -165,7 +206,7 @@ First, before anything else, decide whether the reader's latest message
 names a concrete problem or task ("my timeline takes too much room", "I want
 to map my MIDI controller") or only a broad area of work ("I do live shows",
 "I make generative art", "I build installations", "make TouchDesigner
-better"). For a broad area, do not search and do not pick: call recommend
+better"). For a broad area, do not ${search ? 'search and do not ' : ''}pick: call recommend
 with no picks and a reply that asks which part they mean, offering three or
 four concrete parts the catalog covers. For live shows that could be:
 controlling parameters from MIDI or OSC, sending output to projectors or
@@ -174,8 +215,7 @@ your previous turn already asked such a question, pick from their answer.
 
 Rules:
 - Only recommend tools from the catalog below, by their exact name. Never invent a tool.
-- Before recommending a tool for anything its one-line description does not
-  already say, call readDoc on it. Use searchDocs to find candidates.
+${lookup}
 - Every turn ends with exactly one recommend call: picks, a clarifying
   question, a how-to answer and a decline all go through it (with picks
   empty when there are none). Never answer in plain text.
@@ -190,10 +230,7 @@ Rules:
 - If nothing in the catalog does what they asked, say so plainly, call
   recommend with no picks, and suggest the community page
   https://functionstore.tools/community/ or the Derivative forum.
-- You may read at most ${LIMITS.reads} docs; then recommend.
 - Ask at most one clarifying question in a row.
-- A how-to question about an FNSTools tool gets a few lines taken from that
-  tool's doc (call readDoc) and a link to its docs page. Never answer from memory.
 - You do not give general TouchDesigner help. For questions about
   TouchDesigner itself, say briefly that you only know FNSTools and point to
   https://docs.derivative.ca or https://forum.derivative.ca.
@@ -202,7 +239,7 @@ Rules:
   name (FNS_BorderlessTD); the catalog name is only for tool calls.
 
 Catalog (name | title | category | access | description | tags):
-${CATALOG}${already}`;
+${CATALOG}${reference}${already}`;
 }
 
 /** Strips the markdown a model writes anyway: emphasis, backticks, bullets. */
@@ -246,7 +283,7 @@ export function clampMessages(messages) {
  * Answers one turn. Returns {reply, picks, dropped, read}: picks are
  * catalog-validated, read names the docs the model opened.
  */
-export async function answer({ messages, access, shown }, { model, abortSignal } = {}) {
+export async function answer({ messages, access, shown }, { model, abortSignal, context = 'search' } = {}) {
   const msgs = clampMessages(messages);
   if (!msgs.length || msgs[msgs.length - 1].role !== 'user') {
     return { error: 'The conversation must end with a message from you.' };
@@ -295,7 +332,7 @@ export async function answer({ messages, access, shown }, { model, abortSignal }
   };
   const base = {
     model,
-    instructions: instructions(access, already),
+    instructions: instructions(access, already, context),
     messages: msgs,
     maxOutputTokens: LIMITS.outputTokens,
     timeout: LIMITS.timeoutMs,
@@ -305,7 +342,12 @@ export async function answer({ messages, access, shown }, { model, abortSignal }
   };
   let result;
   try {
-    result = await generateText({
+    result = context !== 'search' ? await generateText({
+      ...base,
+      toolChoice: { type: 'tool', toolName: 'recommend' },
+      activeTools: ['recommend'],
+      stopWhen: isStepCount(1),
+    }) : await generateText({
       ...base,
       // Every step calls a tool, so every turn ends in recommend: a turn
       // answered in plain text draws no rows on the page.
@@ -329,7 +371,7 @@ export async function answer({ messages, access, shown }, { model, abortSignal }
     });
   }
   if (final) {
-    return { reply: plainReply(final.reply || result.text), picks: final.accepted, dropped: final.dropped, read };
+    return { reply: plainReply(final.reply || result.text), picks: final.accepted, dropped: final.dropped, read, steps: result.steps.length, usage: result.totalUsage };
   }
-  return { reply: plainReply(result.text), picks: [], dropped: [], read };
+  return { reply: plainReply(result.text), picks: [], dropped: [], read, steps: result.steps.length, usage: result.totalUsage };
 }

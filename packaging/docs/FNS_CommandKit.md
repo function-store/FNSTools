@@ -2,36 +2,42 @@
 package: FNS_CommandKit
 summary: 'Drop-in kit that lets any component publish commands to every palette that serves them: the CommandPalette inside TouchDesigner and the TDXL launcher''s.'
 features:
-  - name: Command Kit
-    anchor: command-kit
-  - name: How the pieces fit
+  - name: Why use it
+    anchor: why-use-it
+  - name: How to use it
+    anchor: how-to-use-it
+  - name: How the command pieces fit
     anchor: how-the-command-pieces-fit
-  - name: Adopting it
-    anchor: adopting-it
+  - name: Marking methods with the decorator
+    anchor: marking-methods-with-the-decorator
+  - name: Declaring commands without imports
+    anchor: declaring-commands-without-imports
+  - name: 'Ids, handlers and limits'
+    anchor: ids-handlers-and-limits
   - name: What the kit does on load
     anchor: what-the-kit-does-on-load
   - name: Checking it worked
     anchor: checking-it-worked
 feature_list:
   - name: Publish commands from any component
-    anchor: command-kit
+    anchor: how-to-use-it
     does: Drop the kit in as a direct child and the methods you mark appear in the CommandPalette and the TDXL launcher.
     authors: true
   - name: Safe without a registry
-    anchor: command-kit
+    anchor: why-use-it
     does: 'With no command registry in the session nothing happens and nothing errors, so the component works the same for people without the palette.'
     authors: true
-  - name: Command decorator
-    anchor: decorator-derives-everything-from-your-code
+  - name: Decorator for command methods
+    anchor: marking-methods-with-the-decorator
     does: 'The fns_command decorator derives label, help and prompted parameters from the method name, docstring and signature; Literal hints become menus.'
     authors: true
   - name: 'Context, state and identity options'
-    anchor: decorator-derives-everything-from-your-code
+    anchor: marking-methods-with-the-decorator
     does: 'Decorator extras set a context for greying out, a live state chip, surface, capability, hidden, and a canonical identity shared across packages.'
     authors: true
-  - name: 'Explicit spec, no imports'
-    anchor: explicit-spec-no-imports-at-all
-    does: 'Promote an FnsCommands() method returning a spec list instead of importing anything: id, label, method, help, prompted params and every decorator extra as plain dict keys.'
+  - name: Declare commands without imports
+    anchor: declaring-commands-without-imports
+    does: 'Promote an FnsCommands() method that returns a spec list, with no imports at all: id, label, method, help, prompted params and every decorator extra as plain dict keys.'
     authors: true
   - name: Announces on load
     anchor: what-the-kit-does-on-load
@@ -41,28 +47,52 @@ feature_list:
     anchor: checking-it-worked
     does: 'Three reads tell you whether your commands are served, and a short ladder says what to look at when one is missing.'
     authors: true
-  - name: Re-announce after changes
-    anchor: adopting-it
+  - name: Announce again after changes
+    anchor: how-to-use-it
     does: Call Announce() to republish the component after its command set changes at runtime.
     authors: true
   - name: Tell placed copies apart
-    anchor: rules-worth-knowing
+    anchor: ids-handlers-and-limits
     does: Promote FnsInstance() and FnsToolName() so palettes distinguish multiple copies and favourites reach all of them (FNS_CommandRegistry 3.2.1 or newer).
     authors: true
 ---
 
-## Command Kit
+## Why use it
 
-Your component's commands appear in every palette that serves the command
-registry, the [CommandPalette](/docs/fns-commandpalette/) inside
+Say your component has a few actions worth a keystroke: toggle its overlay,
+set the tempo, clear a buffer. Today you reach them by opening the component
+and hunting for the pulse, or by wiring a Keyboard In CHOP for each one. A
+command palette would be quicker, but you would not want your component to
+depend on one, or to break for someone who has never installed it.
+
+CommandKit puts your component's commands in every palette that serves the
+command registry, the [CommandPalette](/docs/fns-commandpalette/) inside
 TouchDesigner and [TDX Launcher Ultra](https://launcher.functionstore.xyz)'s
-(`>` / `?` in both), without it having to know anything about the registry.
-Drop this COMP inside your component, mark the methods you want exposed, and
-they show up.
+(`>` / `?` in both), without your component having to know anything about
+the registry. Drop this COMP inside your component, mark the methods you want
+exposed, and they show up.
 
 It is **guarded throughout**: when no registry is in the session, nothing
 happens and nothing errors. A component carrying the kit works exactly the
 same for someone who never installs the palette or the launcher.
+
+## How to use it
+
+1. Drag the COMP in as a **direct child** of your component's root.
+2. Mark your commands, with the
+   [decorator](#marking-methods-with-the-decorator) or with an
+   [explicit spec](#declaring-commands-without-imports).
+3. That is all. The kit announces your component on load, once you actually
+   declare something.
+4. Open the palette and type `#` followed by your component's name: its
+   commands list under it.
+
+If your command set changes while TouchDesigner is running, call
+`op('FNS_CommandKit').Announce()` to publish the new set.
+
+Components inside the FNS toolkit do not need this kit: they carry the same
+module in their ExtUtils and announce themselves. This is for everything
+else.
 
 ## How the command pieces fit
 
@@ -84,15 +114,9 @@ hidden commands and presets are one machine-wide file that the palette and
 the launcher both read and write, keyed by tool name and command id, so a
 star in one is a star in the other; query history stays per consumer.
 
-## Adopting it
+## Marking methods with the decorator
 
-1. Drag the COMP in as a **direct child** of your component's root.
-2. Mark your commands (either way below).
-3. Done. The kit announces your component on load, once you actually declare
-   something. After changing your command set at runtime:
-   `op('FNS_CommandKit').Announce()`.
-
-### Decorator: derives everything from your code
+The decorator derives everything it can from your code:
 
 ```python
 FNSCommand = op('FNS_CommandKit').mod('FNSCommand')  # import
@@ -106,16 +130,21 @@ class MyToolExt:
 The label comes from the CamelCase name, the help from the docstring's first
 line, and the prompted parameters from the signature: type hints become
 styles, `typing.Literal[...]` becomes a menu, and a parameter with no default
-is required. Extras: `fns_command(label=…, help=…, hidden=True, params=[…])`,
-plus `context=` (what the command acts on, so a palette can grey it out when
-that subject is absent), `state=` (a live value to show as a chip),
-`surface=` and `capability=` (where and how a consumer may present it), and
-`canonical=` (a cross-package identity for a command another package might
-ship too; the newest package wins). The
-[registry page](/docs/fns-commandregistry/#what-a-command-carries) explains
-each.
+is required.
 
-### Explicit spec: no imports at all
+Extras: `fns_command(label=…, help=…, hidden=True, params=[…])`, plus:
+
+- `context=`: what the command acts on, so a palette can grey it out when
+  that subject is absent;
+- `state=`: a live value to show as a chip;
+- `surface=` and `capability=`: where and how a consumer may present it;
+- `canonical=`: a cross-package identity for a command another package might
+  ship too; the newest package wins.
+
+The [registry page](/docs/fns-commandregistry/#what-a-command-carries)
+explains each.
+
+## Declaring commands without imports
 
 For a component that would rather not import anything, or whose command set
 is built at runtime, promote a `FnsCommands()` method that returns the same
@@ -173,7 +202,7 @@ Values cross as text and arrive at your method coerced to the declared
 style; a bad value or a missing required parameter refuses the run before
 your method is called.
 
-### Rules worth knowing
+## Ids, handlers and limits
 
 - **Command ids are permanent.** Favourites, hidden flags and presets in
   both palettes key on `tool#id`, and the id derives from the method name, so
@@ -191,10 +220,6 @@ your method is called.
   COMP names differ. Palettes then tell the copies apart, and favourites reach
   all of them. Needs FNS_CommandRegistry 3.2.1 or newer; older registries
   ignore both.
-
-Components inside the FNS toolkit do not need this kit: they carry the same
-module in their ExtUtils and announce themselves. This is for everything
-else.
 
 ## What the kit does on load
 

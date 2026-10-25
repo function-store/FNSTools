@@ -228,8 +228,11 @@ user's choice. Full reasoning in `docs/FNS_Console.md`.
    later, the root's **Pick Tools**). First run: the page says it is
    fetching the catalog while the store refreshes, then welcomes with
    **Recommended** / **Everything** / **Pick my own**.
-3. Adjust the list, hit **Review install…**, read the plan, hit
-   **Install**. Packages land in the dropped container; the done step's
+3. Adjust the list and hit **Install N tools**. The plan screen comes up
+   only when there is something to decide (a removal, a problem, a
+   Patreon pick waiting for a sign-in, the signed-out sign-in line), and
+   its **Install** is then the confirmation. Packages land in the dropped
+   container; the done step's
    **Open Settings** hands the panel to the console.
 
 The manual rail still exists: **Selection** takes a `selection.json`

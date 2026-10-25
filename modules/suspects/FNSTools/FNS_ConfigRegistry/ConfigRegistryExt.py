@@ -256,10 +256,19 @@ class ConfigRegistryExt(RegistryBase):
 	# --- surface hooks (RegistryBase contract; the 'surface' is the file) ---
 
 	def _preInit(self):
-		# Which canonicals were applied this session: healing-tick republishes
-		# must not re-apply config every few seconds. Plain attribute -- /sys
-		# is rebuilt every boot, so 'once per session' resets naturally.
-		self._applied_this_session = set()
+		# Which tool INSTANCE each canonical was applied to this session,
+		# {canonical: (tool id, host id)}. Healing-tick republishes of the
+		# same instance must not re-apply config every few seconds. A NEW
+		# instance must: an update that replaced the tool (embedded rail) or
+		# reloaded its children, and with them its host (bound rail), would
+		# otherwise run on shipped defaults until TD restarts, and the next
+		# save would write those over the file. Plain attribute -- /sys is
+		# rebuilt every boot, so 'once per session' resets naturally.
+		self._applied_this_session = {}
+		# canonical -> absTime.frame its apply was queued. Until it lands, a
+		# save keeps the file's section rather than snapshotting a tool that
+		# has not had its config back yet.
+		self._pending_apply = {}
 		self._cfg_cache = None
 		self._cfg_cache_mtime = -1
 
@@ -376,7 +385,7 @@ class ConfigRegistryExt(RegistryBase):
 	# Location-independent: resolves through the config package's global
 	# shortcut, evaluates to None (no clone, no warning) where it is absent.
 	# _healHostClones and StampHost come from RegistryBase off these two.
-	CLONE_EXPR = "op.FNS.op('FNS_ConfigRegistry') if hasattr(op, 'FNS') else None"
+	CLONE_EXPR = "tdu.tryExcept(lambda: op.FNS.op('FNS_ConfigRegistry'), None)"
 
 	# --- config file ---
 
@@ -976,6 +985,8 @@ class ConfigRegistryExt(RegistryBase):
 		tools = data.setdefault('tools', {})
 		saved = 0
 		for canonical, info in self.stored['PaneRegistry'].items():
+			if self._applyPending(canonical):
+				continue  # the file's section stands until the tool has it back
 			try:
 				section = self._snapshotTool(canonical, dict(info),
 											 carry=tools.get(canonical) or {})
@@ -1011,6 +1022,8 @@ class ConfigRegistryExt(RegistryBase):
 		if self._scopeIsProject():
 			# snapshot for its side effects; the file is untouched
 			return self._snapshotTool(canonical_name, dict(info)) is not None
+		if self._applyPending(canonical_name):
+			return False  # the file's section stands until the tool has it back
 		data = self._readFile()
 		if data.get('schema') != self.SCHEMA:
 			self._retireFile('.schema%s.bak' % data.get('schema'))
@@ -1432,13 +1445,31 @@ class ConfigRegistryExt(RegistryBase):
 		con = getattr(op, 'FNS_CONSOLE', None)
 		return con.Close() if (con is not None and con.valid) else {'ok': True}
 
-	def _queueApply(self, canonical_name):
-		"""Deferred once-per-session apply, scheduled at registration. The
-		delay puts it after clone sync, the tool's own extension init, and
-		the Registry-page bind wiring."""
-		if canonical_name in self._applied_this_session:
+	# A queued apply older than this is taken as lost (its run() never
+	# fired), so it stops holding the file's section back from saves.
+	PENDING_APPLY_FRAMES = 300
+
+	@staticmethod
+	def _instanceKey(info):
+		"""Which live tool a registration is: the tool COMP and the host
+		that published it. An embedded update makes a new tool COMP; a
+		bound update recreates the children, the host among them."""
+		info = info or {}
+		return (info.get('panel_id'), info.get('source_registry_id'))
+
+	def _applyPending(self, canonical_name):
+		"""Is this tool's apply queued and not landed yet?"""
+		queued = self._pending_apply.get(canonical_name)
+		return queued is not None and absTime.frame - queued < self.PENDING_APPLY_FRAMES
+
+	def _queueApply(self, canonical_name, key):
+		"""Deferred apply, once per tool instance per session, scheduled at
+		registration. The delay puts it after clone sync, the tool's own
+		extension init, and the Registry-page bind wiring."""
+		if self._applied_this_session.get(canonical_name) == key:
 			return
-		self._applied_this_session.add(canonical_name)
+		self._applied_this_session[canonical_name] = key
+		self._pending_apply[canonical_name] = absTime.frame
 		run(f"args[0].valid and args[0].extensionsReady and "
 			f"args[0].ext.{self.EXT_NAME}._applyToolConfig(args[1])",
 			self.ownerComp, canonical_name,
@@ -1446,7 +1477,9 @@ class ConfigRegistryExt(RegistryBase):
 
 	def _applyToolConfig(self, canonical_name):
 		"""Apply pars, then hand state to the tool's onConfigLoad."""
-		self._applied_this_session.add(canonical_name)
+		self._pending_apply.pop(canonical_name, None)
+		self._applied_this_session[canonical_name] = self._instanceKey(
+			self.stored['PaneRegistry'].get(canonical_name))
 		if self._scopeIsProject():
 			# .toe state stands; log the skip once per session, not per tool
 			if not getattr(self, '_scope_skip_logged', False):
@@ -1515,7 +1548,7 @@ class ConfigRegistryExt(RegistryBase):
 		self.stored['PaneRegistry'][canonical_name] = entry
 		self.fnsLog(f'{self.REGISTRY_NAME}: registered tool "{canonical_name}" ({comp.path})')
 		if autoload:
-			self._queueApply(canonical_name)
+			self._queueApply(canonical_name, self._instanceKey(entry))
 
 	def UnregisterTool(self, canonical_name):
 		"""Remove a tool's registration from the settings registry (forwarded to the /sys global)."""

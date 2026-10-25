@@ -2,117 +2,141 @@
 package: FNS_SearchPalette
 summary: Search field for TouchDesigner's palette browser, installed into the palette on startup.
 features:
-  - name: TDX_SearchPalette
-    anchor: tdx-searchpalette
-  - name: Search hotkey
-    anchor: search-hotkey
+  - name: Why use it
+    anchor: why-use-it
+  - name: How to use it
+    anchor: how-to-use-it
+  - name: The search hotkey
+    anchor: the-search-hotkey
+  - name: Writing a search
+    anchor: writing-a-search
 feature_list:
-  - name: Search field in the palette browser
-    anchor: tdx-searchpalette
-    does: 'Installs a search field into TouchDesigner''s palette browser on project start while Auto Install is on, with Install and Uninstall pulses.'
-  - name: Focus search by hotkey
-    anchor: search-hotkey
-    does: Brings TouchDesigner's own palette tab to the front and focuses the search field in place; the combo is rebindable in HotkeyManager.
-  - name: Word navigation in the field
-    anchor: editing-the-search-text
-    does: 'The search field is a Text COMP, so it edits like TouchDesigner''s own text fields, including Ctrl+Left and Ctrl+Right to jump by word.'
+  - name: Find components in the palette browser
+    anchor: how-to-use-it
+    does: 'A search field in TouchDesigner''s palette browser lists the matching components from every folder; it is put in every time a project opens, or added and removed on demand.'
+  - name: Focus the field by hotkey
+    anchor: the-search-hotkey
+    does: '`Ctrl+Shift+F` brings TouchDesigner''s own palette tab to the front and puts the cursor in an empty search field; the key is rebindable in HotkeyManager.'
   - name: Ranked substring search
-    anchor: search-behavior
-    does: 'Matches substrings case-insensitively, combines multiple words, and ranks exact, prefix and word-start matches first, alphabetical within each group.'
-  - name: Wildcards and exclusions
-    anchor: search-behavior
-    does: 'Words with `*` or `?` match as front-anchored patterns, and a word prefixed with `-` removes its matches from the results.'
-  - name: Fuzzy fallback
-    anchor: search-behavior
-    does: 'When nothing matches literally, retries each word as the other side''s spelling, as initials, as a typo, and last as letters in order.'
+    anchor: writing-a-search
+    does: 'Finds a word anywhere in a name, combines several words, and lists exact, prefix and word-start matches first.'
+  - name: Wildcard patterns
+    anchor: writing-a-search
+    does: 'Words with `*` or `?` match as patterns from the front of a name, so a wildcard can only widen the search.'
+  - name: Exclude matches with a minus
+    anchor: writing-a-search
+    does: 'A word starting with `-` takes its matches out of the results.'
+  - name: Fuzzy fallback for typos and spellings
+    anchor: writing-a-search
+    does: 'When nothing matches as typed, it tries the other side''s spelling, initials, a typo, and finally letters in order.'
   - name: Folder search
-    anchor: search-behavior
-    does: 'A word containing / matches the palette folder instead of the name, so tools/ alone lists a whole folder; toggleable with Folder Search.'
+    anchor: writing-a-search
+    does: 'A word containing / matches the palette folder, so tools/ on its own lists a whole folder.'
   - name: Latest version only
-    anchor: search-behavior
-    does: Collapses numbered or duplicate copies of one component to the latest-modified file; toggleable with the Latest Version Only parameter.
+    anchor: writing-a-search
+    does: 'Numbered or duplicate copies of one component collapse to the most recently modified file.'
+  - name: Jump by word in the field
+    anchor: how-to-use-it
+    does: 'The field edits like TouchDesigner''s own text fields, including `Ctrl+Left` and `Ctrl+Right` to jump by word.'
 ---
 
-## TDX_SearchPalette
+## Why use it
 
-Adds a search field to TouchDesigner's palette browser, so palette
-components can be found by typing their name.
-It is based on [Yea Chen's TD-SearchPalette](https://github.com/yeataro/TD-SearchPalette).
+TouchDesigner's palette browser is a folder tree. To use a component you have
+to remember which folder it is in and scroll to it, and the more components
+you collect, the longer that takes.
 
-The component installs itself into the palette on project start while
-**Auto Install** is on (the toggle roams with your config), and can be
-installed or removed at any time with the **Install** / **Uninstall**
-pulses on its parameters.
+SearchPalette adds a search field to the palette browser. Type part of a name
+and the list shows the matching components from every folder, best match
+first. It is based on
+[Yea Chen's TD-SearchPalette](https://github.com/yeataro/TD-SearchPalette),
+with a search that goes well past the original's prefix match.
 
-## Search hotkey
+## How to use it
 
-`ctrl+shift+f` (`cmd+shift+f` on macOS) brings TD's own palette tab to the
-front and focuses the search field, ready to type.
+1. Install it. The search field is put into the palette browser every time a
+   project opens while **Auto Install at startup** is on. That choice roams
+   with your config, so it holds across projects. **Install** and
+   **Uninstall** add or remove the field right away.
+2. Open the palette browser and type into the field. The list follows as you
+   type.
+3. To get back to browsing, click a folder in the tree. That clears the search,
+   and the list shows the folder's own contents again. The **X** button next
+   to the field clears the search without changing folder.
 
-It acts on the palette **in place**. `ui.openPaletteBrowser()` would pop the
-palette out into a floating window, so the hotkey deliberately leaves it
-uncalled: if the browser is closed, the hotkey does nothing and starts no
-rearranging of your workspace.
+The field is a Text COMP, so it edits the way TouchDesigner's own text fields
+do, including `Ctrl+Left` and `Ctrl+Right` to jump by word. It replaced the
+legacy Field COMP, which TouchDesigner deprecated in 2022.24200 and which had
+no word navigation.
 
-The tab step matters because the search field lives inside the *stock* palette
-list, and any contributed tab hides that list. The hotkey asks whichever
-palette-tab owner is installed to show TD's own tab again
+Two settings worth knowing:
+
+- If a very large palette makes typing feel heavy, switch off **Live Search**:
+  the list then waits until you stop typing.
+- To have the palette browser close itself when you are not using it, switch
+  on **Hide Palette When Idle** and set **Hide After (Minutes)**. Unused means
+  the mouse is outside the palette and nothing is being typed into the field.
+
+Earlier releases shipped this package as TDX_SearchPalette. It is
+FNS_SearchPalette now. A copy installed under the old name keeps working but is
+no longer offered updates, so reinstall it under the new name.
+
+## The search hotkey
+
+With the palette browser open, `Ctrl+Shift+F` (`Cmd+Shift+F` on macOS) brings
+TouchDesigner's own palette tab to the front, clears the search field and puts
+the cursor in it, ready to type.
+
+It works on the palette where it already is. It leaves
+`ui.openPaletteBrowser()` uncalled on purpose, because that pops the palette
+out into a floating window. So if the browser is closed, the hotkey does
+nothing and your workspace stays as it is.
+
+The tab step matters because the search field lives inside the stock palette
+list, and any contributed palette tab hides that list. The hotkey asks
+whichever palette-tab owner is installed to show TouchDesigner's own tab again
 ([PaletteRegistry](/docs/fns-paletteregistry/) and TDXLU's own injector are
-both feature-detected, neither required), then takes focus one frame later,
-because a tab switched back this frame is still hidden.
+both detected, neither is required), then takes focus one frame later, because
+a tab switched back this frame is still hidden.
 
-**Rebindable.** The combo lives on this package's own **Search Hotkey**
-parameter, so it is listed under TDX_SearchPalette in HotkeyManager and can
-be changed there or on the parameter directly; *Reset to Default* restores
-`ctrl+shift+f`. It used to live in MY_HOTKEYS; keeping it with the tool that
-owns the field means uninstalling this package takes its hotkey with it.
+The combo is this package's own **Search Hotkey** parameter. Change it there,
+or in [HotkeyManager](/docs/fns-hotkeymanager/), which lists it under
+SearchPalette; resetting it to its default brings back `Ctrl+Shift+F`. It used
+to live in MY_HOTKEYS. Keeping it with the tool that owns the field means
+uninstalling this package takes its hotkey with it.
 
-## Editing the search text
+## Writing a search
 
-The search field is a Text COMP, so it edits the way TouchDesigner's own text
-fields do, including `ctrl+left` / `ctrl+right` to jump by word. It replaced
-the legacy Field COMP, which TouchDesigner deprecated in 2022.24200 and which
-had no word navigation.
+What you can type, from plain words to patterns:
 
-## Search behavior
+- **Anywhere in the name, any case.** `blur` finds `hsvBlur`, `radialBlur` and
+  `barrel_blur`, as well as names that start with it.
+- **Several words narrow it down.** Every word has to match: `audio an` finds
+  `audioAnalysis`.
+- **Best matches first.** An exact match comes first, then names starting with
+  the query, then names where it starts a word (`blur` puts `hsvBlur` and
+  `barrel_blur` above `unblurred`), then the rest, alphabetical within each
+  group.
+- **Wildcards.** A word carrying `*` or `?` is matched as a pattern, anchored
+  at the front only, so a wildcard can only widen the search: `audio*` is
+  still a classic prefix search, `*fee` finds `feedbackGen` just like plain
+  `fee` does, and `web*ser` finds `webBrowser`.
+- **Leave things out with `-`.** A word starting with a minus removes its
+  matches: `blur -barrel` finds every blur except the `barrel_blur` pair.
+- **When nothing matches.** Each word is then read more loosely, best reading
+  first: a spelling from the other side of the Atlantic (`randomise` finds
+  `randomize`, `colour` finds `color`), initials (`mfo` finds
+  `movieFileOut`), a typo of a word or its start (`nosie` finds `noise`,
+  `kinnect` finds `kinectAzure`; one slip for words of four to seven letters,
+  two from eight), and last the letters in order, so `fbg` finds
+  `feedbackGen` and `wbrsr` finds `webBrowser`. These only appear when the
+  strict search came up empty, and they never reorder it.
+- **Search a folder.** A word containing `/` matches the palette folder, so
+  `gen/ noise` finds `noise` in the Generators folder, and `tools/` alone lists
+  a whole folder. **Folder Search (token/)** switches this off.
+- **One copy per component.** Numbered copies of one component (`tool`,
+  `tool1`, `tool2`, or the same name in two folders) collapse to the most
+  recently modified file. **Latest Version Only** switches this off.
 
-Matching goes beyond the original module's prefix search:
-
-- **Substring, case-insensitive**: `blur` finds `hsvBlur`, `radialBlur`
-  and `barrel_blur`, as well as names that start with it.
-- **Multiple words AND together**: `audio an` finds `audioAnalysis`.
-- **Ranked results**: an exact match first, then names starting with the
-  query, then names where it starts a word (`blur` puts `hsvBlur` and
-  `barrel_blur` above `unblurred`), then the rest, alphabetical within
-  each group.
-- **Wildcards still work**: a word carrying `*` or `?` is matched as a
-  pattern, anchored at the front only, so a wildcard can only ever widen
-  the search: `audio*` is still classic prefix search, `*fee` finds
-  `feedbackGen` just like plain `fee` does, and `web*ser` finds
-  `webBrowser`.
-- **Exclude with `-`**: a word prefixed with a minus removes matches: `blur -barrel` finds every blur except the
-  `barrel_blur` pair.
-- **Fuzzy fallback**: when nothing matches literally, each word is
-  re-read more loosely, best reading first: a spelling either side of the
-  Atlantic (`randomise` finds `randomize`, `colour` finds `color`),
-  initials (`mfo` finds `movieFileOut`), a typo of a word or its start
-  (`nosie` finds `noise`, `kinnect` finds `kinectAzure`; one slip for
-  words of four to seven letters, two from eight), and last a
-  *subsequence*, so `fbg` finds `feedbackGen` and `wbrsr` finds
-  `webBrowser`. These only ever appear when the strict search came up
-  empty, and they never reorder it.
-- **Folder search**: a word containing `/` matches the palette *folder*
-  instead of the name: `gen/ noise` finds `noise` in the Generators
-  folder, and `tools/` alone lists a whole folder. Toggleable via the
-  **Folder Search** parameter.
-- **Latest version only**: numbered copies of one component (`tool`,
-  `tool1`, `tool2`, or the same name in two folders) collapse to the
-  latest-modified file. Toggleable via the **Latest Version Only**
-  parameter.
-
-The list stops at 200 rows, so a one-character query returns the 200
-best-ranked components only.
-
-Clicking a folder in the tree clears the search, so the list falls back to
-that folder's own contents and the old query goes with it. The **X** button next to the field still clears it
-without changing folder.
+The list stops at 200 rows, so a one-letter query shows the 200 best-ranked
+components only.

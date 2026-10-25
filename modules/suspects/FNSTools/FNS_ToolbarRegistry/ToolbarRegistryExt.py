@@ -543,7 +543,7 @@ class ToolbarRegistryExt(RegistryBase):
 	# Location-independent: resolves through the toolbar package's global
 	# shortcut, evaluates to None (no clone, no warning) where it is absent.
 	# _healHostClones and StampHost come from RegistryBase off these two.
-	CLONE_EXPR = "op.FNS.op('FNS_ToolbarRegistry') if hasattr(op, 'FNS') else None"
+	CLONE_EXPR = "tdu.tryExcept(lambda: op.FNS.op('FNS_ToolbarRegistry'), None)"
 
 	def _healHostClones(self):
 		"""The base heal, plus toolbar hosts that still carry a constant path.
@@ -555,9 +555,13 @@ class ToolbarRegistryExt(RegistryBase):
 		that resolves alone; this converts one that resolves to the master
 		anyway, so nothing changes inside the toolkit. A constant naming a
 		different master is a deliberate choice and stays.
+
+		Dev checkout only, like the base heal: an EMPTY constant reads None and
+		used to be converted too, which would re-link every frozen host in a
+		user's project (docs/RegistryHostsFrozen.md).
 		"""
 		RegistryBase._healHostClones(self)
-		if not self._is_sys_global():
+		if not self._is_sys_global() or not self._devCheckout():
 			return
 		master = self._masterComp()
 		if master is None:

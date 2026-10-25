@@ -2,28 +2,47 @@
 package: FNS_GlobalVolControl
 summary: Set the overall volume of TouchDesigner.
 features:
-  - name: Mute and Volume
-    anchor: mute-and-volume
+  - name: Why use it
+    anchor: why-use-it
     icon: GlobalVol.png
+  - name: How to use it
+    anchor: how-to-use-it
 feature_list:
   - name: Master volume slider
-    anchor: mute-and-volume
+    anchor: how-to-use-it
     does: 'Sets TouchDesigner''s application-wide output level from the toolbar, leaving the Volume on every Audio Device Out and Audio Play CHOP unchanged.'
   - name: Mute
-    anchor: mute-and-volume
+    anchor: how-to-use-it
     does: 'The speaker button silences output without moving the slider, so unmuting returns to the same level.'
+  - name: Set volume or toggle mute from quick-launch
+    anchor: how-to-use-it
+    does: 'The Set volume command takes a level from 0 to 1, and Toggle mute mutes and unmutes.'
+  - name: Restore the level at startup
+    anchor: how-to-use-it
+    does: The level and the mute state are applied again as the project starts.
 ---
 
-## Mute and Volume
+## Why use it
 
-A speaker button and a slider on the toolbar for TouchDesigner's **application-wide**
-output level, the same thing the Audio Device Out settings control, without
-opening a dialog.
+In a TouchDesigner patch the volume lives in many places: every Audio Device
+Out and Audio Play CHOP has its own Volume parameter. When everything needs to
+be quieter right now, for a soundcheck or a call in the studio, digging through
+a mix you balanced carefully is the last thing you want to do.
 
-This is the master level: it leaves the Volume parameter on every Audio Device
-Out and Audio Play CHOP as it is, so turning it down leaves
-your patch's own mix exactly as you built it. That is what makes it safe to grab
-mid-set.
+GlobalVolControl puts TouchDesigner's master output level on the toolbar, as a
+speaker button and a slider, with no dialog to open. It changes the
+application-wide level and leaves the Volume parameter on every operator as it
+is, so your patch's own mix stays exactly as you built it. That is what makes
+it safe to grab mid-set.
 
-**Mute** silences output without disturbing the slider, so unmuting returns you to
-the level you were at.
+## How to use it
+
+- Drag the slider on the toolbar to set the overall level.
+- Click the speaker button to mute. The icon lights while the sound is muted.
+  The slider stays where it is, so unmuting returns you to the level you were
+  at.
+- From quick-launch, **Set volume** takes a level from 0 to 1 and **Toggle
+  mute** mutes and unmutes.
+
+The tool applies its level and mute state again as the project starts. If a
+project opens silent, check the speaker button first.

@@ -22,10 +22,20 @@ a port of it), so both sides compare like with like: "ChopBank" gives chop,
 bank and the compound chopbank; "colour" folds to color. Dropped: words under
 three letters, trailing digits (in1, Fader1), numbers, stopwords, fenced and
 inline code, link targets and HTML tags, and every word the card itself
-already answers to (title, name, description, family tags), because the
+already answers to (title, name, description, family and catalog tags), because the
 picker scores those fields higher anyway. A word that appears in more than
 COMMON_SHARE of all docs ("parameter", "network") says nothing about any one
 tool and is dropped from both tiers.
+
+A third string rides along when the doc has a feature_list:
+
+    lead  the first word of each feature name, folded, sorted, once each.
+          A feature name leads with what the feature does ("Copy an
+          operator reference", "Noise or image displacement"), so a query
+          word that starts one says the tool DOES it
+          (docs/FeatureSearchPosition.md). Kept whole: neither the common
+          cut nor the card words apply, since it records a position, not
+          a word the card lacks.
 """
 import importlib.util
 import io
@@ -155,12 +165,87 @@ def DocTiers(text):
     return head, body
 
 
+_FEATURE_LIST = re.compile(r'^feature_list:\s*$')
+_FEATURE_NAME = re.compile(r'^\s*-\s+name:\s*(.*)$')
+
+
+def FeatureLeads(text):
+    """The folded first word of every feature_list name in a doc, as a set.
+
+    Only the first raw word counts: "Per-channel processing blocks" leads
+    with per, a stopword, so it gives nothing, never channel.
+    """
+    front, _ = _frontmatter(text)
+    fm = _fuzzy()
+    out, inside = set(), False
+    for line in front:
+        if _FEATURE_LIST.match(line):
+            inside = True
+            continue
+        if inside and line[:1].strip():          # the next top-level key
+            inside = False
+        if not inside:
+            continue
+        m = _FEATURE_NAME.match(line)
+        if not m:
+            continue
+        raw = _RAW.findall(_unquote(m.group(1)))
+        parts = fm.words(_ACRONYM_PLURAL.sub(r'\1S', raw[0])) if raw else []
+        w = _keep(parts[0]) if parts else None
+        if w:
+            out.add(w)
+    return out
+
+
+_FEATURE_ITEM = re.compile(r'^\s*-\s+(\w+):\s*(.*)$')
+_FEATURE_KEY = re.compile(r'^\s+(\w+):\s*(.*)$')
+_MD_LINK = re.compile(r'\[([^\]]+)\]\([^)]*\)')
+_MD_BOLD = re.compile(r'\*\*([^*]+)\*\*')
+
+
+def FeatureLines(text):
+    """Every feature_list entry of a doc as one plain line, "name: does", in
+    order: what the picker's opened card lists (docs/FinderAndToolRow.md).
+
+    Plain text, since the picker draws it with textContent: backticks, link
+    targets and bold markers go, the same as the site build's plainDoes. An
+    entry without both a name and a does line is left out; the site build
+    refuses such a doc anyway.
+    """
+    front, _ = _frontmatter(text)
+    entries, inside = [], False
+    for line in front:
+        if _FEATURE_LIST.match(line):
+            inside = True
+            continue
+        if inside and line[:1].strip():          # the next top-level key
+            inside = False
+        if not inside:
+            continue
+        m = _FEATURE_ITEM.match(line)
+        if m:
+            entries.append({m.group(1): _unquote(m.group(2))})
+            continue
+        m = _FEATURE_KEY.match(line)
+        if m and entries:
+            entries[-1][m.group(1)] = _unquote(m.group(2))
+    out = []
+    for e in entries:
+        name, does = e.get('name', '').strip(), e.get('does', '').strip()
+        if not name or not does:
+            continue
+        does = _MD_BOLD.sub(r'\1', _MD_LINK.sub(r'\1', does.replace('`', '')))
+        out.append('%s: %s' % (name, does))
+    return out
+
+
 def CardWords(row):
     """Every word a manifest row's card fields already answer to."""
     fam = row.get('family') or {}
     texts = [row.get('name', ''), row.get('title', ''), row.get('description', ''),
              fam.get('op_label', ''), fam.get('op_name', ''), fam.get('summary', '')]
     texts.extend(fam.get('search_words') or [])
+    texts.extend(row.get('search_words') or [])   # the catalog's own tags
     return set(Words(' '.join(str(t) for t in texts if t)))
 
 
@@ -168,19 +253,33 @@ def DocPath(docs_dir, name):
     return os.path.join(docs_dir, name + '.md')
 
 
+def NameWords(row):
+    """The words a row's own name fields answer to: name, title, op_label."""
+    fam = row.get('family') or {}
+    texts = [row.get('name', ''), row.get('title', ''), fam.get('op_label', '')]
+    return set(Words(' '.join(str(t) for t in texts if t)))
+
+
 def BuildIndex(rows, docs_dir):
-    """{package name: {'head': str, 'body': str}} for every row with a doc.
+    """{package name: {'head': str, 'body': str[, 'lead': str]}} for every
+    row with a doc.
 
     `rows` are manifest package rows (only name, title, description and family
     are read). The common-word cut counts every doc in docs_dir, not only the
     rows passed, so indexing a subset gives the same words as indexing all.
+
+    A lead word leaves head and body: the picker scores it higher as a lead,
+    so it would only be carried twice. It also leaves out what the row's own
+    name answers to, which outranks it anyway.
     """
-    tiers = {}
+    tiers, leads = {}, {}
     for fn in sorted(os.listdir(docs_dir)):
         if not fn.endswith('.md'):
             continue
         with io.open(os.path.join(docs_dir, fn), encoding='utf-8') as f:
-            tiers[fn[:-3]] = DocTiers(f.read())
+            text = f.read()
+        tiers[fn[:-3]] = DocTiers(text)
+        leads[fn[:-3]] = FeatureLeads(text)
     df = {}
     for head, body in tiers.values():
         for w in set(head) | set(body):
@@ -194,10 +293,13 @@ def BuildIndex(rows, docs_dir):
         if name not in tiers:
             continue
         head, body = tiers[name]
-        drop = common | CardWords(row)
+        lead = leads[name] - NameWords(row)
+        drop = common | CardWords(row) | lead
         h = set(head) - drop
         b = set(body) - drop - h
         out[name] = {'head': ' '.join(sorted(h)), 'body': ' '.join(sorted(b))}
+        if lead:
+            out[name]['lead'] = ' '.join(sorted(lead))
     return out
 
 

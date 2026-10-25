@@ -1,64 +1,103 @@
 ---
 package: FNS_OpMenuMods
-summary: This is a table to define custom search keywords for each OpType for the OpMenu / OP Create Dialog.
+summary: 'Extras for the OP Create dialog: IO filter buttons, your own search words per operator type, and search by initials.'
 features:
-  - name: Custom OpMenu Search Keywords
-    anchor: custom-opmenu-search-keywords
-  - name: OpMenu Mods
-    anchor: opmenu-mods
-  - name: Greg's IO Filters
+  - name: Why use it
+    anchor: why-use-it
+  - name: How to use it
+    anchor: how-to-use-it
+  - name: Greg's IO filters
     anchor: gregs-io-filters
-  - name: Custom Search Keywords
-    anchor: custom-search-keywords
-  - name: Dotsimulate's OpType acronyms
-    anchor: dotsimulates-optype-acronyms
-feature_list:
-  - name: IO filter buttons
-    anchor: gregs-io-filters
-    does: 'Buttons at the top right of the OP Create dialog show only IO operators, only non-IO operators, or all of them.'
   - name: Custom search keywords
     anchor: custom-search-keywords
-    does: 'Give any operator type your own search words, so typing music finds Audio File In; the table syncs across project files.'
+  - name: Dotsimulate's acronym search
+    anchor: dotsimulates-acronym-search
+feature_list:
+  - name: Filter IO operators
+    anchor: gregs-io-filters
+    does: 'Buttons at the top right of the OP Create dialog show only IO operators, hide them, or show everything.'
+  - name: Custom search keywords
+    anchor: custom-search-keywords
+    does: 'Give any operator type your own search words, so typing music finds Audio File In and webcam finds Video Device In.'
   - name: Keyword table in Hub
-    anchor: custom-opmenu-search-keywords
-    does: 'The keyword definitions are edited in a table, also reachable as the SearchWords tab of Hub.'
+    anchor: custom-search-keywords
+    does: 'The keywords live in one table, edited from the SearchWords tab of Hub and synced across project files.'
   - name: Acronym search
-    anchor: dotsimulates-optype-acronyms
-    does: 'Type an operator type''s initials, such as m f o, to find Movie File Out.'
-  - name: Removable registry-based mods
-    anchor: opmenu-mods
+    anchor: dotsimulates-acronym-search
+    does: 'Type the start of each word of an operator''s name, such as m f o, to find Movie File Out.'
+  - name: Remove cleanly, shared with other tools
+    anchor: how-to-use-it
     does: 'The mods apply through OpMenuRegistry, so several tools can decorate the dialog together and it returns to stock when they are removed.'
 ---
 
-## Custom OpMenu Search Keywords
+## Why use it
 
-This is a table to define custom search keywords for each OpType for the **OpMenu / OP Create Dialog**. Read more [here](/docs/fns-opmenumods/#opmenu-mods). It is also reachable as the **SearchWords** tab of [Hub](/docs/fns-hub/) (the **FNS** button in the main-menu bar).
+The OP Create dialog finds operators by their name. That works once you know
+the names, but you have to know that the oscillator you want is a Pattern CHOP,
+that a webcam comes in through Video Device In, or that a clamp is a Limit
+CHOP. Typing what you mean finds nothing. And with every operator that talks to
+the outside world mixed into the list, picking out a processing operator takes
+a moment longer than it should.
 
-## OpMenu Mods
+OpMenuMods adds three things to the dialog: buttons that show or hide the IO
+operators, your own search words for any operator type, and search by the
+start of each word of a name, so `m f o` finds Movie File Out.
 
-OpMenu is a set of mods to TouchDesigner's **OP Create dialog**
-(`/ui/dialogs/menu_op`). They are applied through
+## How to use it
+
+Install it and open the OP Create dialog; all three mods are on.
+
+- Click **IO**, **-IO** or **All** at the top right of the dialog to filter
+  the list.
+- Type a word you associate with an operator, such as `music`, `webcam` or
+  `fft`, and the operator types carrying that word are offered.
+- Type the first letters of an operator's name, separated by spaces: `m f o`
+  for Movie File Out.
+- To add or change search words, open the SearchWords tab of
+  [Hub](/docs/fns-hub/) (the **FNS** button in the main-menu bar).
+
+The mods go into the dialog through
 [OpMenuRegistry](/docs/fns-opmenuregistry/), so several tools can decorate
-the same dialog without fighting over it, and so the dialog goes back to
-stock the moment you remove them.
+the same dialog without fighting over it, and the dialog goes back to stock the
+moment you remove them. Other installed tools add their own decorations the
+same way: [OpTemplates](/docs/fns-optemplates/) marks every operator type you
+have a template for with `>>>`. The OpMenu tab of Hub lists what each tool
+contributes, and lets you reorder the contributions or switch one off without
+uninstalling its tool.
 
-The mods this package ships are below: Greg Hermanovic's IO filters, custom
-search keywords, and Dotsimulate's OpType acronyms. Other installed tools add
-their own decorations through the same registry, for instance
-[OpTemplates](/docs/fns-optemplates/) marks every operator type you have a template
-for with a `>>>`.
+## Greg's IO filters
 
-## Greg's IO Filters
+This mod by [Greg Hermanovic](https://derivative.ca) adds three filter
+buttons to the top right of the OP Create dialog: **IO** shows only IO
+operators, **-IO** shows everything except them, and **All**, the default,
+shows every operator.
 
-This OP Create dialog mod by [Greg Hermanovic](https://derivative.ca) adds filtering options to the OP Create dialog menu to the top right, showing only IO operators (`IO` option), or ops without the IO ones (`-IO`) or all (`All`, default).
+IO operators are the ones that interact with resources outside TouchDesigner,
+such as sensors or web interfaces. Switch off **IO Filter Active** to take the
+buttons out of the dialog.
 
-IO operators are considered ones that interact with resources outside of TouchDesigner such as sensors or web interfaces. 
+## Custom search keywords
 
-## Custom Search Keywords
+Each operator type can carry extra search words. Out of the box, `ramp` or
+`cos` finds the Pattern CHOP and the LFO CHOP, `music` finds Audio File In,
+`webcam` finds Video Device In, `clamp` finds the Limit TOP and CHOP, and
+`donut` finds the Torus SOP.
 
-For each OP Type you can define custom search keywords. For example you can find `Pattern CHOP` by typing `ramp` or `cos`, or you can find `Audio File In` by typing `music` in the OP search field. The definition table is fully customizable through the [custom UI](/docs/fns-opmenumods/#custom-opmenu-search-keywords), and is synced across project files.
+A keyword counts when you type a single word, and it is matched from the
+start of the keyword, so `cam` finds Video Device In through both `cam` and
+`camera`.
 
-## Dotsimulate's OpType acronyms
+The words live in one table, edited from the SearchWords tab of Hub, and it is
+synced across project files. Each row is an operator type, written the way
+TouchDesigner spells it (`patternCHOP`, `audiofileinCHOP`), and its words,
+separated by commas. An edit is used the next time the dialog searches.
 
-Thanks to [Dotsimulate](https://www.patreon.com/dotsimulate/), you can also list OpTypes based on their acronym. Meaning you can find `Movie File Out` by typing `m f o`, and so on.
+Other tools can add search words of their own through
+[OpMenuRegistry](/docs/fns-opmenuregistry/).
 
+## Dotsimulate's acronym search
+
+Thanks to [Dotsimulate](https://www.patreon.com/dotsimulate/), you can find an
+operator by the start of each word of its name. Type the starts in order,
+separated by spaces: `m f o` finds Movie File Out, and `a f i` finds Audio File
+In. Longer starts work too, such as `mov f o`.
