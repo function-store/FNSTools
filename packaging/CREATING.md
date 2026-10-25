@@ -323,8 +323,28 @@ trying to exist.
   scrubs the written tox of `pi_suspect`, `FNS_externalized` and
   `Vcoriginal` (`ScrubArtifact`, on the artifact, never the live master).
   Hand stamp recipes inside the project still sever them themselves.
+- **Anything that runs every frame answers to Perform Mode.** A frame
+  callback, a Time Sliced or Timer CHOP, a feedback loop, a `run()` that
+  reschedules itself: decide whether a show needs it. Authoring work stops
+  while the root's `Perform` is on (the gate recipes are in
+  `/fns-definition-of-done`, "Per-frame work answers to Perform Mode");
+  show work is tagged `fns_show`, on the frame DAT or on the COMP that holds
+  it. Preflight blocks a release on anything that cooks every frame while
+  performing and is neither, measured by `scripts/perform_cook_audit.py`
+  against `packaging/perform_floor.json`
+  ([docs/PerformMode.md](../docs/PerformMode.md) section 6).
 - **Hotkeys** go through the conformance flow — `/fns-hotkey-conformance`.
 - **Quick-launch commands** — `/fns-command-registration`.
+- **Children that hold the user's work are tagged `fns_keep`.** An update
+  replaces a package's children; a DIRECT child tagged `fns_keep` is carried
+  across and put in place of the new copy's same-named child, on both update
+  rails and in either config scope. Keep extensions out of a kept subtree
+  (one that holds an extension is not carried). Tag it in the master so the
+  tag ships, and re-add it on init. If `onConfigLoad` also rebuilds that
+  child from the roaming file, skip the rebuild while the child's
+  `fns_carried` storage equals `os.getpid()` (the mark expires on its own
+  after 600 frames). Full contract:
+  [docs/UpdaterHardening.md](../docs/UpdaterHardening.md), "Kept children".
 
 ## Shipping it
 

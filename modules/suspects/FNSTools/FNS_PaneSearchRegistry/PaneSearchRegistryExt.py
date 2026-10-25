@@ -35,7 +35,7 @@ class PaneSearchRegistryExt(RegistryBase):
 	ORDER_FIRST = 3.6
 	ORDER_SPAN = 0.3
 
-	CLONE_EXPR = "op.FNS.op('FNS_PaneSearchRegistry') if hasattr(op, 'FNS') else None"
+	CLONE_EXPR = "tdu.tryExcept(lambda: op.FNS.op('FNS_PaneSearchRegistry'), None)"
 
 	# --- stamping: a host is not the package ---
 

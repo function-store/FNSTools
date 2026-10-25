@@ -32,6 +32,10 @@
     display: flex; align-items: center; gap: 14px;
     padding: 10px 16px; border-bottom: 1px solid var(--border);
     background: var(--bg-1); flex-shrink: 0;
+    /* on a narrow screen (the CMS opened from a phone or tablet) the
+       buttons wrap onto a second line instead of running off the edge,
+       which hid Save */
+    flex-wrap: wrap; row-gap: 8px;
   }
   .bar h1 { margin: 0; font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
   .bar h1 span { color: var(--accent); }
@@ -65,6 +69,20 @@
      worse than one you have to scroll to */
   body.mode-release .col:nth-child(2) { overflow-x: auto; }
   table.rel { min-width: 640px; }
+  /* A phone or a small tablet: one column at a time, top to bottom -- the
+     list, then the editor, then the preview -- and the page scrolls. Three
+     columns side by side left the editor about 70px wide. */
+  @media (max-width: 820px) {
+    html, body { height: auto; }
+    /* the desktop body is a fixed-height flex column that clips; here the
+       page itself must scroll */
+    body { display: block; overflow: visible; }
+    .cols, body.mode-release .cols { display: block; }
+    .col { overflow: visible; }
+    .col + .col { border-left: 0; border-top: 1px solid var(--border); }
+    .col:first-child { max-height: 45vh; overflow-y: auto; }
+    .rec-grid, .row { grid-template-columns: 1fr; }
+  }
 
   /* ───── Package list ───── */
   .side-top { position: sticky; top: 0; background: var(--bg); padding: 12px; border-bottom: 1px solid var(--border); z-index: 2; }
@@ -199,6 +217,26 @@
   .rec-md { width:100%; font-size:12.5px; line-height:1.5; }
   .rec-preview { border:1px solid var(--border, #333); border-radius:6px; padding:10px 14px; margin-top:6px; max-height:420px; overflow:auto; }
   .rec-preview img { max-width:100%; }
+  /* ───── Questionnaire ───── */
+  .fit-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+  .fit-chip {
+    font: inherit; font-size: 11.5px; cursor: pointer; padding: 2px 8px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--bg-2); color: var(--text-dim);
+  }
+  .fit-chip:hover { border-color: var(--border-strong); color: var(--text); }
+  .fit-chip.on { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
+  .fit-chip .n { opacity: .6; margin-left: 3px; }
+  .q-card { border: 1px solid var(--border); border-radius: 8px; background: var(--bg-1); padding: 12px 14px; margin-bottom: 12px; }
+  .q-head { display: grid; grid-template-columns: auto 120px 1fr auto auto; gap: 8px; align-items: center; }
+  .q-head input[type=text] { width: 100%; }
+  .q-multi { font-size: 12px; color: var(--text-dim); white-space: nowrap; display: flex; gap: 5px; align-items: center; }
+  .q-opts { margin-top: 10px; display: grid; gap: 6px; }
+  .q-opt { display: grid; grid-template-columns: 110px 1fr 1fr auto; gap: 8px; align-items: start; }
+  .q-opt input { width: 100%; }
+  .q-tags { font-size: 11px; color: var(--text-faint); margin-top: 3px; }
+  .q-tags .dead { color: var(--red); }
+  .q-reach { font-size: 11px; color: var(--text-faint); grid-column: 2 / -1; }
+  .q-cols { display: grid; grid-template-columns: 110px 1fr 1fr auto; gap: 8px; font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-faint); margin-top: 10px; }
   .cat-row {
     display: grid; grid-template-columns: 22px 52px 1fr 44px 26px;
     gap: 8px; align-items: start;
@@ -304,6 +342,7 @@
   <span class="dirty" id="dirty">● unsaved</span>
   <div class="spacer"></div>
   <button class="btn" id="cats">Categories</button>
+  <button class="btn" id="quiz">Questionnaire</button>
   <button class="btn" id="community">Community</button>
   <button class="btn" id="params">Parameters</button>
   <button class="btn" id="release">Release</button>
@@ -740,6 +779,17 @@ function renderEditor() {
       <div class="hint" id="alt-state"></div>
     </div>
 
+    <div class="field">
+      <label for="search_words">Search tags <span class="hint">— words the install picker matches like a family tag, separated by spaces (midi controller). A tag ranks just under the tool's own name, so use words people mean this tool by. Lives in catalog.json; the site bakes it at the next build, the in-TD picker gets it with the next release. Family members also have tags of their own in the family section below.</span></label>
+      <input type="text" id="search_words" placeholder="midi controller" />
+    </div>
+
+    <div class="field">
+      <label for="fits">Questionnaire tags <span class="hint">— the tags of the picker's questionnaire this tool answers, separated by spaces. Each answer someone picks adds a point to its tags; this tool scores the points of the tags it shares, and 2 or more ticks it. Click a tag below to add or remove it. Lives in catalog.json as <code>fits</code>; the site bakes it at the next build, the in-TD picker gets it with the next release.</span></label>
+      <input type="text" id="fits" placeholder="live midi" />
+      <div class="fit-chips" id="fit-chips"></div>
+    </div>
+
     <div class="field" id="fam">
       <label><input type="checkbox" id="fam-on" /> FNS family operator <span class="hint">— listed on the FNS tab of the OP Create dialog, placed as one node, with stubs and in-place updates. A live package keeps this in its own FamManifest: this section reads and writes the tool and saves it. A foreign package keeps it in catalog.json with the rest of this form. Membership implies Current network.</span></label>
       <div class="hint" id="fam-state"></div>
@@ -906,6 +956,9 @@ function renderEditor() {
   $('#min_td_build').value = d.min_td_build || '';
   $('#help_url').value = d.help_url || '';
   $('#alternatives_for').value = d.alternatives_for || '';
+  $('#search_words').value = d.search_words || '';
+  $('#fits').value = d.fits || '';
+  renderFitChips(d);
   $('#video').value = d.data.video || '';
   $('#body').value = d.body;
   const plats = d.data.platforms || [];
@@ -949,6 +1002,8 @@ function renderEditor() {
   $('#min_td_build').oninput = (e) => { d.min_td_build = e.target.value.trim(); markDirty(); };
   $('#help_url').oninput = (e) => { d.help_url = e.target.value.trim(); markDirty(); };
   $('#alternatives_for').oninput = (e) => { d.alternatives_for = e.target.value.trim(); markDirty(); };
+  $('#search_words').oninput = (e) => { d.search_words = e.target.value.trim(); markDirty(); };
+  $('#fits').oninput = (e) => { d.fits = e.target.value.trim(); markDirty(); renderFitChips(d); };
   bindFamily(d);
   bindAlternatives(d);
 
@@ -2281,11 +2336,192 @@ async function saveCategories() {
   }
 }
 
+// ───── Questionnaire (catalog `quiz`, each tool's `fits`) ─────
+// How it scores (quizScore/quizSplit in packaging/configurator/index.html):
+// each answer picked adds a point to each of its tags, a tool scores the
+// points of the tags in its fits, and 2 or more ticks it.
+
+let quizDraft = null;
+const escQ = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+const tagList = (s) => String(s || '').toLowerCase().split(/[\s,]+/).filter(Boolean);
+
+/** Every tag the questions use, in the order they are asked, each with the
+ *  answers that carry it. */
+function quizTagIndex(questions) {
+  const idx = new Map();
+  for (const q of questions || []) {
+    for (const o of q.options || []) {
+      for (const t of tagList(Array.isArray(o.tags) ? o.tags.join(' ') : o.tags)) {
+        if (!idx.has(t)) idx.set(t, []);
+        idx.get(t).push(o.label || o.id);
+      }
+    }
+  }
+  return idx;
+}
+
+/** The tag chips under a tool's Questionnaire tags: every tag the questions
+ *  use, lit when the tool has it; a click adds or removes it. A tag the tool
+ *  has that no question uses is shown too, so it can be removed. */
+function renderFitChips(d) {
+  const box = $('#fit-chips');
+  if (!box) return;
+  const idx = quizTagIndex(STATE.quiz && STATE.quiz.questions);
+  const mine = tagList(d.fits);
+  const all = [...idx.keys(), ...mine.filter((t) => !idx.has(t))];
+  box.innerHTML = all.map((t) => {
+    const used = idx.get(t);
+    const title = used ? 'Answers with this tag: ' + used.join('; ') : 'No question uses this tag: it scores nothing';
+    return `<button type="button" class="fit-chip${mine.includes(t) ? ' on' : ''}" data-tag="${escQ(t)}" title="${escQ(title)}">${escQ(t)}<span class="n">${(STATE.fitCounts || {})[t] || 0}</span></button>`;
+  }).join('') || '<span class="hint">The questionnaire has no tags yet.</span>';
+  box.onclick = (e) => {
+    const b = e.target.closest('.fit-chip');
+    if (!b) return;
+    const t = b.dataset.tag;
+    const now = tagList(d.fits);
+    const next = now.includes(t) ? now.filter((x) => x !== t) : [...now, t];
+    d.fits = next.join(' ');
+    $('#fits').value = d.fits;
+    markDirty();
+    renderFitChips(d);
+  };
+}
+
+function openQuiz() {
+  document.body.classList.remove('mode-release');
+  if (draft && JSON.stringify(draft) !== JSON.stringify(current) &&
+      !confirm('Discard unsaved changes to ' + current.name + '?')) return;
+  draft = current = null;
+  catDraft = null;
+  quizDraft = JSON.parse(JSON.stringify((STATE.quiz && STATE.quiz.questions) || []))
+    .map((q) => ({ ...q, options: (q.options || []).map((o) => ({ ...o, tags: (o.tags || []).join(' ') })) }));
+  renderQuiz();
+  renderList();
+}
+
+/** How many tools an answer reaches: those whose fits share one of its tags. */
+function quizReach(tags) {
+  const want = new Set(tagList(tags));
+  if (!want.size) return 0;
+  return STATE.packages.filter((p) => tagList(p.fits).some((t) => want.has(t))).length;
+}
+
+function renderQuiz() {
+  const counts = STATE.fitCounts || {};
+  const cards = quizDraft.map((q, qi) => `
+    <div class="q-card" data-q="${qi}">
+      <div class="q-head">
+        <div class="cat-move">
+          <button data-qup ${qi === 0 ? 'disabled' : ''} title="Ask earlier">▲</button>
+          <button data-qdown ${qi === quizDraft.length - 1 ? 'disabled' : ''} title="Ask later">▼</button>
+        </div>
+        <input type="text" data-qid value="${escQ(q.id)}" placeholder="id" title="The question's id: a lowercase word. Saved answers are keyed by it." />
+        <input type="text" data-qprompt value="${escQ(q.prompt)}" placeholder="The question" />
+        <label class="q-multi"><input type="checkbox" data-qmulti ${q.multi ? 'checked' : ''} /> several answers</label>
+        <button class="icon-x" data-qdel title="Delete this question">×</button>
+      </div>
+      <div class="q-cols"><span>Answer id</span><span>Label</span><span>Tags</span><span></span></div>
+      <div class="q-opts">${(q.options || []).map((o, oi) => {
+        const tags = tagList(o.tags);
+        const tagLine = tags.map((t) => counts[t]
+          ? `${escQ(t)} <span>${counts[t]}</span>`
+          : `<span class="dead" title="No tool has this tag, so it scores nothing">${escQ(t)} 0</span>`).join(' · ');
+        return `
+        <div class="q-opt" data-o="${oi}">
+          <input type="text" data-oid value="${escQ(o.id)}" placeholder="id" />
+          <input type="text" data-olabel value="${escQ(o.label)}" placeholder="What the reader sees" />
+          <div>
+            <input type="text" data-otags value="${escQ(o.tags)}" placeholder="live midi" />
+            <div class="q-tags">${tagLine || 'no tags: this answer scores nothing'}</div>
+          </div>
+          <button class="icon-x" data-odel title="Delete this answer">×</button>
+          <div class="q-reach">points at ${quizReach(o.tags)} tool${quizReach(o.tags) === 1 ? '' : 's'}</div>
+        </div>`;
+      }).join('')}</div>
+      <button class="btn" data-oadd style="margin-top:8px">+ Add answer</button>
+    </div>`).join('');
+
+  $('#editor').innerHTML = `
+    <h2 class="pane-title">Questionnaire</h2>
+    <p class="pane-sub">packaging/<span class="mono">catalog.json</span> · the picker's "Find my set" questions, in the order they are asked</p>
+    <p class="warn">Each answer someone picks adds a point to each of its tags. A tool scores the points of the tags it carries (its Questionnaire tags, on its own page), and 2 or more ticks it; if fewer than 6 tools reach 2, the top 8 are ticked. Explicit-pick-only tools, previews and Core are never ticked. The number beside a tag is how many tools carry it; a red tag reaches none. The site bakes this at the next build, the in-TD picker gets it with the next release.</p>
+    <div id="qcards">${cards}</div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn" id="q-add">+ Add question</button>
+      <div style="flex:1"></div>
+      <button class="btn" id="q-cancel">Cancel</button>
+      <button class="btn btn-primary" id="q-save">Save questionnaire</button>
+    </div>`;
+
+  const qOf = (el) => quizDraft[Number(el.closest('.q-card').dataset.q)];
+  $('#qcards').oninput = (e) => {
+    const t = e.target;
+    const q = qOf(t);
+    if (t.hasAttribute('data-qid')) q.id = t.value.trim();
+    else if (t.hasAttribute('data-qprompt')) q.prompt = t.value;
+    else if (t.hasAttribute('data-qmulti')) q.multi = t.checked;
+    else {
+      const o = q.options[Number(t.closest('.q-opt').dataset.o)];
+      if (t.hasAttribute('data-oid')) o.id = t.value.trim();
+      if (t.hasAttribute('data-olabel')) o.label = t.value;
+      if (t.hasAttribute('data-otags')) o.tags = t.value;
+    }
+  };
+  // tag counts and reach refresh when a tags box is left, not on every key
+  $('#qcards').addEventListener('change', (e) => {
+    if (e.target.hasAttribute('data-otags')) renderQuiz();
+  });
+  $('#qcards').onclick = (e) => {
+    const t = e.target;
+    const card = t.closest('.q-card');
+    if (!card) return;
+    const qi = Number(card.dataset.q);
+    if (t.hasAttribute('data-qup') && qi > 0) {
+      [quizDraft[qi - 1], quizDraft[qi]] = [quizDraft[qi], quizDraft[qi - 1]]; renderQuiz();
+    } else if (t.hasAttribute('data-qdown') && qi < quizDraft.length - 1) {
+      [quizDraft[qi + 1], quizDraft[qi]] = [quizDraft[qi], quizDraft[qi + 1]]; renderQuiz();
+    } else if (t.hasAttribute('data-qdel')) {
+      if (confirm('Delete the question "' + (quizDraft[qi].prompt || quizDraft[qi].id) + '"?')) { quizDraft.splice(qi, 1); renderQuiz(); }
+    } else if (t.hasAttribute('data-oadd')) {
+      quizDraft[qi].options.push({ id: '', label: '', tags: '' }); renderQuiz();
+      const ids = document.querySelectorAll(`.q-card[data-q="${qi}"] [data-oid]`);
+      if (ids.length) ids[ids.length - 1].focus();
+    } else if (t.hasAttribute('data-odel')) {
+      quizDraft[qi].options.splice(Number(t.closest('.q-opt').dataset.o), 1); renderQuiz();
+    }
+  };
+  $('#q-add').onclick = () => {
+    quizDraft.push({ id: '', prompt: '', multi: true, options: [{ id: '', label: '', tags: '' }] });
+    renderQuiz();
+    const ids = document.querySelectorAll('[data-qid]');
+    ids[ids.length - 1].focus();
+  };
+  $('#q-cancel').onclick = () => { quizDraft = null; $('#editor').innerHTML = '<p class="empty">Pick a package on the left.</p>'; };
+  $('#q-save').onclick = saveQuiz;
+}
+
+async function saveQuiz() {
+  try {
+    STATE = await api('/api/quiz', {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ questions: quizDraft }),
+    });
+    quizDraft = JSON.parse(JSON.stringify(STATE.quiz.questions))
+      .map((q) => ({ ...q, options: q.options.map((o) => ({ ...o, tags: o.tags.join(' ') })) }));
+    renderQuiz();
+    toast('Questionnaire saved', 'ok');
+  } catch (e) {
+    toast(e.message, 'err');
+  }
+}
+
 // ───── actions ─────
 
 async function select(name) {
   document.body.classList.remove('mode-release');
   catDraft = null;
+  quizDraft = null;
   featOpen = new Set();   // a row opened by hand belongs to one package
   if (draft && JSON.stringify(draft) !== JSON.stringify(current) &&
       !confirm('Discard unsaved changes to ' + current.name + '?')) return;
@@ -2318,6 +2554,8 @@ async function save() {
         help_url: draft.help_url || '',
         min_td_build: draft.min_td_build || '',
         alternatives_for: draft.alternatives_for || '',
+        search_words: draft.search_words || '',
+        fits: draft.fits || '',
         // only a foreign package's block rides the catalog save; undefined
         // drops out of the JSON, so a live package never touches the key
         family: draft.foreign ? (draft.family || null) : undefined,
@@ -2392,6 +2630,7 @@ document.querySelectorAll('.chip').forEach((c) => {
 });
 $('#filter').oninput = renderList;
 $('#cats').onclick = openCategories;
+$('#quiz').onclick = openQuiz;
 $('#community').onclick = openCommunity;
 $('#params').onclick = openParams;
 $('#release').onclick = openRelease;

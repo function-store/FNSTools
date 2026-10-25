@@ -274,7 +274,7 @@ class TimelineRegistryExt(RegistryBase):
 
 	# Location-independent: resolves through the toolkit root's shortcut and
 	# evaluates to None (no clone, no warning) where FNS is absent.
-	CLONE_EXPR = "op.FNS.op('FNS_TimelineRegistry') if hasattr(op, 'FNS') else None"
+	CLONE_EXPR = "tdu.tryExcept(lambda: op.FNS.op('FNS_TimelineRegistry'), None)"
 
 	# --- zones -------------------------------------------------------------
 

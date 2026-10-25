@@ -11,8 +11,9 @@ active tab (Hub page pars, roamed by the config registry).
 Interaction model of the FNS button:
   left-click   Open()      the hub, on the last active tab
   right-click  OpenMenu()  a popMenu: every tab, then Settings / Install &
-                           remove (the console's pages), then
-                           Documentation / Website
+                           remove (the console's pages), then the FNSTools
+                           Perform Mode toggle, then Documentation / Website /
+                           Support
   drop         RouteDrop() a panel COMP dropped on the button (its main-menu
                            mirror forwards the drop) or on the hub window is
                            offered to every tab whose component implements
@@ -46,6 +47,10 @@ CONSOLE_ITEMS = (('Settings', 'settings'), ('Install & remove', 'tools'))
 # RegistryBase.HELP_SITE and build_manifest.DOCS_SITE: change all three or none.
 WEB_ITEMS = (('Documentation', 'https://functionstore.tools/docs/'),
 			 ('Website', 'https://functionstore.tools/'))
+# Last item: the Patreon join page (a different host from the site above).
+SUPPORT_ITEM = ('Support FNSTools on Patreon', 'https://www.patreon.com/function_store/join')
+# The toolkit root's Perform Mode (docs/PerformMode.md), checked while on.
+PERFORM_ITEM = 'FNSTools Perform Mode'
 # Opens a second menu: every toolbar tool with a docs page, in bar order. A
 # click on the toolbar itself cannot carry this: the buttons forward every
 # click to their tools, and several tools already use Alt and right-click.
@@ -102,6 +107,26 @@ class HubExt:
 	def OpenMainMenuConfigurator(self):
 		"""Open FNS Hub on the Main Menu tab (the configurator lives in the hub)."""
 		return self.Open(tab='mainmenu')
+
+	@FNSCommand.fns_command(label='Toggle FNSTools perform mode', state={'method': 'PerformOn'})
+	def TogglePerform(self):
+		"""Toggle FNSTools Perform Mode: the tools that only serve the network editor stop, and come back as they were."""
+		par = self._performPar()
+		if par is None:
+			return {'ok': False, 'why': 'this toolkit root has no Perform Mode'}
+		par.val = not par.eval()
+		return {'ok': True, 'perform': bool(par.eval())}
+
+	def PerformOn(self):
+		"""State chip for TogglePerform: the toolkit root's Perform Mode
+		(docs/PerformMode.md)."""
+		par = self._performPar()
+		return bool(par is not None and par.eval())
+
+	@staticmethod
+	def _performPar():
+		root = getattr(op, 'FNS', None)
+		return getattr(root.par, 'Perform', None) if root is not None else None
 
 	# --- plumbing -----------------------------------------------------
 
@@ -594,27 +619,30 @@ class HubExt:
 
 	def OpenMenu(self):
 		"""Right-click on the FNS button: jump straight to a tab, to one of
-		the console's pages, or to the documentation and the website."""
+		the console's pages, toggle FNSTools Perform Mode, or go to the
+		documentation, the website or the Patreon join page."""
 		tabs = self._orderedTabs()
 		labels = [t['label'] for t in tabs]
 		console = [lbl for lbl, _ in CONSOLE_ITEMS]
 		hidden = self.HiddenTabs()
 		show_items = ['Show ' + t['label'] for t in hidden]
-		web = [TOOLBAR_DOCS_ITEM] + [lbl for lbl, _ in WEB_ITEMS]
-		items = labels + console + show_items + web
-		dividers = []
-		if labels and (console or show_items):
-			dividers.append(labels[-1])
-		if console and show_items:
-			dividers.append(console[-1])
-		before_web = (show_items or console or labels)
-		if before_web:
-			dividers.append(before_web[-1])
+		perform_par = self._performPar()
+		perform = [PERFORM_ITEM] if perform_par is not None else []
+		web = [TOOLBAR_DOCS_ITEM] + [lbl for lbl, _ in WEB_ITEMS] + [SUPPORT_ITEM[0]]
+		# one divider between each pair of non-empty sections
+		items, dividers = [], []
+		for section in (labels, console, show_items, perform, web):
+			if not section:
+				continue
+			if items:
+				dividers.append(items[-1])
+			items += section
+		checked = [PERFORM_ITEM] if perform and perform_par.eval() else []
 		details = {'tabs': {t['label']: t['name'] for t in tabs},
 				   'show': {'Show ' + t['label']: t['name'] for t in hidden}}
 		op.TDResources.op('popMenu').Open(
 			items=items, callback=self._onMenu, callbackDetails=details,
-			dividersAfterItems=dividers, autoClose=True)
+			dividersAfterItems=dividers, checkedItems=checked, autoClose=True)
 
 	def _onMenu(self, info):
 		item = info.get('item')
@@ -631,7 +659,10 @@ class HubExt:
 			# a frame later: this menu is still closing
 			run('args[0]._openToolbarDocsMenu()', self, delayFrames=1, delayRef=op.TDResources)
 			return
-		url = dict(WEB_ITEMS).get(item)
+		if item == PERFORM_ITEM:
+			self.TogglePerform()
+			return
+		url = dict(WEB_ITEMS + (SUPPORT_ITEM,)).get(item)
 		if url:
 			ui.viewFile(url)
 			return

@@ -36,10 +36,21 @@ import re
 class ParField:
     """One declared custom parameter.
 
-    Values are NEVER clobbered. Re-running Init refreshes labels, help,
-    ranges and menu entries on an existing parameter but leaves whatever
-    value the user (or the saved .toe) put there -- a declaration describes
-    the parameter, not its current state.
+    Values are NEVER clobbered, and neither is anything a user may have tuned
+    in the Component Editor. A declaration describes a parameter at CREATION;
+    after that the user owns it:
+
+    - Always ensured on a refresh (the code depends on them): style (a
+      changed style rebuilds the parameter), menuNames and readOnly. The page
+      is used only to create the parameter; an existing one is not moved.
+    - Set only when the parameter is created, or when a refresh is forced:
+      label, help, startSection, menuLabels, default, and the six range
+      attributes (min, max, clampMin, clampMax, normMin, normMax).
+
+    A refresh is forced by `CustomParHelper.RefreshDeclared(...)` (one shot,
+    for dev), by `force=True` on a single declaration, or by the extension
+    class opting in with `_parRefresh = 'all'` (internal singletons that no
+    user clones, where the code is the only author).
     """
 
     STYLE = 'Str'
@@ -48,7 +59,8 @@ class ParField:
     def __init__(self, default=None, label=None, help=None, page='Custom',
                  order=None, readOnly=False, startSection=False,
                  min=None, max=None, clampMin=None, clampMax=None,
-                 normMin=None, normMax=None, menuNames=None, menuLabels=None):
+                 normMin=None, normMax=None, menuNames=None, menuLabels=None,
+                 force=False):
         # Help is strongly expected (.claude/rules/parameters.md) but NOT
         # enforced: refusing to compile a whole extension over a missing
         # tooltip is out of proportion to the problem. Warn where the author
@@ -70,6 +82,7 @@ class ParField:
         self.clampMin, self.clampMax = clampMin, clampMax
         self.normMin, self.normMax = normMin, normMax
         self.menuNames, self.menuLabels = menuNames, menuLabels
+        self.force = force
         self.name = None
         ParField._COUNTER += 1
         self._seq = ParField._COUNTER if order is None else order
@@ -159,7 +172,7 @@ class ParField:
             return self.default[index] if index < len(self.default) else None
         return self.default
 
-    def apply(self, parGroup, created=False):
+    def apply(self, parGroup, created=False, force=False):
         """Push declared metadata onto a ParGroup.
 
         `created` is the ONLY thing that may set a value. A brand-new
@@ -168,10 +181,19 @@ class ParField:
         was the surprise this argument exists to remove. On a parameter that
         already existed it stays False, which is what keeps the
         value-preservation guarantee intact.
+
+        Only readOnly and menuNames are applied on every call. Everything a
+        user may have tuned in the Component Editor (label, help,
+        startSection, menuLabels, default, and the six range attributes) is
+        applied when the parameter is created or when `force` is set, so an
+        edit made there survives the reinitialisation it triggers.
         """
+        refresh = created or force or self.force
         for i, par in enumerate(parGroup):
-            par.help = self.help
             par.readOnly = self.readOnly
+            if not refresh:
+                continue
+            par.help = self.help
             member = self._defaultFor(i)
             if member is not None:
                 par.default = member
@@ -180,12 +202,16 @@ class ParField:
                 if val is not None and hasattr(par, attr):
                     setattr(par, attr, val)
         first = parGroup[0]
-        if self.label:
-            first.label = self.label
-        first.startSection = bool(self.startSection)
+        if refresh:
+            if self.label:
+                first.label = self.label
+            first.startSection = bool(self.startSection)
         if self.menuNames:
             first.menuNames = list(self.menuNames)
-            first.menuLabels = list(self.menuLabels or self.menuNames)
+            # Labels follow the names when they are refreshed, and also when
+            # a changed name list left them the wrong length.
+            if refresh or len(first.menuLabels) != len(self.menuNames):
+                first.menuLabels = list(self.menuLabels or self.menuNames)
         # Seed the value ONLY on creation -- never on a refresh.
         if created and self.default is not None and self.STYLE not in self._NO_VALUE:
             for i, par in enumerate(parGroup):
@@ -612,7 +638,7 @@ class CustomParHelper:
         return newGroup
 
     @classmethod
-    def EnsurePar(cls, ownerComp: COMP, name: str, field):
+    def EnsurePar(cls, ownerComp: COMP, name: str, field, force: bool = False):
         """Create or refresh ONE parameter from a field spec, and RETURN it.
 
         This is the primitive. Everything else -- the init-time helpers below
@@ -621,7 +647,10 @@ class CustomParHelper:
         drift apart.
 
         Returns the Par (a ParGroup for multi-member styles), or None if a
-        restyle failed. Idempotent: an existing parameter keeps its value.
+        restyle failed. Idempotent: an existing parameter keeps its value, and
+        keeps the label, help, ranges and default a user may have edited --
+        those are written on creation, or when `force` is set (see
+        ParField.apply for the split).
         """
         if not cls._PAR_NAME_RE.match(name):
             raise ValueError(
@@ -647,7 +676,7 @@ class CustomParHelper:
             created = True
             if parGroup is None:
                 return None
-        field.apply(parGroup, created=created)
+        field.apply(parGroup, created=created, force=force)
         return parGroup if len(parGroup) > 1 else parGroup[0]
 
     # --- init-time declaration (the primary API) ---------------------------
@@ -674,27 +703,45 @@ class CustomParHelper:
         return cls.EnsurePar(ownerComp, name, kind(*args, **kw))
 
     @classmethod
-    def EnsureParFields(cls, extension_self, ownerComp: COMP) -> list:
+    def EnsureParFields(cls, extension_self, ownerComp: COMP, force: bool = None) -> list:
         """Create or refresh every declared parameter. Returns the names.
 
-        IDEMPOTENT, and it never touches a value: re-running refreshes label,
-        help, range and menu entries but leaves whatever the user or the saved
-        .toe put there. A declaration describes a parameter, not its state.
+        IDEMPOTENT, and it never touches a value. A parameter that exists
+        keeps whatever the user or the saved .toe put there, and keeps the
+        label, help, ranges and default they may have edited in the Component
+        Editor: those are written when the parameter is CREATED. Only
+        readOnly and menuNames are re-applied on every run. A declaration
+        describes a parameter at creation, not its current state.
 
-        A STYLE change is reported and skipped rather than applied, because
-        applying it means destroying the parameter -- taking its value, any
-        expression, binding or export with it. Delete it by hand if you really
-        mean to restyle.
+        `force` re-applies everything once. Left as None it is read from the
+        extension class: `_parRefresh = 'all'` opts an internal singleton in
+        (the code is its only author), anything else leaves it off.
+        RefreshDeclared is the one-shot form.
+
+        A STYLE change is applied, not refused: the parameter is rebuilt
+        (see _restyle), carrying page position, mode, expression and value.
         """
         fields = cls._declaredParFields(extension_self)
         if not fields:
             return []                      # the additive guarantee
+        if force is None:
+            force = getattr(type(extension_self), '_parRefresh', None) == 'all'
         touched = []
         for name, field in fields:
-            if cls.EnsurePar(ownerComp, name, field) is None:
+            if cls.EnsurePar(ownerComp, name, field, force=force) is None:
                 continue
             touched.append(name)
         return touched
+
+    @classmethod
+    def RefreshDeclared(cls, extension_self, ownerComp: COMP) -> list:
+        """Re-apply every declared parameter's label, help, ranges and default, once.
+
+        The dev counterpart of `_parRefresh = 'all'`: run it after changing a
+        declaration so existing hosts pick the change up. Values are still
+        never touched.
+        """
+        return cls.EnsureParFields(extension_self, ownerComp, force=True)
 
     @classmethod
     def __setOwnerCompToDocked(cls, ownerComp: COMP) -> None:

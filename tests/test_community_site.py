@@ -53,7 +53,7 @@ check('draft must be a boolean', _rec.validate({'schema': 1, 'tools': [dict(_doc
 _pub = _rec.published(_doc)['tools']
 check('installs never download a draft', [t['name'] for t in _pub] == ['B'] and 'draft' not in _pub[0])
 check('the site leaves drafts out unless the local preview asks',
-      "const highlights = (recommends.tools || []).filter((t) => SHOW_DRAFTS || t.draft !== true);" in site
+      "const highlights = (recommends.tools || []).filter((t) => (SHOW_DRAFTS || t.draft !== true) && t.ours !== true);" in site
       and "FNS_SHOW_DRAFTS: '1'" in read('website', 'tools', 'cms.mjs'))
 check('a draft never reaches the committed landing strip',
       'const shown = highlights.filter((t) => t.draft !== true);' in site

@@ -280,9 +280,12 @@ class QuickmarkStorageExt:
     LIST_ORDER = 150        # under CookBar's Top List (100) in a shared corner
     LAYER_ACTIVE_EXPR = 'me.parent().par.Active and me.parent().par.Showpins'
     OVERLAY_SHORTCUT = 'alt.shift.m'
+    # nothing while the toolkit root's Perform Mode is on (docs/PerformMode.md)
     FRAME_GATE = ("parent().par.Active and ((parent().par.Showpins and "
                   "(parent().par['Ovdisplayed'] is None or parent().par.Ovdisplayed)) "
-                  "or parent().par.Showlist)")
+                  "or parent().par.Showlist)"
+                  " and not (hasattr(op, 'FNS') and getattr(op.FNS.par, 'Perform', None)"
+                  " is not None and op.FNS.par.Perform.eval())")
     KEYBOARD_SHORTCUTS_EXPR = "parent().par.Shortcuts + ' ' + parent().par.Overlayshortcut"
     LIST_MARGIN = 12
     LIST_ROWS = 10

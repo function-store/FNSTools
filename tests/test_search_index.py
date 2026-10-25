@@ -23,9 +23,11 @@ SITE = os.path.join(_ROOT, 'website', 'tools', 'build-site.mjs')
 FAILS = []
 
 # What the index may cost the manifest (docs/PickerSearch.md, size budget).
-# Measured 2026-10-03 over 98 docs: 80 KB raw, 26 KB gzipped.
-BUDGET_RAW = 100000
-BUDGET_GZIP = 35000
+# Measured 2026-10-03 over 98 docs: 80 KB raw, 26 KB gzipped. Re-measured
+# 2026-10-25 over 105 docs: 117 KB raw, 38 KB gzipped (more docs, not a
+# regression); the budget is about 20% above that.
+BUDGET_RAW = 140000
+BUDGET_GZIP = 46000
 
 
 def check(label, cond, detail=''):
@@ -115,6 +117,23 @@ check('a docs-only word is indexed: "undo" for BorderlessTD, nowhere on its card
 all_words = set(' '.join(v['head'] + ' ' + v['body'] for v in idx.values()).split())
 check('corpus-common words are dropped (touchdesigner, parameter, operator)',
       not ({'touchdesigner', 'parameter', 'operator', 'network'} & all_words))
+# lead: the first word of each feature name (docs/FeatureSearchPosition.md)
+leads = {n: v['lead'].split() for n, v in idx.items() if 'lead' in v}
+check('lead is sorted, single-spaced, each word once, and never empty when present',
+      all(ws and ws == sorted(set(ws)) for ws in leads.values()), leads)
+check('a lead word is in neither the head nor the body (it scores higher as a lead)',
+      all(not (set(leads.get(n, ())) & set(v['head'].split() + v['body'].split()))
+          for n, v in idx.items()))
+check('a feature name\'s first word is a lead ("Copy an operator reference" -> copy)',
+      'copy' in leads.get('FNS_OpToClipboard', []), leads.get('FNS_OpToClipboard'))
+check('a lead keeps a word the card description has (it records a position)',
+      'reset' in leads.get('FNS_HotkeyManager', []), leads.get('FNS_HotkeyManager'))
+check('a stopword lead gives nothing ("Per-channel processing blocks": no per, no channel)',
+      not ({'per', 'channel'} & set(leads.get('ChopBank', []))), leads.get('ChopBank'))
+check('the row\'s own name words are not leads (ResetPLS: no reset)',
+      'reset' not in leads.get('FNS_ResetPLS', []), leads.get('FNS_ResetPLS'))
+check('the "features" section list is not read for leads (ChopBank: no "what", "input")',
+      not ({'what', 'input'} & set(leads.get('ChopBank', []))), leads.get('ChopBank'))
 raw, gz = si.Sizes(idx)
 print('  ....  index size: %d bytes raw, %d gzipped (%d rows)' % (raw, gz, len(idx)))
 check('the index fits its budget (%d raw, %d gzipped)' % (BUDGET_RAW, BUDGET_GZIP),
@@ -139,6 +158,21 @@ check('the site back-fills `search` from the repo manifest into /get/',
 check('search_index.py imports nothing from TouchDesigner',
       not re.search(r'^\s*(import td|from td|op\(|parent\()',
                     io.open(os.path.join(PKG, 'search_index.py'), encoding='utf-8').read(), re.M))
+
+print('5. features for the opened picker card (docs/FinderAndToolRow.md)')
+sample = ("---\nsummary: x\nfeature_list:\n  - name: Hide the bar\n    anchor: a\n"
+          "    does: Hides the `bar` on [one key](#k).\n  - name: Escape\n"
+          "    does: 'It''s **always** back.'\n  - name: No line\nhotkeys:\n"
+          "  - does: not a feature\n---\nbody\n")
+check('a feature_list becomes plain "name: does" lines, entries without a does left out',
+      si.FeatureLines(sample) == ['Hide the bar: Hides the bar on one key.', "Escape: It's always back."],
+      si.FeatureLines(sample))
+check('Build() attaches them as `features`, never on a preview',
+      "entry['features'] = feats" in bm
+      and re.search(r"for entry in packages:\s*\n\s*if entry\.get\('preview'\):\s*\n\s*continue\s*\n\s*path = sidx\.DocPath", bm)
+      is not None)
+check('the site bakes the same lines into /get/',
+      'pkg.features = feats.map((f) => `${f.name}: ${plainDoes(f.does)}`);' in site)
 
 print()
 if FAILS:

@@ -149,7 +149,9 @@ def rollout(apply=False, link_slim=False):
 				if link_slim and sm is not None and c.path != sm.path and not _isCloneOf(c, sm):
 					if apply:
 						c.par.enablecloning = True
-						c.par.clone = sm
+						# a path, not the OP: assigning the OP stores its absolute
+						# path, which dies under a renamed root or a standalone copy
+						c.par.clone = c.relativePath(sm)
 					out['slim_linked'].append(c.path)
 				drift = _dockDrift(c, dockmap)      # see survey(): dead par callbacks otherwise
 				if drift:
@@ -160,7 +162,7 @@ def rollout(apply=False, link_slim=False):
 		if not _isCloneOf(c, m):
 			if apply:
 				c.par.enablecloning = True
-				c.par.clone = m
+				c.par.clone = c.relativePath(m)     # relative, as above
 			out['cloned'].append(c.path)
 		# after cloning: children may have been rebuilt, dropping their docks
 		drift = _dockDrift(c, dockmap)

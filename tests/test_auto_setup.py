@@ -141,9 +141,11 @@ check('EnsureRootEntryPoints creates it get-or-create, default off',
 # toggle joined it (v3.2.30): a toggle is useless without value changes,
 # so `valuechange` is on and the project toggles ride the same DAT. The
 # roaming ROOT_TOGGLES stay off it -- nothing acts on them at the moment
-# they change, they are read when a pass runs.
-check('the forwarder carries the entry points and the project toggles',
-      "pe.par.pars = " + "' '.join(n for n, _, _ in ROOT_ENTRY_POINTS + ROOT_PROJECT_TOGGLES\n                           + ROOT_PROJECT_PULSES)" in gsrc
+# they change, they are read when a pass runs. Perform Mode joined it on
+# 2026-10-18 (docs/PerformMode.md): the overlay registry is told when it
+# changes; Follow TD Perform Mode stays off it.
+check('the forwarder carries the entry points, the project toggles and Perform',
+      "pe.par.pars = " + "' '.join([n for n, _, _ in ROOT_ENTRY_POINTS + ROOT_PROJECT_TOGGLES\n                            + ROOT_PROJECT_PULSES] + ['Perform'])" in gsrc
       and 'pe.par.valuechange = True' in gsrc)
 
 print('5. the welcome asks before it opens anything')

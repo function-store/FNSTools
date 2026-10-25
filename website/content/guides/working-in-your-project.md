@@ -32,6 +32,31 @@ To change a tool for good, make it yours:
 
 Your copy is then yours to edit. FNSTools does not update it.
 
+## Performing a show
+
+FNSTools has a **Perform Mode** for shows. The tools that only help you
+build (the overlays on the network editor, the radial menu, the watchers
+behind hovering and dragging, Autosave) stop, and everything your show uses
+keeps running. Switch it from the FNS button's right-click menu, from the
+quick-launch palette, or with **Perform Mode** on the FNSTools page of the
+`/FNSTools` root. The FNS button turns red while it is on.
+
+- **It follows TouchDesigner's Perform Mode.** Press F1 and FNSTools
+  performs too; leave it and FNSTools goes back to how it was. Turn off
+  **Follow TD Perform Mode** on the same page to keep them separate.
+- **Use it in Designer mode too.** If you run a show with the network editor
+  open and your output in a window of its own, switch Perform Mode on by
+  hand: TouchDesigner's Perform Mode never starts, but the authoring tools
+  still get out of the way.
+- **It is saved with the project.** Save a show file with Perform Mode on
+  and it opens ready to perform. It never carries over to your other
+  projects.
+- **Nothing is lost.** No tool's settings change, so switching Perform Mode
+  off brings every overlay and helper back exactly as you left it.
+
+The full list of what stops is on the
+[Hub page](/docs/fns-hub/#perform-mode).
+
 ## Single downloads
 
 A free tool can also be downloaded on its own from the picker. That copy works by itself and does not update itself.
@@ -45,3 +70,5 @@ If you install FNSTools later in the same project:
 ## For AI agents and scripts
 
 The same rules apply to an assistant or a script working in your project: change tools through their parameters, never inside `/FNSTools`. The short version for agents is at [/llms.txt](/llms.txt), and the toolkit container carries the same rules in its `README`.
+
+An agent that should know the toolkit itself, every package's methods, commands, hotkeys and parameters, gets that from the agent skill: run **Install agent skill** and read [Use FNSTools from a coding agent](/docs/guides/agent-skill/).

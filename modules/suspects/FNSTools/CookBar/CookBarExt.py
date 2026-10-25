@@ -15,9 +15,12 @@ class CookBarExt:
 	# execute_op_info scans only while something of Cook Bar would draw:
 	# Active, and its bars shown (Ovdisplayed, the Overlay tab's Show) or its
 	# Top List on. Ovdisplayed arrives with the registry host's promotion, so
-	# a missing one reads as shown.
+	# a missing one reads as shown. Nothing while the toolkit root's Perform
+	# Mode is on (docs/PerformMode.md); no root, never performing.
 	FRAME_GATE = ("parent().par.Active and ((parent().par['Ovdisplayed'] is None"
-				  " or parent().par.Ovdisplayed) or parent().par.Toplist)")
+				  " or parent().par.Ovdisplayed) or parent().par.Toplist)"
+				  " and not (hasattr(op, 'FNS') and getattr(op.FNS.par, 'Perform', None)"
+				  " is not None and op.FNS.par.Perform.eval())")
 
 	def __init__(self, ownerComp):
 		self.ownerComp = ownerComp

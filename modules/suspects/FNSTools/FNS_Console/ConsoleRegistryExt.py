@@ -48,7 +48,7 @@ class ConsoleRegistryExt(RegistryBase):
 
 	# Location-independent: resolves through the toolkit root's global
 	# shortcut, evaluates to None (no clone, no warning) where it is absent.
-	CLONE_EXPR = "op.FNS.op('FNS_Console') if hasattr(op, 'FNS') else None"
+	CLONE_EXPR = "tdu.tryExcept(lambda: op.FNS.op('FNS_Console'), None)"
 
 	# A deliberately uncommon block: the 8xxx/9xxx dev-server range is
 	# crowded, and a bind failure there is hard to tell from a toolkit bug.

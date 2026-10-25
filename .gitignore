@@ -104,3 +104,8 @@ website/node_modules/
 # root embeds EVERY tool including gated ones (leaked to the mirror once,
 # 2026-08-30); distribution is the bucket, never git.
 modules/release/
+/promo/shots
+/promo
+
+# the Perform cook audit's last measurement: per machine (docs/PerformMode.md section 6)
+packaging/.perform_cook_audit.json

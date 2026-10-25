@@ -66,8 +66,15 @@ for path in ('FNSTools/FNS_TimelineTools/TimelineToolsExt.py',
 print('4. mentioning a gated tool is not being one -- these still publish')
 for path in ('packaging/catalog.json',
              'packaging/docs/FNS_SwitchTools.md',
-             'docs/GatedDeliveryResearch.md',
+             'docs/RegistryScheme.md',
              'FNSTools/FNS_TimelineRegistry/TimelineRegistryExt.py'):
+    check('published: %s' % path, pp.Rule(path, real) is None)
+
+print('4b. docs/ is internal unless allowlisted as user-facing')
+for path in ('docs/GatedDeliveryResearch.md', 'docs/README.md',
+             'docs/SomeFutureNote.md'):
+    check('withheld: %s' % path, pp.Rule(path, real) == 'internal-doc')
+for path in pp.PUBLIC_DOCS:
     check('published: %s' % path, pp.Rule(path, real) is None)
 
 print('5. THE claim: gate another package, its paths drop out, no code edit')

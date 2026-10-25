@@ -175,7 +175,7 @@ check('a first visit or a frame records everything and shows nothing',
 # 2026-10-17 (wizard phase 1): a banner on the set screen, not a window
 # over the catalog -- the same guard decides whether it appears at all
 check('never on a first run or a first visit; a banner on the set, not a window',
-      'if (!firstrun && !firstVisit && announceOn && unseenAtLoad.size && !(served && locked)) {' in page
+      'if (!firstrun && !firstVisit && !resumed && announceOn && unseenAtLoad.size && !(served && locked)) {' in page
       and 'prepareNewTools();\n    renderNewBanner();' in page)
 check('every answer records them as shown',
       "function seen() { markSeen(names); newNames = []; b.remove(); }" in page
@@ -195,10 +195,23 @@ check('a new tool already in the selection is recorded and left out (no "already
 check('the console count leaves installed tools out too',
       'and n not in installed' in ins and 'installed |= {rec_t[i, 0].val' in ins)
 check('a preference: the window opens by itself only while it is on',
-      'if (!firstrun && !firstVisit && announceOn && unseenAtLoad.size' in page
+      'if (!firstrun && !firstVisit && !resumed && announceOn && unseenAtLoad.size' in page
       and "auto.id = 'newauto';" in page and "window.FNS_ANNOUNCE !== false" in page
       and "'window.FNS_ANNOUNCE = %s;\\n'" in ins)
 check('and the New filter shows the way back', "'New-tools window: on' : 'New-tools window: off'" in page)
+# 2026-10-17 field report: signing in at the install step reloaded the page
+# onto the catalog with the ticks gone and the unlocked tool announced
+check('a sign-in or recheck reload keeps the place (both account watchers)',
+      "if (acctKey(st) !== acctKey(account)) reloadKeepingPlace();" in page
+      and "setTimeout(reloadKeepingPlace, 900);" in page
+      and "location.reload(); }, 900)" not in page)
+check('the resumed load restores the ticks, the placements and the family choice',
+      re.search(r"if \(resumed\) \{\s*picked\.clear\(\);.*?placing\.clear\(\);.*?familyOn = resumed\.family;",
+                page, re.S) is not None)
+check('and at the install step re-plans, so the unlocked tool joins it',
+      "if (resumeInstall) document.getElementById('save').click();" in page)
+check('the resume is one-shot and short-lived',
+      "sessionStorage.removeItem(RESUME_KEY);" in page and "15 * 60 * 1000" in page)
 con = read(CONSOLE)
 check('the console counts them on Install & remove',
       'data-view="view-tools"' in con and "fetch('/newtools.json'" in con

@@ -719,14 +719,18 @@ around.
 
 ## 6. Packaging and distribution
 
-- **Master vs copies — in-project hosts are CLONES.** Every tool host's
-  `clone` par is an EXPRESSION on the stable global shortcut —
-  `op.FNS_TOOLBAR.op('ToolbarRegistry') if hasattr(op, 'FNS_TOOLBAR') else None`
-  — never a relative path (paths bake in hierarchy assumptions and break on
+- **Hosts clone in the dev checkout only; a released host is FROZEN**
+  (owner decision 2026-10-21, landed the same day except the rails;
+  [RegistryHostsFrozen.md](RegistryHostsFrozen.md)). In the dev
+  checkout a tool host's `clone` par is an EXPRESSION on the root's global
+  shortcut, `CLONE_EXPR` on each registry
+  (`op.FNS.op('FNS_ToolbarRegistry') if hasattr(op, 'FNS') else None`) —
+  never a relative path (paths bake in hierarchy assumptions and break on
   re-parenting; note par OP paths resolve from the PARENT network,
-  sibling-based). The guard makes cloning vanish silently where the toolbar
-  package is absent. Master edits propagate live; host-specific Registration par VALUES are
-  untouched by cloning. Two hazards paid for: cloning breaks `me.dock`
+  sibling-based). Master edits propagate live there; host-specific
+  Registration par VALUES are untouched by cloning. In a user's project a
+  host runs the copy it shipped with, so the host-to-global boundary is a
+  contract that only grows (next bullet). Two hazards paid for: cloning breaks `me.dock`
   references inside the clone (the ExtUtils `extParameter` Pages expr was
   rewritten dock-free), and a clone re-sync transiently rebuilds children.
   The `/sys` global stays unclonled (it is disposable). **`RegistryBase.py`
@@ -746,14 +750,31 @@ around.
   `pre_release` strips file/syncfile + tracker tags off every bound DAT at
   release time, so only the shipped artifact is standalone. That is exactly
   what the hook is for; a save is just `comp.save(externaltox)`.
+- **The host contract: an old host must work with a newer global.** A
+  client never needs an updated registry when the main registry updates. A
+  host older than the global stands down at promotion and only calls the
+  global, so four things stay compatible for as long as a released host may
+  exist: (1) host-to-global calls only grow -- `Register` / `Unregister` /
+  the `Register*` family and the entry fields keep their names and meaning,
+  new arguments are optional with a default; (2) anything the global calls
+  back into a tool (`onRegistered`, menu callbacks) is optional and skipped
+  with a log line when the host predates it; (3) a takeover stays a merge
+  (section 2); (4) the code a host runs on its own (install-or-stand-down,
+  the clone guard, the tool's Registry page, bind repair) stays small and
+  is treated as frozen once released: new behaviour goes into the global.
 - **Release scrubbing of clones**: shipped copies must NOT carry the clone
-  par. The registry's own `pre_release` scrubs it for standalone releases;
-  every HOSTING TOOL's `pre_release` carries an auto-added scrub block for
-  nested hosts (nested components' own hooks do NOT run when a parent is
-  released — by Embody, and releases also go through Private Investigator,
-  which supports the same `pre_release` convention). Belt-and-suspenders:
-  the global's healing tick re-asserts host cloning in-project
-  (`_healHostClones`), so even a live-comp scrub self-repairs.
+  par -- every artifact's registry hosts ship with `clone` empty and Enable
+  Cloning off. Nested components' own hooks do NOT run when a parent is
+  released (by Embody, and releases also go through Private Investigator,
+  which supports the same `pre_release` convention), so the scrub belongs in
+  `pre_release_common`, which every package's hook runs. `_healHostClones`
+  re-asserts host cloning in the dev checkout only, so a live-comp scrub
+  there self-repairs and an install is never re-linked. A host an older
+  install had cloned freezes itself on its first init after the registry
+  updates (`_ensureCloneSane`), and `StampHost` stamps a frozen host outside
+  the dev checkout. The dev checkout is the toolkit root bound to
+  `modules/suspects/FNSTools.tox` (`RegistryBase._devCheckout`) --
+  [RegistryHostsFrozen.md](RegistryHostsFrozen.md).
 - **Release artifact**: `op.Embody.ExportPortableTox(target, save_path)` →
   `modules/release/<Name>.tox`. The component's `pre_release` hook runs on
   the staged copy and scrubs all host state (Registration pars, `PaneRegistry`

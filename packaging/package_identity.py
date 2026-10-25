@@ -146,11 +146,109 @@ def _guard(comp, name, execute_type):
     return d
 
 
-def Stamp(comp, name, is_global, execute_type=None):
+# The tool's About page is where a person finds out what they have and
+# where its documentation is. FNS_About carries the credit UI: Helpurl /
+# Authorurl / Authorname on its own pages, the Help and Link pulses on
+# `To Deploy`, and a Deploy pulse that mirrors them onto the tool's About
+# page. Deploy skips Help while Helpurl is empty, and Helpurl was empty on
+# 68 of 69 masters (2026-10-20): derivation from the package name does the
+# manifest's whole job (build_manifest._helpUrl), so nobody ever typed one,
+# and one tool in 69 shipped a Help button. The release stamps the derived
+# URL and deploys the two pulses here, on the artifact copy, the way
+# Pkgname is stamped: the masters stay as they are.
+ABOUT_PAGE = 'About'
+HELP_URL_PAR = 'Helpurl'
+HELP_PAR = 'Openhelp'
+AUTHOR_URL_PAR = 'Authorurl'
+AUTHOR_PAR = 'Openauthor'
+AUTHOR_NAME_PAR = 'Authorname'
+# A tool that authored its own credit pars before FNS_About's shape settled
+# keeps them: a second button saying the same thing is worse than an odd name.
+_LEGACY_TWINS = {HELP_PAR: (), AUTHOR_PAR: ('Link',), AUTHOR_NAME_PAR: ('Author',)}
+
+
+def _aboutPage(comp):
+    """Get-or-create the tool's About page."""
+    page = next((pg for pg in comp.customPages if pg.name == ABOUT_PAGE), None)
+    return page if page is not None else comp.appendCustomPage(ABOUT_PAGE)
+
+
+def _hasPar(comp, names):
+    return any(getattr(comp.par, n, None) is not None for n in names)
+
+
+def _mirror(comp, about, par_name, make):
+    """Deploy's one move for one par: the tool's About page carries
+    `par_name` (made by `make(page)` when absent; a legacy twin counts as
+    present and gets no sibling) and FNS_About's own `par_name` follows it
+    by bind, so a press on the tool reaches FNS_About's callback. Returns
+    the tool's par, or None when FNS_About has nothing to answer with."""
+    src = getattr(about.par, par_name, None)
+    if src is None:
+        return None
+    dst = getattr(comp.par, par_name, None)
+    if dst is None:
+        if _hasPar(comp, _LEGACY_TWINS[par_name]):
+            return None
+        dst = make(_aboutPage(comp))
+    expr = 'parent().par.%s' % par_name
+    src.bindExpr = expr
+    if str(getattr(src, 'bindExpr', '') or '') != expr:
+        raise RuntimeError('%s did not bind on %s' % (par_name, about.path))
+    return dst
+
+
+def _aboutLinks(comp, about, help_url):
+    """Help and Link on the tool's About page, answered by FNS_About.
+
+    `help_url` is the package's derived docs page; an authored
+    FNS_About.Helpurl is the one override and is kept (the manifest's rule,
+    build_manifest._helpUrl). No URL, no button: a package without a docs
+    page gets nothing rather than a 404. The author's name rides along
+    read-only, as Deploy mirrors it. Returns {'help': url, 'link': url}
+    for what landed."""
+    out = {}
+    url_par = getattr(about.par, HELP_URL_PAR, None)
+    if url_par is not None:
+        if help_url and not str(url_par.eval() or '').strip():
+            url_par.expr = ''
+            url_par.val = help_url
+        target = str(url_par.eval() or '').strip()
+        if target:
+            def make_help(page):
+                p = page.appendPulse(HELP_PAR, label='Help')[0]
+                p.help = "Open this tool's documentation page in your browser."
+                return p
+            if _mirror(comp, about, HELP_PAR, make_help) is not None:
+                out['help'] = target
+    author_par = getattr(about.par, AUTHOR_URL_PAR, None)
+    author_url = str(author_par.eval() or '').strip() if author_par is not None else ''
+    if author_url:
+        def make_link(page):
+            p = page.appendPulse(AUTHOR_PAR, label='Link')[0]
+            p.help = "Open the author's page in your browser."
+            return p
+        if _mirror(comp, about, AUTHOR_PAR, make_link) is not None:
+            out['link'] = author_url
+    name_par = getattr(about.par, AUTHOR_NAME_PAR, None)
+    author_name = str(name_par.eval() or '').strip() if name_par is not None else ''
+    if author_name:
+        def make_name(page):
+            p = page.appendStr(AUTHOR_NAME_PAR, label='Author')[0]
+            p.val = author_name
+            p.readOnly = True
+            return p
+        _mirror(comp, about, AUTHOR_NAME_PAR, make_name)
+    return out
+
+
+def Stamp(comp, name, is_global, execute_type=None, help_url=''):
     """Stamp `comp` (an artifact copy) with its package identity, and a
     global tool with its step-aside guard when `execute_type` (TD's
-    executeDAT, passed by the caller) is given. Returns what was stamped;
-    raises when the stamp did not hold."""
+    executeDAT, passed by the caller) is given. `help_url`, the package's
+    docs page (build_manifest._helpUrl), fills an empty FNS_About.Helpurl
+    and puts Help, Link and Author on the tool's About page (_aboutLinks).
+    Returns what was stamped; raises when the stamp did not hold."""
     out = {}
     about = comp.op(ABOUT)
     if about is not None:
@@ -161,6 +259,7 @@ def Stamp(comp, name, is_global, execute_type=None):
         if str(p.eval()) != name:
             raise RuntimeError('Pkgname did not stamp onto %s' % about.path)
         out['pkgname'] = name
+        out.update(_aboutLinks(comp, about, help_url))
     if is_global:
         comp.tags.add(GLOBAL_TAG)
         if GLOBAL_TAG not in comp.tags:

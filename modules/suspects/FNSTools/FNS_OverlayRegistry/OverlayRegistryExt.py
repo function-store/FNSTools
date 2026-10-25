@@ -2,7 +2,37 @@
 CustomParHelper: CustomParHelper = (next((d for d in me.docked if 'ExtUtils' in d.tags), None) or next((c for c in me.parent().children if 'ExtUtils' in c.tags), None)).mod('CustomParHelper').CustomParHelper # import
 ###
 
+import sys
+
 RegistryBase = mod('RegistryBase').RegistryBase
+
+# TD centres a network editor's view (pane.x, pane.y) on the network below the
+# pane's path bar, which bottomLeft/topRight include: measured 2026-10-15 by
+# TDXCollab from screenshots (Windows 125%, zoom 1 and 2; a Mac agreed).
+_PANE_BAR = 24.0		# points
+_user32 = None
+
+
+def _getUser32():
+	"""user32 with the argtypes Cursor() needs, in its own instance so they do
+	not leak into other code using ctypes.windll.user32. From TDXCollab's
+	CollabPaneSyncHandler, where the cursor code was first measured."""
+	global _user32
+	if _user32 is None:
+		import ctypes
+		from ctypes import wintypes
+		user32 = ctypes.WinDLL('user32')
+		user32.GetCursorPos.argtypes = [ctypes.POINTER(wintypes.POINT)]
+		user32.WindowFromPoint.argtypes = [wintypes.POINT]
+		user32.WindowFromPoint.restype = wintypes.HWND
+		user32.GetAncestor.argtypes = [wintypes.HWND, wintypes.UINT]
+		user32.GetAncestor.restype = wintypes.HWND
+		user32.GetWindowThreadProcessId.argtypes = [wintypes.HWND, ctypes.POINTER(wintypes.DWORD)]
+		user32.GetWindowTextW.argtypes = [wintypes.HWND, wintypes.LPWSTR, ctypes.c_int]
+		user32.GetClientRect.argtypes = [wintypes.HWND, ctypes.POINTER(wintypes.RECT)]
+		user32.ScreenToClient.argtypes = [wintypes.HWND, ctypes.POINTER(wintypes.POINT)]
+		_user32 = user32
+	return _user32
 
 
 class OverlayRegistryExt(RegistryBase):
@@ -27,7 +57,7 @@ class OverlayRegistryExt(RegistryBase):
 	TOOL_PAGE_LABEL = 'Network Overlay'
 	TOOL_PAGE_PARS = ('Autoregister', 'Register', 'Regstatus', 'Menuorder', 'Displayed')
 
-	CLONE_EXPR = "op.FNS.op('FNS_OverlayRegistry') if hasattr(op, 'FNS') else None"
+	CLONE_EXPR = "tdu.tryExcept(lambda: op.FNS.op('FNS_OverlayRegistry'), None)"
 
 	OVERLAY_TAG = 'fns_network_overlay'	# the annotation showing the composite
 	WIDGET_TAG = 'fns_network_overlay_widget'	# one per interactive panel widget
@@ -41,6 +71,7 @@ class OverlayRegistryExt(RegistryBase):
 	MARGIN = 0.15			# how far past the view the overlay reaches on each side
 	MAX_PIXELS = 4096		# the render's longest side, at most
 	HEAL_EVERY = 15			# frames between checks of the annotation's warning
+	MOUSE_IN = 'mousein_cursor'	# Cursor()'s source on macOS only
 
 	VIEW_PAGE = 'View'
 	VIEW_PARS = (
@@ -332,19 +363,56 @@ class OverlayRegistryExt(RegistryBase):
 		return (pane.x - hw >= x0 and pane.x + hw <= x0 + w
 				and pane.y - hh >= y0 and pane.y + hh <= y0 + h)
 
+	@staticmethod
+	def _performing() -> bool:
+		"""Perform Mode is on at the toolkit root (docs/PerformMode.md):
+		nothing is shown while it is. No root, never performing."""
+		root = getattr(op, 'FNS', None)
+		par = getattr(root.par, 'Perform', None) if root is not None else None
+		return bool(par is not None and par.eval())
+
+	def onPerformChange(self) -> None:
+		"""Perform Mode changed: show or take down every layer and widget.
+		Called by the root's forwarder, a frame after the change."""
+		if self._is_sys_global():
+			self._syncSurface()
+
 	def _shownLayers(self):
 		"""(canonical, layer TOP) for every layer in the overlay, bottom
 		first: registered, displayed by the user, active by its tool, and its
-		TOP still there (docs/OverlayManager.md, two flags per layer)."""
+		TOP still there (docs/OverlayManager.md, two flags per layer). None
+		while performing."""
+		if self._performing():
+			return []
 		shown = []
 		for canonical in self._registeredNamesInOrder():
 			info = self.stored['PaneRegistry'][canonical]
 			if str(info.get('display', '1')) != '1' or str(info.get('active', '1')) != '1':
 				continue
+			if not self._toolLayerActive(info):
+				continue
 			layer = self._resolvePanelOp(info)
 			if layer is not None and layer.family == 'TOP':
 				shown.append((canonical, layer))
 		return shown
+
+	def _toolLayerActive(self, info):
+		"""The tool's own switch, read on its host (Layer Active). The entry's
+		'active' is a copy the host sends on every change, and a host with
+		Auto-register off stopped sending: its layer was published by the
+		Register pulse, the tool switched off, and the overlay stayed up and
+		kept fitting itself to the view (FNSTools_pre in a clean project,
+		2026-10-22). Read here, a layer whose tool is off is never drawn
+		whatever its entry says. A host that cannot be read keeps the
+		entry's word."""
+		host = self._resolveSourceRegistry(info)
+		par = host.par['Layeractive'] if host is not None else None
+		if par is None:
+			return True
+		try:
+			return bool(par.eval())
+		except Exception:
+			return True
 
 	def _pruneDeadLayers(self, sync=True):
 		"""A tool deleted while its layer is shown never says so: TD calls no
@@ -556,7 +624,9 @@ class OverlayRegistryExt(RegistryBase):
 	def _shownWidgets(self):
 		"""The live widgets the user shows and whose tool is on. A widget is
 		registered for as long as its tool exists, so the overlay manager can
-		list a hidden one (docs/OverlayManager.md)."""
+		list a hidden one (docs/OverlayManager.md). None while performing."""
+		if self._performing():
+			return []
 		return [w for w in self._liveWidgets()
 				if str(w[2].get('shown', '1')) == '1' and str(w[2].get('active', '1')) == '1']
 
@@ -636,13 +706,22 @@ class OverlayRegistryExt(RegistryBase):
 			w = max(1.0, float(panel.width)) / zoom
 			h = max(1.0, float(panel.height)) / zoom
 			anchor = spec.get('anchor', 'topleft')
-			margin = max(0.0, float(spec.get('margin', self.WIDGET_MARGIN)))
-			along = stacked.get(anchor, 0.0)
-			stacked[anchor] = along + margin + max(1.0, float(panel.height))
-			ox = margin / zoom
-			oy = (along + margin) / zoom
-			x = pane.x - half_w + ox if 'left' in anchor else pane.x + half_w - ox - w
-			y = pane.y + half_h - oy - h if 'top' in anchor else pane.y - half_h + oy
+			if anchor == 'at':
+				# centred on a point held as screen points from the view's
+				# centre, so a pan or zoom leaves it under the same screen
+				# spot; kept inside the view; no part of any corner stack
+				x = pane.x + float(spec.get('atx', 0.0)) / zoom - w / 2
+				y = pane.y + float(spec.get('aty', 0.0)) / zoom - h / 2
+				x = min(max(x, pane.x - half_w), pane.x + half_w - w)
+				y = min(max(y, pane.y - half_h), pane.y + half_h - h)
+			else:
+				margin = max(0.0, float(spec.get('margin', self.WIDGET_MARGIN)))
+				along = stacked.get(anchor, 0.0)
+				stacked[anchor] = along + margin + max(1.0, float(panel.height))
+				ox = margin / zoom
+				oy = (along + margin) / zoom
+				x = pane.x - half_w + ox if 'left' in anchor else pane.x + half_w - ox - w
+				y = pane.y + half_h - oy - h if 'top' in anchor else pane.y - half_h + oy
 			rect = (round(x), round(y), max(1, round(w)), max(1, round(h)))
 			cur = (ann.nodeX, ann.nodeY, ann.nodeWidth, ann.nodeHeight)
 			if cur != rect and (fresh or not settling):
@@ -699,8 +778,25 @@ class OverlayRegistryExt(RegistryBase):
 		ann.par.Opviewerfillbodytitle = True
 		ann.par.Opviewerfillalpha = 0
 		ann.par.enable = True		# a widget takes clicks: keep it small
+		self._ensureWidgetInput(ann)
 		self._widgetAnns[canonical] = ann
 		return ann
+
+	@staticmethod
+	def _ensureWidgetInput(ann):
+		"""The panel takes the mouse, not the annotation's empty text body.
+		TD's Annotate lifts its viewer above the body only while a layer
+		expression reads Opviewerinteractive and not editing; the radial
+		menu's wheel got the body on top (ui.rolloverPanel read
+		annotation/body/bodyText, an I-beam cursor, no click reached the
+		panel, 2026-10-17). A widget's body is empty, so it is not shown and
+		the viewer is pinned above it."""
+		body = ann.op('annotation/body')
+		if body is not None and (body.par.display.mode != ParMode.CONSTANT or body.par.display.eval()):
+			body.par.display = False
+		view = ann.op('annotation/opview')
+		if view is not None and (view.par.layer.mode != ParMode.CONSTANT or view.par.layer.eval() != 1):
+			view.par.layer = 1
 
 	def _parkWidget(self, canonical):
 		"""Hide a widget's annotation in place: nothing drawn, nothing to
@@ -722,6 +818,7 @@ class OverlayRegistryExt(RegistryBase):
 			return
 		ann.par.Opviewerdisplay = True
 		ann.par.enable = True
+		self._ensureWidgetInput(ann)
 		self._parkedWidgets.discard(canonical)
 
 	def _removeWidget(self, canonical):
@@ -735,10 +832,14 @@ class OverlayRegistryExt(RegistryBase):
 			self._removeWidget(canonical)
 
 	def RegisterPanelWidget(self, panel, canonical, anchor='topleft', order=None, margin=None,
-							shown=True, active=True, tool=None, pars=None):
+							shown=True, active=True, tool=None, pars=None, at=None):
 		"""Show `panel` (a panel COMP) as an interactive widget pinned to a
 		corner of the network editor you work in, at its own size on screen.
-		anchor: topleft, topright, bottomleft or bottomright. order: its place
+		anchor: topleft, topright, bottomleft or bottomright, or 'at' with
+		at=(x, y), a network point to centre the widget on (Cursor() gives
+		one): held as screen points from the view's centre, so it stays under
+		that screen spot, kept inside the view, outside the corner stacks, and
+		left out of FNS_Hub's Overlay tab (a radial menu, 0.4.0). order: its place
 		in that corner's stack, lowest nearest the corner (default 100, the
 		layer bands' numbers). margin: screen points from the editor's edges
 		and from the widget before it in the stack (default 12); offer it as
@@ -752,13 +853,23 @@ class OverlayRegistryExt(RegistryBase):
 		api = self._registryApi()
 		if api is not None and api is not self:
 			return api.RegisterPanelWidget(panel, canonical, anchor=anchor, order=order, margin=margin,
-										   shown=shown, active=active, tool=tool, pars=pars)
+										   shown=shown, active=active, tool=tool, pars=pars, at=at)
 		if not self._is_sys_global():
 			return False
 		if panel is None or not getattr(panel, 'isPanel', False):
 			debug(f'{self.REGISTRY_NAME}: RegisterPanelWidget({canonical!r}): not a panel COMP')
 			return False
-		anchor = anchor if anchor in self.WIDGET_ANCHORS else 'topleft'
+		offset = None
+		if anchor == 'at':
+			pane = self._overlayPane()
+			if at is not None and pane is not None:
+				zoom = pane.zoom or 1.0
+				offset = ((float(at[0]) - pane.x) * zoom, (float(at[1]) - pane.y) * zoom)
+			else:		# hiding it (shown=False) keeps the last point: it parks
+				old = self._widgetSpecs().get(canonical) or {}
+				offset = (float(old.get('atx', 0.0)), float(old.get('aty', 0.0)))
+		else:
+			anchor = anchor if anchor in self.WIDGET_ANCHORS else 'topleft'
 		specs = self._widgetSpecs()
 		spec = {'panel_path': panel.path, 'panel_id': int(panel.id), 'anchor': anchor,
 				'order': float(self.WIDGET_ORDER if order is None else order),
@@ -766,10 +877,13 @@ class OverlayRegistryExt(RegistryBase):
 				'shown': '1' if shown else '0', 'active': '1' if active else '0',
 				'tool_path': tool.path if tool is not None else '',
 				'pars': self._encodeWidgetPars(pars)}
+		if offset is not None:
+			spec['atx'], spec['aty'] = round(offset[0], 2), round(offset[1], 2)
 		if specs.get(canonical) != spec:
 			specs[canonical] = spec
 			self.ownerComp.store('widgets', specs)
-			self.fnsLog(f'{self.REGISTRY_NAME}: widget "{canonical}" ({panel.path}, {anchor})')
+			if offset is None:		# an at widget re-registers on every open
+				self.fnsLog(f'{self.REGISTRY_NAME}: widget "{canonical}" ({panel.path}, {anchor})')
 		self._syncSurface()
 		return True
 
@@ -1004,6 +1118,11 @@ class OverlayRegistryExt(RegistryBase):
 			null.inputConnectors[0].connect(comp)
 		for i in range(self.LAYER_SLOTS):
 			self._layerSlot(i, comp)
+		if sys.platform != 'win32' and c.op(self.MOUSE_IN) is None:
+			# Cursor() on macOS reads it; Windows asks the OS instead
+			mouse = c.create(mouseinCHOP, self.MOUSE_IN)
+			mouse.par.output = 'absolute'
+			mouse.nodeX, mouse.nodeY = 200, -1000
 		frame = c.op('execute_frame')
 		if frame is None:
 			frame = c.create(executeDAT, 'execute_frame')
@@ -1079,6 +1198,97 @@ class OverlayRegistryExt(RegistryBase):
 		"""A point in network units to layer pixels (origin bottom left)."""
 		v = self.View()
 		return ((x - v['x0']) / v['unitsPerPixel'], (y - v['y0']) / v['unitsPerPixel'])
+
+	def Cursor(self):
+		"""The mouse over a network editor as (network, x, y) in network units,
+		or None when it is over no network editor of this TD's main window.
+		Read on demand, never polled: the current pane is tried first, then
+		every open network editor."""
+		cursor = self._cursorInWindow()
+		if cursor is None:
+			return None
+		cx, cy = cursor
+		for pane in [ui.panes.current] + list(ui.panes):
+			if pane is None or pane.type != PaneType.NETWORKEDITOR or not getattr(pane, 'open', True):
+				continue
+			bl, tr = pane.bottomLeft, pane.topRight
+			width, height = tr.x - bl.x, tr.y - bl.y - _PANE_BAR	# the network, below the path bar
+			px, py = cx - bl.x, cy - bl.y
+			if not (0 <= px <= width and 0 <= py <= height) or pane.owner is None:
+				continue
+			zoom = pane.zoom or 1.0
+			# pane.x/y is the network point at the centre of the network area
+			return (pane.owner, pane.x + (px - width / 2) / zoom, pane.y + (py - height / 2) / zoom)
+		return None
+
+	def _cursorInWindow(self):
+		"""The mouse over TD's main window as (x, y) in the panes' coordinates:
+		DPI-scaled points from the window content's bottom-left. None when the
+		mouse is somewhere else."""
+		pane = next((p for p in ui.panes if p.topRight.u > 0), None)
+		if pane is None:
+			return None
+		scaledWidth = pane.topRight.x / pane.topRight.u	# the content's width in points
+		if sys.platform == 'win32':
+			try:
+				return self._cursorInWindowWin32(scaledWidth)
+			except Exception as e:
+				debug(f'{self.REGISTRY_NAME}: could not read the mouse: {e}')
+				return None
+		return self._cursorInWindowMouseIn()
+
+	def _cursorInWindowWin32(self, scaledWidth):
+		"""Windows asks the OS, which is current even when the mouse has not
+		moved (a Mouse In CHOP updates only on mouse events). The window under
+		the mouse must be this TD's main window: not another app, a floating
+		TD window, or a second TD on the same machine."""
+		import ctypes
+		import os
+		from ctypes import wintypes
+		user32 = _getUser32()
+		point = wintypes.POINT()
+		if not user32.GetCursorPos(ctypes.byref(point)):
+			return None
+		window = user32.GetAncestor(user32.WindowFromPoint(point), 2)	# GA_ROOT
+		pid = wintypes.DWORD()
+		user32.GetWindowThreadProcessId(window, ctypes.byref(pid))
+		title = ctypes.create_unicode_buffer(32)
+		user32.GetWindowTextW(window, title, 32)
+		if pid.value != os.getpid() or not title.value.startswith('TouchDesigner'):
+			return None
+		rect = wintypes.RECT()
+		user32.GetClientRect(window, ctypes.byref(rect))
+		user32.ScreenToClient(window, ctypes.byref(point))
+		if rect.right <= 0:
+			return None
+		scale = rect.right / scaledWidth	# physical pixels per point
+		return point.x / scale, (rect.bottom - point.y) / scale
+
+	def _cursorInWindowMouseIn(self):
+		"""macOS: a Mouse In CHOP's absolute position (points, y up from the
+		primary monitor's bottom-left) minus where the window content starts;
+		ui.window* is the window's frame in points with the same origin, the
+		title bar on top and no other border. Measured by TDXCollab on a
+		Retina MacBook, 2026-10-15. The global's CHOP, made by
+		_ensureOverlayOps: never created here, since a child created inside
+		the global rebuilds its extension (see "Never rebuild the global")."""
+		api = self._registryApi() or self
+		mouse = api.ownerComp.op(self.MOUSE_IN)
+		if mouse is None or mouse.numChans < 2:
+			return None
+		return mouse[0].eval() - ui.windowX, mouse[1].eval() - ui.windowY
+
+	def WidgetRect(self, canonical):
+		"""(network, x, y, width, height) of a widget as placed now, in network
+		units of the network it shows in, or None while it is not shown. With
+		Cursor() a tool can tell where the mouse is on its widget without the
+		panel's rollover values, which arrive only once the panel has focus
+		(the radial menu's hover, 2026-10-17)."""
+		api = self._registryApi() or self
+		ann = getattr(api, '_widgetAnns', {}).get(canonical)
+		if ann is None or not ann.valid or canonical in getattr(api, '_parkedWidgets', set()):
+			return None
+		return (ann.parent(), ann.nodeX, ann.nodeY, ann.nodeWidth, ann.nodeHeight)
 
 	def WidgetTarget(self, canonical):
 		"""The live layer TOP registered under `canonical`, or None."""
@@ -1275,14 +1485,34 @@ class OverlayRegistryExt(RegistryBase):
 			ext._applyHostRegistration()
 
 	def onParDisplayed(self, _par, _val, _prev):
-		ext = self._hostExtFromPar(_par)
-		if ext._isAutoRegister():
-			ext._applyHostRegistration()
+		self._hostExtFromPar(_par)._sendLayerFlags()
 
 	def onParLayeractive(self, _par, _val, _prev):
-		ext = self._hostExtFromPar(_par)
-		if ext._isAutoRegister():
-			ext._applyHostRegistration()
+		self._hostExtFromPar(_par)._sendLayerFlags()
+
+	def _sendLayerFlags(self):
+		"""Displayed and Layer Active reach the global whenever this host has
+		a layer there, Auto-register or not. Gated on Auto-register alone, a
+		layer published by the Register pulse kept the flags it had then: its
+		tool switched off and the overlay stayed (2026-10-22)."""
+		if self._isAutoRegister():
+			self._applyHostRegistration()
+		elif self._ownsLiveLayer():
+			self._applyHostRegistration(force=True)
+
+	def _ownsLiveLayer(self):
+		"""The global holds a layer this host published. Asked of the global,
+		not of stored['HostCanonical'] alone: that is local bookkeeping and
+		drifts (RegistryBase._unregisterHost)."""
+		api = self._registryApi()
+		if api is None or api is self:
+			return False
+		entries = api.stored['PaneRegistry']
+		for name in (self.stored['HostCanonical'], self._hostCanonicalName()):
+			info = entries.get(name) if name else None
+			if info and api._resolveSourceRegistry(info) == self.ownerComp:
+				return True
+		return False
 
 	def onParCallback(self, _par, _val, _prev):
 		ext = self._hostExtFromPar(_par)

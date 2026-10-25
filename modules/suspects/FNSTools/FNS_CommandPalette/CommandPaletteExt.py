@@ -26,6 +26,7 @@ capturing the foreground pid before its overlay steals focus.
 
 import inspect
 import json
+import os
 
 # the docked ExtUtils, found by TAG -- the toolkit's import contract
 CustomParHelper = next(d for d in me.docked if 'ExtUtils' in d.tags).mod('CustomParHelper').CustomParHelper
@@ -106,6 +107,9 @@ class CommandPaletteExt:
 		self._catalogue = None           # lazily built, invalidated on summon
 		self._curationFile = None        # the shared curation file, opened on first use
 		self._usageFile = None           # the shared usage file, opened on first use
+		self._toolDocsCache = None       # ((manifest path, mtime), {tool: words}), see _toolDocs
+		self._hitMemo = None             # the ranking memo, see _rankMemo
+		self._actions = frozenset()      # folded action words, see _actionWords
 		self._query = ''
 		self._selected = 0
 		self._rows = []
@@ -113,6 +117,7 @@ class CommandPaletteExt:
 		self._pending = None
 		self._histPos = None
 		self._recalling = False
+		self._choose = None             # Choose(): the caller's onChosen while picking
 		# a hot-sync reinit mid-use would leave the window open with no state
 		# behind it; start closed instead
 		win = ownerComp.op('window')
@@ -180,11 +185,19 @@ class CommandPaletteExt:
 		Guarded: no registry in the project is a normal state, not an error.
 		Serves ALL commands -- `surface` narrows only when a tool declares it,
 		and today none declares one for us.
+
+		TouchDesigner's own commands are listed once per identity: a project
+		with the TDXL launcher companion carries a second FNS_CommandRegistry,
+		and both announce the built-ins (35 doubled rows, 2026-10-18). A tool's
+		commands are never collapsed; its copies share an identity on purpose.
 		"""
 		reg = getattr(op, 'FNS_COMMANDREGISTRY', None)
 		if reg is None or not hasattr(reg, 'Commands'):
 			return []
 		over = self._overrides()
+		fuzzy = self.ownerComp.op('FuzzyMatch').module
+		docs = self._toolDocs()
+		builtins = set()
 		rows = []
 		for cmd in reg.Commands():
 			ident = self._identity(cmd)
@@ -192,6 +205,10 @@ class CommandPaletteExt:
 				continue
 			contexts = cmd.get('context') or []
 			instance = cmd.get('instance') or ''
+			if cmd.get('builtin'):
+				if (ident, instance) in builtins:
+					continue
+				builtins.add((ident, instance))
 			rows.append({
 				'kind': self.KIND_COMMAND,
 				'key': cmd.get('key'),
@@ -207,8 +224,59 @@ class CommandPaletteExt:
 				'builtin': bool(cmd.get('builtin')),      # TD/system functionality, not a tool's
 				'contexts': contexts,
 				'available': self._isAvailable(contexts),
+				'helpwords': tuple(fuzzy.words(cmd.get('help') or '')),
+				'tooldocs': self._docsFor(docs, cmd.get('tool') or '', ident),
 			})
 		return rows
+
+	def _toolDocs(self) -> dict:
+		"""{public tool name, lower case: {'desc', 'head', 'body'}} as folded
+		word tuples: the card description and the docs head and body words
+		(packaging/search_index.py) of every package in the store manifest the
+		updater keeps on disk; {} without one (docs/PaletteSearch.md). The
+		body words are never matched; they only witness action words
+		(_actionWords, docs/PaletteVerbNoun.md).
+
+		The catalogue rebuilds on every summon, so the manifest is parsed once
+		per file version, never per summon or keystroke.
+		"""
+		upd = getattr(op, 'FNS_UPDATER', None)
+		try:
+			path = '%s/manifest.json' % upd.StoreFolder()
+			stamp = (path, os.path.getmtime(path))
+		except Exception:
+			return {}
+		if self._toolDocsCache is not None and self._toolDocsCache[0] == stamp:
+			return self._toolDocsCache[1]
+		try:
+			man = upd.StoreManifest() or {}
+		except Exception:
+			man = {}
+		fuzzy = self.ownerComp.op('FuzzyMatch').module
+		out = {}
+		for p in man.get('packages') or []:
+			name = str(p.get('name') or '')
+			if not name:
+				continue
+			public = name[4:] if name.startswith('FNS_') else name
+			search = p.get('search') if isinstance(p.get('search'), dict) else {}
+			out[public.lower()] = {
+				'desc': tuple(fuzzy.words(str(p.get('description') or ''))),
+				# folded at build; a feature name's first word moved from head
+				# to lead (docs/FeatureSearchPosition.md), so both count here
+				'head': tuple(str(search.get('head') or '').split()
+							  + str(search.get('lead') or '').split()),
+				'body': tuple(str(search.get('body') or '').split()),
+			}
+		self._toolDocsCache = (stamp, out)
+		return out
+
+	def _docsFor(self, docs: dict, tool: str, ident: str):
+		"""The docs words a command answers to: its own tool's, or, on an
+		installer row (Installer#install-<Package>), the package it installs."""
+		if ident.startswith(self.INSTALL_IDENT_PREFIX):
+			tool = ident[len(self.INSTALL_IDENT_PREFIX):]
+		return docs.get(tool.lower())
 
 	def _paletteRows(self) -> list:
 		"""Every .tox in TD's palette, as palette rows.
@@ -262,8 +330,53 @@ class CommandPaletteExt:
 	def Catalogue(self, rebuild: bool = False) -> list:
 		"""Every row the palette can offer, commands first."""
 		if rebuild or self._catalogue is None:
-			self._catalogue = self._presetRows() + self._commandRows() + self._paletteRows()
+			self._hitMemo = None             # its keys hold id()s of the old rows' words
+			commands = self._commandRows()
+			self._actions = self._actionWords(commands)
+			self._catalogue = self._presetRows() + commands + self._paletteRows()
 		return self._catalogue
+
+	def _actionWords(self, commands: list) -> frozenset:
+		"""The folded words this catalogue uses as actions (docs/PaletteVerbNoun.md).
+
+		Command titles are imperative ("Copy op path"), so a word leading one
+		is a candidate. It needs a second witness, because a few titles lead
+		with a noun ("LFO on hovered par", "Smoothness ..."): it also leads a
+		help line, or an inflected form of it (copied, saving, tapped) is a
+		word of some help line, card description or docs page.
+		"""
+		fuzzy = self.ownerComp.op('FuzzyMatch').module
+		leads, helpLeads, vocab = set(), set(), set()
+		seen = set()
+		for r in commands:
+			ws = fuzzy.words(r.get('title') or '')
+			if ws and len(ws[0]) >= self.DEEP_MIN and ws[0].isalpha():
+				leads.add(ws[0])
+			hw = r.get('helpwords') or ()
+			if hw:
+				helpLeads.add(hw[0])
+				vocab.update(hw)
+			docs = r.get('tooldocs')
+			if docs and id(docs) not in seen:      # one dict per tool, shared by its rows
+				seen.add(id(docs))
+				for key in ('desc', 'head', 'body'):
+					vocab.update(docs.get(key) or ())
+		return frozenset(w for w in leads
+						 if w in helpLeads or any(f in vocab for f in self._inflections(w)))
+
+	@staticmethod
+	def _inflections(w: str) -> tuple:
+		"""The past and -ing forms of a verb, with the spelling changes English
+		makes: copy -> copied, save -> saving, tap -> tapped."""
+		forms = [w + 'ed', w + 'ing', w + 'd']
+		if w.endswith('e'):
+			forms.append(w[:-1] + 'ing')
+		if w.endswith('y'):
+			forms += [w[:-1] + 'ied', w[:-1] + 'ies']
+		if (len(w) >= 3 and w[-1] not in 'aeiouwxy' and w[-2] in 'aeiou'
+				and w[-3] not in 'aeiou'):
+			forms += [w + w[-1] + 'ed', w + w[-1] + 'ing']
+		return tuple(forms)
 
 	# --- ranking -----------------------------------------------------------
 
@@ -306,6 +419,56 @@ class CommandPaletteExt:
 	CATEGORY_PENALTY = 0.4
 	PATH_PENALTY = 0.7
 
+	# What a command does, beyond its title (docs/PaletteSearch.md): its help
+	# line, then its tool's card description and docs head words. Matched by
+	# WORD START only, never as a substring or fuzzily -- a fuzzy reading of a
+	# sentence matches almost anything, which the install picker paid for
+	# (docs/PickerSearch.md) -- and only by a word of three letters or more.
+	# A hit lands on the word tier plus the penalty, so it ranks under the
+	# same word in a title or tool name and above any looser title reading.
+	# The docs BODY words are left out: they put every command of a tool
+	# whose long doc mentions "delete" in passing on a 12-row list.
+	DEEP_FIELDS = (('help', 0.5, 'help'), ('desc', 0.6, 'docs'), ('head', 0.7, 'docs'))
+	DEEP_MIN = 3
+	# A docs word is the TOOL's, so it carries every command of that tool
+	# equally; past this many per tool the rest only crowd out other tools.
+	DOCS_ROWS_PER_TOOL = 2
+	# An action word (_actionWords) asks for something to DO
+	# (docs/PaletteVerbNoun.md). A component is a thing: it answers to an
+	# action word by strict hits only, under the commands that lead with it
+	# (tier 1) and above every help or docs hit (2.5 and up). In a command
+	# title past the first word the action word is an object ("Floating copy
+	# of pane"), ranked under the help and docs hits of tools that do it.
+	ROLE_THING_PENALTY = 0.8
+	ROLE_OBJECT_PENALTY = 0.6
+	# Words that mean the same thing here (docs/PaletteSearch.md, Synonyms):
+	# a typed word of a group also answers to the others as WHOLE words of a
+	# command TITLE (plurals are listed as their own words). A synonym leading
+	# the title lands at 2.2, a later word at 2.3: under the typed word
+	# anywhere in a title (WORD, 2), so "view" keeps Home network view above
+	# the Open commands, and above help and docs hits (2.5 and up). Folded,
+	# whole words only, so "ad" and "inst" change nothing. Kept short on
+	# purpose: a group goes in when a real command is missed by its partner
+	# (each one's measured miss is in the doc). Left out after measuring:
+	# close (would offer Quit to someone closing a pane), save/store (store is
+	# also the package store), make (hits "space maker").
+	SYNONYM_GROUPS = (
+		('add', 'install'),
+		('remove', 'delete'),
+		('open', 'show', 'view'),
+		('randomize', 'scramble', 'shuffle'),
+		('restore', 'revert'),
+		('quit', 'exit'),
+		('create', 'new'),
+		('load', 'import'),
+		('op', 'ops', 'operator', 'operators'),
+		('par', 'pars', 'parameter', 'parameters'),
+		('comp', 'comps', 'component', 'components'),
+	)
+	SYNONYMS = {w: tuple(o for o in g if o != w) for g in SYNONYM_GROUPS for w in g}
+	SYNONYM_LEAD = 0.2      # over FuzzyMatch.WORD: the synonym leads the title
+	SYNONYM_INNER = 0.3     # ... or is a later word of it ("Copy op path")
+
 	def _rowScore(self, query: str, row: dict):
 		"""Match score for a row as one float, or None if the query misses.
 
@@ -314,15 +477,179 @@ class CommandPaletteExt:
 		quality the hundreds, which is the reach the type, favourite and
 		context nudges had before: enough to win a tie, never a tier.
 		"""
-		fuzzy = self.ownerComp.op('FuzzyMatch').module
-		hit = fuzzy.score_fields(query, (
-			(row.get('title') or '', 0.0, False),
-			(row.get('category') or '', self.CATEGORY_PENALTY, False),
-			(row.get('path') or '', self.PATH_PENALTY, True)))
+		hit = self._rowHit(query, row)
 		if hit is None:
 			return None
-		tier, quality = hit
+		tier, quality, _why = hit
 		return (10.0 - tier) * 1000 + quality * 100
+
+	def _rowHit(self, query: str, row: dict, memo: dict = None):
+		"""(tier, quality, why) for a row, or None when a word of the query
+		misses it.
+
+		Title, tool name and path go through FuzzyMatch.score_fields one token
+		at a time; a token they miss, or catch only loosely, may land on the
+		row's help or docs words instead. Combined as score_fields combines
+		fields: the worst token's tier, the mean of (quality - tier). `why`
+		names the tokens only help or docs carried ('in docs: copy'), so a
+		deep hit explains itself. `memo` is the ranking memo (_rankMemo):
+		token hits per text, which the rows share (a category names hundreds
+		of components) and the next keystroke reuses for the words already
+		typed, and word-start lookups, since every command of a tool shares
+		its docs.
+		"""
+		memo = {} if memo is None else memo
+		ctx = memo.get(None)
+		if ctx is None or ctx[0] != query:
+			fuzzy = self.ownerComp.op('FuzzyMatch').module
+			toks = fuzzy.tokens(query)
+			ctx = memo[None] = (query, fuzzy, [(t, fuzzy.fold(t), fuzzy.fold(t) in self._actions)
+											   for t in toks])
+		_query, fuzzy, toks = ctx
+		if not toks:
+			return fuzzy.EXACT, 0.0, ''
+		fields = ((row.get('title') or '', 0.0, False),
+				  (row.get('category') or '', self.CATEGORY_PENALTY, False),
+				  (row.get('path') or '', self.PATH_PENALTY, True))
+		thing = row.get('kind') == self.KIND_COMPONENT
+		deep = None
+		worst, total, carried, synonyms = 0.0, 0.0, {}, []
+		for t, tk, action in toks:
+			# FuzzyMatch.score_fields for one token, through the memo; the
+			# arithmetic is score_fields' own, so the floats come out the same
+			best = None
+			for i, (text, penalty, strict) in enumerate(fields):
+				if not text:
+					continue
+				if action and thing:
+					strict, penalty = True, penalty + self.ROLE_THING_PENALTY
+				m = self._tokenHit(fuzzy, t, tk, text, strict, memo)
+				if m is not None:
+					if action and not thing and i == 0 and m[0] >= fuzzy.WORD:
+						penalty += self.ROLE_OBJECT_PENALTY
+					key = (m[0] + penalty, -m[1])
+					if best is None or key < best:
+						best = key
+			if best is not None:
+				best = (best[0], (-best[1] - best[0]) + best[0])          # (tier, quality)
+			via = None
+			if not thing and tk in self.SYNONYMS and fields[0][0]:
+				# a WHOLE word of the title: as a prefix, "op" would answer
+				# "operator" with every Open command
+				title = fields[0][0]
+				key = ('words', title)
+				if key not in memo:
+					memo[key] = fuzzy.words(title)
+				words = memo[key]
+				for s in self.SYNONYMS[tk]:
+					if s not in words:
+						continue
+					lead = words[0] == s
+					tier = fuzzy.WORD + (self.SYNONYM_LEAD if lead else self.SYNONYM_INNER)
+					if not lead and s in self._actions:
+						tier += self.ROLE_OBJECT_PENALTY
+					quality = min(1.0, len(s) / float(len(title)))
+					if best is None or (tier, -quality) < (best[0], -best[1]):
+						best, via = (tier, quality), s
+			label = ''
+			if len(tk) >= self.DEEP_MIN and deep is None:
+				deep = []
+				docs = row.get('tooldocs') or {}
+				for key, penalty, lab in self.DEEP_FIELDS:
+					words = row.get('helpwords') if key == 'help' else docs.get(key)
+					if words:
+						deep.append((words, penalty, lab))
+			if deep and len(tk) >= self.DEEP_MIN and (best is None or best[0] > fuzzy.WORD + deep[0][1]):
+				for words, penalty, lab in deep:       # cheapest penalty first: first hit is best
+					key = (id(words), tk)
+					if key not in memo:
+						memo[key] = self._wordStart(tk, words, self._stems(tk) if action else ())
+					q = memo[key]
+					if q is None:
+						continue
+					if best is None or fuzzy.WORD + penalty < best[0]:
+						best, label = (fuzzy.WORD + penalty, q), lab
+					break
+			if best is None:
+				return None
+			if label:
+				carried.setdefault(label, []).append(t)
+			elif via:
+				synonyms.append('%s as %s' % (t, via))
+			worst = max(worst, best[0])
+			total += best[1] - best[0]
+		why = '   '.join(['in %s: %s' % (label, ', '.join(ts)) for label, ts in carried.items()] + synonyms)
+		return worst, total / len(toks), why
+
+	# The ranking memo outlives one keystroke (typing "copy image" re-scores
+	# "copy" on every letter of "image"), so it is bounded (about 110 bytes an
+	# entry, measured: 100000 is about 11 MB), dropped when the palette closes,
+	# and dropped when the catalogue rebuilds: its word-start keys hold id()s
+	# of the rows' word tuples, which a rebuild frees.
+	RANK_MEMO_CAP = 100000
+
+	def _rankMemo(self, fuzzy) -> dict:
+		"""The memo Rank() hands _rowHit, fresh when the matcher module was
+		reloaded or the memo grew past its cap."""
+		memo = self._hitMemo
+		if memo is None or memo.get('module') is not fuzzy or len(memo) > self.RANK_MEMO_CAP:
+			memo = self._hitMemo = {'module': fuzzy}
+		return memo
+
+	@staticmethod
+	def _tokenHit(fuzzy, t: str, tk: str, text: str, strict: bool, memo: dict):
+		"""FuzzyMatch.match_token(t, text, strict), remembered per text.
+
+		A miss is decided first from letters alone where that is exact: every
+		tier but the typo tier needs each letter of the folded token in the
+		folded text, and a typo hit is refused by the matcher itself when more
+		letters are missing from a word than its distance limit (1 for four
+		to seven letters, 2 from eight). Most rows miss most queries, and this
+		turns their typo pass, the bulk of a keystroke, into a set lookup.
+		"""
+		key = (t, text, strict)
+		if key in memo:
+			return memo[key]
+		tf = fuzzy.fold(text)                 # the matcher caches folds itself
+		n = len(tk)
+		allowed = 0 if strict or n < fuzzy.TYPO_MIN else (1 if n < fuzzy.TYPO_WIDE else 2)
+		missing = 0
+		for ch in tk:
+			if ch not in tf:
+				missing += 1
+				if missing > allowed:
+					memo[key] = None
+					return None
+		m = memo[key] = fuzzy.match_token(t, text, strict=strict)
+		return m
+
+	@staticmethod
+	def _wordStart(tk: str, words, stems=()) -> 'float | None':
+		"""Quality in 0..1 of the best word that starts with the folded token,
+		a whole word scoring 1; None when no word does. `stems` are further
+		starts that count as the token (_stems: copi for copies, copied)."""
+		best = None
+		for w in words:
+			if w.startswith(tk) or (stems and w.startswith(stems)):
+				q = min(1.0, len(tk) / float(len(w)))
+				if best is None or q > best:
+					best = q
+		return best
+
+	@staticmethod
+	def _stems(tk: str) -> tuple:
+		"""Word starts an action word's inflections have that the word itself
+		is not a prefix of: copy -> copi (copies, copied), save -> saving,
+		tap -> tapp (tapped, tapping)."""
+		stems = []
+		if tk.endswith('y'):
+			stems.append(tk[:-1] + 'i')
+		if tk.endswith('e'):
+			stems.append(tk[:-1] + 'ing')
+		if (len(tk) >= 3 and tk[-1] not in 'aeiouwxy' and tk[-2] in 'aeiou'
+				and tk[-3] not in 'aeiou'):
+			stems.append(tk + tk[-1])
+		return tuple(stems)
 
 	# --- prefixes and relevance ---------------------------------------------
 	#
@@ -409,19 +736,44 @@ class CommandPaletteExt:
 							   r['title'].lower()))
 			return ordered[:limit]
 
-		scored = []
+		fuzzy = self.ownerComp.op('FuzzyMatch').module
+		subsequence = fuzzy.SUBSEQUENCE
+		memo, scored, strict = self._rankMemo(fuzzy), [], False
 		for row in rows:
-			base = self._rowScore(q, row)
-			if base is None:
+			hit = self._rowHit(q, row, memo)
+			if hit is None:
 				continue
-			total = (base
+			tier, quality, why = hit
+			strict = strict or tier < subsequence
+			total = ((10.0 - tier) * 1000 + quality * 100
 					 + self.TYPE_WEIGHT.get(row['kind'], 0)
 					 + (self.FAVOURITE_BONUS if self._curationId(row) in favourites else 0)
 					 + usage.get(self._usageId(row), 0.0)
 					 + self._relevance(row))
-			scored.append((total, row))
-		scored.sort(key=lambda pair: (-pair[0], pair[1]['title'].lower()))
-		return [row for _, row in scored[:limit]]
+			scored.append((total, tier, dict(row, why=why) if why else row))
+		# Letters in order only fill in when nothing reads stricter: over 1700
+		# rows they find a scattered "delete" in TD_SearchPalette and an "undo"
+		# in Houndstooth, and a 12-row list has no room below for the real hit.
+		if strict:
+			scored = [s for s in scored if s[1] < subsequence]
+		# Rows a tool's docs word carried tie on everything that tool shares;
+		# the registry harvests alphabetically, so there is no declared order
+		# to fall back on. The shorter title is the tool's plain command
+		# ("Paste image" over "Paste as Script TOP" for copy).
+		scored.sort(key=lambda s: (-s[0],
+								   len(s[2]['title']) if 'in docs' in (s[2].get('why') or '') else 0,
+								   s[2]['title'].lower()))
+		out, perTool = [], {}
+		for _, _, row in scored:
+			if 'in docs' in (row.get('why') or ''):
+				tool = id(row.get('tooldocs'))        # one dict per tool, shared by its rows
+				perTool[tool] = perTool.get(tool, 0) + 1
+				if perTool[tool] > self.DOCS_ROWS_PER_TOOL:
+					continue
+			out.append(row)
+			if len(out) >= limit:
+				break
+		return out
 
 	# --- network navigation: `/` root, `./` here, `../` up -------------------
 
@@ -853,7 +1205,9 @@ class CommandPaletteExt:
 		"""`#` lists the tools (one row each); `#tool ` lists that tool's commands.
 
 		A tool is matched by name or by the `capability` its commands declare,
-		so `#quick` finds QuickMarks, QuickPane and friends.
+		so `#quick` finds QuickMarks, QuickPane and friends; below those, by a
+		word of its card description or docs, so `#copy` finds
+		PasteFromClipboard (docs/PaletteSearch.md).
 		"""
 		rest = (query or '#')[1:]
 		tok, sep, sub = rest.partition(' ')
@@ -866,18 +1220,27 @@ class CommandPaletteExt:
 			for r in cmds:
 				counts[r['category']] = counts.get(r['category'], 0) + 1
 			rows = []
+			docs = self._toolDocs()
+			tk = self.ownerComp.op('FuzzyMatch').module.fold(tok)
 			for tool, n in counts.items():
 				score = self._subsequenceScore(tok, tool) if tok else 0.0
+				why = ''
 				if score is None:
 					caps = {r.get('capability') for r in cmds if r['category'] == tool}
-					if not any(c and self._subsequenceScore(tok, c) is not None for c in caps):
-						continue
-					score = 0.3
+					if any(c and self._subsequenceScore(tok, c) is not None for c in caps):
+						score = 0.3
+					else:
+						words = docs.get(tool.lower()) or {}
+						if len(tk) < self.DEEP_MIN or not any(
+								self._wordStart(tk, words.get(k) or ()) is not None
+								for k in ('desc', 'head')):
+							continue
+						score, why = 0.2, '   in docs: ' + tok
 				rows.append((score, {
 					'kind': self.KIND_TOOL, 'key': 'tool:' + tool, 'title': tool,
 					'category': '%d command%s' % (n, '' if n == 1 else 's'),
 					'detail': '', 'path': '', 'params': [], 'state': None,
-					'contexts': [], 'available': True, 'tool': tool}))
+					'contexts': [], 'available': True, 'tool': tool, 'why': why.strip()}))
 			rows.sort(key=lambda pair: (-pair[0], pair[1]['title'].lower()))
 			return [r for _, r in rows]
 		low = tok.lower()
@@ -1112,6 +1475,8 @@ class CommandPaletteExt:
 		if reg is not None and hasattr(reg, 'Commands'):
 			for cmd in reg.Commands():            # unfiltered: hidden ones included
 				commands.setdefault(self._identity(cmd), []).append(cmd)
+		fuzzy = self.ownerComp.op('FuzzyMatch').module
+		docs = self._toolDocs()
 		rows = []
 		for p in presets:
 			ident, pinned = self._splitTarget(p['ident'])
@@ -1146,7 +1511,9 @@ class CommandPaletteExt:
 					'category': self._instanceTitle(cmd.get('label') or cmd.get('id') or '', instance)
 								+ ((' - ' + summary) if summary else ''),
 					'path': cmd.get('path') or '',
-					'contexts': contexts, 'available': self._isAvailable(contexts)})
+					'contexts': contexts, 'available': self._isAvailable(contexts),
+					'helpwords': tuple(fuzzy.words(cmd.get('help') or '')),
+					'tooldocs': self._docsFor(docs, cmd.get('tool') or '', ident)})
 		return rows
 
 	# --- hidden, and the manager tab ------------------------------------------
@@ -1228,6 +1595,8 @@ class CommandPaletteExt:
 		"""Enter on a row. Returns a result dict; never raises at the caller."""
 		if not row:
 			return {'ok': False, 'error': 'no row'}
+		if self._choose is not None and row['kind'] in (self.KIND_COMMAND, self.KIND_PRESET):
+			return self._chosen(row, args)
 		if row['kind'] == self.KIND_COMMAND:
 			return self._runCommand(row, args or {})
 		if row['kind'] == self.KIND_PRESET:
@@ -1440,6 +1809,45 @@ class CommandPaletteExt:
 	def _ui(self, name):
 		return self.ownerComp.op(name)
 
+	def Choose(self, onChosen, title: str = None):
+		"""Open the palette as a picker: Enter or a click on a command or a
+		preset hands it to onChosen instead of running it, as a dict
+		{'key', 'label', 'kwargs'}; closing without a pick calls
+		onChosen(None). Components, networks and methods cannot be chosen.
+		The radial menu fills its slots this way (docs/RadialMenu.md)."""
+		self._choose = onChosen
+		self.Summon()
+		inp = self._ui('panel/input')
+		if title and inp is not None:
+			inp.par.placeholdertext = title
+		return True
+
+	def _chosen(self, row, args) -> dict:
+		"""Choose mode's answer for a row: the command (a preset gives its
+		command and arguments) to the caller, nothing run."""
+		cmd = row.get('command') if row['kind'] == self.KIND_PRESET else row
+		if not cmd or not cmd.get('key'):
+			return {'ok': False, 'error': 'nothing to choose'}
+		onChosen, self._choose = self._choose, None
+		kwargs = dict(row.get('args') or {}) if row['kind'] == self.KIND_PRESET else dict(args or {})
+		try:
+			onChosen({'key': cmd['key'], 'label': row.get('title') or cmd.get('title') or cmd['key'],
+					  'kwargs': kwargs})
+		except Exception as exc:
+			debug('CommandPalette: onChosen failed:', exc)
+			return {'ok': False, 'error': '%s: %s' % (type(exc).__name__, exc)}
+		return {'ok': True, 'chosen': cmd['key']}
+
+	def _cancelChoose(self):
+		"""Closed without a pick: a frame after Dismiss, so the pick that
+		closes the window itself (ActivateSelected) gets there first."""
+		onChosen, self._choose = self._choose, None
+		if onChosen is not None:
+			try:
+				onChosen(None)
+			except Exception as exc:
+				debug('CommandPalette: onChosen(None) failed:', exc)
+
 	def Summon(self):
 		"""Open the palette over whatever the user is looking at right now.
 
@@ -1485,12 +1893,16 @@ class CommandPaletteExt:
 
 	def Dismiss(self):
 		"""Close the palette and stop listening for keys."""
+		self._hitMemo = None                 # only typing reuses it; free it while closed
 		kb = self._ui('keyboardin')
 		if kb is not None:
 			kb.par.active = False
 		win = self._ui('window')
 		if win is not None and win.isOpen:
 			win.par.winclose.pulse()
+		if self._choose is not None:
+			run("me.ext.CommandPaletteExt._cancelChoose()", fromOP=self.ownerComp,
+				delayFrames=1, delayRef=op.TDResources)
 		return True
 
 	def IsOpen(self):
@@ -1671,6 +2083,91 @@ class CommandPaletteExt:
 		self._catalogue = None
 		self._refresh()
 
+	# --- the row menu: right-click -------------------------------------------
+	# What the row keys do, plus Add to radial menu (owner, 2026-10-18: not
+	# worth a hotkey, worth a right-click). The menu keeps a copy of the row,
+	# and the blur check waits while it is up, so the palette stays open.
+
+	def rowMenu(self, index: int):
+		"""panel/panelexec_rows_menu: a right-click on a row."""
+		if not self._rows or index < 0 or index >= len(self._rows) or self._pending is not None:
+			return
+		menu = getattr(op.TDResources, 'PopMenu', None)
+		if menu is None:
+			return
+		self._selected = index
+		self._paint()
+		r = self._rows[index]
+		kind = r['kind']
+		if kind not in (self.KIND_COMMAND, self.KIND_COMPONENT, self.KIND_PRESET):
+			return
+		items = ['Run', 'Unstar' if self._curationId(r) in self.Favourites() else 'Star']
+		if kind == self.KIND_PRESET:
+			items.append('Delete preset')
+		elif kind == self.KIND_COMMAND:
+			items.append('Hide')
+		root = getattr(op, 'FNS', None)
+		if kind in (self.KIND_COMMAND, self.KIND_PRESET) and root is not None \
+				and root.op('FNS_RadialMenu') is not None:
+			items.append('Add to radial menu')
+		self._menuRow = dict(r)
+		self._rowMenuOpen = True
+		menu.Open(items=items, callback=self._onRowMenu, title=str(r.get('title') or '')[:40],
+				  dividersAfterItems=['Run'])
+		run("me.ext.CommandPaletteExt._watchRowMenu()", fromOP=self.ownerComp, delayFrames=10)
+
+	def _watchRowMenu(self):
+		"""Until the menu is gone: a menu left without a choice sends no
+		callback, so this is what hands the palette its focus back."""
+		if not getattr(self, '_rowMenuOpen', False):
+			return
+		if getattr(op.TDResources.PopMenu, 'IsOpen', False):
+			run("me.ext.CommandPaletteExt._watchRowMenu()", fromOP=self.ownerComp, delayFrames=10)
+			return
+		self._rowMenuOpen = False
+		if self.IsOpen():
+			self._focusInput()
+
+	def _onRowMenu(self, info: dict):
+		self._rowMenuOpen = False
+		item = info.get('item')
+		r = getattr(self, '_menuRow', None)
+		if not item or r is None:
+			return
+		if item == 'Run':
+			if self.IsOpen():
+				self._pushHistory(self._query)
+				self.Dismiss()
+			self.Activate(r)
+			return
+		if item in ('Star', 'Unstar'):
+			self.ToggleFavourite(self._curationId(r))
+		elif item == 'Hide':
+			self.ToggleHidden(self._curationId(r))
+			self._catalogue = None
+		elif item == 'Delete preset':
+			self.DeletePreset(r['preset']['id'])
+			self._catalogue = None
+		elif item == 'Add to radial menu':
+			self._addRowToWheel(r)
+		if self.IsOpen():
+			self._refresh()
+			run("me.ext.CommandPaletteExt._focusInput()", fromOP=self.ownerComp, delayFrames=1)
+
+	def _addRowToWheel(self, r: dict):
+		"""A command or preset into the first empty slot of FNS_RadialMenu's
+		main wheel (docs/RadialMenu.md), said in the footer."""
+		cmd = r.get('command') if r['kind'] == self.KIND_PRESET else r
+		root = getattr(op, 'FNS', None)
+		wheel = root.op('FNS_RadialMenu') if root is not None else None
+		if wheel is None or not hasattr(wheel, 'AddToWheel') or not cmd:
+			return
+		args = dict(r.get('args') or {}) if r['kind'] == self.KIND_PRESET else None
+		slot = wheel.AddToWheel(cmd['key'], label=r.get('title') or '', kwargs=args)
+		foot = self._ui('panel/footer')
+		if foot is not None:
+			foot.par.text = ('Added to the radial menu, slot %d' % slot) if slot else 'The radial menu has no empty slot'
+
 	# --- preset authoring: Alt+S ---------------------------------------------
 
 	def _beginNaming(self):
@@ -1740,6 +2237,8 @@ class CommandPaletteExt:
 			return
 		if inp.panel.focus or panel.panel.inside:
 			return                    # focus came back, or the mouse is on us
+		if getattr(self, '_rowMenuOpen', False):
+			return                    # our row menu took focus; _watchRowMenu gives it back
 		self.Dismiss()
 
 	def _select(self, index):
@@ -1769,7 +2268,10 @@ class CommandPaletteExt:
 		if row['kind'] == self.KIND_TOOL:
 			self._drill()
 			return {'ok': True, 'listed': row.get('tool')}
-		if row['kind'] == self.KIND_COMMAND and row.get('params'):
+		if self._choose is not None and row['kind'] not in (self.KIND_COMMAND, self.KIND_PRESET):
+			self._hint()
+			return {'ok': False, 'error': 'choose a command or a preset'}
+		if row['kind'] == self.KIND_COMMAND and row.get('params') and self._choose is None:
 			return self._beginPending(row)   # walk the parameters first
 		self._pushHistory(self._query)
 		self.Dismiss()
@@ -2007,8 +2509,11 @@ class CommandPaletteExt:
 				ctx = max(r['contexts'], key=lambda c: self.CONTEXT_TIER.get(c, 0))
 				tag = ' ' + self.CONTEXT_TAG.get(ctx, ctx)
 			star = '* ' if self._curationId(r) in favs else ''
+			category = r.get('category') or ''
+			if r.get('why'):                # a hit only help or docs carried says so
+				category = (category + '   ' if category else '') + r['why']
 			row.par.text = '%s%s%s    %s  %s%s%s' % (
-				star, r['title'], self._code(dim), r.get('category') or '',
+				star, r['title'], self._code(dim), category,
 				self._code(kc), badge, tag)
 			row.par.fontcolorr, row.par.fontcolorg, row.par.fontcolorb = colour
 			row.par.bgalpha = 1.0 if sel else 0.0

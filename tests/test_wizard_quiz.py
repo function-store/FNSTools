@@ -140,6 +140,18 @@ else:
     orphan = sorted(t for t in fits if t not in asked)
     check('every fits tag is asked for by some option', not orphan, ', '.join(orphan))
 
+print('the CMS edits both')
+cms_srv = io.open(os.path.join(_ROOT, 'website', 'tools', 'cms.mjs'), encoding='utf-8').read()
+cms_page = io.open(os.path.join(_ROOT, 'website', 'tools', 'cms.html'), encoding='utf-8').read()
+check('the CMS saves the questions through PUT /api/quiz, checked like build_manifest._quiz',
+      "p === '/api/quiz' && req.method === 'PUT'" in cms_srv and 'function normaliseQuiz(questions)' in cms_srv)
+check("a tool's fits ride its package save, normalised like an answer's tags",
+      "'fits'" in cms_srv and "quizTags(body.fits, 'fits')" in cms_srv
+      and "fits: draft.fits || ''" in cms_page)
+check('the page has the Questionnaire view and the fits chips',
+      'id="quiz">Questionnaire</button>' in cms_page and 'function renderQuiz()' in cms_page
+      and 'function renderFitChips(d)' in cms_page)
+
 print()
 if FAILS:
     print('FAILED (%d): %s' % (len(FAILS), ', '.join(FAILS)))

@@ -134,6 +134,15 @@
       "description": "A super performant, well designed path tracer for TouchDesigner.",
       "slug": "pathtracer",
       "date": "2026-09-27"
+    },
+    {
+      "name": "TDX Launcher Ultra",
+      "author": "Function Store",
+      "author_url": "https://www.functionstore.xyz/link-in-bio",
+      "url": "https://launcher.functionstore.xyz",
+      "description": "a project launcher for TouchDesigner, for Windows and macOS, with an FNSTools tab that installs the toolkit into a running session",
+      "date": "2026-10-24",
+      "ours": true
     }
   ],
   "families": [

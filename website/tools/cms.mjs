@@ -149,7 +149,7 @@ function saveCommunityImage(body) {
 const REC_FIELDS = ['name', 'author', 'author_url', 'url', 'description',
                     'category', 'note',
                     'tox_url', 'sha256', 'bytes', 'pinned_at',
-                    'slug', 'date', 'image', 'platform', 'author_license', 'tdp', 'draft'];
+                    'slug', 'date', 'image', 'platform', 'author_license', 'tdp', 'draft', 'ours'];
 const HEX64 = /^[0-9a-f]{64}$/;
 const REC_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const REC_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -425,6 +425,12 @@ function curatedExtras(entry) {
     // for the input. Derived at manifest build for a live package with an
     // op-menu host (a curated list there is a preflight problem).
     alternatives_for: (Array.isArray(entry.alternatives_for) ? entry.alternatives_for : []).join(' '),
+    // words the install picker matches like a family tag, for any package
+    // (build_manifest.CuratedSearchWords, docs/PickerSearch.md)
+    search_words: (Array.isArray(entry.search_words) ? entry.search_words : []).join(' '),
+    // the questionnaire tags this tool answers (catalog `fits`): an answer
+    // whose tags it shares scores it (quizScore in the picker)
+    fits: (Array.isArray(entry.fits) ? entry.fits : []).join(' '),
     // an FNS family member's block, curated here ONLY for a foreign
     // package; a live package carries it in its FamManifest and the editor
     // writes that through /api/td/familywrite (docs/OperatorFamilyFromStore.md)
@@ -478,6 +484,54 @@ function normaliseFamily(f) {
   return [out, ''];
 }
 
+/** Questionnaire tags from an input: lowercase, one word each, in order,
+ *  once each. Shared by a tool's `fits` and an answer's `tags`, which must
+ *  match each other to score anything. Returns [list, error]. */
+function quizTags(raw, what) {
+  const words = (Array.isArray(raw) ? raw : String(raw || '').replace(/,/g, ' ').split(/\s+/))
+    .map((w) => String(w).trim().toLowerCase()).filter(Boolean);
+  const bad = words.filter((w) => !/^[a-z0-9][a-z0-9-]*$/.test(w));
+  if (bad.length) return [null, `${what}: ${bad.join(', ')} -- one word each, letters, digits and dashes`];
+  return [[...new Set(words)], ''];
+}
+
+/** The questionnaire as the editor saves it, checked with the rules
+ *  build_manifest._quiz applies: every question a unique id and a prompt,
+ *  every answer a unique id within its question and a label. Ids are
+ *  slugs because the picker keys answers by them. Returns [quiz, error]. */
+function normaliseQuiz(questions) {
+  if (!Array.isArray(questions)) return [null, 'questions must be a list'];
+  const slug = /^[a-z][a-z0-9-]*$/;
+  const out = [];
+  const seenQ = new Set();
+  for (const [qi, q] of questions.entries()) {
+    const id = String(q && q.id || '').trim();
+    const prompt = String(q && q.prompt || '').trim();
+    const where = `question ${qi + 1}`;
+    if (!slug.test(id)) return [null, `${where}: id "${id}" must be a lowercase word like work or output`];
+    if (seenQ.has(id)) return [null, `${where}: id "${id}" is used twice`];
+    if (!prompt) return [null, `${where} (${id}): needs a question`];
+    seenQ.add(id);
+    const opts = [];
+    const seenO = new Set();
+    for (const [oi, o] of (Array.isArray(q.options) ? q.options : []).entries()) {
+      const oid = String(o && o.id || '').trim();
+      const label = String(o && o.label || '').trim();
+      const ow = `${id}, answer ${oi + 1}`;
+      if (!slug.test(oid)) return [null, `${ow}: id "${oid}" must be a lowercase word like live`];
+      if (seenO.has(oid)) return [null, `${ow}: id "${oid}" is used twice in this question`];
+      if (!label) return [null, `${ow} (${oid}): needs a label`];
+      seenO.add(oid);
+      const [tags, err] = quizTags(o.tags, `${ow} (${oid}) tags`);
+      if (err) return [null, err];
+      opts.push({ id: oid, label, tags });
+    }
+    if (!opts.length) return [null, `${where} (${id}): needs at least one answer`];
+    out.push({ id, prompt, multi: !!q.multi, options: opts });
+  }
+  return [{ questions: out }, ''];
+}
+
 function applyCurated(entry, body) {
   const setOrDelete = (k, v) => { if (v) entry[k] = v; else delete entry[k]; };
   if (body.author !== undefined) {
@@ -502,6 +556,23 @@ function applyCurated(entry, body) {
     }
     const list = [...new Set(tokens)].sort();
     if (list.length) entry.alternatives_for = list; else delete entry.alternatives_for;
+  }
+  if (typeof body.search_words === 'string') {
+    // the same rule as build_manifest.CuratedSearchWords: lowercase, one
+    // word each, catalog order, once each
+    const words = body.search_words.replace(/,/g, ' ').split(/\s+/).filter(Boolean)
+      .map((w) => w.toLowerCase());
+    const badWords = words.filter((w) => !/^[a-z0-9][a-z0-9+-]*$/.test(w));
+    if (badWords.length) {
+      return `search_words: ${badWords.join(', ')} -- one word each, letters and digits`;
+    }
+    const list = [...new Set(words)];
+    if (list.length) entry.search_words = list; else delete entry.search_words;
+  }
+  if (typeof body.fits === 'string') {
+    const [list, err] = quizTags(body.fits, 'fits');
+    if (err) return err;
+    if (list.length) entry.fits = list; else delete entry.fits;
   }
   // `source` decides foreign-ness. Clearing its manifest URL removes the
   // block, and with it every foreign-only field (they would be orphans).
@@ -630,6 +701,13 @@ function state() {
     icons: fs.readdirSync(ICONS).filter((f) => /\.(png|jpg)$/i.test(f)).sort(),
     // the campaign's tiers, so the UI can offer names while writing ids
     ladder,
+    // the guided setup's questions, and how many tools answer each tag:
+    // an answer tag no tool fits scores nothing (build_manifest reports it)
+    quiz: { questions: (cat.quiz && Array.isArray(cat.quiz.questions)) ? cat.quiz.questions : [] },
+    fitCounts: Object.values(cat.packages).reduce((n, e) => {
+      for (const t of (Array.isArray(e.fits) ? e.fits : [])) n[t] = (n[t] || 0) + 1;
+      return n;
+    }, {}),
     packages,
   };
 }
@@ -778,6 +856,18 @@ const server = http.createServer(async (req, res) => {
       } catch (e) {
         return json(res, 400, { error: e.message });
       }
+      return json(res, 200, state());
+    }
+
+    // The questionnaire (catalog `quiz`). Written whole: the editor holds
+    // every question, and order is meaning (it is the order they are asked).
+    if (p === '/api/quiz' && req.method === 'PUT') {
+      const { questions } = await readBody(req);
+      const [quiz, err] = normaliseQuiz(questions);
+      if (err) return json(res, 400, { error: err });
+      const cat = readCatalog();
+      cat.quiz = quiz;
+      writeCatalog(cat);
       return json(res, 200, state());
     }
 
@@ -939,7 +1029,7 @@ const server = http.createServer(async (req, res) => {
           cat = readCatalog();
         }
 
-        const curatedKeys = ['author', 'source', 'alternatives_for', 'family', ...LINK_KEYS, ...FOREIGN_ONLY];
+        const curatedKeys = ['author', 'source', 'alternatives_for', 'search_words', 'fits', 'family', ...LINK_KEYS, ...FOREIGN_ONLY];
         if (typeof body.category === 'string' || typeof body.description === 'string'
             || typeof body.recommended === 'boolean'
             || typeof body.nopick === 'boolean'

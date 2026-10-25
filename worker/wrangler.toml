@@ -165,7 +165,11 @@ TIERS = """
     "FNS_SimpleSceneChanger",
     "FNS_ProSceneChanger",
     "FNS_GeoPilot",
-    "FNS_POPOverlay"
+    "FNS_POPOverlay",
+    "FNS_SpaceMaker",
+    "FNS_RadialMenu",
+    "PandorasTox",
+    "FNS_Autosave"
   ]
 }
 """

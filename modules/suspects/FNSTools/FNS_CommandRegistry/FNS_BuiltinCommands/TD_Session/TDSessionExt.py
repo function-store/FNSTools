@@ -229,3 +229,29 @@ class TDSessionExt:
 		if target is None:
 			return {'ok': False, 'error': 'no current operator'}
 		return {**self._defer(lambda: target.openViewer()), 'path': target.path}
+
+	@fns_command(label='Open parent parameters')
+	def OpenParentParameters(self):
+		"""Open a floating parameter dialog for the component whose network you are in."""
+		owner = getattr(ui.panes.current, 'owner', None)
+		if owner is None:
+			return {'ok': False, 'error': 'no network'}
+		return {**self._defer(lambda: owner.openParameters()), 'path': owner.path}
+
+	@fns_command(label='Customize parent')
+	def CustomizeParent(self):
+		"""Open the Component Editor on the component whose network you are in, to add custom parameters."""
+		owner = getattr(ui.panes.current, 'owner', None)
+		if owner is None:
+			return {'ok': False, 'error': 'no network'}
+		return {**self._defer(lambda: ui.openCOMPEditor(owner)), 'path': owner.path}
+
+	@fns_command(label='Customize op')
+	def CustomizeOp(self):
+		"""Open the Component Editor on the selected component, to add custom parameters."""
+		target = self._pickCurrentOp()
+		if target is None:
+			return {'ok': False, 'error': 'no current operator'}
+		if not target.isCOMP:
+			return {'ok': False, 'error': '%s is not a component' % target.name}
+		return {**self._defer(lambda: ui.openCOMPEditor(target)), 'path': target.path}

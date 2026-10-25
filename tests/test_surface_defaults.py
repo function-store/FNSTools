@@ -186,6 +186,9 @@ check('the dev workspace ships empty',
       sv.get('FNS_VSCodeTools', {}).get('.', {}).get('Workspace') == '')
 check("TimelineTools' test export file ships empty",
       sv.get('FNS_TimelineTools', {}).get('.', {}).get('Exportfile') == '')
+check("oscMapper ships with receive and talkback off (each project turns them on)",
+      sv.get('oscMapper', {}).get('.', {}).get('Active') is False
+      and sv.get('oscMapper', {}).get('.', {}).get('Active2') is False)
 vs = Comp('FNS_VSCodeTools', '/q/FNS_VSCodeTools',
           {'Workspace': Par('FunctionStore_tools_2023.code-workspace'), 'Folder': Par('scripts')})
 sd.Apply(vs, {'packages': {}, 'configurators': {}, 'shipped_values': sv})

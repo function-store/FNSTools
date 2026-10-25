@@ -2,39 +2,65 @@
 package: FNS_OpenExt
 summary: Press Ctrl+E on a COMP to open its promoted extension in your external editor.
 features:
-  - name: OpenExt
-    anchor: openext
+  - name: Why use it
+    anchor: why-use-it
+  - name: How to use it
+    anchor: how-to-use-it
+  - name: Editing and syncing back
+    anchor: editing-and-syncing-back
 feature_list:
   - name: Open extension by hotkey
-    anchor: openext
-    does: Opens the current COMP's first promoted extension in the external editor TouchDesigner is set to use; nothing happens on a COMP without one.
-  - name: Quick-launch command
-    anchor: openext
+    anchor: how-to-use-it
+    does: '`Ctrl+E` on a COMP opens its first promoted extension in the external editor TouchDesigner is set to use; on a COMP without one nothing happens.'
+  - name: Command palette entry
+    anchor: how-to-use-it
     does: 'Also published as the quick-launch command Open extension of current, so it runs from the command palette without the hotkey.'
+  - name: Sync edits back with VSCodeTools
+    anchor: editing-and-syncing-back
+    does: 'With the extension synced to a file by VSCodeTools, every save in your editor lands back in the running component.'
 ---
 
-## OpenExt
+## Why use it
 
-Put the cursor on a COMP that has a **promoted extension** and press `Ctrl+E`
-(`Cmd+E` on macOS): the extension's Python opens in your external editor,
-straight from the network editor.
+While you write a component's extension, you open it over and over: dive into
+the COMP, find the extension DAT among its children, open it in your editor,
+come back up. OpenExt saves that dive. With the COMP current in the network
+editor, `Ctrl+E` (`Cmd+E` on macOS) opens its extension's Python in your
+external editor.
 
-It saves the dive you would otherwise do a hundred times a day on the
-component you are actively writing: into the COMP, find the extension DAT,
-open it.
+## How to use it
 
-It acts on the **current** operator in the active pane, and only on a COMP. If
-the component has several extensions it opens the first one marked *Promote*;
-if it has none, nothing happens, so the key is safe to lean on while moving
-through a network.
+1. Click a COMP that has a promoted extension, so it is the current operator.
+2. Press `Ctrl+E` (`Cmd+E` on macOS). The extension opens in your editor.
+3. To run it without the key, use **Open extension of current** from
+   quick-launch, for example in [CommandKit](/docs/fns-commandkit/).
 
-Opening is done by pulsing that DAT's own **Edit** parameter, which means the
-file lands in whichever external editor TouchDesigner itself is set to use.
-This tool has no editor setting of its own to get out of step with it.
+What it opens, and where:
 
-For the full round trip, editing outside and syncing the changes back, see
-[VSCodeTools](/docs/fns-vscodetools/); the two tools sit alongside each other.
+- It acts on the current operator in the active pane, and only on a COMP. If
+  the component has several extensions it opens the first one marked
+  *Promote*. If it has none, nothing happens, so the key is safe to lean on
+  while you move through a network.
+- It finds the DAT through the extension's object, written the usual way:
+  `op('./MyExt').module.MyExt(me)`. An extension set up in another form is
+  skipped.
+- It opens the DAT by pulsing the DAT's own **Edit** parameter, so the file
+  lands in whichever external editor TouchDesigner is set to use in its
+  Preferences. OpenExt has no editor setting of its own to get out of step
+  with it.
 
-It is also published as a quick-launch command, **Open extension of current**,
-so you can fire it from [CommandKit](/docs/fns-commandkit/) without the
-hotkey.
+## Editing and syncing back
+
+OpenExt is the quick way in. [VSCodeTools](/docs/fns-vscodetools/) makes the
+editor the place you actually write the code, and the two sit alongside each
+other:
+
+1. Once per extension, go to the extension DAT inside the COMP and press
+   `Ctrl+Shift+E` (VSCodeTools' sync key, when its shortcut is switched on).
+   VSCodeTools writes the DAT to a file in a subfolder named after the COMP
+   and switches on Sync to File.
+2. From then on, `Ctrl+E` on the COMP opens that file. Each save in your editor
+   updates the DAT in TouchDesigner and the extension reinitialises with the
+   new code, and anything you change in the DAT is written back to the file.
+3. With VSCodeTools' stubs deployed for the COMP, the editor also autocompletes
+   the extension's members.

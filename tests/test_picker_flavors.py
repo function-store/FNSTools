@@ -90,19 +90,19 @@ console.log(out.join('\\n'));
 
 try:
     got = subprocess.run([os.environ.get('NODE', 'node'), '-e', harness],
-                         capture_output=True, text=True, timeout=30)
+                         capture_output=True, text=True, encoding='utf-8', timeout=30)
     lines = [l for l in got.stdout.strip().split('\n') if l]
 except Exception as e:
     lines = []
     print('  SKIP  node unavailable (%s)' % e)
 
 if lines:
-    check('site flavor (no global) -> plain "Patreon:Base", no state class',
-          lines[0] == 'Patreon:Base|', lines[0])
-    check('signed out -> plain "Patreon:Base", no state class',
-          lines[1] == 'Patreon:Base|', lines[1])
-    check('a Pro entry tier reads "Patreon:Pro"',
-          len(lines) > 4 and lines[4] == 'Patreon:Pro|', lines[4:5])
+    check('site flavor (no global) -> plain "Patreon · Base", no state class',
+          lines[0] == 'Patreon · Base|', lines[0])
+    check('signed out -> plain "Patreon · Base", no state class',
+          lines[1] == 'Patreon · Base|', lines[1])
+    check('a Pro entry tier reads "Patreon · Pro"',
+          len(lines) > 4 and lines[4] == 'Patreon · Pro|', lines[4:5])
     check('a tier the ladder does not name falls back to "Patreon"',
           len(lines) > 5 and lines[5] == 'Patreon|', lines[5:6])
     check('entitled -> unlocked, own class',
@@ -173,7 +173,7 @@ console.log(run({products: []}));
 
 try:
     got = subprocess.run([os.environ.get('NODE', 'node'), '-e', sel_harness],
-                         capture_output=True, text=True, timeout=30)
+                         capture_output=True, text=True, encoding='utf-8', timeout=30)
     sel_lines = [l for l in got.stdout.strip().split('\n') if l]
     if got.returncode != 0:
         print('  node stderr: %s' % got.stderr.strip()[:300])
@@ -213,7 +213,7 @@ console.log(installScript());
 
 try:
     got = subprocess.run([os.environ.get('NODE', 'node'), '-e', scr_harness],
-                         capture_output=True, text=True, timeout=30)
+                         capture_output=True, text=True, encoding='utf-8', timeout=30)
     script = got.stdout.strip()
     if got.returncode != 0:
         print('  node stderr: %s' % got.stderr.strip()[:300])
@@ -283,7 +283,7 @@ console.log(out.join('\\n'));
 
 try:
     got = subprocess.run([os.environ.get('NODE', 'node'), '-e', auto_harness],
-                         capture_output=True, text=True, timeout=30)
+                         capture_output=True, text=True, encoding='utf-8', timeout=30)
     auto_lines = [l for l in got.stdout.strip().split('\n') if l]
     if got.returncode != 0:
         print('  node stderr: %s' % got.stderr.strip()[:300])

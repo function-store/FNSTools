@@ -444,6 +444,28 @@ dialog::backdrop { background: rgba(0,0,0,0.7); }
 .qres-sub { margin: 10px 0 2px; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); }
 .qres.plus { border-color: var(--plus-faint); }
 
+/* ── the tool finder chat (docs/PickerChatbot.md) ── */
+.ask-log { display: flex; flex-direction: column; gap: 10px; margin: 0 0 12px; }
+.ask-msg {
+  max-width: 88%; padding: 9px 13px; border-radius: 10px; font-size: 14px; line-height: 1.55;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.ask-msg.user { align-self: flex-end; background: var(--accent-dim); color: var(--text); border: 1px solid var(--accent); }
+.ask-msg.bot { align-self: flex-start; background: var(--bg-2); color: var(--text); border: 1px solid var(--border); }
+.ask-msg.bot a { color: var(--accent); }
+.ask-msg.wait { color: var(--text-dim); font-style: italic; }
+.ask-msg.err { border-color: rgba(248,113,113,0.5); color: var(--text-dim); }
+.ask-picks { display: flex; flex-direction: column; gap: 4px; align-self: stretch; }
+.ask-picks .qres-desc { -webkit-line-clamp: 3; }
+.ask-form { display: flex; gap: 8px; align-items: flex-end; }
+.ask-form textarea {
+  flex: 1; min-height: 44px; max-height: 160px; resize: vertical; padding: 10px 12px;
+  border-radius: 8px; border: 1px solid var(--border); background: var(--bg-2); color: var(--text);
+  font: inherit; font-size: 14px; line-height: 1.45;
+}
+.ask-form textarea:focus { outline: none; border-color: var(--accent); }
+.ask-note { margin: 8px 0 0; font-size: 12px; color: var(--text-faint); line-height: 1.5; }
+
 /* ── toast ── */
 .toast {
   position: fixed; bottom: 14px; right: 18px; padding: 8px 14px;
@@ -699,7 +721,7 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
   }
   .seg button:hover, .tog:hover { color: var(--text); }
   .seg button.on { background: var(--bg-3); color: var(--text); border-color: var(--border-strong); }
-  .seg button[data-access="plus"].on { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+  .seg button[data-access="plus"].on { background: var(--plus-dim); color: var(--plus); border-color: var(--plus-line); }
   .seg .dia { color: var(--plus); font-size: 10px; }
   .seg .k, .tog .k {
     font-size: 11.5px; color: var(--text-faint); font-variant-numeric: tabular-nums;
@@ -776,6 +798,20 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
      border); a full accent outline on sixteen rows read loud at 1040x720
      (owner, 2026-10-17) ── */
   #list .card { position: relative; }
+  /* the tick is the selection; the rest of the card opens it
+     (docs/FinderAndToolRow.md) */
+  #list .card .tickbox { flex: none; display: flex; padding: 3px; margin: -3px; cursor: pointer; }
+  #list .card .more { display: none; margin-top: 8px; }
+  #list .card.open .more { display: block; }
+  #list .card.open .desc:not(.byline) { display: block; -webkit-line-clamp: unset; overflow: visible; }
+  #list .card.open .tt { color: var(--accent); }
+  .more .adds { font-size: 12px; color: var(--text-faint); }
+  .more .feats { list-style: none; margin: 6px 0 0; padding: 0 0 0 10px; border-left: 1px solid var(--border-strong); }
+  .more .feats li { font-size: 12.5px; color: var(--text-dim); line-height: 1.5; padding: 1px 0; }
+  .more .feats b { color: var(--text); font-weight: 600; }
+  #list.dense .card .more { order: 9; flex-basis: 100%; }
+  #list.dense .card.open .desc:not(.byline) { white-space: normal; }
+  .askfinder { white-space: nowrap; }
   #list .card.on { border-color: var(--border-strong); background: var(--bg-2); }
   #list .card.on:hover { background: var(--bg-3); }
   #list .card.placed { border-color: var(--accent); border-style: dashed; }
@@ -845,6 +881,12 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
   #list.dense .desc.byline, #list.dense .chip.where,
   #list.dense .chip.hint, #list.dense .chip.variant,
   #list.dense .card:not(.placed) .card-foot { display: none; }
+  /* an opened row shows what the one-line row leaves out: where it lands
+     ("ticked: waits in the FNS tab"), the byline, the hints, Place */
+  #list.dense .card.open .desc.byline { display: block; }
+  #list.dense .card.open .chip.where, #list.dense .card.open .chip.hint,
+  #list.dense .card.open .chip.variant { display: inline-flex; }
+  #list.dense .card.open .card-foot { display: flex; }
 
   /* ── the footer count opens the selection tray ── */
   .sum-count {
@@ -1076,9 +1118,13 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
   .start .preset .pick { margin-top: auto; padding-top: 6px; }
   .start-note { margin: 10px 0 0; }
   .start-note .empty { padding: 28px 0; text-align: left; }
-  .welcome-counts { margin: 22px 0 0; font-size: 13.5px; color: var(--text-dim); }
+  /* the counts lead the screen, under the title: what is free is the first
+     thing a reader learns (docs/InstallerWizardFlow.md, the funnel pass) */
+  .welcome-counts { margin: 0 0 6px; font-size: 15px; color: var(--text-dim); }
+  body.app .welcome-counts { font-size: 14px; }
   .welcome-counts b { color: var(--text); }
-  .welcome-auth { margin: 4px 0 0; font-size: 12.5px; color: var(--text-faint); }
+  .welcome-auth { margin: 22px 0 0; font-size: 12.5px; color: var(--text-faint); }
+  .welcome-auth .btn { margin: 0 6px; vertical-align: baseline; }
   .start-meta { margin: 26px 0 0; font-size: 12px; color: var(--text-faint); }
   .start-meta a { color: var(--text-dim); }
   .start-meta a:hover { color: var(--accent); }
@@ -1089,12 +1135,21 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
   #screen-quiz .quiz-options { flex-direction: row; flex-wrap: wrap; gap: 8px; }
   #screen-quiz .qopt { border-radius: 999px; }
   .quiz-foot { justify-content: flex-end; }
+  #screen-ask .quiz { max-width: 720px; padding: 22px 0 16px; }
+  #screen-ask .quiz-prompt { font-size: 22px; }
+  body.app #screen-ask .quiz-prompt { font-size: 19px; }
   .inst { max-width: 760px; padding: 22px 0 16px; }
   .inst h2 { margin: 0 0 6px; font-size: 22px; font-weight: 700; letter-spacing: -0.015em; }
   body.app .inst h2 { font-size: 19px; }
   .inst-hint { margin: 0 0 14px; font-size: 13.5px; color: var(--text-dim); line-height: 1.6; }
+  .inst-agent { margin-top: 14px; }
+  .inst-agent code { display: block; margin: 8px 0; padding: 8px 10px; border-radius: 8px; background: var(--bg-deep); border: 1px solid var(--border); color: var(--text); white-space: normal; word-break: break-word; user-select: all; }
+  .inst-agent .btn { padding: 4px 12px; font-size: 12.5px; }
   .inst pre.out { max-height: none; }
   .inst-report { margin-top: 4px; }
+  .inst-wait { margin-top: 16px; }
+  .inst-wait .seclab { margin-bottom: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-faint); }
+  .inst-wait .plusline { margin: 0; }
   .inst-foot { justify-content: flex-end; }
   .inst-foot .bar-docs { margin-right: auto; }
   html[data-served] #screen-start, html[data-embedded] #screen-start,
@@ -1155,16 +1210,17 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
   <section class="screen" id="screen-start" hidden>
     <div class="start">
       <h1 id="welcometitle">Welcome to FNSTools.</h1>
+      <p class="welcome-counts" id="welcomecounts" hidden></p>
       <p class="start-lead" id="startlead">Pick a starting point. Nothing installs until you review the plan.</p>
       <div class="presets" id="presets">
         <button class="preset primary" id="pre-last" hidden><b>Set up like last time</b><span id="pre-last-desc"></span><span class="pick">Install now ›</span></button>
         <button class="preset" id="pre-quiz" hidden><b>Answer a few questions</b><span>A few quick questions, then a set picked for how you work.</span><span class="pick">Find my set ›</span></button>
+        <button class="preset" id="pre-ask" hidden><b>Describe what you need</b><span>Tell the tool finder what gets in your way in TouchDesigner. It picks tools and says why.</span><span class="pick">Ask ›</span></button>
         <button class="preset" id="pre-starter"><b>Recommended</b><span id="pre-starter-desc"></span><span class="pick">Start here ›</span></button>
         <button class="preset" id="pre-all"><b>Everything</b><span id="pre-all-desc"></span><span class="pick">Select all ›</span></button>
         <button class="preset" id="pre-none"><b>Pick my own</b><span>Start from an empty list and browse the catalog.</span><span class="pick">Browse ›</span></button>
       </div>
       <div class="start-note" id="startnote" hidden></div>
-      <p class="welcome-counts" id="welcomecounts" hidden></p>
       <p class="welcome-auth" id="welcomeauth" hidden></p>
       <p class="start-meta" id="startmeta"></p>
     </div>
@@ -1186,6 +1242,30 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
       <span class="spacer"></span>
       <button type="button" class="btn btn-secondary" id="quiz-next">Next</button>
       <button type="button" class="btn btn-primary" id="quiz-use" hidden>Use this selection</button>
+    </div>
+  </section>
+
+  <!-- S1b "Describe what you need": the tool finder chat. The reader
+       writes, /api/chat/ answers with picks, the picks render as the
+       questionnaire's rows; Use this selection lands on the catalog the
+       same way. Shown only when the endpoint says it is ready
+       (docs/PickerChatbot.md). -->
+  <section class="screen" id="screen-ask" hidden>
+    <div class="quiz" id="ask">
+      <div class="quiz-progress">Tool finder</div>
+      <h2 class="quiz-prompt">What gets in your way in TouchDesigner?</h2>
+      <p class="quiz-hint">Describe a problem or something you want to do. The finder reads the FNSTools docs and picks the tools that help.</p>
+      <div class="ask-log" id="ask-log" aria-live="polite"></div>
+      <form class="ask-form" id="ask-form">
+        <textarea id="ask-input" maxlength="1500" rows="2" placeholder="For example: my networks get messy and I lose track of what feeds what"></textarea>
+        <button type="submit" class="btn btn-secondary" id="ask-send">Send</button>
+      </form>
+      <p class="ask-note">What you write is sent to an AI model (Google Gemini, through Vercel) to pick tools. It is not stored.</p>
+    </div>
+    <div class="sum quiz-foot">
+      <button type="button" class="btn btn-quiet" id="ask-back">Back</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn btn-primary" id="ask-use" hidden>Use this selection</button>
     </div>
   </section>
 
@@ -1248,17 +1328,19 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
       <input type="search" id="q" placeholder="Search tools, their docs, categories…" autocomplete="off" aria-label="Search tools">
       <kbd class="qkey" aria-hidden="true">/</kbd>
     </div>
-    <div class="viewwrap" id="viewwrap">
-     <button type="button" class="btn btn-secondary viewbtn" id="viewbtn" aria-haspopup="true" aria-expanded="false" data-tip="Filters and the compact view">View <span class="k" id="viewk" hidden></span><span class="caret" aria-hidden="true">▾</span></button>
-   <div class="bar-row bar-filters">
+    <!-- Next to the search, as on the site's tool lists (docs/FinderAndToolRow.md) -->
     <div class="seg" id="access" role="group" aria-label="Show tools by access" hidden>
       <button type="button" data-access="all" aria-pressed="true">All <span class="k"></span></button>
       <button type="button" data-access="free" aria-pressed="false" data-tip="Tools anyone can install">Free <span class="k"></span></button>
       <button type="button" data-access="plus" aria-pressed="false" data-tip="Tools that unlock with a Patreon tier"><span class="dia" aria-hidden="true">◆</span> Patreon <span class="k"></span></button>
     </div>
+    <button type="button" class="tog" id="expandall" aria-pressed="false" data-tip="Open every tool to its features, or close them all">Expand all</button>
+    <button type="button" class="linkbtn askfinder" id="askfinder" hidden data-tip="Describe what gets in your way; the finder picks tools and says why. Its picks add to yours.">Ask the finder →</button>
+    <div class="viewwrap" id="viewwrap">
+     <button type="button" class="btn btn-secondary viewbtn" id="viewbtn" aria-haspopup="true" aria-expanded="false" data-tip="More filters">View <span class="k" id="viewk" hidden></span><span class="caret" aria-hidden="true">▾</span></button>
+   <div class="bar-row bar-filters">
     <button type="button" class="tog" id="placeonly" aria-pressed="false" hidden data-tip="Tools you drop into a network as nodes, like the FNS family operators">Placeable <span class="k"></span></button>
     <button type="button" class="tog" id="newonly" aria-pressed="false" hidden data-tip="Packages that are new in the current release line">New <span class="k"></span></button>
-    <button type="button" class="tog" id="compact" aria-pressed="false" data-tip="One-line rows. Off, the cards show the full descriptions">Compact</button>
    </div>
     </div>
     <button class="btn btn-quiet" id="theme" data-tip="Toggle theme" aria-label="Toggle theme">◐</button>
@@ -1307,7 +1389,23 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
       <h2 id="insttitle">Install plan</h2>
       <p class="inst-hint" id="insthint"></p>
       <pre class="out" id="instout"></pre>
+      <!-- site only (window.FNS_SITE): the one line that onboards a coding
+           agent, beside the paste script; the Hub inside TouchDesigner has
+           the Install agent skill command for this -->
+      <p class="inst-hint inst-agent" id="instagent" hidden>Using a coding agent? Paste this into it and it installs the FNSTools agent skill into your project: <code id="instagentline">Fetch and execute the instructions at https://functionstore.tools/agent-setup/prompt.md to set me up for FNSTools</code> <button type="button" class="btn btn-secondary" id="instagentcopy">Copy</button></p>
       <div class="dlg-report inst-report" id="instreport" hidden></div>
+      <!-- the picks the account cannot install yet: not in the plan, still
+           shown at the last step with the route that unlocks them -->
+      <div class="inst-wait" id="instwait" hidden>
+        <div class="seclab">Waiting for Patreon</div>
+        <div class="plusline" id="instplus"></div>
+      </div>
+      <!-- signed out with nothing deferred: the supporter's last chance to
+           sign in before the install (the plan), and one quiet line after
+           it (the done report); hidden by "Not a supporter" -->
+      <div class="inst-wait" id="instsupporter" hidden>
+        <div class="plusline" id="instsupline"></div>
+      </div>
     </div>
     <div class="sum inst-foot">
       <a class="bar-docs" id="instdocs" target="_blank" rel="noopener">Installation notes ↗</a>
@@ -1332,6 +1430,8 @@ body.app .catnav .fold-all .btn { padding: 3px 9px; font-size: 12px; }
   <div class="dlg-actions">
     <span class="spacer"></span>
     <button class="btn btn-secondary" id="dlgreload" hidden>Reload picker</button>
+    <button class="btn btn-secondary" id="dlgcancel" hidden
+            data-tip="Stop waiting for this sign-in or membership check. Nothing you picked changes.">Cancel</button>
     <button class="btn btn-quiet" id="close">Close</button>
   </div>
 </div></dialog>
@@ -1691,7 +1791,7 @@ function heroServed() {
   document.querySelector('.cfg-hero h1').textContent = again ? 'Your toolkit.' : 'Pick your tools.';
   document.querySelector('.cfg-sub').textContent = again
     ? 'Ticked tools are in this project. Tick to add, untick to remove, then apply the changes.'
-    : 'Tick what you want; your set grows in the footer. Nothing installs until you review the plan.';
+    : 'Tick what you want; your set grows in the footer. Nothing installs until you press Install.';
 }
 
 /* FNS:SEARCH:START -- the picker's search (docs/PickerSearch.md). Pure
@@ -1888,9 +1988,11 @@ var FNSFuzzy = (function () {
 // FuzzyMatch promise. Only the short name fields take fuzzy hits; a typo
 // or a subsequence over a description or a docs page matches almost
 // anything. Hotkeys are not searched: nearly every one carries alt or
-// ctrl, so "alt" listed 41 tools above AltSelect.
+// ctrl, so "alt" listed 41 tools above AltSelect. LEAD is a word some
+// feature name of the tool starts with: a feature name leads with what the
+// feature does, so it says the tool DOES it (docs/FeatureSearchPosition.md).
 var FNSSearch = (function (F) {
-  var NAME = 0, TAG = 0.3, META = 0.4, DESC = 0.5, HEAD = 0.6, BODY = 0.8;
+  var NAME = 0, LEAD = 0.2, TAG = 0.3, META = 0.4, DESC = 0.5, HEAD = 0.6, BODY = 0.8;
   // A token this short is a word start or nothing: two letters inside a
   // word ("ui" in quick) are in most names, and in every docs page.
   var SHORT = 3;
@@ -1912,8 +2014,10 @@ var FNSSearch = (function (F) {
     add(String(p.name || '').replace(/^FNS_/, ''), NAME);
     add(fam.op_label, NAME);
     // the CMS tags and the operator types it stands in for, one field
-    // each, so "math" is a prefix hit on mathCHOP wherever it sits
+    // each, so "math" is a prefix hit on mathCHOP wherever it sits; the
+    // catalog's own tags score the same, for a tool outside the family
     (fam.search_words || []).forEach(function (w) { add(w, TAG); });
+    (p.search_words || []).forEach(function (w) { add(w, TAG); });
     (p.alternatives_for || []).forEach(function (t) { add(t, TAG); });
     add(p.category, META, true);
     add(fam.op_group, META, true);
@@ -1929,6 +2033,7 @@ var FNSSearch = (function (F) {
     // space-joined -- padded so every word sits between two spaces
     var s = p.search || {};
     return {fields: fields,
+            lead: s.lead ? ' ' + s.lead + ' ' : '',
             head: s.head ? ' ' + s.head + ' ' : '',
             body: s.body ? ' ' + s.body + ' ' : ''};
   }
@@ -1960,7 +2065,7 @@ var FNSSearch = (function (F) {
           via = null;
         }
       }
-      var tiers = tk.length < SHORT ? [] : [[row.head, HEAD], [row.body, BODY]];
+      var tiers = tk.length < SHORT ? [] : [[row.lead, LEAD], [row.head, HEAD], [row.body, BODY]];
       for (var j = 0; j < tiers.length; j++) {
         var w = docWord(tk, tiers[j][0]);
         if (!w) continue;
@@ -1985,7 +2090,7 @@ var FNSSearch = (function (F) {
   }
 
   return {prepare: prepare, score: score, compare: compare, docWord: docWord,
-          weights: {NAME: NAME, TAG: TAG, META: META, DESC: DESC, HEAD: HEAD, BODY: BODY}};
+          weights: {NAME: NAME, LEAD: LEAD, TAG: TAG, META: META, DESC: DESC, HEAD: HEAD, BODY: BODY}};
 })(FNSFuzzy);
 /* FNS:SEARCH:END */
 
@@ -2195,6 +2300,36 @@ function fnsBoot() {
   function memberPicked() {
     return Array.from(picked).some(function (n) { return byName[n] && byName[n].family; });
   }
+  // The picker reloads itself when a sign-in or "I just pledged" changes
+  // the account (watchAuth, refreshAccount). Served, a reload rebuilt the
+  // ticks from the install record and landed on the catalog, so someone
+  // who signed in at the install step lost what they had picked, met the
+  // tool they had just unlocked as "new since you last looked", and was
+  // back at Pick Tools (field report 2026-10-17). Those reloads carry the
+  // place across; any other load starts fresh.
+  var RESUME_KEY = 'fns.resume';
+  function reloadKeepingPlace() {
+    try {
+      sessionStorage.setItem(RESUME_KEY, JSON.stringify({
+        at: Date.now(), screen: curScreen,
+        drawer: document.documentElement.hasAttribute('data-drawer'),
+        picked: Array.from(picked), placing: Array.from(placing), family: familyOn}));
+    } catch (e) { /* sandboxed: the reload starts fresh, as before */ }
+    location.reload();
+  }
+  var resumed = null;
+  try {
+    resumed = JSON.parse(sessionStorage.getItem(RESUME_KEY) || 'null');
+    sessionStorage.removeItem(RESUME_KEY);
+  } catch (e) { resumed = null; }
+  if (resumed && !(Date.now() - (resumed.at || 0) < 15 * 60 * 1000)) resumed = null;
+  if (resumed) {
+    picked.clear();
+    (resumed.picked || []).forEach(function (n) { if (pickable(byName[n])) picked.add(n); });
+    placing.clear();
+    (resumed.placing || []).forEach(function (n) { if (pickable(byName[n])) placing.add(n); });
+    if (typeof resumed.family === 'boolean') familyOn = resumed.family;
+  }
 
   // Release, TD build and the verification promise were a meta line under
   // the headline; they are said where the download question is actually
@@ -2256,12 +2391,12 @@ function fnsBoot() {
   function titleOfName(n) { return byName[n] ? titleOf(byName[n]) : publicName(n); }
 
   // --- section fold state -------------------------------------------
-  // The overview IS the closed state: category rows with a pitch and a
-  // count. Served by the installer (or framed in the console) the page is
-  // the raw view and opens everything; on the site and the standalone it
-  // opens nothing until asked. Per-browser memory of what was opened,
-  // in localStorage like the selection, with the same "a nicety, never a
-  // blocker" tolerance for storage that throws.
+  // Every flavor opens its categories from the start (owner, 2026-10-24:
+  // "the sidebar and open categories are for /get"; the site's landing
+  // page is the folded overview, docs/FinderAndToolRow.md). Until then the
+  // site and the standalone opened nothing until asked. Per-browser memory
+  // of what was opened or folded, in localStorage like the selection, with
+  // the same "a nicety, never a blocker" tolerance for storage that throws.
   var FOLD_KEY = 'fns.fold';
   var foldOpen = null;   // null = defaults; else {cat: true}
   try {
@@ -2274,7 +2409,7 @@ function fnsBoot() {
   function isOpen(cat) {
     if (foldOpen && Object.prototype.hasOwnProperty.call(foldOpen, cat)) return !!foldOpen[cat];
     if (quiet(cat)) return false;
-    return served;
+    return true;
   }
   function setOpen(cat, on) {
     if (!foldOpen) foldOpen = {};
@@ -2322,7 +2457,10 @@ function fnsBoot() {
   // creators' links step aside. (The Selected filter went with the 2026-10
   // wizard pass: the set screen IS the selection.)
   var VIEW_KEY = 'fns.view';
-  var view = {access: 'all', fresh: false, once: false};
+  // `expanded` is the Expand all toggle: every card open. Per visit, like
+  // the cards opened one by one (openCards).
+  var view = {access: 'all', fresh: false, once: false, expanded: false};
+  var openCards = new Set();
   try {
     var rawView = JSON.parse(stored(VIEW_KEY, 'null') || 'null');
     if (rawView && ['all', 'free', 'plus'].indexOf(rawView.access) >= 0) view.access = rawView.access;
@@ -2340,28 +2478,12 @@ function fnsBoot() {
     render();
   }
   function narrowed() { return view.access !== 'all' || view.fresh || view.once; }
-  // Compact: title-only tiles (owner, 2026-10-03: "there are just so many
-  // tools and features"). A view, not a filter: every card stays, only
-  // its description, byline, hints and where-it-lands chips go, and the
-  // description is still the tile's hover. Per viewer: off by default on
-  // the site and the standalone, ON by default when the installer serves
-  // the page (2026-10-16: the TD window is 1040x720, and title-only tiles
-  // are what puts tools on its first screen). A stored choice wins.
-  var COMPACT_KEY = 'fns.compact';
-  var compactOn = stored(COMPACT_KEY, null) === '1'
-    || (served && stored(COMPACT_KEY, null) === null);
-  function applyCompact() {
-    listEl.classList.toggle('dense', compactOn);
-    var b = document.getElementById('compact');
-    b.setAttribute('aria-pressed', compactOn ? 'true' : 'false');
-    b.classList.toggle('on', compactOn);
-  }
-  function setCompact(on) {
-    compactOn = !!on;
-    try { localStorage.setItem(COMPACT_KEY, compactOn ? '1' : '0'); } catch (e) { /* nicety */ }
-    applyCompact();
-  }
-  applyCompact();
+  // One-line rows, always. A collapsed tool is the compact row (the Compact
+  // view of 2026-10-03, rows since 2026-10-16); a click on it, or Expand
+  // all, opens it. The Compact toggle went (owner, 2026-10-25: "we said
+  // expand/collapse"): beside Expand all it was a second "how much do I
+  // see" control, four combinations for what is one choice.
+  listEl.classList.add('dense');
   // Placeable: a tool you drop into a network as nodes rather than a
   // service living in the toolkit container -- an FNS family member, a
   // package that spawns into your network or at its root, or one the
@@ -2547,13 +2669,13 @@ function fnsBoot() {
 
   /** The Patreon chip a card and a set row carry. Without an account it
    *  says only what the package IS, which is all the public page can
-   *  honestly claim; it names the ROUTE, not just the state: "Patreon:Base"
+   *  honestly claim; it names the ROUTE, not just the state: "Patreon · Base"
    *  is the lowest tier that unlocks it (the ladder grants upward), and
    *  the tooltip adds the key when a Gumroad row exists. */
   function plusChip(p) {
     var own = entitled(p);
     var tierName = tierLabel(p.access);
-    var mark = tierName ? 'Patreon:' + tierName : 'Patreon';
+    var mark = tierName ? 'Patreon · ' + tierName : 'Patreon';
     var label = !account ? mark
       : (own ? mark + ' · unlocked' : mark + ' · locked');
     var extra = !account ? '' : (own ? ' own' : ' locked');
@@ -2575,15 +2697,42 @@ function fnsBoot() {
 
   function card(p, hit) {
     var on = picked.has(p.name);
-    var el = document.createElement('label');
+    // The checkbox is the only thing that selects; a click anywhere else on
+    // the card opens it to its description, what it adds and its features
+    // (docs/FinderAndToolRow.md). A whole-card <label> ticked a tool every
+    // time someone clicked to read about it.
+    var el = document.createElement('div');
     var placed = !on && placing.has(p.name);
+    var open = view.expanded || openCards.has(p.name);
     el.className = 'card' + (on ? ' on' : '') + (placed ? ' placed' : '')
       + (isPlus(p) ? ' plus' : '')
-      + (isPlus(p) && entitled(p) ? ' own' : '') + (p.minor ? ' minor' : '');
+      + (isPlus(p) && entitled(p) ? ' own' : '') + (p.minor ? ' minor' : '')
+      + (open ? ' open' : '');
     el.setAttribute('data-name', p.name);
+    el.setAttribute('aria-expanded', open ? 'true' : 'false');
+    el.addEventListener('click', function (e) {
+      if (e.target.closest('a, button, input, label, select, textarea')) return;
+      if (openCards.has(p.name)) openCards.delete(p.name); else openCards.add(p.name);
+      var now = view.expanded || openCards.has(p.name);
+      el.classList.toggle('open', now);
+      el.setAttribute('aria-expanded', now ? 'true' : 'false');
+      setRowTip(now);
+    });
+    // The hover of a collapsed row: what its one line cuts off (owner,
+    // 2026-10-25: "could mouse-over still show the expanded text even in
+    // collapse?"). An open row has all of it on screen, so it has none.
+    var rowTip = '';
+    function setRowTip(isOpen) {
+      if (isOpen || !rowTip) el.removeAttribute('data-tip');
+      else el.setAttribute('data-tip', rowTip);
+    }
 
+    var tick = document.createElement('label');
+    tick.className = 'tickbox';
     var cb = document.createElement('input');
     cb.type = 'checkbox'; cb.checked = on;
+    cb.setAttribute('aria-label', 'Pick ' + titleOf(p));
+    tick.appendChild(cb);
     cb.addEventListener('change', function () {
       if (cb.checked) { picked.add(p.name); placing.delete(p.name); }
       else picked.delete(p.name);
@@ -2621,8 +2770,7 @@ function fnsBoot() {
     }
     if (p.help_url) {
       var a = docsLink(p.help_url, 'docs ↗', 'help');
-      // The card is a <label>: without this the docs link would also toggle
-      // the checkbox it is nested in.
+      // a link opens its page, never the card it sits on
       a.addEventListener('click', function (e) { e.stopPropagation(); });
       name.appendChild(a);
     }
@@ -2732,7 +2880,7 @@ function fnsBoot() {
       pb.setAttribute('data-tip', placed
         ? 'In this project only: not part of your setup, so a new project does not get it. Undo removes it on Apply.'
         : 'Put it in this project without adding it to your setup: "Set up like last time" will not bring it into the next project. Tick the card instead to have it every time.');
-      // the card is a <label>: without both, the press would also tick it
+      // a press on the card opens it: this one must not
       pb.addEventListener('click', function (e) {
         e.preventDefault(); e.stopPropagation();
         if (placing.has(p.name)) placing.delete(p.name); else placing.add(p.name);
@@ -2756,15 +2904,41 @@ function fnsBoot() {
     if (p.placement === 'none') {
       chips.appendChild(chip('ticked: waits in the FNS tab', 'where'));
     }
-    // Surfaces ride the tooltip, not the card: at a glance a card is a
-    // name and a line, and "Toolbar button / Pane bar button" on every
-    // other card was most of the noise. They stay searchable (match()
-    // reads them through surfaceLabel), and the words still come from
-    // the manifest's surface_meta.
+    // Surfaces and features live in the opened card, not on it: at a glance
+    // a card is a name and a line, and "Toolbar button / Pane bar button" on
+    // every other card was most of the noise. Surfaces stay searchable
+    // (match() reads them through surfaceLabel), and the words still come
+    // from the manifest's surface_meta. Features are each doc's
+    // feature_list: the site build bakes them in; a manifest without them
+    // (the served picker, until a release carries them) opens to the rest.
     var surf = (p.surfaces || []).map(surfaceLabel);
-    el.setAttribute('data-tip', (p.description || '')
-      + (surf.length ? '\n\nAdds: ' + surf.join(', ') : '')
-      + (p.whatsnew ? '\n\nLatest (' + (p.version || '') + '): ' + p.whatsnew : ''));
+    var more = document.createElement('div');
+    more.className = 'more';
+    if (surf.length) {
+      var adds = document.createElement('div');
+      adds.className = 'adds';
+      adds.textContent = 'Adds: ' + surf.join(', ');
+      more.appendChild(adds);
+    }
+    var feats = Array.isArray(p.features) ? p.features : [];
+    if (feats.length) {
+      var fl = document.createElement('ul');
+      fl.className = 'feats';
+      feats.forEach(function (f) {
+        var li = document.createElement('li');
+        var at = String(f).indexOf(': ');
+        if (at > 0) {
+          var fb = document.createElement('b');
+          fb.textContent = String(f).slice(0, at);
+          li.appendChild(fb);
+          li.appendChild(document.createTextNode(String(f).slice(at)));
+        } else {
+          li.textContent = String(f);
+        }
+        fl.appendChild(li);
+      });
+      more.appendChild(fl);
+    }
     // an integration whose partner is not selected: say so plainly rather
     // than blocking the choice -- these degrade by design
     (p.integrates_with || []).forEach(function (t) {
@@ -2778,6 +2952,19 @@ function fnsBoot() {
       }
     });
     if (chips.children.length) body.appendChild(chips);
+    if (more.children.length) body.appendChild(more);
+    // the full description, where it lands and what it adds; the features
+    // stay in the opened row. Where it lands is said in full here: the chip's
+    // "ticked: waits in the FNS tab" assumes you know what the FNS tab is.
+    var lands = {
+      none: 'Ticked, it waits on the FNS tab of the OP Create dialog: place it from there, one node each.',
+      pane: 'Lands in the network you are working in.',
+      root: 'Lands at your network root.'
+    }[p.placement] || '';
+    rowTip = (p.description || '')
+      + (lands ? '\n\n' + lands : '')
+      + (surf.length ? '\n\nAdds: ' + surf.join(', ') : '');
+    setRowTip(open);
     var db = null;
     if (singleDownloadUrl(p)) {
       db = document.createElement('button');
@@ -2788,7 +2975,7 @@ function fnsBoot() {
         + ' stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
       db.setAttribute('aria-label', 'Download ' + titleOf(p) + ' as a single .tox');
       db.setAttribute('data-tip','Just this tool, as a single .tox. It works on its own but never updates itself; an install keeps it current.');
-      // the card is a <label>: without both, the press would also tick it
+      // a press on the card opens it: this one must not
       db.addEventListener('click', function (e) {
         e.preventDefault(); e.stopPropagation();
         downloadTool(p);
@@ -2803,7 +2990,7 @@ function fnsBoot() {
       body.classList.add('has-foot');
     }
 
-    el.appendChild(cb); el.appendChild(body);
+    el.appendChild(tick); el.appendChild(body);
     return el;
   }
 
@@ -2838,6 +3025,28 @@ function fnsBoot() {
     });
     p.appendChild(a);
     return p;
+  }
+
+  /** The products of ours the installer cannot place: one line per row,
+   *  the name a link to the product's page. Rows come from the same
+   *  recommendations list as the community pointer, flagged `ours`. */
+  function ownPointer(rows) {
+    var p = document.createElement('div');
+    p.className = 'community-pointer own-pointer';
+    p.appendChild(document.createTextNode('Also from Function Store: '));
+    rows.forEach(function (t, i) {
+      if (i) p.appendChild(document.createTextNode(' · '));
+      var a = document.createElement('a');
+      a.href = t.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+      a.textContent = t.name + ' ↗';
+      p.appendChild(a);
+      if (t.description) p.appendChild(document.createTextNode(', ' + t.description));
+    });
+    return p;
+  }
+  function ownMatches(t, q) {
+    var hay = (t.name + ' ' + (t.description || '')).toLowerCase();
+    return String(q).toLowerCase().split(/\s+/).some(function (w) { return w && hay.indexOf(w) >= 0; });
   }
 
   /** Fetched at RUNTIME, not baked into the manifest: the list publishes on
@@ -3150,8 +3359,16 @@ function fnsBoot() {
     // Tools by OTHER creators live in their own place (the console's
     // Community view, the site's /community/), never among ours: here they
     // are one line pointing there (docs/CommunityHighlights.md).
-    var recs = narrowed() || filtering ? [] : (window.FNS_RECOMMENDS || []);
+    var allRecs = window.FNS_RECOMMENDS || [];
+    var ownRecs = allRecs.filter(function (t) { return t.ours === true; });
+    var recs = narrowed() || filtering ? [] : allRecs.filter(function (t) { return t.ours !== true; });
     if (recs.length) listEl.appendChild(communityPointer(recs.length));
+    // Products of ours the installer cannot place (TDX Launcher Ultra, a
+    // desktop app): one line each, and a search that names one finds it.
+    var ownShown = narrowed() || filtering
+      ? (q ? ownRecs.filter(function (t) { return ownMatches(t, q); }) : [])
+      : ownRecs;
+    if (ownShown.length) listEl.appendChild(ownPointer(ownShown));
 
     // Core is not shown: plumbing that installs with any selection and
     // needs no choice. The install plan names its count.
@@ -3210,7 +3427,14 @@ function fnsBoot() {
       save.setAttribute('data-tip', locked);
       save.disabled = true;
     } else if (served) {
-      save.textContent = (removals || famGoes) ? 'Apply changes…' : 'Review install…';
+      // The primary says what it does. Install counts the tools that will
+      // land now (on a re-entry, the adds); it goes straight through unless
+      // the plan has something to decide, and then the plan screen is the
+      // one confirmation. Apply changes always shows the plan.
+      saveApplies = !!(removals || famGoes);
+      var landing = reentry ? adds : Array.from(picked).filter(installable).length;
+      save.textContent = saveApplies ? 'Apply changes…'
+        : (landing ? 'Install ' + landing + (landing === 1 ? ' tool' : ' tools') : 'Review install…');
       // removals (and places) alone are actionable even with nothing picked
       save.disabled = picked.size === 0 && removals === 0 && !famGoes && !toPlace;
     } else {
@@ -3289,8 +3513,9 @@ function fnsBoot() {
     var viewK = document.getElementById('viewk');
     var viewBtn = document.getElementById('viewbtn');
     if (viewK && viewBtn) {
-      var narrowing = (view.access !== 'all' ? 1 : 0)
-        + (view.fresh ? 1 : 0) + (view.once ? 1 : 0);
+      // the access filter sits beside the search now and shows itself;
+      // the badge counts what hides inside the menu
+      var narrowing = (view.fresh ? 1 : 0) + (view.once ? 1 : 0);
       viewK.textContent = narrowing ? String(narrowing) : '';
       viewK.hidden = !narrowing;
       viewBtn.classList.toggle('on', !!narrowing);
@@ -3444,6 +3669,38 @@ function fnsBoot() {
   // The welcome leads with what is free (owner, 2026-09-16: the first step
   // must not discourage). Every number and tier label is read from the
   // manifest and the account, so a new tool or tier needs no copy change.
+  // --- the supporter nudge: Start, the plan, the done report -------------
+  // A signed-out reader who picks a starting point never ticks a locked
+  // tool (autoPick leaves them out), so the modal, the drawer line and the
+  // Waiting for Patreon block never fire for them. One line on each of
+  // the three screens everyone passes carries the sign-in instead, and
+  // "Not a supporter" hides all three on this machine until Start over.
+  // It never hides the answers to the reader's own action: the locked
+  // tool's modal, the drawer line, the Waiting for Patreon block.
+  var NUDGE_KEY = 'fns.notsupporter';
+  function supporterNudgeDismissed() { return stored(NUDGE_KEY, null) === '1'; }
+  function supporterNudgeWanted() {
+    return served && hasAuthRail && !account && !!authActions.signIn
+      && !supporterNudgeDismissed()
+      && lockedPatreon(tools.map(function (p) { return p.name; })).length > 0;
+  }
+  function supporterSignInButton() {
+    var b = mk('button', 'btn btn-secondary', signInLabel());
+    b.type = 'button';
+    b.addEventListener('click', function () { authActions.signIn(); });
+    return b;
+  }
+  function supporterDismissLink() {
+    var a = mk('button', 'linkbtn', 'Not a supporter');
+    a.type = 'button';
+    a.setAttribute('data-tip', 'Hide this on this machine. Start over shows it again.');
+    a.addEventListener('click', function () {
+      try { localStorage.setItem(NUDGE_KEY, '1'); } catch (e) { /* nicety */ }
+      renderWelcomeAccess();
+      renderSupporterLine();
+    });
+    return a;
+  }
   function renderWelcomeAccess() {
     var counts = document.getElementById('welcomecounts');
     var authEl = document.getElementById('welcomeauth');
@@ -3475,10 +3732,26 @@ function fnsBoot() {
     var rest = parts.length > 1
       ? parts.slice(0, -1).join(', ') + ', and ' + parts[parts.length - 1]
       : parts.join('');
-    counts.appendChild(document.createTextNode((rest ? ', ' + rest : '') + '.'));
+    // With tools still locked the free ones get their own sentence: the
+    // reader's first question is whether they need an account at all
+    counts.appendChild(document.createTextNode(locked.length
+      ? ', no account needed.' + (rest ? ' ' + rest.charAt(0).toUpperCase() + rest.slice(1) + '.' : '')
+      : (rest ? ', ' + rest : '') + '.'));
     if (!locked.length) return;
-    authEl.hidden = false;
     var join = authActions.join || (FNS_DOCS + '/patreon/');
+    if (hasAuthRail && !account && authActions.signIn) {
+      // The supporter's one door on Start, a real button (a supporter who
+      // picks a starting point first never meets a locked tool, so this
+      // is where they learn to sign in). Hidden for good on this machine
+      // by "Not a supporter".
+      if (supporterNudgeDismissed()) return;
+      authEl.hidden = false;
+      authEl.appendChild(document.createTextNode('Supporting on Patreon? Sign in first to add your Patreon tools.'));
+      authEl.appendChild(supporterSignInButton());
+      authEl.appendChild(supporterDismissLink());
+      return;
+    }
+    authEl.hidden = false;
     if (hasAuthRail && signInWanted() && authActions.signIn) {
       authEl.appendChild(document.createTextNode(
         (account && account.connected === false)
@@ -3542,7 +3815,7 @@ function fnsBoot() {
     acctAskedAt = nowMs;
     fetch('/auth/status').then(function (r) { return r.json(); })
       .then(function (st) {
-        if (acctKey(st) !== acctKey(account)) location.reload();
+        if (acctKey(st) !== acctKey(account)) reloadKeepingPlace();
       })
       .catch(function () { /* no server answer: keep what the page has */ });
   }
@@ -3603,6 +3876,20 @@ function fnsBoot() {
     }
     save(); render();
   });
+  // Expand all / Collapse all: the one "how much do I see" control. Collapse
+  // also closes the cards opened one by one. Always shown: an opened card
+  // has its full description and what it adds even where the manifest
+  // carries no features (it was hidden there while it was called "All
+  // features", which promised them).
+  var expandBtn = document.getElementById('expandall');
+  expandBtn.addEventListener('click', function () {
+    view.expanded = !view.expanded;
+    if (!view.expanded) openCards.clear();
+    expandBtn.setAttribute('aria-pressed', view.expanded ? 'true' : 'false');
+    expandBtn.classList.toggle('on', view.expanded);
+    expandBtn.textContent = view.expanded ? 'Collapse all' : 'Expand all';
+    render();
+  });
   Array.prototype.forEach.call(document.querySelectorAll('#access button[data-access]'), function (b) {
     b.addEventListener('click', function () { setView({access: b.getAttribute('data-access')}); });
   });
@@ -3628,7 +3915,6 @@ function fnsBoot() {
       if (ev.key === 'Escape' && wrap.classList.contains('open')) openMenu(false);
     });
   })();
-  document.getElementById('compact').addEventListener('click', function () { setCompact(!compactOn); });
   document.getElementById('resetview').addEventListener('click', function () {
     document.getElementById('q').value = '';
     setView({access: 'all', fresh: false, once: false});
@@ -3691,10 +3977,13 @@ function fnsBoot() {
       'downloads; everything is sha256-verified against the release ' +
       'manifest before anything is installed.'
       + (meta.length ? ' (' + meta.join(' ') + ')' : ''),
-    done: 'Your tools are live in the project. Settings, install & remove ' +
-      'and updates all live in the FNS console. Open it here, or any time ' +
-      'from the toolkit root’s parameters (Open Settings / Pick Tools). ' +
-      'This window can be closed.'
+    done: 'Your tools are live in the project. The FNS button at the right end ' +
+      'of TouchDesigner’s menu bar opens the hub: every tool’s settings, ' +
+      'install and remove, updates, and the configurators for the toolbar, ' +
+      'pane bars, main menu and OP Create; right-click it for the same as a ' +
+      'menu. This window can be closed.',
+    family: 'Your FNS family operators are on the FNS tab of the OP Create ' +
+      'dialog, one node each.'
   };
   if (served) {
     document.getElementById('save').textContent = 'Review install…';
@@ -3789,6 +4078,62 @@ function fnsBoot() {
     renderWelcomeAccess();
     setScreen('start');
   }
+  /** One result row: checkbox, name with its chips and links, and a line
+   *  under it -- the finder's reason when there is one, else the tool's
+   *  description. Shared by the questionnaire and the tool finder;
+   *  `state` collects the ticks ({chosen, plus}). */
+  function pickRow(r, ticked, state) {
+    var p = byName[r.name];
+    var row = document.createElement('label');
+    row.className = 'qres' + (isPlus(p) ? ' plus' : '');
+    var cb = document.createElement('input');
+    cb.type = 'checkbox'; cb.checked = ticked;
+    state.chosen[r.name] = ticked;
+    if (isPlus(p)) state.plus[r.name] = cb;
+    cb.addEventListener('change', function () {
+      state.chosen[r.name] = cb.checked;
+      if (cb.checked && lockedPatreon([r.name]).length) {
+        askPatreon([r.name], function () {
+          cb.checked = false; state.chosen[r.name] = false;
+        });
+      }
+    });
+    row.appendChild(cb);
+    var body = document.createElement('span');
+    body.className = 'qres-body';
+    // the same name line a card has: title, docs, and the curated
+    // link-outs; a reader deciding on a recommendation needs the docs
+    // one click away, not after leaving the dialog
+    var nm = document.createElement('span');
+    nm.className = 'qres-name';
+    var t = document.createElement('b');
+    t.textContent = titleOf(p);
+    nm.appendChild(t);
+    if (isPlus(p)) {
+      nm.appendChild(chip(tierLabel(p.access)
+        ? 'Patreon · ' + tierLabel(p.access) : 'Patreon', 'plus'));
+    }
+    if (pricingOf(p)) {
+      nm.appendChild(chip(pricingOf(p).summary, 'trial'));
+    }
+    [['help_url', 'docs ↗'], ['homepage', 'site ↗'], ['changelog_url', 'changelog ↗']]
+      .forEach(function (k) {
+        if (!p[k[0]]) return;
+        var l = docsLink(p[k[0]], k[1], 'help');
+        // the row is a <label>: a link click must not toggle its box
+        l.addEventListener('click', function (e) { e.stopPropagation(); });
+        nm.appendChild(l);
+      });
+    body.appendChild(nm);
+    if (r.why || p.description) {
+      var ds = document.createElement('span');
+      ds.className = 'qres-desc';
+      ds.textContent = Array.isArray(r.why) ? r.why.join(' · ') : (r.why || p.description);
+      body.appendChild(ds);
+    }
+    row.appendChild(body);
+    return row;
+  }
   function quizRender(onUse) {
     var n = quiz.questions.length;
     var prog = document.getElementById('quiz-progress');
@@ -3829,7 +4174,10 @@ function fnsBoot() {
       return;
     }
     // the result: a pre-ticked set with the reasons, editable before use
-    var picks = quizScore(quizAnswers, quiz, bulkTools);
+    // Every tool scores, not only the bulk list: a trial or foreign match
+    // (TDXMap, a controller-specific tool) is offered too, unticked, after
+    // the ticked rows, with its own chips as the reason (owner, 2026-10-24).
+    var picks = quizScore(quizAnswers, quiz, tools);
     var split = quizSplit(picks);
     prog.textContent = 'Your set';
     // Counted on what the set TICKS: a Patreon match the account cannot
@@ -3849,63 +4197,17 @@ function fnsBoot() {
     next.hidden = true; use.hidden = !picks.length;
     var chosenNames = {};
     var plusBoxes = {};   // the Plus rows' checkboxes, for Leave Plus out
-    function resultRow(r, ticked) {
-      var p = byName[r.name];
-      var row = document.createElement('label');
-      row.className = 'qres' + (isPlus(p) ? ' plus' : '');
-      var cb = document.createElement('input');
-      cb.type = 'checkbox'; cb.checked = ticked;
-      chosenNames[r.name] = ticked;
-      if (isPlus(p)) plusBoxes[r.name] = cb;
-      cb.addEventListener('change', function () {
-        chosenNames[r.name] = cb.checked;
-        if (cb.checked && lockedPatreon([r.name]).length) {
-          askPatreon([r.name], function () {
-            cb.checked = false; chosenNames[r.name] = false;
-          });
-        }
-      });
-      row.appendChild(cb);
-      var body = document.createElement('span');
-      body.className = 'qres-body';
-      // the same name line a card has: title, docs, and the curated
-      // link-outs; a reader deciding on a recommendation needs the docs
-      // one click away, not after leaving the dialog
-      var nm = document.createElement('span');
-      nm.className = 'qres-name';
-      var t = document.createElement('b');
-      t.textContent = titleOf(p);
-      nm.appendChild(t);
-      if (isPlus(p)) {
-        nm.appendChild(chip(tierLabel(p.access)
-          ? 'Patreon:' + tierLabel(p.access) : 'Patreon', 'plus'));
-      }
-      if (pricingOf(p)) {
-        nm.appendChild(chip(pricingOf(p).summary, 'trial'));
-      }
-      [['help_url', 'docs ↗'], ['homepage', 'site ↗'], ['changelog_url', 'changelog ↗']]
-        .forEach(function (k) {
-          if (!p[k[0]]) return;
-          var l = docsLink(p[k[0]], k[1], 'help');
-          // the row is a <label>: a link click must not toggle its box
-          l.addEventListener('click', function (e) { e.stopPropagation(); });
-          nm.appendChild(l);
-        });
-      body.appendChild(nm);
-      if (p.description) {
-        var ds = document.createElement('span');
-        ds.className = 'qres-desc';
-        ds.textContent = p.description;
-        body.appendChild(ds);
-      }
-      row.appendChild(body);
-      return row;
-    }
+    var rowState = {chosen: chosenNames, plus: plusBoxes};
+    function resultRow(r, ticked) { return pickRow(r, ticked, rowState); }
     // A recommendation starts ticked only when this account can install it.
     // A Patreon tool the reader cannot get yet is still offered, unticked:
     // ticked by default it read as part of the install for a signed-out
     // reader, who then watched an install that could never include it.
-    split.main.forEach(function (r) { res.appendChild(resultRow(r, ticks(r))); });
+    // Ticked rows first, then the locked Patreon ones, each group in score
+    // order: the list reads "what you get" and then "what Patreon adds",
+    // the same order the catalog's sections use (owner, 2026-10-24).
+    split.main.filter(ticks).concat(split.main.filter(function (r) { return !ticks(r); }))
+      .forEach(function (r) { res.appendChild(resultRow(r, ticks(r))); });
     // A Plus tool in the set is the moment a reader would otherwise be
     // surprised at install time. Say what it is and what happens, and
     // offer the one-click way out. Counted on what is NOT installable
@@ -3913,7 +4215,12 @@ function fnsBoot() {
     var plusInSet = split.main.filter(function (r) {
       return isPlus(byName[r.name]) && !installable(r.name);
     });
-    if (plusInSet.length) {
+    // a trial or foreign row is unticked for the same reason: never picked
+    // for the reader. Counted here so the box explains every unticked row.
+    var trialInSet = split.main.filter(function (r) {
+      return !isPlus(byName[r.name]) && handPick(byName[r.name]);
+    });
+    if (plusInSet.length || trialInSet.length) {
       var pn = document.createElement('div');
       pn.className = 'quiz-plus';
       var pm = document.createElement('span');
@@ -3921,12 +4228,20 @@ function fnsBoot() {
       pm.textContent = '◆';
       pn.appendChild(pm);
       var pb = document.createElement('b');
-      pb.textContent = plusInSet.length + ' more '
-        + (plusInSet.length === 1 ? 'fits' : 'fit') + ', with Patreon:';
+      var moreN = plusInSet.length + trialInSet.length;
+      pb.textContent = moreN + ' more ' + (moreN === 1 ? 'fits' : 'fit') + ', with '
+        + (plusInSet.length && trialInSet.length ? 'Patreon or a trial'
+           : (plusInSet.length ? 'Patreon' : 'a trial')) + ':';
       pn.appendChild(pb);
-      pn.appendChild(document.createTextNode(
-        ' ' + plusReality() + ' '));
-      pn.appendChild(docsLink(FNS_DOCS + '/patreon/', 'How unlocking works ↗'));
+      if (plusInSet.length) {
+        pn.appendChild(document.createTextNode(' ' + plusReality() + ' '));
+        pn.appendChild(docsLink(FNS_DOCS + '/patreon/', 'How unlocking works ↗'));
+      }
+      if (trialInSet.length) {
+        pn.appendChild(document.createTextNode(' '
+          + (trialInSet.length === 1 ? 'The trial tool installs' : 'The trial tools install')
+          + ' when you tick ' + (trialInSet.length === 1 ? 'it' : 'them') + '.'));
+      }
       var out = document.createElement('button');
       out.type = 'button';
       out.className = 'btn btn-quiet';
@@ -3934,6 +4249,7 @@ function fnsBoot() {
       // a ticked Patreon tool is recorded as wanted and installs once the
       // account is signed in and entitled.
       out.textContent = 'Add the Patreon tools anyway';
+      out.hidden = !plusInSet.length;
       out.addEventListener('click', function () {
         var names = Object.keys(plusBoxes);
         names.forEach(function (nm) {
@@ -3977,6 +4293,140 @@ function fnsBoot() {
     };
   }
 
+  // --- the tool finder (docs/PickerChatbot.md) ---------------------------
+  // On the site (and its Previews) the endpoint is same-origin; served by
+  // the installer from 127.0.0.1, or opened from a file, it is the live
+  // site's. /api/chat/ keeps its trailing slash: vercel.json redirects the
+  // bare path, and a CORS preflight never follows a redirect.
+  var CHAT_URL = /(^|\.)functionstore\.tools$|\.vercel\.app$|^localhost$/.test(location.hostname)
+    ? '/api/chat/' : FNS_DOCS + '/api/chat/';
+  var chatReady = false;
+  // /get/#ask asked for the finder before we knew whether it answers
+  var wantAsk = String(location.hash || '').toLowerCase() === '#ask';
+  // A GET says whether the finder is switched on (a model configured). No
+  // answer, offline, or not yet: the Start card stays hidden.
+  try {
+    fetch(CHAT_URL, {cache: 'no-store'})
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        chatReady = !!(d && d.ready);
+        var b = document.getElementById('pre-ask');
+        if (b && chatReady) b.hidden = false;
+        var c = document.getElementById('askfinder');
+        if (c && chatReady) c.hidden = false;
+        // /get/#ask: the finder's own address, honoured once it answers
+        if (chatReady && wantAsk) { wantAsk = false; askFromCatalog(); }
+      })
+      .catch(function () { /* finder unreachable: the card stays hidden */ });
+  } catch (e) { /* no fetch: no finder */ }
+  var ask = {messages: [], state: {chosen: {}, plus: {}}, names: [], busy: false};
+  function askAccess() {
+    return bulkTools.some(function (p) { return isPlus(p) && installable(p.name); }) ? 'patreon' : 'free';
+  }
+  // Plain text with its http(s) links made clickable; nothing is parsed
+  // as HTML.
+  function askText(el, text) {
+    var parts = String(text || '').split(/(https?:\/\/[^\s)]+)/);
+    parts.forEach(function (t, i) {
+      if (!t) return;
+      if (i % 2) {
+        var url = t.replace(/[.,;:]+$/, '');
+        el.appendChild(docsLink(url, url.replace(/^https?:\/\//, '')));
+        if (url.length < t.length) el.appendChild(document.createTextNode(t.slice(url.length)));
+      } else {
+        el.appendChild(document.createTextNode(t));
+      }
+    });
+  }
+  function askBubble(cls, text) {
+    var b = mk('div', 'ask-msg ' + cls);
+    askText(b, text);
+    document.getElementById('ask-log').appendChild(b);
+    b.scrollIntoView({block: 'nearest'});
+    return b;
+  }
+  function askSend() {
+    var input = document.getElementById('ask-input');
+    var text = String(input.value || '').trim();
+    if (!text || ask.busy) return;
+    input.value = '';
+    ask.messages.push({role: 'user', content: text});
+    askBubble('user', text);
+    var wait = askBubble('bot wait', 'Reading the docs…');
+    ask.busy = true;
+    document.getElementById('ask-send').disabled = true;
+    function done() {
+      ask.busy = false;
+      document.getElementById('ask-send').disabled = false;
+      if (wait.parentNode) wait.parentNode.removeChild(wait);
+      input.focus();
+    }
+    function failed(msg) {
+      done();
+      // the turn did not happen: take it back so a retry is clean
+      ask.messages.pop();
+      askBubble('bot err', msg);
+    }
+    fetch(CHAT_URL, {method: 'POST', headers: {'Content-Type': 'application/json'},
+                     body: JSON.stringify({messages: ask.messages, access: askAccess(), shown: ask.names})})
+      .then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (d) {
+        if (!d || d.error || typeof d.reply !== 'string') {
+          failed((d && d.error) || 'The tool finder could not answer. Try again, or use the questions instead.');
+          return;
+        }
+        done();
+        var picks = (d.picks || []).filter(function (r) { return byName[r.name]; });
+        // the history stays plain dialogue; what was offered travels as
+        // `shown` (a picks line here was copied back as a plain answer)
+        ask.messages.push({role: 'assistant', content: d.reply});
+        askBubble('bot', d.reply);
+        if (!picks.length) return;
+        var box = mk('div', 'ask-picks');
+        // what installs first, then the locked Patreon picks (the quiz's order)
+        function tickable(r) { return installable(r.name) && !handPick(byName[r.name]); }
+        picks.filter(tickable).concat(picks.filter(function (r) { return !tickable(r); })).forEach(function (r) {
+          if (ask.names.indexOf(r.name) === -1) ask.names.push(r.name);
+          box.appendChild(pickRow(r, tickable(r), ask.state));
+        });
+        document.getElementById('ask-log').appendChild(box);
+        document.getElementById('ask-use').hidden = false;
+        box.scrollIntoView({block: 'nearest'});
+      })
+      .catch(function () {
+        failed('Could not reach the tool finder. Check the connection, or use the questions instead.');
+      });
+  }
+  /** Opens the finder. `onBack` defaults to the Start screen, where its
+   *  card lives; the catalog's own link passes a way back to the list. */
+  function askStart(onUse, onBack) {
+    ask = {messages: [], state: {chosen: {}, plus: {}}, names: [], busy: false};
+    document.getElementById('ask-log').textContent = '';
+    document.getElementById('ask-use').hidden = true;
+    setScreen('ask');
+    document.getElementById('ask-form').onsubmit = function (e) { e.preventDefault(); askSend(); };
+    document.getElementById('ask-input').onkeydown = function (e) {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); askSend(); }
+    };
+    document.getElementById('ask-back').onclick = onBack || function () { quizShow(false); };
+    document.getElementById('ask-use').onclick = function () {
+      onUse(ask.names.filter(function (nm) { return ask.state.chosen[nm]; }));
+    };
+    document.getElementById('ask-input').focus();
+  }
+  /** The finder opened from Pick tools (its link, or /get/#ask): what it
+   *  picks joins what is already ticked, and Back returns to the list. The
+   *  Start card's finder replaces the selection instead, as a starting
+   *  point does. */
+  function askFromCatalog() {
+    askStart(function (names) {
+      names.forEach(function (n) { if (byName[n]) picked.add(n); });
+      save(); render();
+      landOnCatalog();
+    }, function () { setScreen('catalog'); });
+  }
+  document.getElementById('askfinder').addEventListener('click', askFromCatalog);
+
   function applyPreset(names) {
     picked.clear();
     names.forEach(function (n) { picked.add(n); });
@@ -4019,10 +4469,27 @@ function fnsBoot() {
       starterReady.length + ' tools, the everyday set: ' +
       starterReady.slice(0, 4).map(titleOfName).join(', ') + (starterReady.length > 4 ? '…' : '');
     var allReady = autoPick(bulkTools.map(function (p) { return p.name; }));
+    // Everything leaves out what this account cannot install and what is
+    // only ever ticked by hand (hardware integrations, other creators'
+    // tools, trials); the card counts both so its number never reads as a
+    // disagreement with the counts line above. No Patreon words here: the
+    // line under the cards says it once.
+    var lockedAll = lockedPatreon(tools.map(function (p) { return p.name; })).length;
+    var byHand = tools.filter(function (p) {
+      return !lockedPatreon([p.name]).length && allReady.indexOf(p.name) < 0;
+    }).length;
+    // "All 45 free tools." (owner, 2026-10-24: nothing about the two that
+    // only a tick brings in; byHand stays computed for the count check)
+    void byHand;
     document.getElementById('pre-all-desc').textContent =
-      allReady.length < bulkTools.length
-        ? 'All ' + allReady.length + ' tools you can install now. Remove any later from Pick Tools.'
-        : 'All ' + bulkTools.length + ' tools. Remove any later from Pick Tools.';
+      'All ' + allReady.length + (lockedAll && !account ? ' free' : '') + ' tools.'
+      + ' Remove any later from Pick Tools.';
+    // the served page installs on its own button; the site and the file
+    // end on the paste script
+    if (served && !locked) {
+      document.getElementById('startlead').textContent =
+        'Pick a starting point. Nothing installs until you press Install.';
+    }
     document.getElementById('welcometitle').textContent =
       (firstrun || firstVisit) ? 'Welcome to FNSTools.' : 'Choose a starting point.';
     // the facts that were the hero's meta line: release, TD build, the
@@ -4056,7 +4523,7 @@ function fnsBoot() {
       choose(names, bind, false, true);
       if (!served || locked) return;
       installPolls = 0; installCancelled = false;
-      installEpilogue = '';
+      installEpilogue = ''; installHeader = '';
       showInstall('plan', 'Planning the install…', undefined, {title: 'Setting up like last time'});
       post('/selection', JSON.stringify(selection(), null, 1) + '\n',
         function (res) {
@@ -4071,6 +4538,9 @@ function fnsBoot() {
     };
     pre.onclick = function () { choose(starter); };
     preQuiz.onclick = function () { quizStart(function (names) { choose(names, null, true); }); };
+    var preAsk = document.getElementById('pre-ask');
+    preAsk.hidden = !chatReady;
+    preAsk.onclick = function () { askStart(function (names) { choose(names, null, true); }); };
     document.getElementById('pre-all').onclick = function () {
       choose(bulkTools.map(function (p) { return p.name; }));
     };
@@ -4105,7 +4575,9 @@ function fnsBoot() {
   }
   document.getElementById('wizard').addEventListener('click', function () {
     // Start over, repeatable on purpose: it only changes the selection,
-    // and nothing is downloaded or installed without the plan.
+    // and nothing is downloaded or installed until Install is pressed.
+    // It also brings back the supporter line "Not a supporter" hid.
+    try { localStorage.removeItem(NUDGE_KEY); } catch (e) { /* nicety */ }
     showStart();
   });
   // Appended to the install report by the auto-resume flow: its pass
@@ -4120,7 +4592,9 @@ function fnsBoot() {
   // as a chip by its title, removals and failures marked -- and keeps
   // the raw text underneath the chips only when a line does not parse.
   function finished(text) {
-    showInstall('done', text + installEpilogue, HINTS.done);
+    // a family member installed with the tab on: say where it went
+    var famHint = (companions.length > 0 && memberPicked() && familyOn) ? ' ' + HINTS.family : '';
+    showInstall('done', text + installEpilogue, HINTS.done + famHint);
     var report = document.getElementById('instreport');
     var out = document.getElementById('instout');
     report.innerHTML = '';
@@ -4213,15 +4687,10 @@ function fnsBoot() {
   // problems -- with what is already there folded into one line, and
   // keeps the raw text only when nothing in it parses. A refusal keeps
   // its sentence and its next step, and no Install button.
-  function showPlan(res) {
-    showInstall('plan', res.text, undefined, {installable: !!res.ok});
-    if (!res.ok) return;
-    var report = document.getElementById('instreport');
-    var out = document.getElementById('instout');
-    report.innerHTML = '';
+  function parsePlan(text) {
     var installs = [], removes = [], problems = [];
     var keptTools = [], keptCore = 0, installCore = 0, download = '', target = '';
-    String(res.text || '').split('\n').forEach(function (line) {
+    String(text || '').split('\n').forEach(function (line) {
       var s = line.trim(), m;
       if (!s) return;
       if ((m = /^install into (.+)$/.exec(s))) { target = m[1]; return; }
@@ -4237,6 +4706,43 @@ function fnsBoot() {
       if ((m = /^(\S+)\s+(NO ARTIFACT|NOT IN MANIFEST)$/.exec(s))) { problems.push(titleOfName(m[1]) + ': ' + m[2].toLowerCase()); return; }
       if (/^REFUSED/.test(s)) problems.push(s);
     });
+    return {installs: installs, removes: removes, problems: problems, keptTools: keptTools,
+            keptCore: keptCore, installCore: installCore, download: download, target: target};
+  }
+  // Install goes straight through when the plan holds nothing to decide:
+  // something installs, nothing is removed, nothing is refused or missing,
+  // no Patreon pick waits for a sign-in, and the signed-out supporter
+  // checkpoint does not apply. Any of those keeps the plan screen, which
+  // is then the one confirmation (owner, 2026-10-24: two install buttons
+  // in a row ask the same question twice).
+  function planNeedsReview(res) {
+    if (!res.ok) return true;
+    var pl = parsePlan(res.text);
+    if (pl.removes.length || pl.problems.length) return true;
+    if (!pl.installs.length && !pl.installCore) return true;
+    if (lockedPatreon(Array.from(picked)).length) return true;
+    return supporterNudgeWanted();
+  }
+  // The plan in one sentence, the progress header of a straight install:
+  // "Installing 16 tools with 10 core packages, 7.6 MB, into /project1/FNSTools."
+  function planSentence(res) {
+    var pl = parsePlan(res.text);
+    var n = pl.installs.length;
+    return 'Installing ' + n + (n === 1 ? ' tool' : ' tools')
+      + (pl.installCore ? ' with ' + pl.installCore + ' core package' + (pl.installCore === 1 ? '' : 's') : '')
+      + (pl.download ? ', ' + pl.download : '')
+      + (pl.target ? ', into ' + pl.target : '') + '.';
+  }
+  function showPlan(res) {
+    showInstall('plan', res.text, undefined, {installable: !!res.ok});
+    if (!res.ok) return;
+    var report = document.getElementById('instreport');
+    var out = document.getElementById('instout');
+    report.innerHTML = '';
+    var pl = parsePlan(res.text);
+    var installs = pl.installs, removes = pl.removes, problems = pl.problems;
+    var keptTools = pl.keptTools, keptCore = pl.keptCore, installCore = pl.installCore;
+    var download = pl.download, target = pl.target;
     if (!installs.length && !removes.length && !problems.length && !keptTools.length && !installCore) return;
     function section(label, names, cls) {
       var sec = document.createElement('div');
@@ -4296,10 +4802,12 @@ function fnsBoot() {
   // browser chrome, so a page that asks to be reloaded asks for something
   // the reader cannot do (field report 2026-09-17). Every auth wait
   // carries the reload button; nothing else shows it.
-  function showDialog(text, installable, hint, reloadable) {
+  function showDialog(text, installable, hint, reloadable, cancellable) {
     var dlg = document.getElementById('dlg');
     document.getElementById('out').textContent = text;
     document.getElementById('dlgreload').hidden = !reloadable;
+    // only while a sign-in or a membership check is being waited on
+    document.getElementById('dlgcancel').hidden = !cancellable;
     var h = document.getElementById('dlghint');
     h.textContent = hint || '';
     h.hidden = !hint;
@@ -4317,8 +4825,14 @@ function fnsBoot() {
     plan: 'Install plan', progress: 'Installing', done: 'Installed', failed: 'Install stopped',
     script: window.FNS_SITE ? 'Paste this into the Textport' : 'Your selection'
   };
+  // the install screen's current state, for the supporter line
+  var instState = '';
+  // the progress state's header: the plan's sentence when Install went
+  // straight through, kept while the poll narrates the hops under it
+  var installHeader = '';
   function showInstall(state, text, hint, opts) {
     opts = opts || {};
+    if (state === 'progress' && !hint && installHeader) hint = installHeader;
     document.getElementById('insttitle').textContent = opts.title || INSTALL_TITLES[state] || 'Install';
     var h = document.getElementById('insthint');
     var fallback = state === 'done' ? HINTS.done : (state === 'script' ? HINTS.script : HINTS.selection);
@@ -4332,6 +4846,7 @@ function fnsBoot() {
     document.getElementById('instinstall').hidden = !((state === 'plan' && opts.installable) || state === 'failed');
     document.getElementById('instinstall').textContent = state === 'failed' ? 'Install again' : 'Install';
     document.getElementById('instcopy').hidden = state !== 'script';
+    document.getElementById('instagent').hidden = !(window.FNS_SITE && state === 'script');
     document.getElementById('instsave').hidden = !(state === 'script' && !served && !window.FNS_SITE);
     document.getElementById('instopen').hidden = state !== 'done';
     document.getElementById('instopen').disabled = false;
@@ -4340,7 +4855,64 @@ function fnsBoot() {
     document.getElementById('instclose').hidden = !(state === 'progress' || state === 'done');
     document.getElementById('instback').hidden = !(state === 'plan' || state === 'script' || state === 'failed');
     document.getElementById('instdocs').hidden = state === 'progress';
+    // The picks the account cannot install yet are kept out of the plan
+    // (recorded as wanted, they install by themselves after a sign-in),
+    // which left them unmentioned at the last step. The plan now carries
+    // them under "Waiting for Patreon" with the actions that unlock them
+    // (the drawer's own line), on the plan AND on the done report: the
+    // done report used to carry the sentence alone, and a reader who had
+    // just watched 24 picks wait had no button to press (owner,
+    // 2026-10-24). The script state already says it in its hint.
+    var wait = document.getElementById('instwait');
+    var waitLine = document.getElementById('instplus');
+    if (wait && waitLine) {
+      if (state === 'plan' || state === 'done') {
+        renderPlusLine(waitLine);
+        wait.hidden = waitLine.hidden;
+      } else {
+        wait.hidden = true;
+      }
+    }
+    instState = state;
+    renderSupporterLine();
     setScreen('install');
+  }
+  // The install screen's supporter line, for a signed-out reader with no
+  // Patreon pick waiting (the Waiting block speaks when one is): on the
+  // plan the sign-in, after the install one sentence and a way to the
+  // Patreon tools. Said once on the screen, never beside the Waiting block.
+  function renderSupporterLine() {
+    var box = document.getElementById('instsupporter');
+    var line = document.getElementById('instsupline');
+    if (!box || !line) return;
+    var waiting = !document.getElementById('instwait').hidden;
+    var on = (instState === 'plan' || instState === 'done') && !waiting && supporterNudgeWanted();
+    box.hidden = !on;
+    line.textContent = '';
+    if (!on) return;
+    var mark = mk('span', 'mark', '◆');
+    mark.setAttribute('aria-hidden', 'true');
+    line.appendChild(mark);
+    var n = lockedPatreon(tools.map(function (p) { return p.name; })).length;
+    if (instState === 'plan') {
+      line.appendChild(document.createTextNode(
+        'Supporting on Patreon? Sign in before you install to add your Patreon tools.'));
+      line.appendChild(supporterSignInButton());
+      line.appendChild(supporterDismissLink());
+      return;
+    }
+    line.appendChild(document.createTextNode(n + ' more ' + (n === 1 ? 'tool comes' : 'tools come')
+      + ' with Patreon. '));
+    var show = mk('button', 'linkbtn', 'Show them');
+    show.type = 'button';
+    show.addEventListener('click', function () {
+      // for this look only: setView would remember the filter, and the
+      // next Pick Tools would open on the Patreon tools alone
+      view.access = 'plus';
+      render();
+      setScreen('catalog');
+    });
+    line.appendChild(show);
   }
   document.getElementById('instback').addEventListener('click', function () { setScreen('catalog'); });
   document.getElementById('instbrowse').addEventListener('click', function () { setScreen('catalog'); });
@@ -4470,6 +5042,10 @@ function fnsBoot() {
     toClipboard(document.getElementById('instout').textContent,
                 document.getElementById('instcopy'));
   });
+  document.getElementById('instagentcopy').addEventListener('click', function () {
+    toClipboard(document.getElementById('instagentline').textContent.trim(),
+                document.getElementById('instagentcopy'));
+  });
   // The account line, once: it changes only across a sign-in, which ends in
   // a page reload anyway.
   (function () {
@@ -4525,7 +5101,7 @@ function fnsBoot() {
             JSON.stringify({ key: key, package: sel.value }),
             function (res) {
               showDialog(res.text, false);
-              if (res.ok) { inp.value = ''; watchAuth(); }
+              if (res.ok) { inp.value = ''; startAuthWatch(); }
             });
         });
         redeemRow.appendChild(sel);
@@ -4541,19 +5117,19 @@ function fnsBoot() {
     authActions.signIn = function () {
       post('/auth/signin', '{}', function (res) {
         showDialog(res.text, false);
-        if (res.ok) watchAuth();
+        if (res.ok) startAuthWatch(!/checking your membership/i.test(res.text || ''));
       });
     };
     authActions.recheck = function () {
       post('/auth/recheck', '{}', function (res) {
         showDialog(res.text, false);
-        if (res.ok) watchAuth();
+        if (res.ok) startAuthWatch();
       });
     };
     function doSignIn() {
       post('/auth/signin', '{}', function (res) {
         showDialog(res.text, false);
-        if (res.ok) watchAuth();
+        if (res.ok) startAuthWatch(!/checking your membership/i.test(res.text || ''));
       });
     }
     if (support) {
@@ -4623,7 +5199,7 @@ function fnsBoot() {
             // second arg false ON PURPOSE: true unhides the Install
             // button, and a recheck acknowledgment is not an install
             showDialog(res.text, false);
-            if (res.ok) watchAuth();
+            if (res.ok) startAuthWatch();
           });
         });
       }
@@ -4650,47 +5226,132 @@ function fnsBoot() {
     }
     var before = acctSig(account);
     var authPolls = 0;
+    var authStarted = 0;
+    var authCancelled = false;
+    // An answer is still coming while the status reads like one of these
+    // (ExtAuth.TRANSITIONAL_STATUS). Never a reason to wait unbounded: the
+    // updater settles every flow (timeout, refusal, a reinit's reset), and
+    // this page has its own two limits besides.
+    var SETTLING = /checking|waiting|finishing/i;
+    var SETTLE_LIMIT_MS = 20000;   // the record changed but still "checking"
+    // How long a wait may last. A browser sign-in is a round trip the
+    // person makes on whatever device, so it gets ten minutes; a check
+    // (I just pledged, a licence key, an adopted session) is one gate call
+    // that times out on its own in under a minute, so a minute here.
+    var CHECK_LIMIT_MS = 60000;
+    var BROWSER_LIMIT_MS = 600000;
+    var authLimit = CHECK_LIMIT_MS;
+    /** Start (or restart) the wait for a sign-in or recheck outcome. */
+    function startAuthWatch(browser) {
+      authCancelled = false;
+      authPolls = 0;
+      authStarted = Date.now();
+      authLimit = browser ? BROWSER_LIMIT_MS : CHECK_LIMIT_MS;
+      watchAuth();
+    }
+    // Cancel: stop waiting here AND drop the pending flow in the updater,
+    // so nothing later reloads the page under the reader. Their picks and
+    // screen are untouched; the dialog says where the account stands.
+    document.getElementById('dlgcancel').addEventListener('click', function () {
+      authCancelled = true;
+      post('/auth/cancel', '{}', function (res) {
+        showDialog('Cancelled. ' + (res && res.text ? 'Account: ' + res.text + '.' : '')
+                   + '\nYou can sign in or check again any time.', false);
+      });
+    });
     // Ten minutes, not one: the wait is a browser round trip through
     // Patreon on whatever device the person reaches for, and a watcher
     // that gave up after 60 seconds left the page frozen on "finish in
     // your browser" for good (field report 2026-09-17).
     function watchAuth() {
-      if (++authPolls > 400) {
-        showDialog('Still waiting for the browser. Sign in there, then '
-                   + 'reload the picker.', false, undefined, true);
+      if (authCancelled) return;
+      ++authPolls;
+      if (Date.now() - authStarted > authLimit) {
+        showDialog(authLimit === BROWSER_LIMIT_MS
+          ? 'Still waiting for the browser. Sign in there, then reload the picker.'
+          : 'No answer from the membership check. Nothing you picked changed; '
+            + 'try I just pledged again in a moment, or reload the picker.',
+          false, undefined, true);
         return;
       }
       setTimeout(function () {
+        if (authCancelled) return;
         fetch('/auth/status').then(function (r) { return r.json(); })
           .then(function (st) {
+            if (authCancelled) return;
+            var settling = !!(st.status && SETTLING.test(st.status));
             // ANY change to the record: products, the connection state,
             // the account label, or the moment the gate last confirmed
             // it. A sign-in on an account entitled to nothing changes no
             // products, and watching products alone waited for a change
-            // that could never come.
-            if (acctSig(st) !== before) {
+            // that could never come. A change that arrives while a
+            // membership check is still out (an adopted session, then its
+            // recheck) waits for the check, at most SETTLE_LIMIT_MS, so the
+            // page does not refresh onto the cached answer.
+            if (acctSig(st) !== before
+                && (!settling || Date.now() - authStarted > SETTLE_LIMIT_MS)) {
               showDialog((st.status || 'Done.') + '\nRefreshing the picker…', false);
-              setTimeout(function () { location.reload(); }, 900);
+              setTimeout(reloadKeepingPlace, 900);
               return;
             }
             // keep watching through every TRANSITIONAL status -- the
             // flow narrates itself as waiting/finishing/checking, and
             // stopping on the first of those froze the dialog there
             // while the sign-in completed behind it
-            if (st.status && !/checking|waiting|finishing/i.test(st.status)) {
+            if (st.status && !settling) {
               showDialog(st.status, false, undefined, true);
               return;
             }
-            var secs = Math.round(authPolls * 1.5);
+            var secs = Math.round((Date.now() - authStarted) / 1000);
             showDialog((st.status || 'Waiting for the browser…')
                        + '\nStill waiting, ' + secs + 's. You can leave this '
-                       + 'open; it refreshes by itself when the sign-in lands.',
-                       false, undefined, true);
+                       + 'open; it refreshes by itself when '
+                       + (authLimit === BROWSER_LIMIT_MS ? 'the sign-in lands.' : 'the check answers.')
+                       + ' Cancel stops waiting.',
+                       false, undefined, true, true);
             watchAuth();
           })
           .catch(function () { watchAuth(); });
       }, 1500);
     }
+
+    // One quiet retry for a brand-new pledge. Patreon can take a moment to
+    // report a pledge as active, so a sign-in made right after pledging may
+    // come back entitled to nothing. When the page loads on a session the
+    // gate confirmed in the last two minutes that unlocks nothing here, it
+    // asks once more after 30 seconds, without a dialog; a change reloads
+    // (keeping the place), anything else changes nothing on screen. Once
+    // per tab, so it can never loop.
+    (function quietRecheck() {
+      if (!account || account.connected === false) return;
+      if ((account.products || []).some(function (n) { return byName[n]; })) return;
+      if (!(Date.now() / 1000 - (account.checked_at || 0) < 120)) return;
+      try {
+        if (sessionStorage.getItem('fns.quietrecheck')) return;
+        sessionStorage.setItem('fns.quietrecheck', '1');
+      } catch (e) { return; }
+      setTimeout(function () {
+        fetch('/auth/recheck', {method: 'POST', headers: {'Content-Type': 'application/json'},
+                                body: '{}'})
+          .then(function (r) { return r.json(); })
+          .then(function (res) {
+            if (!res || !res.ok) return;
+            var tries = 0;
+            (function look() {
+              if (++tries > 15 || authCancelled) return;
+              setTimeout(function () {
+                fetch('/auth/status').then(function (r) { return r.json(); })
+                  .then(function (st) {
+                    if (acctKey(st) !== acctKey(account)) { reloadKeepingPlace(); return; }
+                    if (st.status && SETTLING.test(st.status)) look();
+                  })
+                  .catch(function () { /* the server is gone: nothing to do */ });
+              }, 2000);
+            })();
+          })
+          .catch(function () { /* the server is gone: nothing to do */ });
+      }, 30000);
+    })();
   })();
 
   function post(uri, body, onDone) {
@@ -4709,10 +5370,24 @@ function fnsBoot() {
           + 'FNSTools root to reopen it.\n\n(' + e + ')', false);
       });
   }
+  // set by render(): the primary reads Apply changes. No initializer, so
+  // this line running after the first render cannot reset it.
+  var saveApplies;
   document.getElementById('save').addEventListener('click', function () {
     if (served) {
-      showInstall('plan', 'Planning…');
-      post('/selection', JSON.stringify(selection(), null, 1) + '\n', showPlan);
+      // Apply changes (a removal, the family switch off) always shows the
+      // plan; Install goes straight through when the plan holds nothing
+      // to decide, the way "Set up like last time" does
+      installPolls = 0; installCancelled = false;
+      installEpilogue = ''; installHeader = '';
+      showInstall('progress', 'Planning the install…');
+      post('/selection', JSON.stringify(selection(), null, 1) + '\n', function (res) {
+        if (installCancelled) return;
+        if (saveApplies || planNeedsReview(res)) { showPlan(res); return; }
+        installHeader = planSentence(res);
+        showInstall('progress', 'Installing…');
+        post('/install', '{}', installOrPoll);
+      });
       return;
     }
     downloadSelection();
@@ -4780,7 +5455,7 @@ function fnsBoot() {
   }
   document.getElementById('instinstall').addEventListener('click', function () {
     installPolls = 0; installCancelled = false;
-    installEpilogue = '';
+    installEpilogue = ''; installHeader = '';
     showInstall('progress', 'Installing…');
     post('/install', '{}', installOrPoll);
   });
@@ -5004,6 +5679,7 @@ function fnsBoot() {
   // derives from `picked`, `placing`, `familyOn` and `wantBind`.
   var SCREENS = {start: document.getElementById('screen-start'),
                  quiz: document.getElementById('screen-quiz'),
+                 ask: document.getElementById('screen-ask'),
                  catalog: document.getElementById('screen-catalog'),
                  install: document.getElementById('screen-install')};
   var curScreen = null;
@@ -5027,6 +5703,14 @@ function fnsBoot() {
     var t = document.getElementById('toast');
     if (!t) { t = mk('div', 'toast'); t.id = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
     t.textContent = msg;
+    // The base pins a toast to the bottom right, which is where the
+    // catalog footer's buttons sit: for its few seconds the line read as
+    // the buttons having gone (owner, 2026-10-17). Lift it above the
+    // footer wherever one is showing; in the console frame, where the
+    // footer moved into the toolbar, the corner is free.
+    var foot = document.getElementById('catfoot');
+    var lift = foot && foot.offsetParent ? foot.offsetHeight + 12 : 14;
+    t.style.bottom = lift + 'px';
     t.classList.add('show');
     clearTimeout(toast.timer);
     toast.timer = setTimeout(function () { t.classList.remove('show'); }, 3600);
@@ -5050,12 +5734,16 @@ function fnsBoot() {
     if (h === '#set') return 'set';
     if (h === '#install') return 'catalog';
     if (h === '#start' || h === '#quiz') return 'start';
+    // #ask is the finder's own address (docs/FinderAndToolRow.md): the list
+    // first, then the finder over it once it answers (wantAsk), so with the
+    // finder switched off the link still lands somewhere useful
+    if (h === '#ask') return 'catalog';
     if (h === '#catalog' || h.indexOf('#cat-') === 0 || HASH_ACCESS[h]) return 'catalog';
     return null;
   }
   // the step each screen belongs to: the catalog is step two, the
   // questionnaire belongs to Start
-  var STEP_OF = {start: 'start', quiz: 'start', catalog: 'set', install: 'install'};
+  var STEP_OF = {start: 'start', quiz: 'start', ask: 'start', catalog: 'set', install: 'install'};
   var STEP_ORDER = ['start', 'set', 'install'];
   // the last step names the flavor's real finish: an install where the
   // page can install, the paste script where it cannot
@@ -5105,6 +5793,10 @@ function fnsBoot() {
     }
   }
   window.addEventListener('hashchange', function () {
+    if (String(location.hash).toLowerCase() === '#ask' && chatReady && curScreen !== 'ask') {
+      askFromCatalog();
+      return;
+    }
     var s = screenOfHash(location.hash);
     if (s && s !== curScreen) setScreen(s, {fromHash: true});
   });
@@ -5280,8 +5972,10 @@ function fnsBoot() {
    *  that fixes it (sign in, check again, or upgrade). Above the list
    *  because a long set scrolls and the route has to be seen before
    *  Review. */
-  function renderPlusLine() {
-    var line = document.getElementById('plusline');
+  function renderPlusLine(target, noteOnly) {
+    // the drawer's line by default; the install screen passes its own,
+    // and after an install asks for the sentence without the actions
+    var line = target || document.getElementById('plusline');
     if (!line) return;
     var names = Array.from(picked).concat(Array.from(placing).filter(function (n) { return !picked.has(n); }));
     var lockedHere = lockedPatreon(names);
@@ -5324,7 +6018,7 @@ function fnsBoot() {
       text = n + ' of these ' + (one ? 'comes' : 'come') + ' with Patreon; ' + plusReality();
     }
     line.appendChild(document.createTextNode(text));
-    acts.forEach(function (a) { line.appendChild(a); });
+    if (!noteOnly) acts.forEach(function (a) { line.appendChild(a); });
     line.appendChild(docsLink(FNS_DOCS + '/patreon/', 'How unlocking works \u2197'));
   }
 
@@ -5384,7 +6078,13 @@ function fnsBoot() {
   // browse, with the set one click away on the count.
   var fromHash = screenOfHash(location.hash);
   var landing;
-  if (fromHash) landing = fromHash;
+  // back where a sign-in reload left off (reloadKeepingPlace); the
+  // install step re-plans, so a tool the sign-in unlocked joins the plan
+  var resumeInstall = !!(resumed && served && resumed.screen === 'install' && !locked);
+  if (resumed && served && resumed.screen) {
+    landing = resumeInstall ? 'catalog'
+      : (resumed.screen === 'catalog' && resumed.drawer ? 'set' : resumed.screen);
+  } else if (fromHash) landing = fromHash;
   else if (FNS_EMBEDDED) landing = 'catalog';
   else if (served) landing = (firstrun && !sessionFlag('fns.welcomed')) ? 'start' : 'catalog';
   else landing = stored('fns.visited', null) ? 'catalog' : 'start';
@@ -5400,6 +6100,7 @@ function fnsBoot() {
   } else {
     setScreen(landing, {fromHash: true});
   }
+  if (resumeInstall) document.getElementById('save').click();
   loadRecommends();
   // A store manifest was served and the installer is checking the bucket
   // for a newer release (InstallerExt._checkManifest). When the release
@@ -5448,7 +6149,9 @@ function fnsBoot() {
   // on the set: never on a first run or a first visit (the guided setup is
   // their introduction, and unseenNow recorded everything as shown), never
   // where Apply is refused anyway.
-  if (!firstrun && !firstVisit && announceOn && unseenAtLoad.size && !(served && locked)) {
+  // Not on a sign-in reload either: the tool just unlocked is not news in
+  // the middle of an install; it is announced on the next visit.
+  if (!firstrun && !firstVisit && !resumed && announceOn && unseenAtLoad.size && !(served && locked)) {
     prepareNewTools();
     renderNewBanner();
   }
@@ -5502,9 +6205,9 @@ function fnsBoot() {
           ['quiz', 'presets'].forEach(function (k) {
             if (!m[k] && baked[k]) m[k] = baked[k];
           });
-          // Category, description and fits are catalog presentation the
-          // site build baked; they are newer than any published release,
-          // so the baked copy wins for those three.
+          // Category, description, fits and the catalog's search_words are
+          // catalog presentation the site build baked; they are newer than
+          // any published release, so the baked copy wins for those four.
           if (baked.categories) m.categories = baked.categories;
           var bakedRow = {};
           (baked.packages || []).forEach(function (p) { bakedRow[p.name] = p; });
@@ -5514,9 +6217,13 @@ function fnsBoot() {
             if (b.category) p.category = b.category;
             if (b.description) p.description = b.description;
             if (b.fits) p.fits = b.fits; else delete p.fits;
+            if (b.search_words) p.search_words = b.search_words; else delete p.search_words;
             // the docs search index, baked from the repo's docs: newer
             // than the release for the same reason
             if (b.search) p.search = b.search;
+            // each tool's features, baked from the same docs: a release
+            // published before the manifest carried them has none
+            if (b.features && !p.features) p.features = b.features;
           });
           window.FNS_MANIFEST = m;
         }

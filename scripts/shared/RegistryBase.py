@@ -22,12 +22,47 @@ class _RegistryToolPageMixin:
 	TOOL_PAGE_LABEL = None       # section header label; defaults to REGISTRY_NAME
 	TOOL_PAGE_PARS = ()          # host Registration par names to proxy
 
-	# In-project host cloning. Subclasses set the guarded clone expression
-	# hosts carry; masters are depth-1 packages of the toolkit root, so it
-	# resolves through the root's FNS shortcut --
-	#   CLONE_EXPR = "op.FNS.op('XRegistry') if hasattr(op, 'FNS') else None"
+	# Host cloning, in the DEV CHECKOUT ONLY (docs/RegistryHostsFrozen.md):
+	# a released host is a frozen copy and the host-to-global contract keeps
+	# it working. Subclasses set the clone expression dev hosts carry; masters
+	# are depth-1 packages of the toolkit root, so it resolves through the
+	# root's FNS shortcut, and tryExcept survives a root being torn down (a
+	# bare `op.FNS.op(...)` raised "Operator /FNSTools has been deleted") --
+	#   CLONE_EXPR = "tdu.tryExcept(lambda: op.FNS.op('XRegistry'), None)"
 	# With it set, the base provides _healHostClones and StampHost.
 	CLONE_EXPR = None
+
+	# The dev checkout is where the toolkit root is bound to the repo's own
+	# suspect file. The shipped rail root is bound to nothing and the
+	# installer binds packages into the palette store or a project folder,
+	# never modules/suspects/ (checked 2026-10-21). `externaltox` being set
+	# at all is not the test (installs bind too), and neither is pi_suspect
+	# (the rail ships it).
+	_DEV_ROOT_TOX = 'modules/suspects/FNSTools.tox'
+
+	@classmethod
+	def _devCheckout(cls):
+		"""True only in the toolkit's own dev project."""
+		try:
+			root = getattr(op, 'FNS', None)
+			if root is None or not root.valid:
+				return False
+			tox = str(root.par.externaltox.eval()).replace('\\', '/')
+			return tox.endswith(cls._DEV_ROOT_TOX)
+		except Exception:
+			return False
+
+	@staticmethod
+	def _isToolkitCloneLink(par):
+		"""Does this clone par point into the toolkit -- this registry's
+		expression in either form (op.FNS ... or the legacy hasattr guard), or
+		any other path into it? Clones of TouchDesigner's own components
+		(op.TD...) are not ours."""
+		text = par.expr if par.mode == ParMode.EXPRESSION else str(par.val)
+		text = (text or '').strip()
+		if not text or text.startswith('op.TD'):
+			return False
+		return 'op.FNS' in text or 'FNS_' in text or '/FNSTools' in text
 
 	def _ensureToolRegistryPage(self):
 		"""Standardized 'Registry' page on the host's PARENT tool: key
@@ -1241,10 +1276,15 @@ class _RegistryHealMixin:
 		return root.op(self.REGISTRY_NAME)
 
 	def _healHostClones(self):
-		"""Re-assert in-project cloning on tool hosts. Release flows scrub the
-		clone par on shipped copies (pre_release); if a release flow scrubbed
-		the LIVE host instead of a staged copy, this restores it."""
-		if not self._is_sys_global() or not self.CLONE_EXPR:
+		"""Re-assert cloning on tool hosts -- in the DEV CHECKOUT only. Release
+		flows scrub the clone par on shipped copies (pre_release_common); if a
+		release flow scrubbed the LIVE host instead of a staged copy, this
+		restores it, and it moves a host still carrying the legacy
+		`hasattr(op, 'FNS')` expression onto CLONE_EXPR. In a user's project
+		it does nothing: it used to re-link every installed host to the
+		toolkit's masters, which is what a frozen host must not be
+		(docs/RegistryHostsFrozen.md)."""
+		if not self._is_sys_global() or not self.CLONE_EXPR or not self._devCheckout():
 			return
 		master = self._masterComp()
 		if master is None:
@@ -1255,9 +1295,11 @@ class _RegistryHealMixin:
 				continue
 			try:
 				p = src_reg.par.clone
-				if p.mode != ParMode.EXPRESSION or p.expr != self.CLONE_EXPR:
-					if not p.eval():
-						p.expr = self.CLONE_EXPR
+				if p.mode == ParMode.EXPRESSION and p.expr == self.CLONE_EXPR:
+					continue
+				legacy = p.mode == ParMode.EXPRESSION and 'op.FNS.op(' in p.expr
+				if legacy or not p.eval():
+					p.expr = self.CLONE_EXPR
 			except Exception:
 				pass
 
@@ -1400,7 +1442,9 @@ class _RegistryStampMixin:
 		  * Registration-par BINDs copied from a master that doubles as a
 		    bound host are felled to CONSTANT BEFORE values are written
 		    (assigning through a dangling bind raises);
-		  * in-project cloning is wired as the guarded CLONE_EXPR expression;
+		  * in the dev checkout the host clones its master through CLONE_EXPR;
+		    anywhere else (drop-to-register in a user's project) it is stamped
+		    FROZEN: cloning off, no clone link (docs/RegistryHostsFrozen.md);
 		  * the extension is re-armed last, so registration runs against a
 		    fully configured host.
 
@@ -1477,9 +1521,14 @@ class _RegistryStampMixin:
 			else:
 				debug(f'{self.REGISTRY_NAME}: StampHost: no par {pname!r} on the host')
 		host.par.Autoregister = bool(autoregister)
-		if self.CLONE_EXPR:
+		if self.CLONE_EXPR and self._devCheckout():
 			host.par.clone.expr = self.CLONE_EXPR
 			host.par.enablecloning = True
+		else:
+			# cloning off FIRST: on with an empty Clone par is the native crash
+			host.par.enablecloning = False
+			host.par.clone.mode = ParMode.CONSTANT
+			host.par.clone.val = ''
 		host.par.initextonstart = True
 		host.par.reinitextensions.pulse()
 		debug(f'{self.REGISTRY_NAME}: stamped host {host.path} '
@@ -1996,13 +2045,36 @@ class RegistryBase(_RegistryToolPageMixin,
 		touched: cloning off while the clone reads None, and back on once the
 		clone resolves again through the registry's own expression (the real
 		toolkit arrived). Written only when wrong; the master and the /sys
-		global clone nothing and are left alone."""
+		global clone nothing and are left alone.
+
+		Re-linking is DEV-CHECKOUT ONLY (docs/RegistryHostsFrozen.md). In a
+		user's project -- a toolkit root that is not the dev root -- a host
+		still linked into the toolkit is FROZEN instead, once: cloning off
+		first, then the link cleared, so it runs the copy it shipped with and
+		an update or a deleted root can no longer reach it. Shipped copies
+		arrive frozen already (pre_release_common); this catches hosts that
+		installs before 2026-10-21 had cloned, and the new code reaches them
+		THROUGH that cloning on the first init after the registry updates."""
 		c = self.ownerComp
 		try:
 			enabled = bool(c.par.enablecloning.eval())
-			target = c.par.clone.eval()
-			ours = bool(self.CLONE_EXPR) and c.par.clone.mode == ParMode.EXPRESSION \
-				and c.par.clone.expr == self.CLONE_EXPR
+			p = c.par.clone
+			linked = self._isToolkitCloneLink(p)
+			root = tdu.tryExcept(lambda: getattr(op, 'FNS', None), None)
+			if linked and root is not None and not self._devCheckout():
+				if enabled:
+					c.par.enablecloning = False
+				p.mode = ParMode.CONSTANT
+				p.val = ''
+				self.fnsLog(f'{self.REGISTRY_NAME}: {c.path} frozen: a released host '
+							f'clones nothing (docs/RegistryHostsFrozen.md)')
+				return
+			try:
+				target = p.eval()
+			except Exception:
+				target = None       # an expression evaluated while the root is torn down
+			ours = bool(self.CLONE_EXPR) and p.mode == ParMode.EXPRESSION \
+				and (p.expr == self.CLONE_EXPR or 'op.FNS.op(' in p.expr)
 			if enabled and target is None:
 				c.par.enablecloning = False
 				self.fnsLog(f'{self.REGISTRY_NAME}: Enable Cloning switched off on '

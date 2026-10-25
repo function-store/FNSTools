@@ -1,5 +1,165 @@
 # FNS tools changelog
 
+## v3.2.76 -- 2026-10-21
+
+- ChopBank 1.0.4 -> 1.0.5 -- after changing the value type, a copy or a renamed ChopBank shows its own output in its node viewer. Its search tags no longer include controller and midi, so searching for either word in the install picker or the OP Create dialog brings up the MIDI and controller tools first.
+- ChopProcess 1.0.4 -> 1.0.5 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- CircularDistortionTOP 1.0.4 -> 1.0.5 -- maintenance build; nothing changes in what it does.
+- ColorGen 1.0.3 -> 1.0.4 -- maintenance build; nothing changes in what it does.
+- ColorGenPro 1.0.3 -> 1.0.4 -- maintenance build; nothing changes in what it does.
+- ComplexMix 1.0.3 -> 1.0.4 -- maintenance build; nothing changes in what it does.
+- ComplexOp 1.0.3 -> 1.0.4 -- maintenance build; nothing changes in what it does.
+- ConstantCHOP 1.0.4 -> 1.0.5 -- after changing the value type, a copy or a renamed ConstantCHOP shows its own output in its node viewer.
+- CookBar 1.0.5 -> 1.0.7 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed. Switching it off takes its bar out of the network overlay also when its Auto-register is off.
+- EaseInterpolator 1.0.4 -> 1.0.5 -- maintenance build; nothing changes in what it does.
+- ExpressionPOP 1.0.5 -> 1.0.6 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_AltSelect 3.2.7 -> 3.2.8 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_AutoCombine 3.2.10 -> 3.2.11 -- ships without old log lines from the authoring machine.
+- FNS_AutoRes 3.2.10 -> 3.2.11 -- ships without old log lines from the authoring machine.
+- FNS_Autosave 3.2.9 -> 3.2.10 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_BorderlessTD 3.2.11 -> 3.2.12 -- a fresh TouchDesigner no longer pastes the saveStateScriptOp_callbacks DAT on the first Ctrl+V. The File* marker injection copied its Script DAT together with its docked callbacks DAT, and TouchDesigner moves docked companions through the operator clipboard, leaving the last one there. The callbacks DAT is now copied on its own and docked by hand, so the clipboard keeps what you copied.
+- FNS_ColorUI 3.2.11 -> 3.2.12 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_CommandKit 3.2.5 -> 3.2.6 -- the command announcer links to its master by a relative path, so it keeps working under a renamed toolkit root.
+- FNS_CommandPalette 3.2.16 -> 3.2.18 -- a word your commands start with, such as copy, open or reset, now lists the commands that do it first, before components that only carry the word in their name: copy lists Copy op path above the CopyPars component. The palette learns these action words from the commands' own titles and help lines, so a new tool's commands teach it new ones. Every other word ranks as before. ships without the last search results from the authoring project. A typed word now also finds the words that mean the same in command titles: add and install, remove and delete, open, show and view, randomize, scramble and shuffle, restore and revert, quit and exit, create and new, load and import, and op, par and comp with their long forms and plurals. Those matches rank below the typed word itself and above help and docs hits.
+- FNS_CommandRegistry 3.2.9 -> 3.2.11 -- three new built-in commands: Add Embody, Add TDMCP and Add TDX Launcher Utility. Each downloads the component's latest release, checks it against the sha256 its release manifest pins, and loads it at the project root. A command is hidden while its component is already in the project.
+- FNS_ConfigHost 3.2.7 -> 3.2.8 -- maintenance build; nothing changes in what it does.
+- FNS_ConfigRegistry 3.2.10 -> 3.2.11 -- tools in your project run on the copy of this registry's host they shipped with, so removing or renaming the FNSTools root no longer raises "Operator /FNSTools has been deleted" from them. A host an older install had linked is frozen the first time it starts after this update.
+- FNS_Console 3.2.18 -> 3.2.19 -- tools in your project run on the copy of this registry's host they shipped with, so removing or renaming the FNSTools root no longer raises "Operator /FNSTools has been deleted" from them. A host an older install had linked is frozen the first time it starts after this update.
+- FNS_CustomParTools 3.2.14 -> 3.2.15 -- ships without old log lines from the authoring machine, and its ExtUtils distributor links the copies it clones by a relative path, so they keep working under a renamed toolkit root.
+- FNS_ExprHotStrings 3.2.8 -> 3.2.9 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_GlobalOutSelect 3.2.7 -> 3.2.8 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_GlobalVolControl 3.2.9 -> 3.2.10 -- ships at full volume and unmuted. The exported tool no longer carries the author's own level and mute, which would have set TouchDesigner's master volume to zero on a fresh install.
+- FNS_HotkeyManager 3.2.9 -> 3.2.10 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_Hub 3.2.15 -> 3.2.16 -- ships without the authoring project's tab targets. The tabs fill in for the tools you actually have, so a fresh install no longer warns about missing paths.
+- FNS_HubRegistry 3.2.6 -> 3.2.7 -- tools in your project run on the copy of this registry's host they shipped with, so removing or renaming the FNSTools root no longer raises "Operator /FNSTools has been deleted" from them. A host an older install had linked is frozen the first time it starts after this update.
+- FNS_HydroHomie 3.2.10 -> 3.2.11 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_MainMenuRegistry 3.2.7 -> 3.2.8 -- tools in your project run on the copy of this registry's host they shipped with, so removing or renaming the FNSTools root no longer raises "Operator /FNSTools has been deleted" from them. A host an older install had linked is frozen the first time it starts after this update.
+- FNS_Misc 3.2.11 -> 3.2.12 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_NavbarRegistry 3.2.7 -> 3.2.8 -- tools in your project run on the copy of this registry's host they shipped with, so removing or renaming the FNSTools root no longer raises "Operator /FNSTools has been deleted" from them. A host an older install had linked is frozen the first time it starts after this update.
+- FNS_OpFamily 0.1.11 -> 0.1.12 -- the update check no longer runs an asyncio loop step every frame. It used TDAsyncIO only to pulse a web request that was already non-blocking, so the check now starts the request directly and TDAsyncIO is gone from the family registry.
+- FNS_OpMenuMods 3.2.10 -> 3.2.11 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_OpMenuRegistry 3.2.7 -> 3.2.8 -- tools in your project run on the copy of this registry's host they shipped with, so removing or renaming the FNSTools root no longer raises "Operator /FNSTools has been deleted" from them. A host an older install had linked is frozen the first time it starts after this update.
+- FNS_OpTemplates 3.2.13 -> 3.2.14 -- ships without the authoring project's template list and readout, which named a location that no longer exists.
+- FNS_OpToClipboard 3.2.8 -> 3.2.9 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_OpenExt 3.2.7 -> 3.2.8 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_Output 3.2.9 -> 3.2.10 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_OverlayRegistry 0.2.2 -> 0.2.4 -- tools in your project run on the copy of this registry's host they shipped with, so removing or renaming the FNSTools root no longer raises "Operator /FNSTools has been deleted" from them. A host an older install had linked is frozen the first time it starts after this update. Switching a tool off now always takes its layer out of the overlay: with that tool's Auto-register off, the overlay stayed in the network editor and kept resizing as you zoomed.
+- FNS_PaletteRegistry 3.2.6 -> 3.2.7 -- tools in your project run on the copy of this registry's host they shipped with, so removing or renaming the FNSTools root no longer raises "Operator /FNSTools has been deleted" from them. A host an older install had linked is frozen the first time it starts after this update.
+- FNS_PaneSearchRegistry 0.1.5 -> 0.1.6 -- tools in your project run on the copy of this registry's host they shipped with, so removing or renaming the FNSTools root no longer raises "Operator /FNSTools has been deleted" from them. A host an older install had linked is frozen the first time it starts after this update.
+- FNS_PaneTypeRegistry 3.2.8 -> 3.2.9 -- maintenance build; nothing changes in what it does.
+- FNS_ParOPDrop 3.2.11 -> 3.2.12 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_ParRandomizer 3.2.9 -> 3.2.10 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_ParentHierarchy 3.2.8 -> 3.2.9 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_QuickCollapse 3.2.7 -> 3.2.8 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_QuickPane 3.2.9 -> 3.2.10 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_QuickTime 3.2.9 -> 3.2.10 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_ResetPLS 3.2.10 -> 3.2.11 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_SearchFix 0.2.7 -> 0.2.8 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_SearchPalette 3.2.10 -> 3.2.11 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_SetSmoothness 3.2.9 -> 3.2.10 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_SwapOps 3.2.9 -> 3.2.10 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_SwitchOPs 3.2.7 -> 3.2.8 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_SwitchTools 1.1.8 -> 1.1.9 -- maintenance build; nothing changes in what it does.
+- FNS_TimelineRegistry 3.2.7 -> 3.2.8 -- tools in your project run on the copy of this registry's host they shipped with, so removing or renaming the FNSTools root no longer raises "Operator /FNSTools has been deleted" from them. A host an older install had linked is frozen the first time it starts after this update.
+- FNS_ToolbarRegistry 3.2.8 -> 3.2.9 -- tools in your project run on the copy of this registry's host they shipped with, so removing or renaming the FNSTools root no longer raises "Operator /FNSTools has been deleted" from them. A host an older install had linked is frozen the first time it starts after this update.
+- FNS_Updater 3.2.30 -> 3.2.31 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNS_VSCodeTools 3.2.9 -> 3.2.10 -- ships without old log lines from the authoring machine.
+- FNS_iopBrowser 3.2.8 -> 3.2.9 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FeedbackDisplace 1.0.6 -> 1.0.7 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FloatDataRecorder 1.0.4 -> 1.0.5 -- maintenance build; nothing changes in what it does.
+- InstanceTrailer 1.0.3 -> 1.0.4 -- maintenance build; nothing changes in what it does.
+- KinectSinglePlayer 1.0.4 -> 1.0.5 -- maintenance build; nothing changes in what it does.
+- LayerSep3D 1.0.3 -> 1.0.4 -- maintenance build; nothing changes in what it does.
+- LinkOPs 1.0.3 -> 1.0.4 -- maintenance build; nothing changes in what it does.
+- MaskDraw 1.0.5 -> 1.0.6 -- maintenance build; nothing changes in what it does.
+- MoveDetectDir 1.0.4 -> 1.0.5 -- maintenance build; nothing changes in what it does.
+- OpenOp 1.0.3 -> 1.0.4 -- maintenance build; nothing changes in what it does.
+- Particles2D_POP 1.0.5 -> 1.0.6 -- maintenance build; nothing changes in what it does.
+- ParticlesGpuUltimate 2.0.3 -> 2.0.4 -- maintenance build; nothing changes in what it does.
+- PasteFromClipboard 3.2.9 -> 3.2.10 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- PrismTOP 1.0.6 -> 1.0.7 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- QuickMarks 3.2.10 -> 3.2.12 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed. Switching it or its Pins off takes the pins out of the network overlay also when its Auto-register is off.
+- RealRamp 1.0.4 -> 1.0.5 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- SeqMod 1.0.3 -> 1.0.4 -- maintenance build; nothing changes in what it does.
+- SlideShow 1.0.6 -> 1.0.7 -- maintenance build; nothing changes in what it does.
+- ThresholdColor 1.0.5 -> 1.0.6 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- TopToMidi 1.0.4 -> 1.0.5 -- maintenance build; nothing changes in what it does.
+- midiMapper 3.2.9 -> 3.2.10 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- oscMapper 3.2.8 -> 3.2.9 -- runs on the registry hosts it ships with, so it keeps working when the FNSTools root is removed or renamed.
+- FNSTools.tox and FNS_Installer.tox 3.2.75 -> 3.2.76 -- the toolkit root ships without the Private Investigator tag, so a project that uses Private Investigator leaves it alone, and the root's config host runs on the copy it ships with; the install picker opens on how many tools are free, offers the Patreon sign-in on the first screen, before the install and after it (Not a supporter hides it on that machine), keeps the Sign in button beside the picks still waiting for Patreon on the done report, lists the Patreon picks after the ticked ones on the questionnaire and tool-finder results, offers a trial or foreign match there too (TDXMap, unticked, its chips saying why), points at TDX Launcher Ultra under the catalog, names the FNS button in the menu bar on the done report, and installs straight from the list with one Install button when the plan has nothing to decide; the bootstrap carries updater 3.2.31
+
+Every tool's About page now carries a Help button that opens its documentation page and a Link button that opens the author's page, beside the author's name and the package version. Tools that already had their own author link keep it.
+
+The documentation site's search results open the page they name again: every result pointed one folder too high and landed on a 404.
+
+The CommandKit, CommandRegistry and CommandPalette pages each explain how the four command pieces fit, the kit, the registry, the palette and the launcher, and link each other early. The CommandKit page now documents the explicit spec form, what the kit does on load and how to check that commands arrived.
+
+The install picker also matches search tags kept per tool in the catalog, scored like operator-family tags, so a tool outside the operator family can rank for the words people mean it by: TDXMap now comes first for midi and controller.
+
+## v3.2.75 -- 2026-10-19
+
+- CookBar 1.0.4 -> 1.0.5 -- stops scanning while FNSTools Perform Mode is on.
+- FNS_AutoCombine 3.2.9 -> 3.2.10 -- stops following the network you view while FNSTools Perform Mode is on.
+- FNS_AutoRes 3.2.9 -> 3.2.10 -- stops following the network you view while FNSTools Perform Mode is on.
+- FNS_Autosave 3.2.8 -> 3.2.9 -- Skip In Perform Mode follows FNSTools Perform Mode, which follows TouchDesigner's by default (a copy without the toolkit root still reads TouchDesigner's own).
+- FNS_BorderlessTD 3.2.10 -> 3.2.11 -- the window title stops refreshing its unsaved-changes mark every second while FNSTools Perform Mode is on.
+- FNS_ColorUI 3.2.10 -> 3.2.11 -- its browser stops checking every frame whether its viewer is open while FNSTools Perform Mode is on.
+- FNS_CommandPalette 3.2.15 -> 3.2.16 -- a picker mode lets another tool ask you to choose a command; the radial menu fills its slots with it. Right-click a row for its menu: Run, Star, Hide or Delete preset, and Add to radial menu. search finds a command by what it does. A typed word also matches the command's help line and its tool's description and documentation, so "copy" finds PasteFromClipboard and "bookmark" finds QuickMarks; such a row says why it matched ("in docs: copy"), and `#copy` lists the tools whose docs say copy. Letters scattered through a long name ("delete" in TD_SearchPalette) no longer fill the list when a real match exists, and TouchDesigner's own commands are listed once when the TDXL launcher companion is in the project too. Typing is two to three times faster on longer words (copy: 40 ms to 13 ms per keystroke). a fresh install starts with an empty query history.
+- FNS_CommandRegistry 3.2.8 -> 3.2.9 -- three more of TouchDesigner's own commands: Open parent parameters, Customize parent and Customize op (the Component Editor for the network you are in, or the selected component).
+- FNS_ConfigRegistry 3.2.9 -> 3.2.10 -- a tool that an update replaced mid-session gets its saved settings back straight away. It used to run on its shipped defaults until TouchDesigner restarted, and a project save in between wrote those defaults over your saved settings.
+- FNS_CustomParTools 3.2.13 -> 3.2.14 -- its parent and current-COMP parameter and Customize commands share an identity with the toolkit's built-in ones, so quick-launch lists each once. QuickExt stops following the network you view while FNSTools Perform Mode is on. the release no longer carries a path into the author's Downloads folder on QuickParCustom.
+- FNS_Hub 3.2.14 -> 3.2.15 -- a command, Toggle FNSTools perform mode, with its state shown in the palette. the FNS button in the main menu turns red while FNSTools Perform Mode is on, and its tooltip says where to switch it off, so a project that opens performing explains why its authoring tools are quiet. the FNS button's right-click menu switches FNSTools Perform Mode (checked while it is on) and ends with Support FNSTools on Patreon, which opens the Patreon join page.
+- FNS_HydroHomie 3.2.9 -> 3.2.10 -- while FNSTools Perform Mode is on the reminder neither animates nor pops up; one that comes due starts its interval over. The animation was the tool's whole cost while the reminder showed (0.24 ms a frame, 12 operators), and it shows from project start until dismissed.
+- FNS_Misc 3.2.10 -> 3.2.11 -- its toolbar button stops checking its state every frame while FNSTools Perform Mode is on.
+- FNS_OpFamily 0.1.10 -> 0.1.11 -- its update check pauses while FNSTools Perform Mode is on and resumes when perform ends.
+- FNS_OpTemplates 3.2.12 -> 3.2.13 -- stops following the network you view while FNSTools Perform Mode is on.
+- FNS_OverlayRegistry 0.2.1 -> 0.2.2 -- Cursor() tells a tool where the mouse is in the network editor under it, in network units, read on demand. It is TDXCollab's measured cursor code moved into the registry so the two share one copy. widgets can open at a point (the radial menu opens at the mouse), WidgetRect() says where a widget sits, and a widget panel now always takes the mouse: the annotation's empty text body sat on top of it before. shows no layer or widget while FNSTools Perform Mode is on, and stops its frame loop.
+- FNS_PaneTypeRegistry 3.2.7 -> 3.2.8 -- its readme stops watching its colour every frame while FNSTools Perform Mode is on.
+- FNS_ParOPDrop 3.2.10 -> 3.2.11 -- its modifier-key checks stop cooking every frame while FNSTools Perform Mode is on; they are read when you drop.
+- FNS_ParentHierarchy 3.2.7 -> 3.2.8 -- a leftover frame callback that could never run (its condition did not parse and the method it called was removed) is switched off. Its hover chain and its menu rest while FNSTools Perform Mode is on.
+- FNS_QuickPane 3.2.8 -> 3.2.9 -- most of its pane gesture's per-frame work rests while FNSTools Perform Mode is on (0.026 to 0.006 ms a frame).
+- FNS_SearchPalette 3.2.9 -> 3.2.10 -- Hide Palette When Idle stops watching the palette while FNSTools Perform Mode is on.
+- FNS_Updater 3.2.29 -> 3.2.30 -- an update keeps the parts of a tool that hold your own work (children the tool tags fns_keep, such as the radial menu's wheels), in either config scope. If the update fails, they go back into the restored copy. a fresh install shows signed out and no update result until it checks.
+- FNS_iopBrowser 3.2.7 -> 3.2.8 -- its menu stops checking the mouse every frame while FNSTools Perform Mode is on.
+- KinectSinglePlayer 1.0.3 -> 1.0.4 -- no longer cooks every frame without Kinect data (0.16 ms a frame). Its in-range checks no longer force time slicing, so they follow the Kinect stream when one is connected and rest when none is.
+- MaskDraw 1.0.4 -> 1.0.5 -- no longer reads the mouse every frame. A callback that did nothing kept its mouse chain cooking (0.07 ms a frame); it is switched off, which changes nothing you can see.
+- Particles2D_POP 1.0.4 -> 1.0.5 -- no longer cooks every frame while nothing uses it. Its placeholder source, used when nothing is connected, was an animated 1x1 noise that two of its own parameters pulled every frame (0.26 ms a frame); the placeholder is now still.
+- ParticlesGpuUltimate 2.0.2 -> 2.0.3 -- the Snow texture no longer points at an image on the original author's desktop, which no install ever had; the slot is empty until the tool ships its own snow image.
+- PrismTOP 1.0.5 -> 1.0.6 -- no longer cooks every frame while nothing uses it. A parameter that only needed the number of instances read it from the animated pattern chain, which kept all 22 of those operators cooking in every copy you placed and were not using (0.77 ms a frame each); it now counts the instances directly, and the prism animates as before whenever its output is used.
+- QuickMarks 3.2.9 -> 3.2.10 -- its pins and list stop while FNSTools Perform Mode is on.
+- SlideShow 1.0.5 -> 1.0.6 -- plays movies as well as images, and a new Auto-Skip on Done moves to the next slide when a movie reaches its end. Fixed: with Period at zero a started timer flipped the slides every frame; Prev restarted the timer even with Period at zero; switching Random off jumped to another slide instead of continuing from the one on screen; after a script reload the next step started over from the first slide. The crossfade between slides is kept. a fresh install starts on the first slide.
+- oscMapper 3.2.7 -> 3.2.8 -- the OSC In and OSC Out operators no longer keep the author's network addresses underneath their address expressions. Active and Talkback Active start off, so a new copy neither listens nor sends OSC until you switch them on. Both now stay with the project: switching them in one project no longer switches them in every other project on the machine.
+- FNSTools.tox and FNS_Installer.tox 3.2.74 -> 3.2.75 -- the toolkit root carries FNSTools Perform Mode and Follow TD Perform Mode, and the installer no longer carries the last page the author's built-in browser was sent to; the bootstrap carries updater 3.2.30
+
+QuickExt: a parameter declared with CustomParHelper (ParFloat, ParInt and the other Par fields) now takes its label, help, ranges and default when it is created and keeps what you set in the Component Editor after that, so an edit there survives the reload it triggers. Read-only and menu names stay in step with the tool. A tool whose parameters nobody edits can set _parRefresh = 'all' to re-apply them on every init, and CustomParHelper.RefreshDeclared() re-applies the declarations once.
+
+
+FNSTools has a Perform Mode, a switch on the toolkit's own parameter page (FNSTools, next to FNS Tab in OP Create). While it is on, the tools that only serve the network editor stop: Cook Bar, QuickMarks pins, POP Overlay and the overlay that shows them, the scene changers' Cook While Editing watch and the radial menu, and Autosave skips. No tool setting changes, so switching it off brings back exactly what was on. It is saved with the project and never carried to other projects, and by default it follows TouchDesigner's Perform Mode (F1): entering turns it on, leaving puts back what it was. Measured on a dense network, the overlays cost 7.7 ms a frame in Designer mode and still 0.7 ms behind TouchDesigner's perform window; Perform Mode takes both to zero.
+The toolkit's built-in browser stops checking every frame whether its viewer is open while FNSTools Perform Mode is on.
+The toolkit's logger holds its records while FNSTools Perform Mode is on and writes them out when perform ends.
+The installer no longer carries the last page the author's built-in browser was sent to.
+Every package ships its registration readouts blank (Cfregstatus, Tbregstatus, Hbregstatus and the host Regstatus under them), with none of the author's project paths in them, and its nested components carry no leftover drag-in paths to the author's disk (ColorUI, OpFamily, PreviewPanel and PaneTypeRegistry had some).
+
+## v3.2.74 -- 2026-10-17
+
+- FNS_AutoCombine 3.2.8 -> 3.2.9 -- No longer raises "Invalid OP object" when operators are deleted in the network it watches; the watcher that reports new and deleted operators tripped over the operators that had just been deleted.
+- FNS_AutoRes 3.2.8 -> 3.2.9 -- No longer raises "Invalid OP object" when operators are deleted in the network it watches; the watcher that reports new and deleted operators tripped over the operators that had just been deleted.
+- FNS_CustomParTools 3.2.12 -> 3.2.13 -- No longer raises "Invalid OP object" when operators are deleted in the network it watches; the watcher that reports new and deleted operators tripped over the operators that had just been deleted. This is the watcher behind QuickExt.
+- FNS_OpTemplates 3.2.11 -> 3.2.12 -- No longer raises "Invalid OP object" when operators are deleted in the network it watches; the watcher that reports new and deleted operators tripped over the operators that had just been deleted.
+- FNS_Updater 3.2.28 -> 3.2.29 -- Sign in in the picker, when it takes over a Patreon session this computer already holds, now asks Patreon for your membership right away; it used to keep the session's old answer (up to six hours) so a fresh pledge needed "I just pledged". A sign-in or membership check left waiting by a reload of the updater no longer reads "checking" forever.
+- FNSTools.tox and FNS_Installer.tox 3.2.73 -> 3.2.74 -- the install picker keeps your place across a Patreon sign-in, never waits unbounded on one, and has a Cancel button for the wait; the bootstrap carries updater 3.2.29
+
+The install picker keeps your place when a Patreon sign-in or "I just pledged" refreshes it: your ticks stay, an open install step re-plans with the tools the sign-in unlocked, and the newly unlocked tool is announced on your next visit instead of in the middle of the install.
+
+The install picker never gets stuck waiting on Patreon: a membership check gives up after a minute with a clear message, a browser sign-in after ten, a refused check says why at once, and a new Cancel button stops the wait. Your ticks and step stay as they are either way. A sign-in made right after pledging gets one quiet re-check half a minute later, so a pledge Patreon had not confirmed yet still shows up without pressing anything.
+
+## v3.2.73 -- 2026-10-17
+
+- FNSTools.tox and FNS_Installer.tox 3.2.72 -> 3.2.73 -- the install picker's last step names the Patreon picks that wait for a sign-in, and its note after a starting point sits above the footer; the bootstrap carries updater 3.2.28
+
+The install picker's one-line note after a starting point ("16 tools ticked...") sits above the footer; it used to cover the footer's buttons for a few seconds.
+The install picker's last step names the Patreon picks it cannot install yet: the plan carries a "Waiting for Patreon" line with the sign-in, recheck or join action, and the installed report keeps the one-line note; before, a locked pick was recorded as wanted and left unmentioned there.
+
 ## v3.2.72 -- 2026-10-17
 
 - FNS_Hub 3.2.13 -> 3.2.14 -- group brackets survive an in-session update: the restore keeps looking while tools are still being replaced and spends its retries only on a settled bar, a group none of whose members is present yet is retried, and a new RepublishOwned re-places the brackets once an update has finished. A Reset toolbar pulse on the Toolbar tab (its parameters, page Toolbar) puts the bar back to the layout it shipped with after asking: every tool to its stamped slot, TD's own items, dividers and groups to the shipped table, and the settings file stops replaying the old positions. For a project whose bar came out of an update with tools tied at one number.

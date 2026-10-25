@@ -2,8 +2,12 @@
 package: FNS_BorderlessTD
 summary: 'Hide the window''s title bar and the timeline for a cleaner TouchDesigner, on a key each.'
 features:
-  - name: BorderlessTD
-    anchor: borderlesstd
+  - name: Why use it
+    anchor: why-use-it
+  - name: How to use it
+    anchor: how-to-use-it
+  - name: Making it yours
+    anchor: making-it-yours
 hotkeys:
   - keys: F7
     does: Show or hide the window's title bar (Windows only)
@@ -15,62 +19,69 @@ fixed_keys:
   - Shift+Esc
 feature_list:
   - name: Hide the title bar
-    anchor: borderlesstd
-    does: Shows and hides TouchDesigner's window title bar.
+    anchor: how-to-use-it
+    does: Shows and hides TouchDesigner's window title bar on one key.
     platform: Windows only
   - name: Hide the timeline
-    anchor: borderlesstd
-    does: Shows and hides the timeline.
-  - name: Escape key for the title bar
-    anchor: borderlesstd
-    does: Shift+Esc puts the title bar back; the Use Shift-Esc to undo toggle turns this fixed key off once you no longer need it.
-  - name: Borderless on start
-    anchor: borderlesstd
-    does: 'On Start goes borderless as the project opens with no key press, and State on Startup decides whether the timeline starts hidden.'
-  - name: Full screen control
-    anchor: borderlesstd
-    does: Fix Fullscreen On Start re-asserts full screen after opening; turning off Force Full Screen lets TouchDesigner run borderless in a smaller window.
-  - name: Hide menu buttons
-    anchor: borderlesstd
-    does: 'Removes the Wiki, Forum and Tutorials links from the main-menu bar.'
-  - name: Project name in the menu bar
-    anchor: borderlesstd
-    does: 'Shows the project file''s name in the main-menu bar, where the hidden title bar would normally carry it.'
+    anchor: how-to-use-it
+    does: Shows and hides the timeline on one key.
+  - name: Escape back to the title bar
+    anchor: how-to-use-it
+    does: '`Shift+Esc` always brings the title bar back, until you switch that safety net off.'
+  - name: Start borderless
+    anchor: making-it-yours
+    does: 'The project can open borderless, with the timeline already hidden.'
+  - name: Full screen or windowed
+    anchor: making-it-yours
+    does: 'Keeps a borderless window full screen, or lets it sit in a smaller window or a window zone.'
   - name: Pause indicator
-    anchor: borderlesstd
-    does: 'While playback is paused, recolours a chosen TouchDesigner UI colour element to Pause State Color, standing in for the hidden timeline''s indicator.'
+    anchor: making-it-yours
+    does: 'While playback is paused, a part of TouchDesigner''s UI changes colour, standing in for the hidden timeline''s pause cue.'
+  - name: Hide the menu bar links
+    anchor: making-it-yours
+    does: 'Hide Menu Buttons removes the Wiki, Forum and Tutorials links from the menu bar.'
+  - name: Show the project name in the menu bar
+    anchor: making-it-yours
+    does: 'Show Project Name puts the project''s file name in the menu bar, where the hidden title bar used to show it.'
 ---
 
-## BorderlessTD
+## Why use it
 
-For a cleaner TouchDesigner look. More screen space is better!
+Between the operating system's title bar at the top and the timeline at the
+bottom, a fair slice of the screen goes to things you rarely look at. On a
+laptop that is space the network editor could use, and on a performance
+machine it is clutter the audience might see.
 
-- `F7` shows and hides the window's **title bar** (**Windows only**).
-- `Alt+F7` (`Opt+F7` on macOS) shows and hides the **timeline**.
-- `Shift+Esc` puts the title bar back. It is a fixed key, and the **Use Shift-Esc to undo** toggle turns it off once
-  you no longer need the escape hatch.
+BorderlessTD puts both on a key. Hide them while you work, bring them back the
+moment you need them.
 
-The two features have an **Enable** toggle each; both ship switched on. With
-one off, its shortcut does nothing and TouchDesigner's window or timeline is
-left exactly as it was.
+## How to use it
 
-What happens when a project opens is set on the component too: **On Start**
-goes borderless immediately, with no key press needed, and the
-timeline's **State on Startup** decides whether it starts hidden.
+- Press `F7` to hide or show the window's title bar (Windows only).
+- Press `Alt+F7` (`Opt+F7` on macOS) to hide or show the timeline.
+- If a borderless window leaves you stuck, `Shift+Esc` brings the title bar
+  back. It is a fixed key. Once you are comfortable without it, switch off
+  **Use Shift-Esc to undo**.
 
-- **Fix Fullscreen On Start** re-asserts full screen shortly after the project
-  opens, because TouchDesigner does not reliably come back full screen on
-  its own. Ships on.
-- **Force Full Screen (always)** keeps the window full screen whenever it is
-  borderless. Ships on; turn it off to run TouchDesigner borderless inside a
-  smaller window, in a fancy zone for example.
-- **Hide Menu Buttons** removes the Wiki, Forum and Tutorials links from the
-  main-menu bar.
-- **Show Project Name** displays the project file's name in the menu bar,
-  handy once the title bar that normally carries it is gone. It is what
-  BorderlessTD contributes to the main menu.
+Both features ship switched on, and each has its own **Enable** toggle. With
+one switched off, its key does nothing and the window or timeline stays exactly
+as TouchDesigner drew it.
 
-With the timeline hidden you lose its pause indicator, so the tool provides a
-substitute: **Pause Indicator** names a TouchDesigner UI colour element that is
-recoloured to **Pause State Color** while playback is paused, and restored on
-play.
+## Making it yours
+
+- **Always borderless:** switch on **On Start** and the window goes borderless
+  as the project opens, no key press needed. **State on Startup** on the
+  HideTimeline page does the same for the timeline.
+- **Borderless in a window:** a borderless window is kept full screen unless you
+  switch off **Force Full Screen (always)**. Turn it off to run TouchDesigner in
+  a FancyZones layout or any window size you like. BorderlessTD also re-applies
+  full screen shortly after the project opens, because TouchDesigner does not
+  always come back full screen on its own.
+- **Seeing that playback is paused:** the timeline is where you would normally
+  notice a pause. With it hidden, BorderlessTD recolours one element of
+  TouchDesigner's UI while playback is paused and restores it on play. Choose
+  the element with **Pause Indicator** and the colour with **Pause State
+  Color**.
+- **A tidier menu bar:** **Hide Menu Buttons** removes the Wiki, Forum and
+  Tutorials links, and **Show Project Name** puts the project's file name in the
+  menu bar, which helps once the title bar that normally shows it is gone.

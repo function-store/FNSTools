@@ -149,6 +149,16 @@ print('3. the real catalog ranks as promised')
 # The committed manifest plus the docs index built here: the ranking claims
 # hold before the next release regenerates the manifest with `search`.
 manifest = json.load(io.open(os.path.join(PKG, 'manifest.json'), encoding='utf-8'))
+# The catalog's own tags, as Build() copies them (CuratedSearchWords), so a
+# tag curated since the last release ranks here the way it will ship.
+bm = load('build_manifest', os.path.join(PKG, 'build_manifest.py'))
+catalog = json.load(io.open(os.path.join(PKG, 'catalog.json'), encoding='utf-8'))['packages']
+for p in manifest['packages']:
+    words = bm.CuratedSearchWords(catalog.get(p['name']) or {})
+    if words:
+        p['search_words'] = words
+    else:
+        p.pop('search_words', None)
 index = si.BuildIndex(manifest['packages'], os.path.join(PKG, 'docs'))
 tools = [p for p in manifest['packages'] if p.get('kind') == 'tool' and not p.get('companion')]
 for p in tools:
@@ -166,9 +176,10 @@ function rank(rows, q) {
   return out;
 }
 """
-TABLE = ['math chop', 'constant chop', 'midi fader', 'controller', 'hotk', 'alt',
+TABLE = ['math chop', 'constant chop', 'fader remap', 'faders', 'controller', 'hotk', 'alt',
          'feedbak', 'kinnect', 'undo', 'ui', 'ab', 'fx', 'lag', 'osc', 'midi', 'toolbar',
-         'particle', 'record', 'timecode', 'gpu', 'snap', 'crossfade', 'trial']
+         'particle', 'record', 'timecode', 'gpu', 'snap', 'crossfade', 'trial',
+         'export', 'copy']
 res = node(RANK + """
 var bare = DATA.tools.map(function (p) {
   var c = JSON.parse(JSON.stringify(p)); delete c.search; return c;
@@ -193,10 +204,27 @@ check('"math chop" puts ChopBank in the top two (alternatives_for mathCHOP)',
       'ChopBank' in order('math chop')[:2], order('math chop')[:4])
 check('"constant chop" puts ChopBank in the top two (alternatives_for constantCHOP)',
       'ChopBank' in order('constant chop')[:2], order('constant chop')[:4])
-check('"midi fader" puts ChopBank first', order('midi fader')[:1] == ['ChopBank'], order('midi fader')[:4])
-check('a CMS search_words term finds its tool ("controller" -> ChopBank first)',
-      'controller' in chop['family']['search_words'] and order('controller')[:1] == ['ChopBank'],
-      order('controller')[:4])
+# "controller" and "midi" were ChopBank tags until 2026-10-22: a tag ranks
+# just under a title, so they put ChopBank above every MIDI and game
+# controller tool. They are gone; these words are what it does.
+check('"fader remap" puts ChopBank first', order('fader remap')[:1] == ['ChopBank'], order('fader remap')[:4])
+check('a CMS search_words term finds its tool ("faders" -> ChopBank first)',
+      'faders' in chop['family']['search_words'] and order('faders')[:1] == ['ChopBank'],
+      order('faders')[:4])
+# TDXMap is no family member, so its tags are the catalog's `search_words`.
+# A family tag in the COMMITTED manifest can still tie it (ChopBank's and
+# GeoPilot's were removed in the tools on 2026-10-22 and leave the manifest
+# at the next Build); ties go to the title, so what may sit above TDXMap is
+# a tool tagged with the very same word, and nothing else.
+byname = {p['name']: p for p in tools}
+for q in ('midi', 'controller'):
+    tdx = row(q, 'TDXMap')
+    above = order(q)[:order(q).index('TDXMap')] if tdx else None
+    check('"%s": TDXMap answers with a catalog tag, ranked like a family tag' % q,
+          tdx is not None and abs(tdx['tier'] - 0.3) < 1e-9, tdx)
+    check('"%s": only a tool tagged with the same word ranks above TDXMap' % q,
+          above is not None and all(q in ((byname[n].get('family') or {}).get('search_words') or [])
+                                    for n in above), above)
 check('"hotk" puts HotkeyManager first', order('hotk')[:1] == ['FNS_HotkeyManager'], order('hotk')[:4])
 check('"alt" puts AltSelect first (hotkeys are not searched)',
       order('alt')[:1] == ['FNS_AltSelect'], order('alt')[:4])
@@ -208,6 +236,14 @@ check('a docs-only word finds the tool and says so ("undo" -> BorderlessTD, in d
       undo is not None and undo['docs'] == ['undo'], undo)
 check('without the docs index that hit is gone, so the docs carried it',
       not any(r['name'] == 'FNS_BorderlessTD' for r in bare['undo']))
+# a feature name's first word (search.lead, docs/FeatureSearchPosition.md)
+# says the tool does it: it ranks over a description or a docs mention
+check('a feature that leads with the word puts its tool first ("export" -> TimelineTools)',
+      order('export')[:1] == ['FNS_TimelineTools'], full['export'][:3])
+check('...and ranks it over description and docs hits ("copy": ParentHierarchy second)',
+      order('copy')[:2] == ['FNS_OpToClipboard', 'FNS_ParentHierarchy'], full['copy'][:4])
+check('a lead hit sits under every name hit (copy: OpToClipboard by name first)',
+      row('copy', 'FNS_OpToClipboard')['tier'] < row('copy', 'FNS_ParentHierarchy')['tier'])
 check('a priced product answers to "trial" and its pricing summary (TDXMap)',
       'TDXMap' in order('trial'), order('trial'))
 variant = node(RANK + """
@@ -216,8 +252,15 @@ console.log(JSON.stringify(rank([{name: 'FNS_Demo', title: 'Demo', kind: 'tool',
 """, {'labels': labels})
 check('a tier variant answers to its summary (synthetic row: "stereo")',
       [r['name'] for r in variant] == ['FNS_Demo'], variant)
-check('a manifest without `search` still searches every other field (midi -> ChopBank)',
-      [r['name'] for r in bare['midi']][:1] == ['ChopBank'], [r['name'] for r in bare['midi']][:3])
+tagged = node(RANK + """
+console.log(JSON.stringify(rank([
+  {name: 'Described', title: 'Alpha', kind: 'tool', description: 'A midi tool.'},
+  {name: 'Tagged', title: 'Zeta', kind: 'tool', search_words: ['midi']}], 'midi')));
+""", {'labels': labels})
+check('a catalog search_words tag outranks a description hit (synthetic rows: "midi")',
+      [r['name'] for r in tagged] == ['Tagged', 'Described'], tagged)
+check('a manifest without `search` still searches every other field (faders -> ChopBank)',
+      [r['name'] for r in bare['faders']][:1] == ['ChopBank'], [r['name'] for r in bare['faders']][:3])
 for q in ('ui', 'ab', 'fx'):
     check('a two-letter query stays small ("%s": %d of %d)' % (q, len(full[q]), len(tools)),
           len(full[q]) <= 5, order(q))
@@ -265,14 +308,14 @@ for path, src in zip(SHELLS, srcs):
           and 'if (top && !top.checked) top.click();' in src)
     check('%s: the category rail jumps to a hit under a search' % tag,
           "listEl.querySelectorAll('.grid.ranked .card')" in src)
-    m = re.search(r'<div class="bar-row bar-filters">(.*?)</div>\s*</div>', src, re.S)
-    check('%s: the Compact toggle sits in the filter bar, off by default' % tag,
-          m is not None and re.search(r'<button type="button" class="tog" id="compact" aria-pressed="false"',
-                                      m.group(1)) is not None)
-    check('%s: Compact persists per viewer, storage wrapped' % tag,
-          "var COMPACT_KEY = 'fns.compact';" in src
-          and "try { localStorage.setItem(COMPACT_KEY, compactOn ? '1' : '0'); } catch (e)" in src
-          and "stored(COMPACT_KEY, null) === '1'" in src)
+    # 2026-10-25 (docs/FinderAndToolRow.md): the list is always one-line rows,
+    # and Expand all / Collapse all is the only "how much do I see" control
+    check('%s: the list is always one-line rows, with no Compact toggle' % tag,
+          "listEl.classList.add('dense');" in src and 'id="compact"' not in src
+          and 'COMPACT_KEY' not in src)
+    check('%s: Expand all / Collapse all is always shown' % tag,
+          '<button type="button" class="tog" id="expandall" aria-pressed="false"' in src
+          and 'expandBtn.hidden' not in src)
     # 2026-10-16: Compact is a LIST, not title-only tiles -- the description
     # stays, clamped to one line; the byline, hints and where-chips go
     check('%s: Compact keeps the description on one line' % tag,
@@ -281,8 +324,9 @@ for path, src in zip(SHELLS, srcs):
     check('%s: Compact hides the byline, hints and where-chips' % tag,
           re.search(r'#list\.dense \.desc\.byline, #list\.dense \.chip\.where,\s*'
                     r'#list\.dense \.chip\.hint, #list\.dense \.chip\.variant,', src) is not None)
-    check('%s: the description stays on the tile hover (data-tip)' % tag,
-          "el.setAttribute('data-tip', (p.description || '')" in src)
+    # docs/FinderAndToolRow.md: the card opens on a click instead of a hover tip
+    check('%s: the opened card carries what the tool adds and its features' % tag,
+          "more.className = 'more';" in src and "adds.textContent = 'Adds: '" in src)
     check('%s: the site keeps the baked docs index over a live manifest' % tag,
           'if (b.search) p.search = b.search;' in src)
 ui_start = srcs[0].find('/* FNS:UIBASE:START')

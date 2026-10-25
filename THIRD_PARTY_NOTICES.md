@@ -39,6 +39,10 @@ The FNS operator family (`FNS_OpFamily`) is built with
 [TDFam](https://github.com/dotsimulate/TDFam) by Lyell Hintz (dotsimulate) and
 Dan Molnar (Function Store), licensed under the Apache License, Version 2.0.
 
+Modified in FNSTools: the registry's update checker (`TDFamRegistry/UPDATER`)
+no longer carries TDAsyncIO; `ExtUpdater.Check()` starts the tag poll directly
+(2026-10-20).
+
 ### NOTICE
 
 ```

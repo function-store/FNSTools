@@ -64,7 +64,7 @@ class PaletteRegistryExt(RegistryBase):
 
 	# Location-independent: resolves through the toolkit root's global
 	# shortcut, evaluates to None (no clone, no warning) where it is absent.
-	CLONE_EXPR = "op.FNS.op('FNS_PaletteRegistry') if hasattr(op, 'FNS') else None"
+	CLONE_EXPR = "tdu.tryExcept(lambda: op.FNS.op('FNS_PaletteRegistry'), None)"
 	PACKAGE_SHORTCUT = 'FNS'
 
 	# --- the surface ---

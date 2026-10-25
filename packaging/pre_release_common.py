@@ -156,14 +156,64 @@ for _t in _c0.findChildren(name='vc_data', type=tableDAT):
 # constant absolute path warns "Invalid path" in any project where the tool
 # lands elsewhere: the launcher's carried registries, a renamed toolkit
 # root, a `placement: root` package. Ship it as the expression that is true
-# everywhere; the dev copies stay as they are until a fleet sweep.
+# everywhere. The dev copies were swept to the same expression on 2026-10-21
+# (with Enable Cloning switched off: they clone nothing, and a custom-par write
+# on a cloning COMP with an empty Clone par has crashed TD natively); this
+# stays as the backstop for any copy stamped from an older master.
 for _fa in _c0.findChildren(name='FNS_About', type=COMP):
     _p = getattr(_fa.par, 'Owner', None)
     if _p is None:
         continue
     try:
+        # the constant survives the switch to EXPRESSION and ships as bytes:
+        # the dev path is gone only once the value itself is blanked
+        _p.val = ''
         _p.expr = 'parent()'
         _p.mode = ParMode.EXPRESSION
+    except Exception:
+        pass
+
+# --- clone links into the toolkit ship frozen --------------------------------
+# A released copy runs what it shipped with (docs/RegistryHostsFrozen.md). A
+# registry host's clone is `op.FNS.op('FNS_<X>Registry') if hasattr(op, 'FNS')
+# else None`, ExtUtils clones `../FNS_CustomParTools/...`: in a user's project
+# both tie the copy to whatever master is installed, and a host raised
+# "Operator /FNSTools has been deleted" on every evaluation once the root was
+# removed (2026-10-21). Only five tools' hooks scrubbed it; now every artifact
+# does. Clones of TouchDesigner's own components (op.TDResources, op.TDTox,
+# op.TDAnnotate, ...) are its palette convention and stay.
+for _cc in [_c0] + _c0.findChildren(type=COMP, includeUtility=True):
+    try:
+        _cp = _cc.par['clone']
+        if _cp is None:
+            continue
+        _ct = _cp.expr if _cp.mode == ParMode.EXPRESSION else str(_cp.val)
+        if not _ct:
+            # a registry host whose own tool hook already cleared the clone
+            # (TimelineTools, GlobalVolControl, PreviewPanel do `clone = ''`)
+            # still ships with cloning ON and nothing to clone -- the state
+            # that crashed TD natively (2026-10-11). Hosts carry Regstatus.
+            if _cc.par['Regstatus'] is not None and _cc.par.enablecloning.eval():
+                _cc.par.enablecloning = False
+            continue
+        if _ct.lstrip().startswith('op.TD'):
+            continue
+        if 'op.FNS' in _ct or 'FNS_' in _ct or '/FNSTools' in _ct:
+            _cp.mode = ParMode.CONSTANT
+            _cp.val = ''
+            _cc.par.enablecloning = False
+    except Exception:
+        pass
+
+# --- logger FIFOs ship empty ------------------------------------------------
+# The kindergaertner/callbackManager and stubser loggers keep their lines in a
+# FIFO DAT under a `logger*` COMP: the fleet audit of 2026-10-21 found 2023-24
+# lines naming the author's old /FunctionStore_tools root in AutoRes,
+# AutoCombine, OpTemplates, CustomParTools and VSCodeTools artifacts.
+for _ff in _c0.findChildren(type=fifoDAT, includeUtility=True):
+    try:
+        if _ff.parent().name.startswith('logger'):
+            _ff.clear()
     except Exception:
         pass
 
@@ -367,6 +417,59 @@ for _ov in _c0.findChildren(tags=['fns_network_overlay', 'fns_network_overlay_wi
         _ov.destroy()
     except Exception:
         pass
+
+# --- no artifact ships a drag-in path to the author's disk ------------------
+# Dropping a .tox file into TouchDesigner writes TD's drag-in expression,
+# `me.parent().fileFolder + '/' + '<relative path to the dropped file>'`, into
+# the new COMP's externaltox. Switched to Constant later, the text stays on the
+# par, dormant, and the portable export only blanks the VALUE of a nested
+# externaltox, so the author's folder layout rode into the artifacts:
+# '../../../../../../Users/<author>/Downloads/QuickParCustom.tox' in CustomParTools,
+# '../Downloads/webBrowser.tox' in ColorUI, a personal palette folder in
+# PreviewPanel, two Downloads paths in OpFamily (sweep of packaging/dist,
+# 2026-10-18). Clear the text wherever it is dormant. A live expression is a
+# binding the export handles; `parent.sys.fileFolder` (TD's own palette) names
+# no machine and is left alone.
+_DRAG_IN = _re.compile(r"me\.parent\(\)\.fileFolder\s*\+\s*'/'\s*\+")
+for _c in _c0.findChildren(type=COMP):
+    _p = getattr(_c.par, 'externaltox', None)
+    if _p is None:
+        continue
+    try:
+        if _p.mode != ParMode.CONSTANT or not _DRAG_IN.search(_p.expr or ''):
+            continue
+        _v = _p.val
+        _p.expr = ''
+        _p.mode = ParMode.CONSTANT
+        _p.val = _v
+    except Exception:
+        pass
+
+# --- registration readouts ship blank ---------------------------------------
+# RegistryBase writes 'Registered: X -> /FNSTools/X/...' into each tool's
+# Cfregstatus, Tbregstatus, Hbregstatus (one per registry prefix) and every
+# host's Regstatus, and that text is the DEV project's paths, some of them
+# from projects that no longer exist ('/FunctionStore_tools_2025/...'). It is
+# rewritten on the first registration in an install, so the artifact carries
+# the default. A host's Regstatus is BOUND to its tool's readout; the bind
+# stays, only the constant stored under it is reset. On a bound par a `.val`
+# write does not reach that constant (measured TD 2025.33070: the par stays in
+# Bind mode with the old text), so it goes Constant, takes the default, and
+# goes back to Bind, which keeps its bind expression.
+for _c in [_c0] + _c0.findChildren(type=COMP):
+    for _p in _c.customPars:
+        if not _p.name.lower().endswith('regstatus'):
+            continue
+        try:
+            if _p.mode == ParMode.EXPRESSION or _p.val == _p.default:
+                continue
+            _bound = _p.mode == ParMode.BIND
+            _p.mode = ParMode.CONSTANT
+            _p.val = _p.default
+            if _bound:
+                _p.mode = ParMode.BIND
+        except Exception:
+            pass
 
 # --- shipped surface layout is the authored default, not the live one ------
 # A tool's place on the toolbar, navbar, main menu, op menu, pane-type menu

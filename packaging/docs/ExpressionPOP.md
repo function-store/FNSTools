@@ -2,38 +2,86 @@
 package: ExpressionPOP
 summary: 'Per-point attribute expressions for POPs: write lines like P = P + N * 0.1 and they compile to a GLSL compute shader, with local variables carried between lines. An alternative for the Math Combine POP.'
 features:
-  - name: What it is
-    anchor: what-it-is
+  - name: Why use it
+    anchor: why-use-it
+  - name: How to use it
+    anchor: how-to-use-it
+  - name: Writing expressions
+    anchor: writing-expressions
   - name: Inputs and outputs
     anchor: inputs-and-outputs
 feature_list:
-  - name: Line-by-line expressions
-    anchor: what-it-is
-    does: 'Write one expression per line, such as `P = P + N * 0.1`, assigning output attributes and reading any input point attribute by name.'
-  - name: GPU compute shader
-    anchor: what-it-is
-    does: 'The lines compile into a GLSL compute shader that runs on the GPU, so the calculation stays fast however many points come in.'
+  - name: Point math in plain lines
+    anchor: how-to-use-it
+    does: 'Write one expression per line, such as `P = P + N * 0.1`, and read any point attribute of the input by its name.'
+  - name: GPU compute shader from your lines
+    anchor: how-to-use-it
+    does: 'The lines compile into a GLSL compute shader on the GPU, so the math stays fast however many points come in.'
   - name: Local variables
-    anchor: what-it-is
-    does: 'Typed locals such as `vec3 offset = N * 0.2` are available to every later line, so a long calculation splits into readable steps.'
-  - name: Generated code and compile result
-    anchor: inputs-and-outputs
-    does: Outputs the generated shader code and the compile result as DATs beside the processed points.
-  - name: Alternative for Math Combine POP
-    anchor: what-it-is
+    anchor: writing-expressions
+    does: 'Typed locals such as `vec3 offset = N * 0.2` carry over to every later line, so a long calculation splits into readable steps.'
+  - name: GLSL code and compile errors
+    anchor: how-to-use-it
+    does: 'The viewer switches between the points, the generated GLSL and the compile result, and the code and the result also come out as DATs.'
+  - name: Replace a Math Combine POP
+    anchor: how-to-use-it
     does: 'Offered in place of a Math Combine POP, wired into the same spot, when you create one with the alternatives shortcut held.'
-  - name: Place from the FNS tab
-    anchor: what-it-is
-    does: Placed as one node from the FNS tab of the OP Create dialog.
 ---
 
-## What it is
+## Why use it
 
-ExpressionPOP lets you write point math the way you would say it. Each line is one expression, such as `P = P + N * 0.1` or `Color = vec4(P, 1)`, and any point attribute of the input can be read by its name. The lines compile into a GLSL compute shader that runs on the GPU, so the math stays fast however many points come in.
+Small per-point jobs come up all the time in POPs: push the points out along
+their normals, colour them by position, scale them by some attribute. With
+stock operators that is either a chain of Math Combine and Math Mix POPs, each
+set up through menus and attribute scopes, or a GLSL POP where you write the
+compute shader yourself, boilerplate and all.
 
-A line assigns either to an output attribute or to a local variable. Locals need a GLSL type, like `vec3 offset = N * 0.2`, and every later line can use them, so a long calculation can be broken into readable steps.
+ExpressionPOP lets you write the math the way you would say it. Each line is
+one expression, like `P = P + N * 0.1`, and ExpressionPOP writes the GLSL
+compute shader around your lines, so it runs on the GPU however many points
+come in.
 
-It is the alternative for the Math Combine POP: create a Math Combine POP with the alternatives shortcut held and ExpressionPOP is offered in its place, wired into the same spot. It is also a member of the FNS operator family: pick it from the **FNS** tab of the OP Create dialog and it lands as one node.
+## How to use it
+
+1. Create it from the **FNS** tab of the OP Create dialog. Or create a Math
+   Combine POP with the alternatives shortcut held, pick ExpressionPOP, and it
+   lands in that spot with the wiring kept.
+2. Wire points into it: a Grid POP, a Sphere POP, the output of a particle
+   system.
+3. Type a line into **Attribute Expression**, for example `P = P + N * 0.1`.
+   The left side is the attribute it writes, and on the right any point
+   attribute of the input is read by its name.
+4. Add more lines with the sequence's **+** button. They run in order, on every
+   point.
+5. Check the result. **Info** shows the compile result, so a typo shows up
+   there as a shader error. Set **View** to Code to see the GLSL your lines
+   turned into, or to Info to read the compile result in the viewer.
+
+**Out Attrs** lists every attribute the lines write, collected from their left
+sides, which is a quick check that a line writes what you meant.
+
+## Writing expressions
+
+The right side of a line is GLSL, so vector types, swizzles and the built-in
+functions all work: `sin()`, `mix()`, `length()`, `normalize()` and the rest.
+
+```glsl
+P = P + N * 0.1
+Color = vec4(P, 1)
+```
+
+The first line pushes every point along its normal, the second colours each
+point by its position.
+
+To split a longer calculation into steps, use a local. Switch on
+**OutAttr/Local** for that line and give the left side a GLSL type; every later
+line can then use the name:
+
+1. `vec3 offset = N * 0.2`, with **OutAttr/Local** on.
+2. `P = P + offset * length(P)`, with it off.
+
+A line is split at its `=` signs, so comparisons that contain one (`==`, `>=`,
+`<=`, `!=`) do not work inside a line. `<`, `>` and `step()` still do.
 
 ## Inputs and outputs
 

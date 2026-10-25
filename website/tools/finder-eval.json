@@ -1,0 +1,422 @@
+{
+ "_comment": "Test questions for the /get tool finder (docs/PickerChatbot.md). Run with: node tools/eval-finder.mjs. kind: pick (at least one name in `must` among the picks), ask (no picks, a question back), decline (no picks), howto (answers from the tool's doc and links its docs page; `slug` is that page). `good` are also fine; `bad` must never appear. DRAFTED 2026-10-21 by the agent from the catalog -- the owner corrects the expectations.",
+ "cases": [
+  {
+   "id": "timeline",
+   "say": "My timeline takes up too much room and I want a cleaner window for shows.",
+   "kind": "pick",
+   "must": [
+    "FNS_BorderlessTD"
+   ],
+   "good": [],
+   "set": "basic"
+  },
+  {
+   "id": "tidy-collapse",
+   "say": "My networks get messy. I want to tuck groups of nodes away into components quickly.",
+   "kind": "pick",
+   "must": [
+    "FNS_QuickCollapse"
+   ],
+   "good": [
+    "FNS_OpTemplates"
+   ],
+   "set": "basic"
+  },
+  {
+   "id": "jump-around",
+   "say": "I keep scrolling around a big project to get back to the places I work in.",
+   "kind": "pick",
+   "must": [
+    "QuickMarks",
+    "FNS_SwitchOPs"
+   ],
+   "good": [
+    "FNS_GlobalOutSelect",
+    "FNS_iopBrowser",
+    "OpenOp",
+    "FNS_ParentHierarchy"
+   ],
+   "set": "basic"
+  },
+  {
+   "id": "find-by-name",
+   "say": "The find bar never finds operators unless I type the exact start of the name.",
+   "kind": "pick",
+   "must": [
+    "FNS_SearchFix"
+   ],
+   "good": [],
+   "set": "basic"
+  },
+  {
+   "id": "swap-op",
+   "say": "I want to replace a Blur TOP with a different TOP without rewiring everything.",
+   "kind": "pick",
+   "must": [
+    "FNS_SwapOps"
+   ],
+   "good": [],
+   "set": "basic"
+  },
+  {
+   "id": "midi",
+   "say": "I want to map my MIDI controller's knobs and faders to parameters.",
+   "kind": "pick",
+   "must": [
+    "midiMapper",
+    "TDXMap"
+   ],
+   "good": [
+    "ParHoverMIDI_VSN1"
+   ],
+   "set": "basic"
+  },
+  {
+   "id": "osc",
+   "say": "I control my patch from TouchOSC on my phone and want to bind those messages to parameters.",
+   "kind": "pick",
+   "must": [
+    "oscMapper"
+   ],
+   "good": [],
+   "set": "basic"
+  },
+  {
+   "id": "projector",
+   "say": "How do I get my final output onto the projector as a second screen quickly?",
+   "kind": "pick",
+   "must": [
+    "FNS_Output"
+   ],
+   "good": [
+    "FNS_BorderlessTD"
+   ],
+   "set": "basic"
+  },
+  {
+   "id": "reset-state",
+   "say": "Before each show I have to reset all my feedback loops, caches and timers by hand.",
+   "kind": "pick",
+   "must": [
+    "FNS_ResetPLS"
+   ],
+   "good": [],
+   "set": "basic"
+  },
+  {
+   "id": "slow-ops",
+   "say": "My project drops frames and I can't see which operators are the slow ones.",
+   "kind": "pick",
+   "must": [
+    "CookBar"
+   ],
+   "good": [],
+   "set": "basic"
+  },
+  {
+   "id": "promote-pars",
+   "say": "I build components and want to promote inner parameters to the parent's custom parameters fast.",
+   "kind": "pick",
+   "must": [
+    "FNS_CustomParTools"
+   ],
+   "good": [
+    "FNS_ParOPDrop"
+   ],
+   "set": "basic"
+  },
+  {
+   "id": "palettes",
+   "say": "I make generative visuals and want nicer colour palettes.",
+   "access": "patreon",
+   "kind": "pick",
+   "must": [
+    "ColorGen",
+    "ColorGenPro"
+   ],
+   "good": [
+    "RealRamp"
+   ],
+   "set": "basic"
+  },
+  {
+   "id": "trails",
+   "say": "I want smeary feedback trails behind moving shapes.",
+   "kind": "pick",
+   "must": [
+    "FeedbackDisplace",
+    "InstanceTrailer"
+   ],
+   "good": [],
+   "set": "basic"
+  },
+  {
+   "id": "hotkeys",
+   "say": "Some keyboard shortcuts clash and I want to rebind them in one place.",
+   "kind": "pick",
+   "must": [
+    "FNS_HotkeyManager"
+   ],
+   "good": [],
+   "set": "basic"
+  },
+  {
+   "id": "crash-save",
+   "say": "TouchDesigner crashed and I lost an hour of work. How do I stop that happening?",
+   "kind": "pick",
+   "must": [
+    "FNS_Autosave"
+   ],
+   "good": [],
+   "set": "basic"
+  },
+  {
+   "id": "vscode",
+   "say": "I write my extensions in VS Code and want TouchDesigner to work with it nicely.",
+   "kind": "pick",
+   "must": [
+    "FNS_VSCodeTools"
+   ],
+   "good": [
+    "FNS_OpenExt"
+   ],
+   "set": "basic"
+  },
+  {
+   "id": "kinect",
+   "say": "My installation uses a Kinect but I only want to track the one person standing in front.",
+   "kind": "pick",
+   "must": [
+    "KinectSinglePlayer"
+   ],
+   "good": [],
+   "set": "basic"
+  },
+  {
+   "id": "live-broad",
+   "say": "I do live shows a lot, what could help there?",
+   "kind": "ask",
+   "set": "basic"
+  },
+  {
+   "id": "live-midi",
+   "turns": [
+    {
+     "role": "user",
+     "content": "I do live shows a lot, what could help there?"
+    },
+    {
+     "role": "assistant",
+     "content": "Live shows cover a lot of ground. Which part do you want help with: controlling parameters from MIDI or OSC, sending output to projectors or screens, switching scenes or inputs, or keeping the show running smoothly?"
+    },
+    {
+     "role": "user",
+     "content": "mostly controlling things live from my MIDI controller"
+    }
+   ],
+   "kind": "pick",
+   "must": [
+    "midiMapper",
+    "TDXMap"
+   ],
+   "good": [
+    "ParHoverMIDI_VSN1"
+   ],
+   "set": "basic"
+  },
+  {
+   "id": "camera-seq",
+   "say": "I want to sequence camera moves for a live show.",
+   "kind": "decline",
+   "bad": [
+    "FNS_SwitchTools",
+    "SeqMod"
+   ],
+   "set": "basic"
+  },
+  {
+   "id": "td-general",
+   "say": "How do I make a Noise TOP animate slower?",
+   "kind": "decline",
+   "set": "basic"
+  },
+  {
+   "id": "howto-borderless",
+   "say": "How do I hide the timeline with BorderlessTD?",
+   "kind": "howto",
+   "slug": "fns-borderlesstd",
+   "set": "basic"
+  },
+  {
+   "id": "h-same-nodes",
+   "say": "Every new project I end up building the same handful of nodes with the same settings again.",
+   "kind": "pick",
+   "must": [
+    "FNS_OpTemplates"
+   ],
+   "good": [],
+   "set": "hard"
+  },
+  {
+   "id": "h-cluttered",
+   "say": "My screen feels cramped, I never have enough room to see what I'm doing.",
+   "kind": "pick",
+   "must": [
+    "FNS_BorderlessTD",
+    "FNS_QuickPane"
+   ],
+   "good": [],
+   "set": "hard"
+  },
+  {
+   "id": "h-lost-deep",
+   "say": "I dive into a component, then another one inside it, and I lose my way back.",
+   "kind": "pick",
+   "must": [
+    "QuickMarks",
+    "FNS_SwitchOPs",
+    "FNS_ParentHierarchy"
+   ],
+   "good": [
+    "FNS_iopBrowser",
+    "OpenOp",
+    "FNS_GlobalOutSelect"
+   ],
+   "set": "hard"
+  },
+  {
+   "id": "h-typing-paths",
+   "say": "Typing op('...') paths into parameters over and over is tedious and I make typos.",
+   "kind": "pick",
+   "must": [
+    "FNS_OpToClipboard",
+    "FNS_ExprHotStrings"
+   ],
+   "good": [
+    "FNS_CustomParTools"
+   ],
+   "set": "hard"
+  },
+  {
+   "id": "h-happy-accidents",
+   "say": "I want to shake things up and stumble on looks I would never dial in by hand.",
+   "kind": "pick",
+   "must": [
+    "FNS_ParRandomizer"
+   ],
+   "good": [],
+   "set": "hard"
+  },
+  {
+   "id": "h-stale-restart",
+   "say": "When I restart my set, things come back in a weird state from last time instead of fresh.",
+   "kind": "pick",
+   "must": [
+    "FNS_ResetPLS"
+   ],
+   "good": [],
+   "set": "hard"
+  },
+  {
+   "id": "h-fans",
+   "say": "My laptop fans go crazy and I have no idea which part of the patch is eating the GPU.",
+   "kind": "pick",
+   "must": [
+    "CookBar"
+   ],
+   "good": [],
+   "set": "hard"
+  },
+  {
+   "id": "h-phone",
+   "say": "I'd love to tweak my visuals from my phone while I walk around the venue.",
+   "kind": "pick",
+   "must": [
+    "oscMapper"
+   ],
+   "good": [
+    "TDXMap"
+   ],
+   "set": "hard"
+  },
+  {
+   "id": "h-forget-save",
+   "say": "I always forget to save and then something goes wrong.",
+   "kind": "pick",
+   "must": [
+    "FNS_Autosave"
+   ],
+   "good": [],
+   "set": "hard"
+  },
+  {
+   "id": "h-wall-shape",
+   "say": "I want to paint by hand which part of the image shows up on the wall.",
+   "access": "patreon",
+   "kind": "pick",
+   "must": [
+    "MaskDraw"
+   ],
+   "good": [],
+   "set": "hard"
+  },
+  {
+   "id": "h-screenshot",
+   "say": "I often want to drop a reference picture I just screenshotted straight into my network.",
+   "kind": "pick",
+   "must": [
+    "PasteFromClipboard"
+   ],
+   "good": [],
+   "set": "hard"
+  },
+  {
+   "id": "h-ctrl-shift-p",
+   "say": "I miss having one searchable list of every action, like Ctrl+Shift+P in VS Code.",
+   "kind": "pick",
+   "must": [
+    "FNS_CommandPalette"
+   ],
+   "good": [],
+   "set": "hard"
+  },
+  {
+   "id": "h-pixels-notes",
+   "say": "I'd like the image itself to play music, turning brightness into notes for my synth.",
+   "access": "patreon",
+   "kind": "pick",
+   "must": [
+    "TopToMidi"
+   ],
+   "good": [],
+   "set": "hard"
+  },
+  {
+   "id": "h-mirror-shards",
+   "say": "I'm after a broken-mirror, kaleidoscope kind of look.",
+   "access": "patreon",
+   "kind": "pick",
+   "must": [
+    "PrismTOP"
+   ],
+   "good": [
+    "CircularDistortionTOP",
+    "ComplexOp"
+   ],
+   "set": "hard"
+  },
+  {
+   "id": "h-work-faster",
+   "say": "I just want to work faster in TouchDesigner.",
+   "kind": "ask",
+   "set": "hard"
+  },
+  {
+   "id": "h-script-error",
+   "say": "My Script DAT keeps throwing a Python error, can you help me fix it?",
+   "kind": "decline",
+   "set": "hard"
+  }
+ ]
+}

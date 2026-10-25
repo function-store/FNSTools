@@ -145,6 +145,8 @@ nav.site-nav a[aria-current="page"]:not(.btn) { color: var(--text); }
   font-size: 12px; font-weight: 500; color: var(--text-dim);
 }
 .badge-cat { background: var(--accent-dim); border-color: rgba(251,191,36,0.28); color: var(--accent); }
+a.badge-plus { background: var(--plus-dim); border-color: var(--plus-line); color: var(--plus); }
+a.badge-plus:hover { border-color: var(--plus); color: var(--plus); }
 .badge-warn { background: #2a1408; border-color: rgba(251,146,60,0.3); color: #fdba74; }
 
 .toc {
@@ -214,12 +216,6 @@ h2:hover .heading-anchor, h3:hover .heading-anchor { opacity: 1; }
   overflow: hidden; background: var(--bg-2); margin: 0 0 28px;
 }
 .embed-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-
-.edit-page {
-  margin: 48px 0 0; padding-top: 20px;
-  border-top: 1px solid var(--border);
-  font-size: 14px;
-}
 
 /* ───── Docs index ───── */
 .docs-index .doc-cat { margin-top: 44px; }
@@ -363,10 +359,10 @@ a .plus-mark, .side-group .plus-mark { margin-left: 7px; }
 
 /* The unlock callout at the top of a Plus package's page. */
 .plus-note {
-  border: 1px solid rgba(251,191,36,0.3);
+  border: 1px solid var(--plus-faint);
   border-radius: 12px;
   background:
-    radial-gradient(420px 160px at 100% 0%, rgba(251,191,36,0.07), transparent 70%),
+    radial-gradient(420px 160px at 100% 0%, var(--plus-dim), transparent 70%),
     var(--bg-1);
   padding: 18px 20px;
   margin: 0 0 28px;
@@ -413,6 +409,12 @@ details.fold > summary:focus-visible { outline: 2px solid var(--accent); outline
   font-size: 24px; font-weight: 650; letter-spacing: -0.015em;
   margin: 52px 0 14px; padding-top: 4px;
 }
+/* /changelog/: one list per release, version beside the tool name. */
+.changelog h2 { margin-top: 40px; }
+.chg-date { margin-left: 10px; font-size: 14px; font-weight: 500; color: var(--text-dim); }
+.chg { margin: 8px 0 16px; padding-left: 20px; }
+.chg li { margin: 6px 0; line-height: 1.55; overflow-wrap: anywhere; }
+.chg-ver { font: 500 12.5px/1.5 var(--mono, ui-monospace, monospace); color: var(--text-dim); margin-right: 4px; }
 /* Feature metadata authored in the CMS: the icon rides its heading and the
    table of contents; hotkeys list under the feature they belong to. */
 .feat-icon { vertical-align: -3px; margin-right: 7px; border-radius: 3px; }
@@ -442,9 +444,9 @@ details.fold > summary:focus-visible { outline: 2px solid var(--accent); outline
   display: flex; flex-direction: column;
 }
 .tier--plus {
-  border-color: rgba(251,191,36,0.32);
+  border-color: var(--plus-faint);
   background:
-    radial-gradient(520px 200px at 100% 0%, rgba(251,191,36,0.07), transparent 70%),
+    radial-gradient(520px 200px at 100% 0%, var(--plus-dim), transparent 70%),
     var(--bg-1);
 }
 .tier-tag {
@@ -454,28 +456,36 @@ details.fold > summary:focus-visible { outline: 2px solid var(--accent); outline
   background: var(--bg-3); color: var(--text-dim);
   border: 1px solid var(--border);
 }
-.tier--plus .tier-tag { background: var(--accent-dim); color: var(--accent); border-color: rgba(251,191,36,0.3); }
+.tier--plus .tier-tag { background: var(--plus-dim); color: var(--plus); border-color: var(--plus-line); }
 .tier h3 { font-size: 21px; font-weight: 700; letter-spacing: -0.02em; margin: 15px 0 8px; }
 .tier > p { color: var(--text-dim); font-size: 15px; margin: 0 0 18px; }
 .tier ul { list-style: none; margin: 0 0 22px; padding: 0; display: grid; gap: 11px; }
 .tier li { position: relative; padding-left: 24px; font-size: 14.5px; color: var(--text-dim); }
 .tier li::before { content: '✓'; position: absolute; left: 0; top: 0; color: var(--green); font-size: 13px; font-weight: 700; }
-.tier--plus li::before { content: '◆'; color: var(--accent); font-size: 11px; }
+.tier--plus li::before { content: '◆'; color: var(--plus); font-size: 11px; }
 .tier li strong { color: var(--text); font-weight: 600; }
 .tier-actions { margin-top: auto; display: flex; gap: 10px; flex-wrap: wrap; }
 .plus-tiers { margin-bottom: 8px; }
 
-/* The generated Plus package list. */
-.plus-pkgs { display: grid; gap: 12px; margin: 22px 0; }
-.plus-pkg {
-  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 16px;
-  border: 1px solid rgba(251,191,36,0.22);
-  border-radius: 12px; background: var(--bg-1);
-  padding: 18px 20px;
+/* The generated Plus package list: one line per tool under its category,
+   so the list can keep growing without turning the page into a scroll. */
+.plus-list { margin: 22px 0; border-top: 1px solid var(--border); }
+.plus-cat { padding: 14px 0 10px; border-bottom: 1px solid var(--border); }
+.plus-page .plus-cat h3 {
+  display: flex; align-items: baseline; gap: 8px; margin: 0 0 6px;
+  font-size: 11.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim);
 }
-.plus-pkg b { font-size: 16.5px; font-weight: 650; letter-spacing: -0.01em; color: var(--text); }
-.plus-pkg span { display: block; font-size: 14px; color: var(--text-dim); margin-top: 5px; }
-.plus-pkg .cat-of { color: var(--text-faint); font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 8px; }
+.plus-cat-count { color: var(--text-faint); font-weight: 500; }
+.plus-cat ul { list-style: none; margin: 0; padding: 0; }
+.plus-cat li a {
+  display: flex; align-items: baseline; gap: 10px; min-width: 0;
+  padding: 6px 8px; margin: 0 -8px; border-radius: 4px; color: var(--text-dim);
+}
+.plus-cat li a:hover { background: var(--bg-2); color: var(--text-dim); }
+.plus-cat li b { flex: none; font-size: 14.5px; font-weight: 600; color: var(--text); }
+.plus-cat li a:hover b { color: var(--accent); }
+.plus-cat .plus-mark { flex: none; margin: 0; padding: 0 5px; font-size: 10px; letter-spacing: 0.03em; vertical-align: 0; }
+.plus-row-desc { min-width: 0; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .plus-pkgs-empty { color: var(--text-faint); font-style: italic; }
 
 .plus-steps { counter-reset: step; list-style: none; margin: 22px 0; padding: 0; display: grid; gap: 12px; }
@@ -534,7 +544,6 @@ details.fold > summary:focus-visible { outline: 2px solid var(--accent); outline
 
 @media (max-width: 860px) {
   .tiers, .prod-grid { grid-template-columns: 1fr; }
-  .plus-pkg { grid-template-columns: 1fr; }
 }
 
 /* Generated parameter tables. They sit OUTSIDE .docs-body (like .shortcuts)
@@ -756,7 +765,7 @@ a.badge-surface:hover { color: var(--text); border-color: var(--accent); }
 
 /* Keep access labels separate from description typography. */
 .docs-index .doc-card strong { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 10px; font-weight: 600; font-size: 16px; margin-bottom: 8px; }
-.docs-index .doc-card .plus-mark { display: inline-flex; width: auto; flex: 0 0 auto; margin: 0; padding: 1px 5px; font-size: 10px; line-height: 1.5; letter-spacing: 0; text-transform: none; border-radius: 3px; color: var(--accent); }
+.docs-index .doc-card .plus-mark { display: inline-flex; width: auto; flex: 0 0 auto; margin: 0; padding: 1px 5px; font-size: 10px; line-height: 1.5; letter-spacing: 0; text-transform: none; border-radius: 3px; color: var(--plus); }
 .docs-index .doc-card > span { font-size: 13px; line-height: 1.6; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
 .docs-index .doc-cat { margin-top: 32px; }
 .docs-index .doc-cat h2 { font-size: 19px; margin-bottom: 14px; }
@@ -767,8 +776,8 @@ a.badge-surface:hover { color: var(--text); border-color: var(--accent); }
 .side-tool { position: relative; }
 .side-group .side-tool > a { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .side-tool-name { min-width: 0; }
-.side-access { flex-shrink: 0; font-size: 10px; font-weight: 500; line-height: 1.4; color: #b9aa7b; white-space: nowrap; }
-.side-tool > a:hover .side-access, .side-tool > a:focus-visible .side-access { color: var(--accent); }
+.side-access { flex-shrink: 0; font-size: 10px; font-weight: 500; line-height: 1.4; color: var(--plus); opacity: 0.75; white-space: nowrap; }
+.side-tool > a:hover .side-access, .side-tool > a:focus-visible .side-access { opacity: 1; }
 .side-access-detail { display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 5; padding: 10px 12px; background: var(--bg-2); border: 1px solid var(--border-strong); border-radius: 3px; color: var(--text); font-size: 12px; font-weight: 400; line-height: 1.5; box-shadow: 0 4px 12px #0006; }
 .side-tool:hover .side-access-detail, .side-tool:focus-within .side-access-detail { display: block; }
 .side-tool > a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
@@ -881,10 +890,31 @@ span.fl-name { color: var(--text); }
 .fl-note { margin-left: 6px; font-size: 12px; font-style: italic; color: var(--text-faint); white-space: nowrap; }
 .fl-note--authors { font-style: normal; color: var(--accent); }
 .fl-empty { padding: 48px 0; text-align: center; color: var(--text-faint); }
+/* The same rows on a tool's own page (featuresSection in build-site.mjs),
+   inside the prose column, which would otherwise indent and space them. */
+.docs-body .page-features .fl-feats { list-style: none; padding: 0; margin: 0 0 16px; }
+.docs-layout .docs-body .page-features .fl-feats li { margin: 0; }
 @media (max-width: 720px) {
   .features-page { padding: 28px 16px 64px; }
   .fl-bar { top: 61px; }
   .fl-status { margin-left: 0; width: 100%; }
   .fl-feats li { grid-template-columns: minmax(0, 1fr); }
   .fl-cat { scroll-margin-top: 230px; }
+}
+
+/* One line to copy (the agent prompt on the agent-skill guide): the text
+   in a code box, the button beside it; stacked under 600px. */
+.docs-body .copyline {
+  display: flex; align-items: stretch; gap: 10px; margin: 14px 0 18px;
+}
+.docs-body .copyline code {
+  flex: 1; display: block; padding: 10px 12px; border-radius: 8px;
+  background: var(--bg-deep); border: 1px solid var(--border); color: var(--text);
+  font-size: 13px; line-height: 1.5; white-space: normal; word-break: break-word;
+  user-select: all;
+}
+.docs-body .copyline .btn { align-self: center; white-space: nowrap; }
+@media (max-width: 600px) {
+  .docs-body .copyline { flex-direction: column; }
+  .docs-body .copyline .btn { align-self: flex-start; }
 }
