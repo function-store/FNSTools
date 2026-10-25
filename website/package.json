@@ -10,7 +10,9 @@
     "search": "node -e \"require('fs').rmSync('docs/pagefind',{recursive:true,force:true})\" && pagefind --site docs --output-subdir pagefind",
     "serve": "npx --yes serve .",
     "cms": "node tools/cms.mjs",
-    "test:chat": "node tools/test-chat.mjs"
+    "test:chat": "node tools/test-chat.mjs",
+    "test:discord": "node tools/test-discord.mjs",
+    "test:limit": "node tools/test-limit.mjs"
   },
   "devDependencies": {
     "gray-matter": "^4.0.3",
@@ -20,7 +22,9 @@
     "pagefind": "^1.1.1"
   },
   "dependencies": {
+    "@vercel/functions": "^3.9.11",
     "ai": "^7.0.146",
+    "redis": "^6.3.0",
     "zod": "^4.6.7"
   }
 }

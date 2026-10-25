@@ -11,6 +11,7 @@
 // it reads AI_GATEWAY_API_KEY. With no CHAT_MODEL the endpoint answers 503,
 // so an unconfigured deploy says so instead of guessing a model.
 import { answer } from './_lib/finder.js';
+import { take, ipOf, whenAgain } from './_lib/limit.js';
 
 // The site, its Preview deployments, and the installer, which serves the
 // same picker from http://127.0.0.1:<port>/ inside TouchDesigner.
@@ -60,6 +61,10 @@ export async function POST(request) {
     return json(400, { error: 'Send a JSON body: {messages, access, shown}.' }, origin);
   }
   const access = body && body.access === 'patreon' ? 'patreon' : 'free';
+  const lim = await take('ip', ipOf(request));
+  if (!lim.ok) {
+    return json(429, { error: `You have asked the tool finder a lot in a short time. Try again ${whenAgain(lim.retryAfter)}, or use the questions instead.` }, origin);
+  }
   try {
     const out = await answer({ messages: body && body.messages, access, shown: body && body.shown },
       { model, abortSignal: request.signal });

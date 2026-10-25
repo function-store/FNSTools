@@ -6,7 +6,11 @@
        worker/src/index.js   what the gate requests from Patreon and what the
                              session record actually holds (no name, no email,
                              no user id: a refresh token, tier ids, stamps)
-       docs/EntitlementLifecycle.md   the retention windows quoted here -->
+       docs/EntitlementLifecycle.md   the retention windows quoted here
+       website/api/chat.js, website/api/_lib/finder.js   what the tool finder
+                             sends and logs (docs/PickerChatbot.md)
+       website/api/_lib/limit.js   the usage counter: an HMAC key, a number,
+                             an expiry of an hour or a day -->
 
 <h1>Privacy</h1>
 <p class="lede">
@@ -31,6 +35,34 @@
   page views in aggregate without cookies and without profiling visitors. Documentation search runs
   entirely in your browser.
 </p>
+
+<h2>The tool finder</h2>
+<p>
+  The Get page, here and inside the installer, has a tool finder: you describe what gets in your way
+  in TouchDesigner and it suggests tools. It is the one place on the site where what you type leaves
+  your browser.
+</p>
+<ul class="plus-facts">
+  <li><strong>What is sent.</strong> The conversation you write in the finder (capped at its last
+    few turns), whether your account can install Patreon tools, and the names of tools it has
+    already suggested. Nothing else: no account, no name, no project.</li>
+  <li><strong>Where it goes.</strong> To a function on Vercel, which passes it through Vercel AI
+    Gateway to a Google Gemini model to pick the tools. Vercel's model list marks the Gemini models
+    used here as not training on what they are sent.</li>
+  <li><strong>What is kept.</strong> We do not store what you write. The conversation lives in the
+    page and is gone when you close it. If an answer fails, the function logs the kind of error,
+    never your text. Vercel keeps its usual short-lived request logs, as for any page.</li>
+  <li><strong>A usage counter, for a day at most.</strong> So that no one can run the finder
+    non-stop, each question counts against a limit per hour and per day. The counter is a number
+    stored under a scrambled form of your IP address (in Discord, your user id) that cannot be
+    turned back into it, and it deletes itself when its hour or day is over.</li>
+  <li><strong>In Discord,</strong> the <code>/findtool</code> command does the same with the text you
+    give it. Discord delivers that text to the same function together with the usual details of a
+    command (which server, which user); the function uses them only to post the answer back and
+    stores none of it.</li>
+  <li><strong>If you do not use it,</strong> nothing is sent. The page only asks whether the finder
+    is switched on, and that request carries nothing about you.</li>
+</ul>
 
 <h2>The supporter gate</h2>
 <p>
@@ -82,7 +114,8 @@
 <p>
   Only the services that make the above work: <a href="https://patreon.com/function_store"
   target="_blank" rel="noopener">Patreon</a> (memberships), Gumroad (licence keys), Cloudflare
-  (storage and the gate), and Vercel (this website). Nothing is sold, rented, or shared with anyone
+  (storage and the gate), Vercel (this website and the tool finder), and Google (the model behind
+  the tool finder, reached through Vercel AI Gateway). Nothing is sold, rented, or shared with anyone
   else, and there is no advertising or cross-site tracking anywhere in FNSTools.
 </p>
 
