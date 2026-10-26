@@ -456,7 +456,10 @@ dialog::backdrop { background: rgba(0,0,0,0.7); }
 .ask-msg.wait { color: var(--text-dim); font-style: italic; }
 .ask-msg.err { border-color: rgba(248,113,113,0.5); color: var(--text-dim); }
 .ask-picks { display: flex; flex-direction: column; gap: 4px; align-self: stretch; }
-.ask-picks .qres-desc { -webkit-line-clamp: 3; }
+/* the finder's reasons are its answer: shown in full, not clamped */
+.ask-picks .qres-desc { display: block; -webkit-line-clamp: unset; overflow: visible; }
+.qres-start { font-size: 12.5px; color: var(--text-dim); line-height: 1.45; }
+.qres-start b { color: var(--accent); font-weight: 600; }
 .ask-form { display: flex; gap: 8px; align-items: flex-end; }
 .ask-form textarea {
   flex: 1; min-height: 44px; max-height: 160px; resize: vertical; padding: 10px 12px;
@@ -4130,6 +4133,17 @@ function fnsBoot() {
       ds.className = 'qres-desc';
       ds.textContent = Array.isArray(r.why) ? r.why.join(' · ') : (r.why || p.description);
       body.appendChild(ds);
+    }
+    // the tool finder's "Try it" line: a hotkey or where the tool shows
+    // up, checked against the tool's doc on the server (groundedStart)
+    if (r.start) {
+      var st = document.createElement('span');
+      st.className = 'qres-start';
+      var sl = document.createElement('b');
+      sl.textContent = 'Try it: ';
+      st.appendChild(sl);
+      st.appendChild(document.createTextNode(r.start));
+      body.appendChild(st);
     }
     row.appendChild(body);
     return row;

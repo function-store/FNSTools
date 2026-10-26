@@ -164,12 +164,9 @@
   {
    "id": "crash-save",
    "say": "TouchDesigner crashed and I lost an hour of work. How do I stop that happening?",
-   "kind": "pick",
-   "must": [
-    "FNS_Autosave"
-   ],
-   "good": [],
-   "set": "basic"
+   "kind": "decline",
+   "set": "basic",
+   "note": "FNS_Autosave became a preview in v3.2.76 (2026-10-25): no public tool saves on a timer, so nothing fits."
   },
   {
    "id": "vscode",
@@ -343,12 +340,9 @@
   {
    "id": "h-forget-save",
    "say": "I always forget to save and then something goes wrong.",
-   "kind": "pick",
-   "must": [
-    "FNS_Autosave"
-   ],
-   "good": [],
-   "set": "hard"
+   "kind": "decline",
+   "set": "hard",
+   "note": "FNS_Autosave became a preview in v3.2.76 (2026-10-25): no public tool saves on a timer, so nothing fits."
   },
   {
    "id": "h-wall-shape",

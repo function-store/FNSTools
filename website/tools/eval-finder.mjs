@@ -45,9 +45,15 @@ function judge(c, r) {
   if (c.kind === 'pick') pass = names.some((n) => c.must.includes(n));
   else if (c.kind === 'ask') pass = !names.length && r.reply.includes('?');
   else if (c.kind === 'decline') pass = !names.length;
-  else if (c.kind === 'howto') pass = r.reply.includes(`/docs/${c.slug}/`);
+  // the docs link may be in the reply or on the pick's row (both pages and
+  // Discord show every pick with its docs link)
+  else if (c.kind === 'howto') pass = r.reply.includes(`/docs/${c.slug}/`)
+    || r.picks.some((p) => String(p.url || '').includes(`/docs/${c.slug}/`));
   if (bad.length) pass = false;
+  const starts = r.picks.filter((p) => p.start).length;
   const note = [names.length ? `picks ${names.join(', ')}` : 'no picks',
+    names.length ? `try-it ${starts}/${names.length}` : '',
+    r.startsDropped ? `DROPPED-START ${r.startsDropped}` : '',
     bad.length ? `BAD ${bad.join(', ')}` : '', other.length ? `unlisted ${other.join(', ')}` : '']
     .filter(Boolean).join('; ');
   return { pass, note };
@@ -74,7 +80,7 @@ for (const mode of modes) {
     const secs = (Date.now() - t0) / 1000;
     const j = judge(c, r);
     const inTok = r.usage && (r.usage.inputTokens && (r.usage.inputTokens.total ?? r.usage.inputTokens));
-    rows.push({ mode, id: c.id, kind: c.kind, pass: j.pass, secs, steps: r.steps, inTok, note: j.note, reply: r.reply });
+    rows.push({ mode, id: c.id, kind: c.kind, pass: j.pass, secs, steps: r.steps, inTok, note: j.note, reply: r.reply, picks: r.picks, startsDropped: r.startsDropped || 0 });
     console.log(`${j.pass ? 'PASS' : 'FAIL'}  ${mode.padEnd(8)} ${c.id.padEnd(17)} ${secs.toFixed(1).padStart(5)}s `
       + `${String(r.steps ?? '-').padStart(2)} steps ${String(inTok ?? '-').padStart(7)} in  ${j.note}`);
   }

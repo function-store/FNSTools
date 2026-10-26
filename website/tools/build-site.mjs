@@ -2754,6 +2754,9 @@ if (fs.existsSync(cfgSrc)) {
         url: t.url,
         features: (meta.feature_list || []).map((f) => `${f.name}: ${f.does}`),
         hotkeys: (meta.hotkeys || []).map((h) => `${h.keys}: ${h.does}`),
+        // where it shows up (Toolbar button, Main menu entry, ...): with
+        // the hotkeys, what the finder's "Try it" line may cite
+        surfaces: t.surfaces,
         sections: p ? sectionsOf(p.body) : [],
       };
     }),

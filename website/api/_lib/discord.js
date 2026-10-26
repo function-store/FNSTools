@@ -77,7 +77,7 @@ export function toMessage(problem, out) {
       description: `[Add these to your FNSTools selection](${add})`,
       fields: picks.slice(0, 8).map((p) => ({
         name: clip(`${p.title}${p.access === 'patreon' ? ' · Patreon' : ''}`, 256),
-        value: clip(`${p.why || ''}\n[Docs](${p.url})`, 1024),
+        value: clip(`${p.why || ''}${p.start ? `\n*Try it:* ${p.start}` : ''}\n[Docs](${p.url})`, 1024),
       })),
       footer: { text: 'Install from functionstore.tools/get' },
       url: add,

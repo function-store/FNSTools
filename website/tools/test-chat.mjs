@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import { MockLanguageModelV4, mockValues } from 'ai/test';
 import {
-  answer, searchDocs, readDoc, validatePicks, clampMessages, instructions, plainReply, LIMITS,
+  answer, searchDocs, readDoc, validatePicks, clampMessages, instructions, plainReply, combosIn, groundedStart, findTool, namedTools, LIMITS,
 } from '../api/_lib/finder.js';
 import { GET, POST, OPTIONS } from '../api/chat.js';
 import { readFileSync } from 'node:fs';
@@ -74,6 +74,42 @@ await check('validatePicks drops invented names, dedupes, caps', () => {
   assert.deepEqual(v.dropped, ['FNS_Invented']);
   assert.equal(v.accepted[0].name, real);
   assert.equal(v.accepted.length, LIMITS.picks);
+});
+
+await check('combosIn reads key combinations the way docs write them', () => {
+  assert.deepEqual(combosIn('Press Ctrl+W, or Ctrl + Shift + W; alt.F7 and F7'), ['ctrl+w', 'ctrl+shift+w', 'alt+f7', 'f7']);
+  assert.deepEqual(combosIn('Click the toolbar button'), []);
+});
+
+await check('groundedStart keeps a real hotkey and a surface line, drops a made-up hotkey', () => {
+  const qc = findTool('FNS_QuickCollapse');
+  assert.equal(groundedStart(qc, 'Select the nodes and press Ctrl+W.'), 'Select the nodes and press Ctrl+W.');
+  assert.equal(groundedStart(qc, 'Select the nodes and press Ctrl+Q.'), '');
+  assert.equal(groundedStart(qc, 'Press Ctrl+W, then Ctrl+K.'), '');
+  const cb = findTool('CookBar');
+  assert.equal(groundedStart(cb, 'Click its toolbar button.'), 'Click its toolbar button.');
+  assert.equal(groundedStart(cb, ''), '');
+});
+
+await check('namedTools finds tools a reply names, not in a question', () => {
+  assert.deepEqual(namedTools('The KinectSinglePlayer tool can help with this.').map((t) => t.name), ['KinectSinglePlayer']);
+  assert.deepEqual(namedTools('Use oscMapper, or midiMapper for MIDI.').map((t) => t.name), ['oscMapper', 'midiMapper']);
+  assert.deepEqual(namedTools('Do you mean something like CookBar?'), []);
+  assert.deepEqual(namedTools('Nothing in FNSTools does that.'), []);
+});
+
+await check('answer: tools recommended in prose with empty picks become picks', async () => {
+  const { model } = scripted(call('recommend', { reply: 'The KinectSinglePlayer tool can help with this.', picks: [] }, 'r1'));
+  const out = await answer({ messages: [{ role: 'user', content: 'track one person with a kinect' }] }, { model });
+  assert.deepEqual(out.picks.map((p) => p.name), ['KinectSinglePlayer']);
+  assert.equal(out.fromReply, true);
+});
+
+await check('validatePicks carries a grounded start line', () => {
+  const v = validatePicks([{ name: 'FNS_QuickCollapse', why: 'x', start: 'Press Ctrl+W.' },
+    { name: 'FNS_BorderlessTD', why: 'y', start: 'Press Ctrl+Alt+B.' }]);
+  assert.equal(v.accepted[0].start, 'Press Ctrl+W.');
+  assert.equal(v.accepted[1].start, '');
 });
 
 await check('validatePicks refuses every preview package', () => {

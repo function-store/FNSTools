@@ -109,14 +109,61 @@ export function readDoc(name) {
   }
   return {
     name: t.name, title: t.title, access: t.access, tier: t.tier, url: t.url,
-    description: t.description, features: t.features, hotkeys: t.hotkeys, doc: body.trim(),
+    description: t.description, features: t.features, hotkeys: t.hotkeys,
+    surfaces: t.surfaces || [], doc: body.trim(),
   };
+}
+
+// Key combinations as people write them: Ctrl+W, Alt+F7, Opt+F7,
+// Ctrl+Shift+W, a bare F7. Docs and hotkey tables write the same keys as
+// alt.F7 or "Ctrl + W"; normalised, they compare equal.
+const COMBO = /\b(?:(?:ctrl|control|alt|opt|option|shift|cmd|command|meta|win)\s*[+.]\s*)+[a-z0-9]+\b|\bf\d{1,2}\b/gi;
+const normCombo = (s) => s.toLowerCase().replace(/\s+/g, '').replace(/\./g, '+')
+  .replace(/control/g, 'ctrl').replace(/option/g, 'opt').replace(/command/g, 'cmd');
+
+/** Every key combination a text names, normalised. */
+export function combosIn(text) {
+  return [...new Set((String(text || '').match(COMBO) || []).map(normCombo))];
+}
+
+/**
+ * The pick's "Try it" line, or '' when it names a key combination this
+ * tool's own hotkeys and doc do not: a made-up shortcut is worse than no
+ * line at all, so the server checks instead of trusting the prompt.
+ */
+export function groundedStart(tool, start) {
+  const s = String(start || '').trim().slice(0, 220);
+  if (!s) return '';
+  const known = new Set(combosIn([...(tool.hotkeys || []), ...(tool.features || []),
+    ...(tool.sections || []).map((x) => x.text)].join('\n')));
+  return combosIn(s).every((c) => known.has(c)) ? s : '';
+}
+
+/**
+ * Catalog tools a reply names by their exact title or catalog name, in the
+ * order named, at most 3. Not for a reply that only asks a question back
+ * (it may name tools as examples), and never for a title that is a common
+ * word inside a sentence: titles are matched case-sensitively as whole words.
+ */
+export function namedTools(reply) {
+  const s = String(reply || '');
+  if (!s.trim() || s.trim().endsWith('?')) return [];
+  const hits = [];
+  for (const t of TOOLS) {
+    for (const label of [t.title, t.name]) {
+      const re = new RegExp(`(^|[^A-Za-z0-9_])${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![A-Za-z0-9_])`);
+      const m = re.exec(s);
+      if (m) { hits.push({ t, at: m.index }); break; }
+    }
+  }
+  return hits.sort((a, b) => a.at - b.at).map((h) => h.t).slice(0, 3);
 }
 
 /** Keeps only catalog tools, once each, at most LIMITS.picks. */
 export function validatePicks(picks) {
   const accepted = [];
   const dropped = [];
+  let startsDropped = 0;
   const seen = new Set();
   for (const p of picks || []) {
     const t = findTool(p && p.name);
@@ -125,10 +172,12 @@ export function validatePicks(picks) {
     seen.add(t.name);
     accepted.push({
       name: t.name, title: t.title, url: t.url, access: t.access, tier: t.tier,
-      why: String((p && p.why) || '').trim().slice(0, 300),
+      why: String((p && p.why) || '').trim().slice(0, 400),
+      start: groundedStart(t, p && p.start),
     });
+    if (p && p.start && !accepted[accepted.length - 1].start) startsDropped += 1;
   }
-  return { accepted, dropped };
+  return { accepted, dropped, startsDropped };
 }
 
 function catalogLines() {
@@ -219,9 +268,19 @@ ${lookup}
 - Every turn ends with exactly one recommend call: picks, a clarifying
   question, a how-to answer and a decline all go through it (with picks
   empty when there are none). Never answer in plain text.
-- Each pick's reason is written in the reader's own terms and taken from the
-  tool's doc. Keep the reply to two or three sentences; the picks are shown
-  under it, so do not list them again in the reply.
+- Each pick's reason (why) is one or two sentences in the reader's own
+  terms, taken from the tool's doc: what it does for their problem.
+- Each pick may carry a start line: how to begin, from the tool's doc. Its
+  hotkey written as the doc writes it (Ctrl+W), or where it shows up
+  (toolbar button, main menu, OP Create menu). Only what the doc says: a
+  hotkey that is not in the tool's doc is removed before anyone sees it, so
+  leave start out rather than guess.
+- The reply is three to five plain sentences: how the picks fit the
+  reader's problem together and which to try first. The picks are shown
+  under it with their reasons, so do not repeat those.
+- Every tool you recommend in the reply must also be in picks: only picks
+  become rows with docs links the reader can use. A reply that recommends a
+  tool with picks empty is a broken answer.
 - A pick must directly do what the reader asked for. Sharing a word with the
   request (camera, sequence, colour) is not a fit. A tool that only helps
   around the edges is not a pick: leave it out. Fewer, exact picks beat a long list.
@@ -312,10 +371,11 @@ export async function answer({ messages, access, shown }, { model, abortSignal, 
     recommend: tool({
       description: 'Give the final answer: a short reply and the picked tools. Call once, last.',
       inputSchema: z.object({
-        reply: z.string().describe('A short answer to the reader, plain sentences'),
+        reply: z.string().describe('Three to five plain sentences: how the picks fit the problem together and what to try first'),
         picks: z.array(z.object({
           name: z.string().describe('Exact catalog name'),
-          why: z.string().describe('One sentence in the reader\'s terms'),
+          why: z.string().describe('One or two sentences in the reader\'s terms: what it does for their problem'),
+          start: z.string().optional().describe('How to begin, from the tool\'s doc: its hotkey or where it shows up (toolbar button, main menu, OP Create menu). Omit when the doc does not say.'),
         })).describe('Best first; empty when nothing fits or when only answering a question'),
       }),
       execute: async ({ reply, picks }) => {
@@ -370,8 +430,17 @@ export async function answer({ messages, access, shown }, { model, abortSignal, 
       stopWhen: isStepCount(1),
     });
   }
+  if (final && !final.accepted.length) {
+    // the model recommended tools in prose and left picks empty (seen on
+    // Gemini 2.5 Flash once replies grew longer): rows only come from picks
+    const named = namedTools(final.reply).filter((t) => !already.includes(t.name));
+    if (named.length) {
+      final.accepted = validatePicks(named.map((t) => ({ name: t.name, why: t.description }))).accepted;
+      final.fromReply = true;
+    }
+  }
   if (final) {
-    return { reply: plainReply(final.reply || result.text), picks: final.accepted, dropped: final.dropped, read, steps: result.steps.length, usage: result.totalUsage };
+    return { reply: plainReply(final.reply || result.text), picks: final.accepted, fromReply: !!final.fromReply, dropped: final.dropped, startsDropped: final.startsDropped, read, steps: result.steps.length, usage: result.totalUsage };
   }
   return { reply: plainReply(result.text), picks: [], dropped: [], read, steps: result.steps.length, usage: result.totalUsage };
 }
