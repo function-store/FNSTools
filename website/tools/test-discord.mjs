@@ -105,6 +105,8 @@ await check('finish: picks become an embed with titles, Patreon labels and docs 
   assert.ok(f[0].value.includes('[Docs](https://functionstore.tools/docs/colorgen/)'));
   assert.ok(sent.body.content.startsWith('> I want nicer colour palettes'));
   assert.deepEqual(sent.body.allowed_mentions, { parse: [] });
+  assert.equal(sent.body.embeds[0].url, 'https://functionstore.tools/get/#add=ColorGen');
+  assert.ok(sent.body.embeds[0].description.includes('(https://functionstore.tools/get/#add=ColorGen)'));
 });
 
 await check('toMessage: a clarifying question gets a re-run hint, no embed', () => {

@@ -4418,12 +4418,52 @@ function fnsBoot() {
    *  picks joins what is already ticked, and Back returns to the list. The
    *  Start card's finder replaces the selection instead, as a starting
    *  point does. */
+  // --- picks from the tool finder: always ADDED, never a replacement ------
+  // The finder's "Use this selection" (from Start or from the catalog) and
+  // a #add=NameA,NameB link (Discord's /findtool answers carry one) both
+  // land here: the names join whatever this browser already has ticked, or
+  // start a selection. `explicit` is the finder's own rows, ticked by the
+  // reader (a Patreon tick there already went through askPatreon); a link
+  // was not, so it follows every starting point's rule (owner, 2026-09-16)
+  // and leaves out what this account cannot install yet, naming it in the
+  // toast instead. Unknown names are dropped; nothing installs from here.
+  var ADD_MAX = 12;
+  function addNamesOf(h) {
+    h = String(h || '');
+    if (h.slice(0, 5).toLowerCase() !== '#add=') return null;
+    var names = [];
+    try { names = decodeURIComponent(h.slice(5)).split(','); } catch (e) { return null; }
+    names = names.map(function (n) { return n.trim(); })
+      .filter(function (n, i, a) { return n && a.indexOf(n) === i; }).slice(0, ADD_MAX);
+    return names.length ? names : null;
+  }
+  function clearAddHash() {
+    try { history.replaceState(null, '', location.pathname + location.search + '#catalog'); } catch (e) { /* sandboxed */ }
+  }
+  function addPicks(names, explicit) {
+    var known = names.filter(function (n) { return pickable(byName[n]); });
+    var take = explicit ? known : autoPick(known);
+    var held = known.filter(function (n) { return take.indexOf(n) === -1; });
+    var fresh = take.filter(function (n) { return !picked.has(n); });
+    take.forEach(function (n) {
+      picked.add(n);
+      if (byName[n].category) setOpen(byName[n].category, true);
+    });
+    sessionFlag('fns.welcomed', true);
+    save(); render();
+    setScreen('catalog');
+    var msg = fresh.length
+      ? fresh.length + (fresh.length === 1 ? ' tool' : ' tools') + ' added from the tool finder: '
+        + fresh.map(titleOfName).join(', ') + '.'
+      : (take.length ? 'Those tools were already ticked.' : 'Nothing to add.');
+    if (held.length) {
+      msg += ' ' + held.map(titleOfName).join(', ') + (held.length === 1 ? ' needs' : ' need')
+        + ' Patreon; tick ' + (held.length === 1 ? 'it' : 'them') + ' to add anyway.';
+    }
+    toast(msg);
+  }
   function askFromCatalog() {
-    askStart(function (names) {
-      names.forEach(function (n) { if (byName[n]) picked.add(n); });
-      save(); render();
-      landOnCatalog();
-    }, function () { setScreen('catalog'); });
+    askStart(function (names) { addPicks(names, true); }, function () { setScreen('catalog'); });
   }
   document.getElementById('askfinder').addEventListener('click', askFromCatalog);
 
@@ -4540,7 +4580,7 @@ function fnsBoot() {
     preQuiz.onclick = function () { quizStart(function (names) { choose(names, null, true); }); };
     var preAsk = document.getElementById('pre-ask');
     preAsk.hidden = !chatReady;
-    preAsk.onclick = function () { askStart(function (names) { choose(names, null, true); }); };
+    preAsk.onclick = function () { askStart(function (names) { addPicks(names, true); }); };
     document.getElementById('pre-all').onclick = function () {
       choose(bulkTools.map(function (p) { return p.name; }));
     };
@@ -5793,6 +5833,8 @@ function fnsBoot() {
     }
   }
   window.addEventListener('hashchange', function () {
+    var more = addNamesOf(location.hash);
+    if (more) { clearAddHash(); addPicks(more, false); return; }
     if (String(location.hash).toLowerCase() === '#ask' && chatReady && curScreen !== 'ask') {
       askFromCatalog();
       return;
@@ -6076,7 +6118,11 @@ function fnsBoot() {
   // and a re-entry on the set; the site and the file land on Start once
   // per browser and on the catalog after, since a visitor comes to
   // browse, with the set one click away on the count.
-  var fromHash = screenOfHash(location.hash);
+  // a #add= link lands on the catalog with its tools added (addPicks), and
+  // the hash is cleared so a reload does not add them twice
+  var addHash = addNamesOf(location.hash);
+  if (addHash) clearAddHash();
+  var fromHash = addHash ? 'catalog' : screenOfHash(location.hash);
   var landing;
   // back where a sign-in reload left off (reloadKeepingPlace); the
   // install step re-plans, so a tool the sign-in unlocked joins the plan
@@ -6100,6 +6146,7 @@ function fnsBoot() {
   } else {
     setScreen(landing, {fromHash: true});
   }
+  if (addHash) addPicks(addHash, false);
   if (resumeInstall) document.getElementById('save').click();
   loadRecommends();
   // A store manifest was served and the installer is checking the bucket

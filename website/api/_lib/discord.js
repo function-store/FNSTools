@@ -70,18 +70,26 @@ export function toMessage(problem, out) {
     allowed_mentions: { parse: [] },
   };
   if (picks.length) {
+    // the picker reads #add= and ADDS these to the visitor's selection
+    const add = addLink(picks.slice(0, 8).map((p) => p.name));
     msg.embeds = [{
       color: 0xf5c518,
+      description: `[Add these to your FNSTools selection](${add})`,
       fields: picks.slice(0, 8).map((p) => ({
         name: clip(`${p.title}${p.access === 'patreon' ? ' · Patreon' : ''}`, 256),
         value: clip(`${p.why || ''}\n[Docs](${p.url})`, 1024),
       })),
       footer: { text: 'Install from functionstore.tools/get' },
-      url: 'https://functionstore.tools/get/',
+      url: add,
       title: 'FNSTools tool finder',
     }];
   }
   return msg;
+}
+
+/** The picker link that adds `names` to the visitor's selection. */
+export function addLink(names) {
+  return `https://functionstore.tools/get/#add=${names.map(encodeURIComponent).join(',')}`;
 }
 
 /** The PATCH that replaces the deferred "thinking" reply with the answer. */
